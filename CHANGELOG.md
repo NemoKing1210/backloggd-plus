@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.15] - 2026-07-16
+
+### Changed
+
+- Dropped SteamDB HTML scrape (no public API; Cloudflare blocks it). Icon/cover from Steam GetItems, players from GetNumberOfCurrentPlayers only
+
+## [0.5.14] - 2026-07-16
+
+### Changed
+
+- Players online: read from SteamDB `#js-charts-button` first; call Steam `GetNumberOfCurrentPlayers` only if the page scrape misses
+
 ## [0.5.13] - 2026-07-16
 
 ### Changed

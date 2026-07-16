@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.5.13
+// @version           0.5.15
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -43,7 +43,6 @@
 // @connect            store.steampowered.com
 // @connect            api.steampowered.com
 // @connect            gamestatus.info
-// @connect            steamdb.info
 // @run-at             document-idle
 // @noframes
 // ==/UserScript==
@@ -53,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.5.13';
+  const SCRIPT_VERSION = '0.5.15';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -195,11 +194,11 @@
       showSteamDbPageLink: 'Show Backloggd button on SteamDB',
       showSteamDbPageLinkHint: 'Adds a Backloggd button next to Store / IGDB in SteamDB app links.',
       showSteamDbIcon: 'Show SteamDB icon before title',
-      showSteamDbIconHint: 'App icon from the SteamDB page header, with Steam capsule fallback.',
+      showSteamDbIconHint: 'App icon from Steam store assets (community_icon), same CDN as SteamDB.',
       showSteamDbCover: 'Show SteamDB logo under Change cover',
-      showSteamDbCoverHint: 'Cover image from SteamDB below the cover / Change cover control.',
+      showSteamDbCoverHint: 'Steam header image under the cover / Change cover control.',
       showSteamPlayers: 'Show online players',
-      showSteamPlayersHint: 'Current players from SteamDB (#js-charts-button) or Steam API.',
+      showSteamPlayersHint: 'Current players from Steam GetNumberOfCurrentPlayers.',
       steamBackloggdTooltip: 'View on Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Owned',
@@ -312,11 +311,11 @@
       showSteamDbPageLink: 'Кнопка Backloggd на SteamDB',
       showSteamDbPageLinkHint: 'Кнопка рядом со Store / IGDB в блоке app-links на SteamDB.',
       showSteamDbIcon: 'Иконка SteamDB перед названием',
-      showSteamDbIconHint: 'Иконка приложения из шапки страницы SteamDB, запасной вариант — капсула Steam.',
+      showSteamDbIconHint: 'Иконка из Steam store assets (community_icon), тот же CDN, что у SteamDB.',
       showSteamDbCover: 'Логотип SteamDB под Change cover',
-      showSteamDbCoverHint: 'Обложка со SteamDB под обложкой / кнопкой Change cover.',
+      showSteamDbCoverHint: 'Steam header под обложкой / кнопкой Change cover.',
       showSteamPlayers: 'Показывать онлайн игроков',
-      showSteamPlayersHint: 'Текущие игроки со SteamDB (#js-charts-button) или Steam API.',
+      showSteamPlayersHint: 'Текущие игроки через Steam GetNumberOfCurrentPlayers.',
       steamBackloggdTooltip: 'Открыть на Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Куплено',
@@ -2867,95 +2866,6 @@
     return `${STEAM_CDN_APPS}/${Number(appId)}/${file}`;
   }
 
-  function absolutizeSteamDbUrl(url) {
-    const raw = String(url || '').trim();
-    if (!raw) return '';
-    if (/^https?:\/\//i.test(raw)) return raw;
-    if (raw.startsWith('//')) return `https:${raw}`;
-    if (raw.startsWith('/')) return `https://steamdb.info${raw}`;
-    return raw;
-  }
-
-  function parsePlayerCountText(text) {
-    const cleaned = String(text || '').replace(/[^\d]/g, '');
-    if (!cleaned) return null;
-    const n = Number(cleaned);
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function imgUrlFromEl(el) {
-    if (!el) return '';
-    const srcset = String(el.getAttribute('srcset') || '')
-      .split(',')[0]
-      ?.trim()
-      .split(/\s+/)[0];
-    return absolutizeSteamDbUrl(
-      el.getAttribute('src') ||
-        el.getAttribute('data-src') ||
-        el.getAttribute('data-lazy-src') ||
-        srcset ||
-        ''
-    );
-  }
-
-  function parseSteamDbHtml(html) {
-    if (!html || typeof html !== 'string') return null;
-    if (/just a moment|cf-browser-verification|challenge-platform|cdn-cgi\/challenge/i.test(html)) {
-      return null;
-    }
-    let doc;
-    try {
-      doc = new DOMParser().parseFromString(html, 'text/html');
-    } catch (_) {
-      return null;
-    }
-
-    // Current SteamDB layout (prefer), then legacy class names as fallback.
-    const iconEl =
-      doc.querySelector('.pagehead-title > img') ||
-      doc.querySelector('.pagehead .pagehead-title img') ||
-      doc.querySelector('img.app-icon') ||
-      doc.querySelector('.app-icon img') ||
-      doc.querySelector('img[class*="app-icon"]');
-    const logoEl =
-      doc.querySelector('.js-open-screenshot-viewer > img') ||
-      doc.querySelector('.app-row .js-open-screenshot-viewer img') ||
-      doc.querySelector('.row.app-row .span4 img') ||
-      doc.querySelector('img.app-logo') ||
-      doc.querySelector('.app-logo img') ||
-      doc.querySelector('img[class*="app-logo"]');
-
-    let players = null;
-    const chartsEl =
-      doc.querySelector('#js-charts-button > div') || doc.querySelector('#js-charts-button');
-    if (chartsEl) players = parsePlayerCountText(chartsEl.textContent);
-
-    if (players == null) {
-      const things = doc.querySelectorAll('.header-thing');
-      for (const thing of things) {
-        const label = (thing.textContent || '').toLowerCase();
-        const numEl = thing.querySelector('.header-thing-number');
-        if (!numEl) continue;
-        const n = parsePlayerCountText(numEl.textContent);
-        if (n == null) continue;
-        if (/play|online|игрок|joueur|spieler|プレイヤー|플레이/.test(label)) {
-          players = n;
-          break;
-        }
-        if (players == null) players = n;
-      }
-    }
-    if (players == null) {
-      const first = doc.querySelector('.header-thing-number');
-      if (first) players = parsePlayerCountText(first.textContent);
-    }
-
-    const iconUrl = imgUrlFromEl(iconEl);
-    const logoUrl = imgUrlFromEl(logoEl);
-    if (!iconUrl && !logoUrl && players == null) return null;
-    return { iconUrl, logoUrl, players, source: 'steamdb' };
-  }
-
   async function fetchSteamPlayers(appId) {
     const cacheKey = `steam:players:${appId}`;
     const cached = getCached(cacheKey);
@@ -2967,7 +2877,6 @@
       });
       const players = Number(data?.response?.player_count);
       if (!Number.isFinite(players)) return null;
-      // Short TTL for live counts — store via raw cache entry when global TTL is longer.
       const store = readCacheStore();
       store[cacheKey] = { ts: Date.now(), data: { players }, ttlMs: PLAYERS_CACHE_TTL_MS };
       persistCacheSoon();
@@ -2977,7 +2886,12 @@
     }
   }
 
-  async function fetchSteamDbExtras(appId, { tinyImage = null, onPartial, country } = {}) {
+  /**
+   * Icon / cover / players via Steam APIs only.
+   * SteamDB has no public JSON API (internal /api/* is extension-only + Cloudflare).
+   * Media: GetItems community_icon + header. Players: GetNumberOfCurrentPlayers.
+   */
+  async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
     const id = Number(appId);
     if (!Number.isFinite(id) || id <= 0) return null;
 
@@ -2988,9 +2902,9 @@
     const mediaKey = `steamdb:media:${id}`;
     const debugOn = Boolean(settings.debugMode);
     let media = !debugOn ? getCached(mediaKey) : null;
-    let scrapeError = null;
     let latestPlayers = null;
     let latestPlayersSource = null;
+    let playersApiUrl = null;
     const cc = country || settings.steamCountry || 'US';
 
     const emit = (payload) => {
@@ -2998,8 +2912,6 @@
     };
 
     const resolveMediaUrls = () => {
-      // Prefer Steam GetItems community_icon + header (same CDN URLs SteamDB embeds).
-      // Do not use search tinyImage / capsule_231x87 as the title icon.
       const iconUrl = media?.iconUrl || '';
       const logoUrl =
         media?.logoUrl || steamCdnAsset(id, 'header.jpg') || steamCdnAsset(id, 'library_600x900.jpg');
@@ -3015,24 +2927,31 @@
         logoUrl: needMedia && settings.showSteamDbCover ? logoUrl : '',
         logoIsPortrait: Boolean(logoIsPortrait),
         players: needPlayers ? latestPlayers : null,
-        source: media?.source || (scrapeError ? 'steam-fallback' : 'steam'),
+        source: media?.source || 'steam',
         _debug: debugOn
           ? {
-              reason: media?.source
-                ? media.source === 'steam-assets'
-                  ? 'Steam GetItems assets (community_icon + header)'
-                  : media.source === 'steamdb'
-                    ? 'Parsed SteamDB app page'
-                    : `Media source: ${media.source}`
-                : scrapeError
-                  ? `SteamDB scrape failed (${scrapeError}); using Steam CDN / players API`
-                  : 'SteamDB HTML unavailable; using Steam CDN / players API',
-              pageUrl: `${STEAMDB_APP_URL}/${id}/`,
+              reason: [
+                media?.source === 'steam-assets'
+                  ? 'Steam GetItems (community_icon + header)'
+                  : media?.source
+                    ? `Media: ${media.source}`
+                    : needMedia
+                      ? 'Waiting for Steam assets'
+                      : null,
+                latestPlayersSource === 'steam-api'
+                  ? 'Players from GetNumberOfCurrentPlayers'
+                  : latestPlayersSource === 'cache'
+                    ? 'Players from cache'
+                    : needPlayers
+                      ? 'Players pending'
+                      : null,
+              ]
+                .filter(Boolean)
+                .join(' · '),
               chartsUrl: `${STEAMDB_APP_URL}/${id}/charts/`,
-              playersApiUrl: `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(id)}`,
+              playersApiUrl,
               playersSource: latestPlayersSource,
               media,
-              scrapeError,
               players: latestPlayers,
               iconUrl,
               logoUrl,
@@ -3041,7 +2960,6 @@
       };
     };
 
-    // Header.jpg immediately (correct cover shape); icon waits for GetItems hash.
     if (needMedia && !media) {
       media = {
         iconUrl: '',
@@ -3053,98 +2971,46 @@
       emit(buildResult());
     }
 
-    const assetsPromise = needMedia
-      ? fetchSteamStoreAssets(id, cc).catch(() => null)
-      : Promise.resolve(null);
-
-    const playersPromise = (async () => {
-      if (!needPlayers) return;
+    if (needPlayers) {
       const entry = readCacheStore()[`steam:players:${id}`];
-      if (entry?.ts && entry.data && typeof entry.data.players === 'number') {
+      if (entry?.ts && typeof entry.data?.players === 'number') {
         const ttl = entry.ttlMs || PLAYERS_CACHE_TTL_MS;
         if (Date.now() - entry.ts <= ttl) {
           latestPlayers = entry.data.players;
           latestPlayersSource = 'cache';
           emit(buildResult());
-          return;
         }
       }
-      const players = await fetchSteamPlayers(id);
-      if (players != null) {
-        latestPlayers = players;
-        latestPlayersSource = 'steam-api';
-        emit(buildResult());
-      }
-    })();
+    }
+
+    const assetsPromise = needMedia
+      ? fetchSteamStoreAssets(id, cc).catch(() => null)
+      : Promise.resolve(null);
+
+    const playersPromise =
+      needPlayers && latestPlayers == null
+        ? (async () => {
+            playersApiUrl = `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(id)}`;
+            const players = await fetchSteamPlayers(id);
+            if (players != null) {
+              latestPlayers = players;
+              latestPlayersSource = 'steam-api';
+              emit(buildResult());
+            }
+          })()
+        : Promise.resolve();
 
     const [storeAssets] = await Promise.all([assetsPromise, playersPromise]);
     if (storeAssets && (storeAssets.iconUrl || storeAssets.logoUrl)) {
       media = {
         iconUrl: storeAssets.iconUrl || media?.iconUrl || '',
         logoUrl: storeAssets.logoUrl || media?.logoUrl || '',
-        players: media?.players,
         source: 'steam-assets',
       };
       if (!debugOn) setCached(mediaKey, media);
       emit(buildResult());
     }
 
-    // SteamDB HTML only if we still need a page player count or media gaps (CF often blocks).
-    const needScrape =
-      (needPlayers && latestPlayers == null) ||
-      (needMedia && (!media?.iconUrl || !media?.logoUrl));
-
-    if (needScrape) {
-      try {
-        const pageUrl = `${STEAMDB_APP_URL}/${id}/`;
-        const html = await gmRequest({
-          url: pageUrl,
-          responseType: 'text',
-          headers: {
-            Accept: 'text/html,application/xhtml+xml',
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-          timeout: 25000,
-        });
-        const parsed = parseSteamDbHtml(html);
-        if (parsed) {
-          const next = {
-            iconUrl: media?.iconUrl || parsed.iconUrl || '',
-            logoUrl: media?.logoUrl || parsed.logoUrl || '',
-            players: parsed.players,
-            source: media?.source === 'steam-assets' ? 'steam-assets' : 'steamdb',
-            pageUrl,
-          };
-          if (!next.iconUrl && parsed.iconUrl) {
-            next.iconUrl = parsed.iconUrl;
-            next.source = 'steamdb';
-          }
-          if (!next.logoUrl && parsed.logoUrl) {
-            next.logoUrl = parsed.logoUrl;
-            next.source = 'steamdb';
-          }
-          media = next;
-          if (!debugOn && (next.iconUrl || next.logoUrl)) {
-            setCached(mediaKey, {
-              iconUrl: next.iconUrl,
-              logoUrl: next.logoUrl,
-              players: next.players,
-              source: next.source,
-              pageUrl,
-            });
-          }
-          if (needPlayers && parsed.players != null) {
-            latestPlayers = parsed.players;
-            latestPlayersSource = 'steamdb';
-          }
-          emit(buildResult());
-        }
-      } catch (err) {
-        scrapeError = String(err?.message || err);
-      }
-    }
-
-    // Last-resort icon if GetItems/SteamDB both missed.
     if (needMedia && settings.showSteamDbIcon && media && !media.iconUrl) {
       media = { ...media, iconUrl: steamCdnAsset(id, 'capsule_sm_120.jpg') };
     }
@@ -3864,15 +3730,6 @@
     }
 
     const sdb = steamDb?._debug || {};
-    if (sdb.pageUrl || steamDb?.appId) {
-      add(
-        'steamdb',
-        'SteamDB page',
-        sdb.pageUrl || `${STEAMDB_APP_URL}/${steamDb.appId}/`,
-        t.debugSrcSteamDbPage,
-        true
-      );
-    }
     if (sdb.chartsUrl) {
       add('steamdb', 'SteamDB charts', sdb.chartsUrl, t.debugSrcSteamDbCharts);
     }
@@ -4275,7 +4132,6 @@
       if (needSteamDb) {
         jobs.push(
           fetchSteamDbExtras(steam.appId, {
-            tinyImage: steam.tinyImage,
             country: settings.steamCountry || 'US',
             onPartial: (partial) => {
               if (!stillHere()) return;
