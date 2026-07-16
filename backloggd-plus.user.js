@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.4.8
+// @version           0.4.9
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -52,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.4.8';
+  const SCRIPT_VERSION = '0.4.9';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -1151,7 +1151,6 @@
         if (!debugOn) setCached(cacheKey, tags);
         return tags;
       } catch (_) {
-        if (!debugOn) setCached(cacheKey, []);
         return [];
       }
     })();
@@ -1187,7 +1186,6 @@
         setOwnedCached({ appIds });
         return new Set(appIds);
       } catch (_) {
-        setOwnedCached({ appIds: [] });
         return new Set();
       }
     })();
@@ -2086,7 +2084,6 @@
           ? `No Steam search match for ${requestedCountry} or US (session + guest, parallel)`
           : 'No Steam search match (session + guest, parallel)';
         const miss = { found: false, _debug: debug };
-        if (!debugOn) setCached(cacheKey, { found: false });
         return miss;
       }
 
@@ -2132,7 +2129,6 @@
       } catch (err) {
         debug.reason = `Steam details/reviews failed: ${err?.message || err}`;
         const miss = { found: false, _debug: debug };
-        if (!debugOn) setCached(cacheKey, { found: false });
         return miss;
       }
 
@@ -2342,7 +2338,6 @@
         ? 'No GameStatus match for tried slugs'
         : 'No valid GameStatus slug candidates';
       const miss = { missing: true, data: null, slug: tried[0] || null, _debug: debug };
-      if (!debugOn) setCached(cacheKey, { missing: true, data: null, slug: tried[0] || null });
       return miss;
     })();
 

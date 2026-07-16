@@ -35,7 +35,7 @@ backloggd-plus/
 5. On **SteamDB** app pages: inject a `.btn` into `nav.app-links` (prefer IGDB slug from the page).
 6. Steam enrichment: parallel `storesearch` (session + guest) → merge items → pick best app → `appdetails` + `appreviews` + popular tags (`IStoreBrowseService/GetItems` + `tagdata/populartags`) via `GM_xmlhttpRequest` (`@connect store.steampowered.com`, `api.steampowered.com`). If both miss and region ≠ US, retry search with `cc=US` and note it on the Steam row. Ownership via `dynamicstore/userdata` (`rgOwnedApps`) using the browser Steam session (no API key).
 7. GameStatus enrichment (after Steam App ID): slug candidates from store URL / title → `GET gamestatus.info/back/api/gameinfo/game/{slug}/` (match `steam_prod_id`, ≤2 attempts, 404 = miss). Status chips: cracked / bypass / pending / release-today (`@connect gamestatus.info`).
-8. Cache in `GM_getValue` / `GM_setValue` (`blp_cache_v1`); settings in `blp_settings` (incl. per-link toggles).
+8. Cache in `GM_getValue` / `GM_setValue` (`blp_cache_v1`); settings in `blp_settings` (incl. per-link toggles). Cache successful Steam / GameStatus hits only — do not persist misses or request errors.
 9. UI strings in `TRANSLATIONS` / browser locale; settings via navbar **Plus** button and `GM_registerMenuCommand`.
 
 Keep rate limits polite: cache TTLs, request dedupe (`inflight`), debounce on DOM rescans. Do not add IGDB/Twitch credentials unless the user asks for API-backed enrichment.
