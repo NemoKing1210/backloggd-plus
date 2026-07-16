@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.3
+// @version           0.7.4
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -56,7 +56,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.3';
+  const SCRIPT_VERSION = '0.7.4';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -4335,7 +4335,7 @@
   }
 
   function renderOpenCriticValues(oc) {
-    if (!oc) return '';
+    if (!oc || oc.missing) return '';
     const parts = [];
     if (oc.tier) {
       const cls = `blp-oc-badge ${ocTierClass(oc.tier)}`.trim();
@@ -4353,7 +4353,7 @@
   }
 
   function renderHltbValues(hltb) {
-    if (!hltb) return '';
+    if (!hltb || hltb.missing) return '';
     const chips = [];
     const main = formatHoursCompact(hltb.main);
     const extra = formatHoursCompact(hltb.extra);
@@ -6124,22 +6124,31 @@
     }
 
     if (rows.opencritic) {
-      const html = renderOpenCriticValues(opencritic);
-      if (html && !error) {
-        setRowValues(rows.opencritic, html);
+      if (opencritic == null) {
+        // Still loading — keep skeleton visible; do not hide.
         showRow(rows.opencritic);
       } else {
-        hideRow(rows.opencritic);
+        const html = renderOpenCriticValues(opencritic);
+        if (html && !error) {
+          setRowValues(rows.opencritic, html);
+          showRow(rows.opencritic);
+        } else {
+          hideRow(rows.opencritic);
+        }
       }
     }
 
     if (rows.hltb) {
-      const html = renderHltbValues(hltb);
-      if (html && !error) {
-        setRowValues(rows.hltb, html);
+      if (hltb == null) {
         showRow(rows.hltb);
       } else {
-        hideRow(rows.hltb);
+        const html = renderHltbValues(hltb);
+        if (html && !error) {
+          setRowValues(rows.hltb, html);
+          showRow(rows.hltb);
+        } else {
+          hideRow(rows.hltb);
+        }
       }
     }
 
@@ -6216,10 +6225,9 @@
 
     const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
-    if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
-      const needSteamDbUi = settings.showSteamDbIcon || settings.showSteamDbCover;
-      if (!needSteamDbUi || document.querySelector(`[${STEAMDB_ATTR}]`)) return;
-    }
+    // Same page/settings: keep the in-flight (or finished) mount. Remounting while
+    // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
+    if (marker?.getAttribute('data-blp-token') === token) return;
 
     removeEnrichment();
     const rows = ensureEnrichmentRows();
@@ -6477,11 +6485,12 @@
           fetchOpenCritic(title)
             .then((oc) => {
               if (!stillHere()) return;
-              state.opencritic = oc;
+              state.opencritic = oc || { missing: true };
               paintOpenCritic();
             })
             .catch(() => {
               if (!stillHere()) return;
+              state.opencritic = { missing: true };
               paintOpenCritic();
             })
         );
@@ -6491,11 +6500,12 @@
           fetchHltb(title)
             .then((hltb) => {
               if (!stillHere()) return;
-              state.hltb = hltb;
+              state.hltb = hltb || { missing: true };
               paintHltb();
             })
             .catch(() => {
               if (!stillHere()) return;
+              state.hltb = { missing: true };
               paintHltb();
             })
         );
@@ -7208,15 +7218,52 @@
     scheduleCardBadges();
   }
 
+  function isBlpManagedElement(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (
+      el.hasAttribute?.(ENRICH_ATTR) ||
+      el.hasAttribute?.(STEAMDB_ATTR) ||
+      el.hasAttribute?.(CARD_ATTR) ||
+      el.hasAttribute?.(CARD_STATE_ATTR) ||
+      el.hasAttribute?.('data-blp-debug') ||
+      el.hasAttribute?.('data-blp-token') ||
+      el.id === 'blp-nav-settings' ||
+      el.id === 'blp-steam-backloggd-btn' ||
+      el.id === 'blp-steamdb-backloggd-btn'
+    ) {
+      return true;
+    }
+    if (
+      el.classList?.contains('blp-card-badges') ||
+      el.classList?.contains('blp-settings-backdrop') ||
+      el.classList?.contains('blp-fix-match-backdrop') ||
+      el.classList?.contains('blp-debug-panel') ||
+      el.classList?.contains('blp-steamdb-cover')
+    ) {
+      return true;
+    }
+    return Boolean(
+      el.closest?.(
+        `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings`
+      )
+    );
+  }
+
+  function shouldIgnoreDomMutations(mutations) {
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (!isBlpManagedElement(node)) return false;
+      }
+    }
+    return true;
+  }
+
   function observeDom(onChange) {
     const scheduled = debounce(onChange, SCAN_DEBOUNCE_MS);
     const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.addedNodes && m.addedNodes.length) {
-          scheduled();
-          return;
-        }
-      }
+      if (shouldIgnoreDomMutations(mutations)) return;
+      scheduled();
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
     return observer;
