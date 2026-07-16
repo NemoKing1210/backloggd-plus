@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.6.8
+// @version           0.6.10
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -52,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.6.8';
+  const SCRIPT_VERSION = '0.6.10';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -2284,10 +2284,6 @@
         margin-top: 0.75rem;
         width: 100%;
         max-width: 100%;
-      }
-
-      .blp-steamdb-cover a {
-        display: block;
         line-height: 0;
         border-radius: 6px;
         overflow: hidden;
@@ -2920,14 +2916,36 @@
       .blp-settings {
         width: min(440px, 100%);
         max-height: min(90vh, 720px);
-        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
         background: #151921;
         color: var(--blp-text);
         border: 1px solid var(--blp-border);
         border-radius: 12px;
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-        padding: 18px 18px 14px;
         font: 14px/1.45 system-ui, sans-serif;
+      }
+
+      .blp-settings__head {
+        flex: 0 0 auto;
+        padding: 18px 18px 12px;
+        border-bottom: 1px solid var(--blp-border);
+        background: #151921;
+      }
+
+      .blp-settings__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+        padding: 14px 18px;
+      }
+
+      .blp-settings__foot {
+        flex: 0 0 auto;
+        padding: 12px 18px 14px;
+        border-top: 1px solid var(--blp-border);
+        background: #151921;
       }
 
       .blp-settings h2 {
@@ -2936,7 +2954,7 @@
       }
 
       .blp-settings__sub {
-        margin: 0 0 16px;
+        margin: 0;
         color: var(--blp-muted);
         font-size: 13px;
       }
@@ -2947,7 +2965,9 @@
         border-bottom: 1px solid var(--blp-border);
       }
 
-      .blp-settings section:last-of-type {
+      .blp-settings__body > section:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
         border-bottom: none;
       }
 
@@ -3040,6 +3060,10 @@
         margin-top: 8px;
       }
 
+      .blp-settings__foot .blp-actions {
+        margin-top: 0;
+      }
+
       .blp-actions button {
         padding: 8px 12px;
         border-radius: 8px;
@@ -3067,9 +3091,7 @@
       }
 
       .blp-settings__footer {
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid var(--blp-border);
+        margin-top: 10px;
         font-size: 12px;
         color: var(--blp-muted);
       }
@@ -4253,10 +4275,9 @@
     const box = document.createElement('div');
     box.setAttribute(STEAMDB_ATTR, 'cover');
     box.className = 'blp-steamdb-cover';
-    const href = `${STEAMDB_APP_URL}/${Number(appId)}/`;
     const isLogoAsset = (u) => /(?:^|\/)logo\.(png|jpe?g)(?:$|\?)/i.test(String(u || ''));
     const firstIsLogo = isLogoAsset(fallbacks[0]) && !logoIsPortrait;
-    box.innerHTML = `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer" title="SteamDB"><img class="${firstIsLogo ? 'blp-steamdb-cover__logo' : ''}" src="${escapeAttr(fallbacks[0])}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></a>`;
+    box.innerHTML = `<img class="${firstIsLogo ? 'blp-steamdb-cover__logo' : ''}" src="${escapeAttr(fallbacks[0])}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`;
     const img = box.querySelector('img');
     let idx = 0;
     if (img) {
@@ -5497,8 +5518,11 @@
     backdrop.className = 'blp-settings-backdrop';
     backdrop.innerHTML = `
       <div class="blp-settings" role="dialog" aria-modal="true" aria-label="${escapeAttr(t.panelTitle)}">
-        <h2>${escapeHtml(t.panelTitle)} <span class="blp-settings__ver">v${escapeHtml(SCRIPT_VERSION)}</span></h2>
-        <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
+        <div class="blp-settings__head">
+          <h2>${escapeHtml(t.panelTitle)} <span class="blp-settings__ver">v${escapeHtml(SCRIPT_VERSION)}</span></h2>
+          <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
+        </div>
+        <div class="blp-settings__body">
         <section>
           <h3>${escapeHtml(t.sectionGeneral)}</h3>
           <div class="blp-field">
@@ -5619,13 +5643,16 @@
           </div>
           <p class="blp-hint">${escapeHtml(t.debugModeHint)}</p>
         </section>
-        <div class="blp-actions">
-          <button type="button" data-blp-cancel>${escapeHtml(t.cancel)}</button>
-          <button type="button" class="blp-primary" data-blp-save>${escapeHtml(t.saveReload)}</button>
         </div>
-        <div class="blp-settings__footer">
-          <a href="${escapeAttr(REPO_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.repoLink)}</a>
-          — ${escapeHtml(t.repoAbout)}
+        <div class="blp-settings__foot">
+          <div class="blp-actions">
+            <button type="button" data-blp-cancel>${escapeHtml(t.cancel)}</button>
+            <button type="button" class="blp-primary" data-blp-save>${escapeHtml(t.saveReload)}</button>
+          </div>
+          <div class="blp-settings__footer">
+            <a href="${escapeAttr(REPO_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.repoLink)}</a>
+            — ${escapeHtml(t.repoAbout)}
+          </div>
         </div>
       </div>
     `;

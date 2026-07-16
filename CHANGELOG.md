@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.10] - 2026-07-16
+
+### Changed
+
+- SteamDB cover under Change cover is no longer a clickable link
+
+## [0.6.9] - 2026-07-16
+
+### Changed
+
+- Settings: sticky header and footer; only the middle sections scroll
+
 ## [0.6.8] - 2026-07-16
 
 ### Fixed
