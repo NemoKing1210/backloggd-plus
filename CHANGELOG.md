@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.6] - 2026-07-16
+
+### Changed
+
+- OpenCritic row: spacing between tier badge and score
+
+## [0.7.5] - 2026-07-16
+
+### Fixed
+
+- OpenCritic row: when `api.opencritic.com` fails, resolve the game via DuckDuckGo HTML search and parse the OpenCritic game page (tier + Top Critic score)
+
 ## [0.7.4] - 2026-07-16
 
 ### Fixed

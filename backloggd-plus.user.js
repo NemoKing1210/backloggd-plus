@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.4
+// @version           0.7.6
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -45,6 +45,8 @@
 // @connect            gamestatus.info
 // @connect            howlongtobeat.com
 // @connect            api.opencritic.com
+// @connect            opencritic.com
+// @connect            html.duckduckgo.com
 // @connect            www.protondb.com
 // @connect            protondb.com
 // @run-at             document-idle
@@ -56,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.4';
+  const SCRIPT_VERSION = '0.7.6';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -86,6 +88,8 @@
     'https://store.steampowered.com/saleaction/ajaxgetdeckappcompatibilityreport';
   const PROTONDB_SUMMARY_URL = 'https://www.protondb.com/api/v1/reports/summaries';
   const OPENCRITIC_API_BASE = 'https://api.opencritic.com/api';
+  const OPENCRITIC_SITE = 'https://opencritic.com';
+  const DDG_HTML_SEARCH = 'https://html.duckduckgo.com/html/';
   const HLTB_SITE = 'https://howlongtobeat.com';
   const HLTB_INIT_URL = `${HLTB_SITE}/api/bleed/init`;
   const HLTB_SEARCH_URL = `${HLTB_SITE}/api/bleed`;
@@ -2435,44 +2439,17 @@
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
     const task = (async () => {
-      const searchUrl = `${OPENCRITIC_API_BASE}/game/search?criteria=${encodeURIComponent(q)}`;
-      const results = await gmRequest({
-        url: searchUrl,
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': HLTB_UA,
-        },
-        timeout: 15000,
-      });
-      const list = Array.isArray(results) ? results : [];
-      const picked = pickBestTitleMatch(list, q, (g) => g.name || g.distilledName);
-      if (!picked?.item?.id) return null;
-      const id = Number(picked.item.id);
-      const detail = await gmRequest({
-        url: `${OPENCRITIC_API_BASE}/game/${id}`,
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': HLTB_UA,
-        },
-        timeout: 15000,
-      });
-      if (!detail) return null;
-      const score = Number(detail.topCriticScore);
-      const tier = typeof detail.tier === 'string' ? detail.tier : null;
-      const slug = detail.slug || picked.item.slug;
-      const payload = {
-        id,
-        name: detail.name || picked.item.name || q,
-        tier,
-        score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
-        url: slug
-          ? `https://opencritic.com/game/${id}/${encodeURIComponent(slug)}`
-          : `https://opencritic.com/game/${id}`,
-        matchScore: picked.score,
-      };
-      if (!payload.tier && payload.score == null) return null;
-      if (!debugOn) setCached(cacheKey, payload);
-      return payload;
+      const fromApi = await fetchOpenCriticViaApi(q).catch(() => null);
+      if (fromApi) {
+        if (!debugOn) setCached(cacheKey, fromApi);
+        return fromApi;
+      }
+      const fromHtml = await fetchOpenCriticViaHtml(q).catch(() => null);
+      if (fromHtml) {
+        if (!debugOn) setCached(cacheKey, fromHtml);
+        return fromHtml;
+      }
+      return null;
     })().catch(() => null);
 
     inflight.set(cacheKey, task);
@@ -2481,6 +2458,218 @@
     } finally {
       inflight.delete(cacheKey);
     }
+  }
+
+  function pickOpenCriticSearchMatch(list, title) {
+    if (!Array.isArray(list) || !list.length) return null;
+    const scored = list
+      .map((item) => {
+        const name = item?.name || item?.distilledName || '';
+        return {
+          item,
+          titleScore: scoreSteamTitleMatch(name, title),
+          dist: Number(item?.dist),
+        };
+      })
+      .filter((row) => row.item?.id != null);
+    if (!scored.length) return null;
+    scored.sort(
+      (a, b) =>
+        b.titleScore - a.titleScore ||
+        (Number.isFinite(a.dist) ? a.dist : 99) - (Number.isFinite(b.dist) ? b.dist : 99)
+    );
+    const best = scored[0];
+    if (best.titleScore >= TITLE_MATCH_MIN_SCORE) {
+      return { item: best.item, score: best.titleScore };
+    }
+    // OpenCritic search ranks by dist; accept a very close hit when title scoring is strict.
+    if (Number.isFinite(best.dist) && best.dist <= 0.12) {
+      return { item: best.item, score: Math.max(best.titleScore, 80) };
+    }
+    return null;
+  }
+
+  async function fetchOpenCriticViaApi(title) {
+    const searchUrl = `${OPENCRITIC_API_BASE}/game/search?criteria=${encodeURIComponent(title)}`;
+    const results = await gmRequest({
+      url: searchUrl,
+      headers: {
+        Accept: 'application/json',
+        Origin: OPENCRITIC_SITE,
+        Referer: `${OPENCRITIC_SITE}/`,
+      },
+      timeout: 15000,
+    });
+    const list = Array.isArray(results) ? results : [];
+    const picked = pickOpenCriticSearchMatch(list, title);
+    if (!picked?.item?.id) return null;
+    const id = Number(picked.item.id);
+    const detail = await gmRequest({
+      url: `${OPENCRITIC_API_BASE}/game/${id}`,
+      headers: {
+        Accept: 'application/json',
+        Origin: OPENCRITIC_SITE,
+        Referer: `${OPENCRITIC_SITE}/`,
+      },
+      timeout: 15000,
+    });
+    return buildOpenCriticPayload(detail, picked.item, title, picked.score);
+  }
+
+  function buildOpenCriticPayload(detail, searchItem, title, matchScore) {
+    if (!detail || typeof detail !== 'object') return null;
+    const score = Number(detail.topCriticScore);
+    const tier = typeof detail.tier === 'string' ? detail.tier : null;
+    const id = Number(detail.id || searchItem?.id);
+    const slug = detail.slug || searchItem?.slug;
+    const payload = {
+      id,
+      name: detail.name || searchItem?.name || title,
+      tier,
+      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
+      url: slug
+        ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
+        : Number.isFinite(id)
+          ? `${OPENCRITIC_SITE}/game/${id}`
+          : `${OPENCRITIC_SITE}/search?q=${encodeURIComponent(title)}`,
+      matchScore: matchScore || null,
+      source: 'api',
+    };
+    if (!payload.tier && payload.score == null) return null;
+    return payload;
+  }
+
+  function extractOpenCriticGameCandidates(html) {
+    const found = [];
+    const push = (id, slug) => {
+      const num = Number(id);
+      const s = String(slug || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, '')
+        .replace(/^-+|-+$/g, '');
+      if (!Number.isFinite(num) || num <= 0 || !s) return;
+      if (found.some((f) => f.id === num)) return;
+      found.push({
+        id: num,
+        slug: s,
+        url: `${OPENCRITIC_SITE}/game/${num}/${s}`,
+        name: s.replace(/-/g, ' '),
+      });
+    };
+    const directRe = /opencritic\.com\/game\/(\d+)\/([a-z0-9-]+)/gi;
+    let m;
+    while ((m = directRe.exec(html))) {
+      push(m[1], m[2]);
+    }
+    const uddgRe = /[?&]uddg=([^&"']+)/gi;
+    while ((m = uddgRe.exec(html))) {
+      try {
+        const decoded = decodeURIComponent(m[1]);
+        const mm = decoded.match(/opencritic\.com\/game\/(\d+)\/([a-z0-9-]+)/i);
+        if (mm) push(mm[1], mm[2]);
+      } catch (_) {
+        /* ignore */
+      }
+    }
+    return found;
+  }
+
+  async function resolveOpenCriticUrlViaDdg(title) {
+    const q = `${title} site:opencritic.com/game`;
+    const html = await gmRequest({
+      url: `${DDG_HTML_SEARCH}?q=${encodeURIComponent(q)}`,
+      responseType: 'text',
+      headers: {
+        Accept: 'text/html',
+      },
+      timeout: 15000,
+    });
+    const candidates = extractOpenCriticGameCandidates(String(html || ''));
+    if (!candidates.length) return null;
+    const picked = pickOpenCriticSearchMatch(candidates, title);
+    if (picked?.item) return picked.item;
+    // First organic hit if the slug roughly contains the title tokens.
+    const target = normalizeTitle(title);
+    const loose = candidates.find((c) => {
+      const name = normalizeTitle(c.name);
+      return name === target || name.includes(target) || target.includes(name);
+    });
+    return loose || candidates[0] || null;
+  }
+
+  function parseOpenCriticGameHtml(html, fallbackUrl) {
+    const text = String(html || '');
+    if (!text) return null;
+    let score = null;
+    let tier = null;
+    let name = null;
+    let id = null;
+    let slug = null;
+
+    const scoreJson = text.match(/"topCriticScore"\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
+    if (scoreJson) score = Number(scoreJson[1]);
+    const tierJson = text.match(/"tier"\s*:\s*"(Mighty|Strong|Fair|Weak)"/i);
+    if (tierJson) tier = tierJson[1];
+    const nameJson = text.match(/"name"\s*:\s*"([^"\\]+)"/);
+    if (nameJson) name = nameJson[1];
+    const idJson = text.match(/"id"\s*:\s*(\d+)/);
+    if (idJson) id = Number(idJson[1]);
+    const slugJson = text.match(/"slug"\s*:\s*"([a-z0-9-]+)"/i);
+    if (slugJson) slug = slugJson[1];
+
+    if (score == null) {
+      const avg = text.match(/Top Critic Average[\s\S]{0,120}?(\d{2,3})/i);
+      if (avg) score = Number(avg[1]);
+    }
+    if (!tier) {
+      const tierText = text.match(/\b(Mighty|Strong|Fair|Weak)\b/);
+      if (tierText) tier = tierText[1];
+    }
+    if (!name) {
+      const titleTag = text.match(/<title[^>]*>\s*([^|<]+?)\s*(?:Reviews)?\s*[-–|]/i);
+      if (titleTag) name = titleTag[1].trim();
+    }
+    const path = String(fallbackUrl || '').match(/opencritic\.com\/game\/(\d+)\/([a-z0-9-]+)/i);
+    if (path) {
+      if (!id) id = Number(path[1]);
+      if (!slug) slug = path[2];
+    }
+
+    const payload = {
+      id,
+      name: name || slug || null,
+      tier: tier || null,
+      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
+      url:
+        id && slug
+          ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
+          : fallbackUrl || OPENCRITIC_SITE,
+      source: 'html',
+    };
+    if (!payload.tier && payload.score == null) return null;
+    return payload;
+  }
+
+  async function fetchOpenCriticViaHtml(title) {
+    const hit = await resolveOpenCriticUrlViaDdg(title);
+    if (!hit?.url) return null;
+    const html = await gmRequest({
+      url: hit.url,
+      responseType: 'text',
+      headers: {
+        Accept: 'text/html',
+        Referer: `${OPENCRITIC_SITE}/`,
+      },
+      timeout: 20000,
+    });
+    const parsed = parseOpenCriticGameHtml(html, hit.url);
+    if (!parsed) return null;
+    if (parsed.name) {
+      const score = scoreSteamTitleMatch(parsed.name, title);
+      // Reject obvious wrong pages from search noise.
+      if (score > 0 && score < 50) return null;
+    }
+    return parsed;
   }
 
   async function fetchProtonDb(appId) {
@@ -2793,6 +2982,21 @@
                   ? res.responseText
                   : res.response
               );
+            } else if (type === 'json') {
+              if (res.response != null && typeof res.response === 'object') {
+                resolve(res.response);
+                return;
+              }
+              const raw = res.responseText;
+              if (typeof raw === 'string' && raw.trim()) {
+                try {
+                  resolve(JSON.parse(raw));
+                  return;
+                } catch (_) {
+                  /* fall through */
+                }
+              }
+              resolve(res.response);
             } else {
               resolve(res.response);
             }
@@ -3043,15 +3247,18 @@
       }
 
       [${ENRICH_ATTR}] .blp-hltb-chips,
-      [${ENRICH_ATTR}] .blp-deck-proton-chips {
+      [${ENRICH_ATTR}] .blp-deck-proton-chips,
+      [${ENRICH_ATTR}] .blp-oc-chips {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem;
+        gap: 0.45rem;
         justify-content: flex-end;
+        align-items: center;
       }
       @media (min-width: 768px) {
         [${ENRICH_ATTR}] .blp-hltb-chips,
-        [${ENRICH_ATTR}] .blp-deck-proton-chips {
+        [${ENRICH_ATTR}] .blp-deck-proton-chips,
+        [${ENRICH_ATTR}] .blp-oc-chips {
           justify-content: flex-start;
         }
       }
@@ -4349,7 +4556,7 @@
       );
     }
     if (!parts.length) return '';
-    return parts.map((html) => `<span class="blp-steam-line">${html}</span>`).join('');
+    return `<span class="blp-oc-chips">${parts.join('')}</span>`;
   }
 
   function renderHltbValues(hltb) {
