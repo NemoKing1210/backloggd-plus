@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.5.9
+// @version           0.5.10
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -53,7 +53,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.5.9';
+  const SCRIPT_VERSION = '0.5.10';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3981,12 +3981,6 @@
     if (rows.gamestatus) {
       if (gamestatus && !gamestatus.missing && gamestatus.data) {
         setRowValues(rows.gamestatus, renderGameStatusValues(gamestatus));
-        showRow(rows.gamestatus);
-      } else if (debugOn) {
-        setRowValues(
-          rows.gamestatus,
-          `<span class="game-details-value blp-empty">${escapeHtml(t.gsNotInDatabase)}</span>`
-        );
         showRow(rows.gamestatus);
       } else {
         hideRow(rows.gamestatus);
