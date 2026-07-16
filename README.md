@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.0-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.1-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.3.0`). Backloggd enrichment + Steam → Backloggd button.
+> **Status:** early (`0.3.1`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -64,11 +64,16 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 - Backloggd icon button in `.apphub_OtherSiteInfo` (same style as SteamDB / Community Hub)
 - Link built from the Steam URL slug or game title
 
+**SteamDB app pages** (`steamdb.info/app/*`):
+
+- Backloggd button in `nav.app-links` (same `.btn` style as Store / IGDB)
+- Prefers IGDB slug from the page when available
+
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / Metacritic / links row / Steam-page Backloggd button
+- Toggles for Steam / Metacritic / links row / Steam-page & SteamDB Backloggd buttons
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
 - Cache duration + clear cache
 
@@ -82,17 +87,18 @@ Planned: list/card badges, deeper IGDB enrichment, more QoL tweaks.
 | Backloggd (apex) | `https://backloggd.com/*` |
 | Steam Store (app) | `https://store.steampowered.com/app/*` |
 | Steam Community (app) | `https://steamcommunity.com/app/*` |
+| SteamDB (app) | `https://steamdb.info/app/*` |
 
 ## How it works
 
 ```
-Backloggd game page                    Steam app page
+Backloggd game page                    Steam / SteamDB app page
        │                                      │
        ▼                                      ▼
-Enrichment rows (Steam/MC/Links)     .apphub_OtherSiteInfo
-       │                                      │
-       ▼                                      ▼
-storesearch → appdetails             Backloggd btn (slug from URL/title)
+Enrichment rows (Steam/MC/Links)     Steam: .apphub_OtherSiteInfo
+       │                             SteamDB: nav.app-links → .btn
+       ▼
+storesearch → appdetails
 ```
 
 SPA navigations on Backloggd use Turbo events, `MutationObserver`, and an href poll.
@@ -128,7 +134,7 @@ Key `// ==UserScript==` fields used by managers:
 | `@license` | MIT |
 | `@grant` | `GM_xmlhttpRequest`, `GM_getValue`, `GM_setValue`, `GM_addStyle`, `GM_registerMenuCommand` |
 | `@connect` | `store.steampowered.com` |
-| `@match` | Backloggd `/*`, Steam Store/Community `/app/*` |
+| `@match` | Backloggd `/*`, Steam Store/Community `/app/*`, SteamDB `/app/*` |
 
 Localized `@name` and `@description` tags are provided for en, ru, zh-CN, es, pt-BR, de, fr, ja, ko, and pl.
 
