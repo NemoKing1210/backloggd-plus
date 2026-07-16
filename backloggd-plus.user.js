@@ -9544,6 +9544,55 @@
         font-size: 0.72rem;
         color: var(--blp-muted, #9aa0a6);
       }
+
+      .blp-unified-rating.is-loading .blp-unified-rating__num {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 2.8rem;
+      }
+
+      .blp-unified-rating.is-loading .blp-unified-rating__skel-num {
+        display: block;
+        width: 3.4rem;
+        height: 2.5rem;
+        border-radius: 8px;
+      }
+
+      .blp-unified-rating.is-loading .blp-unified-rating__skel-denom {
+        display: block;
+        width: 3.6rem;
+        height: 0.7rem;
+        margin: 0.2rem auto 0;
+        border-radius: 4px;
+      }
+
+      .blp-unified-rating.is-loading .blp-unified-rating__skel-value {
+        display: block;
+        width: 2.5rem;
+        height: 1.1rem;
+        margin-top: 0.1rem;
+        border-radius: 4px;
+      }
+
+      .blp-unified-rating.is-loading .blp-unified-rating__skel-sub {
+        display: block;
+        width: 2rem;
+        height: 0.65rem;
+        margin-top: 0.15rem;
+        border-radius: 4px;
+      }
+
+      .blp-unified-rating__meter--loading .blp-unified-rating__meter-fill {
+        width: 36%;
+        opacity: 0.55;
+        animation: blp-unified-meter-indeterminate 1.35s ease-in-out infinite;
+      }
+
+      @keyframes blp-unified-meter-indeterminate {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(320%); }
+      }
     `);
   }
 
@@ -9562,24 +9611,43 @@
       return row;
     }
 
+    const skeletonCells = [
+      t.unifiedRatingSteam,
+      t.unifiedRatingMetacritic,
+      t.unifiedRatingOpenCritic,
+      t.unifiedRatingBackloggd,
+    ]
+      .map(
+        (label) => `<div class="blp-unified-rating__cell">
+          <span class="blp-unified-rating__cell-label">${escapeHtml(label)}</span>
+          <span class="blp-skeleton blp-unified-rating__skel-value"></span>
+          <span class="blp-skeleton blp-unified-rating__skel-sub"></span>
+        </div>`
+      )
+      .join('');
+
     row = document.createElement('div');
     row.className = 'row blp-unified-rating-row';
     row.setAttribute(ENRICH_ATTR, 'unified-rating');
     if (token) row.setAttribute('data-blp-token', token);
     row.innerHTML = `
       <div class="col">
-        <div class="backloggd-container center-container blp-unified-rating" data-grade="mid">
+        <div class="backloggd-container center-container blp-unified-rating is-loading" data-grade="mid">
           <div class="blp-unified-rating__layout">
             <div class="blp-unified-rating__score-block">
               <p class="blp-unified-rating__label">${escapeHtml(t.unifiedRatingTitle)}</p>
-              <p class="blp-unified-rating__num"><span class="blp-skeleton blp-skeleton--sm" style="display:inline-block;width:3rem;height:1.8rem;"></span></p>
+              <p class="blp-unified-rating__num"><span class="blp-skeleton blp-unified-rating__skel-num"></span></p>
+              <span class="blp-unified-rating__denom"><span class="blp-skeleton blp-unified-rating__skel-denom"></span></span>
             </div>
             <div class="blp-unified-rating__main">
               <div class="blp-unified-rating__head">
+                <p class="blp-unified-rating__title">${escapeHtml(t.unifiedRatingHint)}</p>
                 <p class="blp-unified-rating__hint">${escapeHtml(t.unifiedRatingLoading)}</p>
               </div>
-              <div class="blp-unified-rating__meter"><div class="blp-unified-rating__meter-fill" style="width:0%"></div></div>
-              <div class="blp-unified-rating__grid"></div>
+              <div class="blp-unified-rating__meter blp-unified-rating__meter--loading">
+                <div class="blp-unified-rating__meter-fill"></div>
+              </div>
+              <div class="blp-unified-rating__grid">${skeletonCells}</div>
             </div>
           </div>
         </div>
@@ -9671,6 +9739,7 @@
     const avg5 = present.reduce((s, p) => s + p.score5, 0) / present.length;
     const avg5Rounded = Math.round(avg5 * 10) / 10;
     const grade = avg5Rounded >= 4 ? 'high' : avg5Rounded >= 3 ? 'mid' : 'low';
+    tile.classList.remove('is-loading');
     tile.setAttribute('data-grade', grade);
 
     const barWidth = Math.max(0, Math.min(100, (avg5Rounded / 5) * 100));
