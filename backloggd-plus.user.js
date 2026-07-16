@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.20
+// @version           0.7.21
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.20';
+  const SCRIPT_VERSION = '0.7.21';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -2642,7 +2642,8 @@
     const debugOn = Boolean(settings.debugMode);
     if (!debugOn) {
       const cached = getCached(cacheKey);
-      if (cached) return cached;
+      // Bust legacy HTML caches that kept tier but dropped the numeric score.
+      if (cached && (cached.score != null || cached.missing || cached.scoreParseV2)) return cached;
     }
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
@@ -2712,22 +2713,39 @@
     const picked = pickOpenCriticSearchMatch(list, title);
     if (!picked?.item?.id) return null;
     const id = Number(picked.item.id);
-    const detail = await gmRequest({
-      url: `${OPENCRITIC_API_BASE}/game/${id}`,
-      headers: {
-        Accept: 'application/json',
-        Origin: OPENCRITIC_SITE,
-        Referer: `${OPENCRITIC_SITE}/`,
-      },
-      timeout: 15000,
-    });
-    return buildOpenCriticPayload(detail, picked.item, title, picked.score);
+    let detail = null;
+    try {
+      detail = await gmRequest({
+        url: `${OPENCRITIC_API_BASE}/game/${id}`,
+        headers: {
+          Accept: 'application/json',
+          Origin: OPENCRITIC_SITE,
+          Referer: `${OPENCRITIC_SITE}/`,
+        },
+        timeout: 15000,
+      });
+    } catch (_) {
+      detail = null;
+    }
+    return buildOpenCriticPayload(detail || picked.item, picked.item, title, picked.score);
+  }
+
+  function coerceOpenCriticScore(...candidates) {
+    for (const raw of candidates) {
+      if (raw == null || raw === '') continue;
+      const n = typeof raw === 'number' ? raw : Number(String(raw).trim().replace(',', '.'));
+      if (!Number.isFinite(n) || n <= 0 || n > 100) continue;
+      return Math.round(n);
+    }
+    return null;
   }
 
   function buildOpenCriticPayload(detail, searchItem, title, matchScore) {
     if (!detail || typeof detail !== 'object') return null;
-    const score = Number(detail.topCriticScore);
-    const tier = typeof detail.tier === 'string' ? detail.tier : null;
+    const tier =
+      (typeof detail.tier === 'string' && detail.tier) ||
+      (typeof searchItem?.tier === 'string' && searchItem.tier) ||
+      null;
     if (!tier) return null;
     const id = Number(detail.id || searchItem?.id);
     const slug = detail.slug || searchItem?.slug;
@@ -2735,7 +2753,12 @@
       id,
       name: detail.name || searchItem?.name || title,
       tier,
-      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
+      score: coerceOpenCriticScore(
+        detail.topCriticScore,
+        detail.medianScore,
+        searchItem?.topCriticScore,
+        searchItem?.medianScore
+      ),
       url: slug
         ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
         : Number.isFinite(id)
@@ -2743,6 +2766,7 @@
           : `${OPENCRITIC_SITE}/search?q=${encodeURIComponent(title)}`,
       matchScore: matchScore || null,
       source: 'api',
+      scoreParseV2: true,
     };
   }
 
@@ -2804,17 +2828,35 @@
     return loose || candidates[0] || null;
   }
 
+  function parseOpenCriticScoreFromHtml(text) {
+    const fromJson = text.match(/"topCriticScore"\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
+    if (fromJson) {
+      const n = coerceOpenCriticScore(fromJson[1]);
+      if (n != null) return n;
+    }
+    // Page order is usually: big number, then "Top Critic Average".
+    const beforeLabel = text.match(/(\d{2,3})(?:\s*<[^>]*>|\s|&nbsp;|<!--.*?-->){0,12}\s*Top Critic Average/i);
+    if (beforeLabel) {
+      const n = coerceOpenCriticScore(beforeLabel[1]);
+      if (n != null) return n;
+    }
+    const afterLabel = text.match(/Top Critic Average[\s\S]{0,160}?(\d{2,3})/i);
+    if (afterLabel) {
+      const n = coerceOpenCriticScore(afterLabel[1]);
+      if (n != null) return n;
+    }
+    return null;
+  }
+
   function parseOpenCriticGameHtml(html, fallbackUrl) {
     const text = String(html || '');
     if (!text) return null;
-    let score = null;
     let tier = null;
     let name = null;
     let id = null;
     let slug = null;
 
-    const scoreJson = text.match(/"topCriticScore"\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
-    if (scoreJson) score = Number(scoreJson[1]);
+    const score = parseOpenCriticScoreFromHtml(text);
     const tierJson = text.match(/"tier"\s*:\s*"(Mighty|Strong|Fair|Weak)"/i);
     if (tierJson) tier = tierJson[1];
     const nameJson = text.match(/"name"\s*:\s*"([^"\\]+)"/);
@@ -2824,10 +2866,6 @@
     const slugJson = text.match(/"slug"\s*:\s*"([a-z0-9-]+)"/i);
     if (slugJson) slug = slugJson[1];
 
-    if (score == null) {
-      const avg = text.match(/Top Critic Average[\s\S]{0,120}?(\d{2,3})/i);
-      if (avg) score = Number(avg[1]);
-    }
     if (!tier) {
       const tierText = text.match(/\b(Mighty|Strong|Fair|Weak)\b/);
       if (tierText) tier = tierText[1];
@@ -2847,12 +2885,13 @@
       id,
       name: name || slug || null,
       tier,
-      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
+      score,
       url:
         id && slug
           ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
           : fallbackUrl || OPENCRITIC_SITE,
       source: 'html',
+      scoreParseV2: true,
     };
   }
 
@@ -8135,11 +8174,13 @@
     };
 
     const paintOpenCritic = () => {
-      if (!stillHere() || !rows.opencritic) return;
-      renderEnrichment(
-        { opencritic: rows.opencritic },
-        { opencritic: state.opencritic, error: state.error, skipDebug: true }
-      );
+      if (!stillHere()) return;
+      if (rows.opencritic) {
+        renderEnrichment(
+          { opencritic: rows.opencritic },
+          { opencritic: state.opencritic, error: state.error, skipDebug: true }
+        );
+      }
       updateUnifiedRatingWidget(state);
     };
 
