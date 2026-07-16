@@ -233,7 +233,7 @@
       showSteam: 'Show Steam price & reviews',
       showMetacritic: 'Show Metacritic score',
       showOpenCritic: 'Show OpenCritic score',
-      showOpenCriticHint: 'Tier + Top Critic average from OpenCritic (searched by title).',
+      showOpenCriticHint: 'OpenCritic tier badge (searched by title).',
       showHltb: 'Show HowLongToBeat times',
       showHltbHint: 'Main / Extra / Complete hours from HowLongToBeat.',
       showDeckProton: 'Show Steam Deck & ProtonDB',
@@ -329,7 +329,6 @@
       free: 'Free',
       discount: '-{n}%',
       discountEnds: 'ends {date}',
-      steamRecentLow: 'recent low {price}',
       steamUsFallback: 'Found via US store ({cc} search returned nothing)',
       recommendations: '{n} recommendations',
       links: 'Links',
@@ -414,7 +413,7 @@
       showSteam: 'Показывать цену и отзывы Steam',
       showMetacritic: 'Показывать оценку Metacritic',
       showOpenCritic: 'Показывать оценку OpenCritic',
-      showOpenCriticHint: 'Tier + средний балл Top Critic с OpenCritic (поиск по названию).',
+      showOpenCriticHint: 'Бейдж tier с OpenCritic (поиск по названию).',
       showHltb: 'Показывать время HowLongToBeat',
       showHltbHint: 'Main / Extra / Complete в часах с HowLongToBeat.',
       showDeckProton: 'Показывать Steam Deck и ProtonDB',
@@ -510,7 +509,6 @@
       free: 'Бесплатно',
       discount: '-{n}%',
       discountEnds: 'до {date}',
-      steamRecentLow: 'недавний минимум {price}',
       steamUsFallback: 'Найдено через магазин US (в {cc} ничего не нашлось)',
       recommendations: '{n} рекомендаций',
       links: 'Ссылки',
@@ -595,7 +593,7 @@
       showSteam: '显示 Steam 价格与评价',
       showMetacritic: '显示 Metacritic 分数',
       showOpenCritic: '显示 OpenCritic 分数',
-      showOpenCriticHint: '来自 OpenCritic 的 Tier + Top Critic 均分（按标题搜索）。',
+      showOpenCriticHint: '来自 OpenCritic 的 Tier 徽章（按标题搜索）。',
       showHltb: '显示 HowLongToBeat 时长',
       showHltbHint: '来自 HowLongToBeat 的 Main / Extra / Complete 小时数。',
       showDeckProton: '显示 Steam Deck 与 ProtonDB',
@@ -693,7 +691,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: '至 {date}',
-      steamRecentLow: '近期最低 {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -770,7 +767,7 @@
       showSteam: 'Mostrar precio y reseñas de Steam',
       showMetacritic: 'Mostrar puntuación de Metacritic',
       showOpenCritic: 'Mostrar puntuación de OpenCritic',
-      showOpenCriticHint: 'Tier + media Top Critic de OpenCritic (búsqueda por título).',
+      showOpenCriticHint: 'Insignia de tier de OpenCritic (búsqueda por título).',
       showHltb: 'Mostrar tiempos de HowLongToBeat',
       showHltbHint: 'Horas Main / Extra / Complete de HowLongToBeat.',
       showDeckProton: 'Mostrar Steam Deck y ProtonDB',
@@ -875,7 +872,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: 'hasta {date}',
-      steamRecentLow: 'mínimo reciente {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -952,7 +948,7 @@
       showSteam: 'Mostrar preço e avaliações Steam',
       showMetacritic: 'Mostrar nota Metacritic',
       showOpenCritic: 'Mostrar nota OpenCritic',
-      showOpenCriticHint: 'Tier + média Top Critic do OpenCritic (busca pelo título).',
+      showOpenCriticHint: 'Badge de tier do OpenCritic (busca pelo título).',
       showHltb: 'Mostrar tempos do HowLongToBeat',
       showHltbHint: 'Horas Main / Extra / Complete do HowLongToBeat.',
       showDeckProton: 'Mostrar Steam Deck e ProtonDB',
@@ -1057,7 +1053,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: 'até {date}',
-      steamRecentLow: 'mínimo recente {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -1134,7 +1129,7 @@
       showSteam: 'Steam-Preis & Bewertungen anzeigen',
       showMetacritic: 'Metacritic-Wertung anzeigen',
       showOpenCritic: 'OpenCritic-Wertung anzeigen',
-      showOpenCriticHint: 'Tier + Top-Critic-Schnitt von OpenCritic (Suche nach Titel).',
+      showOpenCriticHint: 'OpenCritic-Tier-Badge (Suche nach Titel).',
       showHltb: 'HowLongToBeat-Zeiten anzeigen',
       showHltbHint: 'Main / Extra / Complete in Stunden von HowLongToBeat.',
       showDeckProton: 'Steam Deck & ProtonDB anzeigen',
@@ -1239,7 +1234,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: 'bis {date}',
-      steamRecentLow: 'kürzliches Tief {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -1316,7 +1310,7 @@
       showSteam: 'Afficher prix et avis Steam',
       showMetacritic: 'Afficher le score Metacritic',
       showOpenCritic: 'Afficher le score OpenCritic',
-      showOpenCriticHint: 'Tier + moyenne Top Critic d’OpenCritic (recherche par titre).',
+      showOpenCriticHint: 'Badge de tier OpenCritic (recherche par titre).',
       showHltb: 'Afficher les temps HowLongToBeat',
       showHltbHint: 'Heures Main / Extra / Complete depuis HowLongToBeat.',
       showDeckProton: 'Afficher Steam Deck et ProtonDB',
@@ -1421,7 +1415,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: 'jusqu’au {date}',
-      steamRecentLow: 'plus bas récent {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -1498,7 +1491,7 @@
       showSteam: 'Steamの価格とレビューを表示',
       showMetacritic: 'Metacriticスコアを表示',
       showOpenCritic: 'OpenCriticスコアを表示',
-      showOpenCriticHint: 'OpenCriticのTierとTop Critic平均（タイトル検索）。',
+      showOpenCriticHint: 'OpenCriticのTierバッジ（タイトル検索）。',
       showHltb: 'HowLongToBeatの時間を表示',
       showHltbHint: 'HowLongToBeatのMain / Extra / Complete時間。',
       showDeckProton: 'Steam DeckとProtonDBを表示',
@@ -1603,7 +1596,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: '{date}まで',
-      steamRecentLow: '直近最安 {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -1680,7 +1672,7 @@
       showSteam: 'Steam 가격 및 리뷰 표시',
       showMetacritic: 'Metacritic 점수 표시',
       showOpenCritic: 'OpenCritic 점수 표시',
-      showOpenCriticHint: 'OpenCritic Tier + Top Critic 평균(제목 검색).',
+      showOpenCriticHint: 'OpenCritic Tier 배지(제목 검색).',
       showHltb: 'HowLongToBeat 시간 표시',
       showHltbHint: 'HowLongToBeat의 Main / Extra / Complete 시간.',
       showDeckProton: 'Steam Deck 및 ProtonDB 표시',
@@ -1785,7 +1777,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: '{date}까지',
-      steamRecentLow: '최근 최저 {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -1862,7 +1853,7 @@
       showSteam: 'Pokaż cenę i opinie Steam',
       showMetacritic: 'Pokaż wynik Metacritic',
       showOpenCritic: 'Pokaż wynik OpenCritic',
-      showOpenCriticHint: 'Tier + średnia Top Critic z OpenCritic (wyszukiwanie po tytule).',
+      showOpenCriticHint: 'Odznaka tier OpenCritic (wyszukiwanie po tytule).',
       showHltb: 'Pokaż czasy HowLongToBeat',
       showHltbHint: 'Godziny Main / Extra / Complete z HowLongToBeat.',
       showDeckProton: 'Pokaż Steam Deck i ProtonDB',
@@ -1967,7 +1958,6 @@
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       discountEnds: 'do {date}',
-      steamRecentLow: 'niedawne minimum {price}',
       linkPcgamingwiki: 'PCGamingWiki',
       linkItad: 'IsThereAnyDeal',
       linkGogdb: 'GOG DB',
@@ -2258,11 +2248,7 @@
   function parseSteamPurchaseExtras(item) {
     const opt = item?.best_purchase_option || null;
     if (!opt || typeof opt !== 'object') {
-      return {
-        discountEndDate: null,
-        recentLowCents: null,
-        recentLowFormatted: null,
-      };
+      return { discountEndDate: null };
     }
     let discountEndDate = null;
     const discounts = Array.isArray(opt.active_discounts) ? opt.active_discounts : [];
@@ -2273,15 +2259,7 @@
         break;
       }
     }
-    const recentLowCents = Number(opt.lowest_recent_price_in_cents);
-    return {
-      discountEndDate,
-      recentLowCents: Number.isFinite(recentLowCents) && recentLowCents >= 0 ? recentLowCents : null,
-      recentLowFormatted:
-        typeof opt.formatted_lowest_recent_price === 'string' && opt.formatted_lowest_recent_price
-          ? opt.formatted_lowest_recent_price
-          : null,
-    };
+    return { discountEndDate };
   }
 
   function parseSteamDeckCompat(item) {
@@ -2648,15 +2626,14 @@
 
   function buildOpenCriticPayload(detail, searchItem, title, matchScore) {
     if (!detail || typeof detail !== 'object') return null;
-    const score = Number(detail.topCriticScore);
     const tier = typeof detail.tier === 'string' ? detail.tier : null;
+    if (!tier) return null;
     const id = Number(detail.id || searchItem?.id);
     const slug = detail.slug || searchItem?.slug;
-    const payload = {
+    return {
       id,
       name: detail.name || searchItem?.name || title,
       tier,
-      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
       url: slug
         ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
         : Number.isFinite(id)
@@ -2665,8 +2642,6 @@
       matchScore: matchScore || null,
       source: 'api',
     };
-    if (!payload.tier && payload.score == null) return null;
-    return payload;
   }
 
   function extractOpenCriticGameCandidates(html) {
@@ -2730,14 +2705,11 @@
   function parseOpenCriticGameHtml(html, fallbackUrl) {
     const text = String(html || '');
     if (!text) return null;
-    let score = null;
     let tier = null;
     let name = null;
     let id = null;
     let slug = null;
 
-    const scoreJson = text.match(/"topCriticScore"\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
-    if (scoreJson) score = Number(scoreJson[1]);
     const tierJson = text.match(/"tier"\s*:\s*"(Mighty|Strong|Fair|Weak)"/i);
     if (tierJson) tier = tierJson[1];
     const nameJson = text.match(/"name"\s*:\s*"([^"\\]+)"/);
@@ -2747,10 +2719,6 @@
     const slugJson = text.match(/"slug"\s*:\s*"([a-z0-9-]+)"/i);
     if (slugJson) slug = slugJson[1];
 
-    if (score == null) {
-      const avg = text.match(/Top Critic Average[\s\S]{0,120}?(\d{2,3})/i);
-      if (avg) score = Number(avg[1]);
-    }
     if (!tier) {
       const tierText = text.match(/\b(Mighty|Strong|Fair|Weak)\b/);
       if (tierText) tier = tierText[1];
@@ -2765,19 +2733,17 @@
       if (!slug) slug = path[2];
     }
 
-    const payload = {
+    if (!tier) return null;
+    return {
       id,
       name: name || slug || null,
-      tier: tier || null,
-      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
+      tier,
       url:
         id && slug
           ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
           : fallbackUrl || OPENCRITIC_SITE,
       source: 'html',
     };
-    if (!payload.tier && payload.score == null) return null;
-    return payload;
   }
 
   async function fetchOpenCriticViaHtml(title) {
@@ -5135,21 +5101,9 @@
   }
 
   function renderOpenCriticValues(oc) {
-    if (!oc || oc.missing) return '';
-    const parts = [];
-    if (oc.tier) {
-      const cls = `blp-oc-badge ${ocTierClass(oc.tier)}`.trim();
-      parts.push(
-        `<a class="${cls} blp-ext-link" href="${escapeAttr(oc.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(oc.tier)}</a>`
-      );
-    }
-    if (oc.score != null) {
-      parts.push(
-        `<a class="game-details-value blp-ext-link" href="${escapeAttr(oc.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(String(oc.score))}</a>`
-      );
-    }
-    if (!parts.length) return '';
-    return `<span class="blp-oc-chips">${parts.join('')}</span>`;
+    if (!oc || oc.missing || !oc.tier) return '';
+    const cls = `blp-oc-badge ${ocTierClass(oc.tier)}`.trim();
+    return `<span class="blp-oc-chips"><a class="${cls} blp-ext-link" href="${escapeAttr(oc.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(oc.tier)}</a></span>`;
   }
 
   function renderHltbValues(hltb) {
@@ -5287,15 +5241,6 @@
     }
   }
 
-  function formatRecentLowPrice(steam) {
-    if (steam?.recentLowFormatted) return steam.recentLowFormatted;
-    const cents = Number(steam?.recentLowCents);
-    if (!Number.isFinite(cents) || cents < 0) return null;
-    const amount = (cents / 100).toFixed(2);
-    const currency = steam?.price?.currency;
-    return currency ? `${amount} ${currency}` : amount;
-  }
-
   async function hydrateSteamApp({
     appId,
     country,
@@ -5410,8 +5355,6 @@
         categories: normalizeSteamCategories(details),
         deckCompat: extras?.deckCompat ?? null,
         discountEndDate: extras?.discountEndDate ?? null,
-        recentLowCents: extras?.recentLowCents ?? null,
-        recentLowFormatted: extras?.recentLowFormatted ?? null,
         tinyImage: hit?.tiny_image || hit?.small_capsule || null,
         headerImage: details?.header_image || null,
         usedUsFallback: Boolean(usedUsFallback),
@@ -7517,13 +7460,6 @@
     if (priceText) {
       parts.push({
         html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}${discountEnds}</a>`,
-      });
-    }
-
-    const recentLow = formatRecentLowPrice(steam);
-    if (recentLow) {
-      parts.push({
-        html: `<span class="game-details-value blp-steam-note">${escapeHtml(fmt(t.steamRecentLow, { price: recentLow }))}</span>`,
       });
     }
 
