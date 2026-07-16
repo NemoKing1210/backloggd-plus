@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.6.4
+// @version           0.6.5
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -52,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.6.4';
+  const SCRIPT_VERSION = '0.6.5';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3032,12 +3032,41 @@
     return '';
   }
 
+  /**
+   * Valid roman numeral token (1–3999). Used so "Baldur's Gate III" ≈ "Baldur's Gate 3".
+   * Bare "i" is only converted when it is not the first token (avoids "I Am Alive" → "1 am alive").
+   */
+  const ROMAN_TOKEN_RE =
+    /^(?=.*[ivxlcdm])(?=[mdclxvi]+$)m{0,4}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$/;
+
+  function romanTokenToArabic(token, { allowLoneI = false } = {}) {
+    const t = String(token || '').toLowerCase();
+    if (!ROMAN_TOKEN_RE.test(t)) return null;
+    if (t === 'i' && !allowLoneI) return null;
+    const map = { i: 1, v: 5, x: 10, l: 50, c: 100, d: 500, m: 1000 };
+    let total = 0;
+    for (let i = 0; i < t.length; i += 1) {
+      const value = map[t[i]];
+      const next = map[t[i + 1]];
+      total += next > value ? -value : value;
+    }
+    return total > 0 ? total : null;
+  }
+
   function normalizeTitle(name) {
-    return String(name || '')
+    const base = String(name || '')
       .toLowerCase()
       .replace(/[™®©]/g, '')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
+    if (!base) return '';
+    const parts = base.split(/\s+/).filter(Boolean);
+    return parts
+      .map((tok, idx) => {
+        const arabic = romanTokenToArabic(tok, { allowLoneI: idx > 0 });
+        return arabic != null ? String(arabic) : tok;
+      })
+      .join(' ');
   }
 
   function titleTokens(name) {
