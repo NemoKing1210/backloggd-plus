@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.3.7
+// @version           0.4.3
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -41,6 +41,7 @@
 // @grant              GM_addStyle
 // @grant              GM_registerMenuCommand
 // @connect            store.steampowered.com
+// @connect            gamestatus.info
 // @run-at             document-idle
 // @noframes
 // ==/UserScript==
@@ -49,6 +50,8 @@
   'use strict';
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
+  /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
+  const SCRIPT_VERSION = '0.4.3';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const ROOT_ATTR = 'data-blp-root';
@@ -60,9 +63,14 @@
   const STEAM_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
   const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews';
   const STEAM_USERDATA_URL = 'https://store.steampowered.com/dynamicstore/userdata/';
+  const GAMESTATUS_API_BASE = 'https://gamestatus.info/back/api/gameinfo/game';
+  const GAMESTATUS_SITE_BASE = 'https://gamestatus.info';
+  const GAMESTATUS_MAX_SLUG_ATTEMPTS = 2;
   const OWNED_CACHE_KEY = 'steam:owned';
   const OWNED_EMPTY_TTL_MS = 5 * 60 * 1000;
   const OWNED_FALLBACK_TTL_MS = 60 * 60 * 1000;
+  const GS_INVALID_SLUG_RE =
+    /^(https?-)?(store-)?steam(powered|static)?(-[a-z0-9]+)*(-com)?$|steampowered|steamstatic|akamaihd|^(on-)?wishlist$|^gamestatus$|^(soon-)?on-game-pass$/;
 
   const LINK_KEYS = ['igdb', 'steam', 'steamdb', 'metacritic', 'opencritic', 'hltb', 'wikipedia'];
   const LINK_DOMAINS = {
@@ -81,10 +89,12 @@
     steamCountry: 'US',
     showSteam: true,
     showMetacritic: true,
+    showGameStatus: true,
     showLinks: true,
     showSteamOwned: true,
     showSteamPageLink: true,
     showSteamDbPageLink: true,
+    debugMode: false,
     links: {
       igdb: true,
       steam: true,
@@ -102,7 +112,7 @@
     en: {
       menuSettings: 'Backloggd Plus — Settings',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · scores · quick links',
+      panelSubtitle: 'Steam · GameStatus · scores · quick links',
       close: 'Close',
       cancel: 'Cancel',
       save: 'Save',
@@ -112,6 +122,12 @@
       sectionGame: 'Game page',
       sectionGeneral: 'General',
       sectionCache: 'Cache',
+      sectionDebug: 'Debug',
+      debugMode: 'Debug mode',
+      debugModeHint:
+        'On game pages, show why Steam / GameStatus matched or failed and a truncated response dump under each row.',
+      debugReason: 'Reason',
+      debugResponse: 'Response',
       uiLanguage: 'Interface language',
       uiLanguageHint: 'Auto follows your browser language. Saved choice applies after reload.',
       uiLanguageAuto: 'Auto (browser)',
@@ -119,6 +135,8 @@
       steamCountryHint: 'Affects price currency from the Steam Store API.',
       showSteam: 'Show Steam price & reviews',
       showMetacritic: 'Show Metacritic score',
+      showGameStatus: 'Show GameStatus crack status',
+      showGameStatusHint: 'Crack / DRM status from GameStatus.info (needs a Steam match).',
       showLinks: 'Show quick links row',
       showSteamOwned: 'Show Steam owned status',
       showSteamOwnedHint:
@@ -135,11 +153,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus settings',
       cacheHours: 'Cache duration (hours)',
-      cacheHoursHint: 'How long to reuse Steam lookups. 0 disables cache.',
+      cacheHoursHint: 'How long to reuse Steam / GameStatus lookups. 0 disables cache.',
       clearCache: 'Clear cache',
       cacheCleared: 'Cache cleared ({count})',
       cacheEmpty: 'Cache is empty',
-      cacheClearHint: 'Removes stored Steam lookups from this browser profile.',
+      cacheClearHint: 'Removes stored Steam / GameStatus lookups from this browser profile.',
       on: 'ON',
       off: 'OFF',
       loading: 'Loading…',
@@ -147,6 +165,13 @@
       loadError: 'Could not load Steam data',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Ready',
+      gsNotCracked: 'Pending',
+      gsBypass: 'Protection bypass',
+      gsReleaseToday: 'Release today',
+      gsUnknown: 'Unknown',
+      gsNotInDatabase: 'Not in database',
       reviews: 'Reviews',
       price: 'Price',
       free: 'Free',
@@ -164,7 +189,7 @@
     ru: {
       menuSettings: 'Backloggd Plus — Настройки',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · оценки · быстрые ссылки',
+      panelSubtitle: 'Steam · GameStatus · оценки · быстрые ссылки',
       close: 'Закрыть',
       cancel: 'Отмена',
       save: 'Сохранить',
@@ -174,6 +199,12 @@
       sectionGame: 'Страница игры',
       sectionGeneral: 'Общие',
       sectionCache: 'Кэш',
+      sectionDebug: 'Отладка',
+      debugMode: 'Режим отладки',
+      debugModeHint:
+        'На странице игры показывает причину совпадения/промаха Steam / GameStatus и урезанный дамп ответа под строкой.',
+      debugReason: 'Причина',
+      debugResponse: 'Ответ',
       uiLanguage: 'Язык интерфейса',
       uiLanguageHint: 'Авто — язык браузера. Выбор применится после перезагрузки.',
       uiLanguageAuto: 'Авто (браузер)',
@@ -181,6 +212,8 @@
       steamCountryHint: 'Влияет на валюту цены из Steam Store API.',
       showSteam: 'Показывать цену и отзывы Steam',
       showMetacritic: 'Показывать оценку Metacritic',
+      showGameStatus: 'Показывать статус GameStatus',
+      showGameStatusHint: 'Статус взлома / DRM с GameStatus.info (нужно совпадение со Steam).',
       showLinks: 'Показывать ряд ссылок',
       showSteamOwned: 'Показывать «Куплено» в Steam',
       showSteamOwnedHint:
@@ -197,11 +230,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Настройки Backloggd Plus',
       cacheHours: 'Время кэша (часы)',
-      cacheHoursHint: 'Как долго переиспользовать ответы Steam. 0 отключает кэш.',
+      cacheHoursHint: 'Как долго переиспользовать ответы Steam / GameStatus. 0 отключает кэш.',
       clearCache: 'Очистить кэш',
       cacheCleared: 'Кэш очищен ({count})',
       cacheEmpty: 'Кэш пуст',
-      cacheClearHint: 'Удаляет сохранённые запросы Steam из этого профиля браузера.',
+      cacheClearHint: 'Удаляет сохранённые запросы Steam / GameStatus из этого профиля браузера.',
       on: 'ВКЛ',
       off: 'ВЫКЛ',
       loading: 'Загрузка…',
@@ -209,6 +242,13 @@
       loadError: 'Не удалось загрузить данные Steam',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Готово',
+      gsNotCracked: 'Ожидание',
+      gsBypass: 'Обход защиты',
+      gsReleaseToday: 'Релиз сегодня',
+      gsUnknown: 'Неизвестно',
+      gsNotInDatabase: 'Нет в базе',
       reviews: 'Отзывы',
       price: 'Цена',
       free: 'Бесплатно',
@@ -226,7 +266,7 @@
     zh: {
       menuSettings: 'Backloggd Plus — 设置',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · 评分 · 快捷链接',
+      panelSubtitle: 'Steam · GameStatus · 评分 · 快捷链接',
       close: '关闭',
       cancel: '取消',
       save: '保存',
@@ -236,6 +276,11 @@
       sectionGame: '游戏页',
       sectionGeneral: '通用',
       sectionCache: '缓存',
+      sectionDebug: '调试',
+      debugMode: '调试模式',
+      debugModeHint: '在游戏页显示 Steam / GameStatus 匹配或失败的原因，以及截断的响应内容。',
+      debugReason: '原因',
+      debugResponse: '响应',
       uiLanguage: '界面语言',
       uiLanguageHint: '自动跟随浏览器语言。保存后刷新生效。',
       uiLanguageAuto: '自动（浏览器）',
@@ -243,6 +288,8 @@
       steamCountryHint: '影响 Steam Store API 返回的货币。',
       showSteam: '显示 Steam 价格与评价',
       showMetacritic: '显示 Metacritic 分数',
+      showGameStatus: '显示 GameStatus 破解状态',
+      showGameStatusHint: '来自 GameStatus.info 的破解/DRM 状态（需要匹配到 Steam）。',
       showLinks: '显示快捷链接行',
       showSteamOwned: '显示 Steam 已拥有状态',
       showSteamOwnedHint: '若游戏在您的 Steam 库中则显示“已拥有”。需要在此浏览器登录 Steam。',
@@ -258,11 +305,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus 设置',
       cacheHours: '缓存时长（小时）',
-      cacheHoursHint: '复用 Steam 查询的时间。0 禁用缓存。',
+      cacheHoursHint: '复用 Steam / GameStatus 查询的时间。0 禁用缓存。',
       clearCache: '清除缓存',
       cacheCleared: '已清除缓存（{count}）',
       cacheEmpty: '缓存为空',
-      cacheClearHint: '删除此浏览器配置中的 Steam 查询缓存。',
+      cacheClearHint: '删除此浏览器配置中的 Steam / GameStatus 查询缓存。',
       on: '开',
       off: '关',
       loading: '加载中…',
@@ -270,6 +317,13 @@
       loadError: '无法加载 Steam 数据',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: '已破解',
+      gsNotCracked: '未破解',
+      gsBypass: '保护绕过',
+      gsReleaseToday: '今日发售',
+      gsUnknown: '未知',
+      gsNotInDatabase: '不在数据库',
       reviews: '评价',
       price: '价格',
       free: '免费',
@@ -287,7 +341,7 @@
     es: {
       menuSettings: 'Backloggd Plus — Ajustes',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · notas · enlaces rápidos',
+      panelSubtitle: 'Steam · GameStatus · notas · enlaces rápidos',
       close: 'Cerrar',
       cancel: 'Cancelar',
       save: 'Guardar',
@@ -297,6 +351,11 @@
       sectionGame: 'Página del juego',
       sectionGeneral: 'General',
       sectionCache: 'Caché',
+      sectionDebug: 'Depuración',
+      debugMode: 'Modo depuración',
+      debugModeHint: 'En la página del juego muestra por qué Steam / GameStatus coincidió o falló y un volcado truncado bajo cada fila.',
+      debugReason: 'Motivo',
+      debugResponse: 'Respuesta',
       uiLanguage: 'Idioma de la interfaz',
       uiLanguageHint: 'Auto sigue el idioma del navegador. Se aplica al recargar.',
       uiLanguageAuto: 'Auto (navegador)',
@@ -304,6 +363,8 @@
       steamCountryHint: 'Afecta la moneda del precio de la API de Steam.',
       showSteam: 'Mostrar precio y reseñas de Steam',
       showMetacritic: 'Mostrar puntuación de Metacritic',
+      showGameStatus: 'Mostrar estado GameStatus',
+      showGameStatusHint: 'Estado de crack / DRM de GameStatus.info (requiere coincidencia con Steam).',
       showLinks: 'Mostrar fila de enlaces',
       showSteamOwned: 'Mostrar si está en tu biblioteca Steam',
       showSteamOwnedHint:
@@ -320,11 +381,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Ajustes de Backloggd Plus',
       cacheHours: 'Duración de caché (horas)',
-      cacheHoursHint: 'Cuánto reutilizar búsquedas de Steam. 0 desactiva la caché.',
+      cacheHoursHint: 'Cuánto reutilizar búsquedas de Steam / GameStatus. 0 desactiva la caché.',
       clearCache: 'Vaciar caché',
       cacheCleared: 'Caché vaciada ({count})',
       cacheEmpty: 'La caché está vacía',
-      cacheClearHint: 'Elimina las búsquedas de Steam de este perfil.',
+      cacheClearHint: 'Elimina las búsquedas de Steam / GameStatus de este perfil.',
       on: 'ON',
       off: 'OFF',
       loading: 'Cargando…',
@@ -332,6 +393,13 @@
       loadError: 'No se pudieron cargar datos de Steam',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Listo',
+      gsNotCracked: 'Pendiente',
+      gsBypass: 'Bypass de protección',
+      gsReleaseToday: 'Lanzamiento hoy',
+      gsUnknown: 'Desconocido',
+      gsNotInDatabase: 'No está en la base',
       reviews: 'Reseñas',
       price: 'Precio',
       free: 'Gratis',
@@ -349,7 +417,7 @@
     pt: {
       menuSettings: 'Backloggd Plus — Configurações',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · notas · links rápidos',
+      panelSubtitle: 'Steam · GameStatus · notas · links rápidos',
       close: 'Fechar',
       cancel: 'Cancelar',
       save: 'Salvar',
@@ -359,6 +427,11 @@
       sectionGame: 'Página do jogo',
       sectionGeneral: 'Geral',
       sectionCache: 'Cache',
+      sectionDebug: 'Depuração',
+      debugMode: 'Modo debug',
+      debugModeHint: 'Na página do jogo mostra por que Steam / GameStatus bateu ou falhou e um dump truncado sob cada linha.',
+      debugReason: 'Motivo',
+      debugResponse: 'Resposta',
       uiLanguage: 'Idioma da interface',
       uiLanguageHint: 'Auto segue o idioma do navegador. Aplica ao recarregar.',
       uiLanguageAuto: 'Auto (navegador)',
@@ -366,6 +439,8 @@
       steamCountryHint: 'Afeta a moeda do preço da API da Steam.',
       showSteam: 'Mostrar preço e avaliações Steam',
       showMetacritic: 'Mostrar nota Metacritic',
+      showGameStatus: 'Mostrar status GameStatus',
+      showGameStatusHint: 'Status de crack / DRM do GameStatus.info (precisa bater com a Steam).',
       showLinks: 'Mostrar linha de links',
       showSteamOwned: 'Mostrar se está na biblioteca Steam',
       showSteamOwnedHint:
@@ -382,11 +457,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Configurações do Backloggd Plus',
       cacheHours: 'Duração do cache (horas)',
-      cacheHoursHint: 'Por quanto tempo reutilizar buscas Steam. 0 desativa o cache.',
+      cacheHoursHint: 'Por quanto tempo reutilizar buscas Steam / GameStatus. 0 desativa o cache.',
       clearCache: 'Limpar cache',
       cacheCleared: 'Cache limpo ({count})',
       cacheEmpty: 'Cache vazio',
-      cacheClearHint: 'Remove buscas Steam deste perfil do navegador.',
+      cacheClearHint: 'Remove buscas Steam / GameStatus deste perfil do navegador.',
       on: 'ON',
       off: 'OFF',
       loading: 'Carregando…',
@@ -394,6 +469,13 @@
       loadError: 'Falha ao carregar dados da Steam',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Pronto',
+      gsNotCracked: 'Pendente',
+      gsBypass: 'Bypass de proteção',
+      gsReleaseToday: 'Lançamento hoje',
+      gsUnknown: 'Desconhecido',
+      gsNotInDatabase: 'Não está na base',
       reviews: 'Avaliações',
       price: 'Preço',
       free: 'Grátis',
@@ -411,7 +493,7 @@
     de: {
       menuSettings: 'Backloggd Plus — Einstellungen',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · Wertungen · Schnelllinks',
+      panelSubtitle: 'Steam · GameStatus · Wertungen · Schnelllinks',
       close: 'Schließen',
       cancel: 'Abbrechen',
       save: 'Speichern',
@@ -421,6 +503,11 @@
       sectionGame: 'Spieleseite',
       sectionGeneral: 'Allgemein',
       sectionCache: 'Cache',
+      sectionDebug: 'Debug',
+      debugMode: 'Debug-Modus',
+      debugModeHint: 'Auf der Spieleseite: Grund für Steam-/GameStatus-Treffer oder Fehlschlag und gekürzter Response unter jeder Zeile.',
+      debugReason: 'Grund',
+      debugResponse: 'Antwort',
       uiLanguage: 'Oberflächensprache',
       uiLanguageHint: 'Auto folgt der Browsersprache. Gilt nach dem Neuladen.',
       uiLanguageAuto: 'Auto (Browser)',
@@ -428,6 +515,8 @@
       steamCountryHint: 'Beeinflusst die Währung der Steam-Store-API.',
       showSteam: 'Steam-Preis & Bewertungen anzeigen',
       showMetacritic: 'Metacritic-Wertung anzeigen',
+      showGameStatus: 'GameStatus-Status anzeigen',
+      showGameStatusHint: 'Crack-/DRM-Status von GameStatus.info (Steam-Treffer erforderlich).',
       showLinks: 'Link-Zeile anzeigen',
       showSteamOwned: 'Steam-Besitz anzeigen',
       showSteamOwnedHint:
@@ -444,11 +533,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus Einstellungen',
       cacheHours: 'Cache-Dauer (Stunden)',
-      cacheHoursHint: 'Wie lange Steam-Abfragen wiederverwendet werden. 0 deaktiviert den Cache.',
+      cacheHoursHint: 'Wie lange Steam-/GameStatus-Abfragen wiederverwendet werden. 0 deaktiviert den Cache.',
       clearCache: 'Cache leeren',
       cacheCleared: 'Cache geleert ({count})',
       cacheEmpty: 'Cache ist leer',
-      cacheClearHint: 'Entfernt gespeicherte Steam-Abfragen aus diesem Profil.',
+      cacheClearHint: 'Entfernt gespeicherte Steam-/GameStatus-Abfragen aus diesem Profil.',
       on: 'AN',
       off: 'AUS',
       loading: 'Lädt…',
@@ -456,6 +545,13 @@
       loadError: 'Steam-Daten konnten nicht geladen werden',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Bereit',
+      gsNotCracked: 'Ausstehend',
+      gsBypass: 'Schutz-Bypass',
+      gsReleaseToday: 'Release heute',
+      gsUnknown: 'Unbekannt',
+      gsNotInDatabase: 'Nicht in der Datenbank',
       reviews: 'Bewertungen',
       price: 'Preis',
       free: 'Kostenlos',
@@ -473,7 +569,7 @@
     fr: {
       menuSettings: 'Backloggd Plus — Réglages',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · notes · liens rapides',
+      panelSubtitle: 'Steam · GameStatus · notes · liens rapides',
       close: 'Fermer',
       cancel: 'Annuler',
       save: 'Enregistrer',
@@ -483,6 +579,11 @@
       sectionGame: 'Page jeu',
       sectionGeneral: 'Général',
       sectionCache: 'Cache',
+      sectionDebug: 'Débogage',
+      debugMode: 'Mode debug',
+      debugModeHint: 'Sur la page jeu : raison du match/échec Steam / GameStatus et dump tronqué sous chaque ligne.',
+      debugReason: 'Raison',
+      debugResponse: 'Réponse',
       uiLanguage: 'Langue de l’interface',
       uiLanguageHint: 'Auto suit la langue du navigateur. Appliqué après rechargement.',
       uiLanguageAuto: 'Auto (navigateur)',
@@ -490,6 +591,8 @@
       steamCountryHint: 'Affecte la devise du prix via l’API Steam Store.',
       showSteam: 'Afficher prix et avis Steam',
       showMetacritic: 'Afficher le score Metacritic',
+      showGameStatus: 'Afficher le statut GameStatus',
+      showGameStatusHint: 'Statut crack / DRM via GameStatus.info (correspondance Steam requise).',
       showLinks: 'Afficher la rangée de liens',
       showSteamOwned: 'Afficher le statut possédé Steam',
       showSteamOwnedHint:
@@ -506,11 +609,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Réglages Backloggd Plus',
       cacheHours: 'Durée du cache (heures)',
-      cacheHoursHint: 'Durée de réutilisation des requêtes Steam. 0 désactive le cache.',
+      cacheHoursHint: 'Durée de réutilisation des requêtes Steam / GameStatus. 0 désactive le cache.',
       clearCache: 'Vider le cache',
       cacheCleared: 'Cache vidé ({count})',
       cacheEmpty: 'Le cache est vide',
-      cacheClearHint: 'Supprime les requêtes Steam de ce profil navigateur.',
+      cacheClearHint: 'Supprime les requêtes Steam / GameStatus de ce profil navigateur.',
       on: 'ON',
       off: 'OFF',
       loading: 'Chargement…',
@@ -518,6 +621,13 @@
       loadError: 'Impossible de charger les données Steam',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Prêt',
+      gsNotCracked: 'En attente',
+      gsBypass: 'Contournement',
+      gsReleaseToday: 'Sortie aujourd’hui',
+      gsUnknown: 'Inconnu',
+      gsNotInDatabase: 'Absent de la base',
       reviews: 'Avis',
       price: 'Prix',
       free: 'Gratuit',
@@ -535,7 +645,7 @@
     ja: {
       menuSettings: 'Backloggd Plus — 設定',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · スコア · クイックリンク',
+      panelSubtitle: 'Steam · GameStatus · スコア · クイックリンク',
       close: '閉じる',
       cancel: 'キャンセル',
       save: '保存',
@@ -545,6 +655,11 @@
       sectionGame: 'ゲームページ',
       sectionGeneral: '一般',
       sectionCache: 'キャッシュ',
+      sectionDebug: 'デバッグ',
+      debugMode: 'デバッグモード',
+      debugModeHint: 'ゲームページで Steam / GameStatus の一致・失敗理由と短縮レスポンスを各行の下に表示します。',
+      debugReason: '理由',
+      debugResponse: 'レスポンス',
       uiLanguage: '表示言語',
       uiLanguageHint: '自動はブラウザ言語に従います。保存後の再読み込みで反映。',
       uiLanguageAuto: '自動（ブラウザ）',
@@ -552,6 +667,8 @@
       steamCountryHint: 'Steam Store APIの価格通貨に影響します。',
       showSteam: 'Steamの価格とレビューを表示',
       showMetacritic: 'Metacriticスコアを表示',
+      showGameStatus: 'GameStatusの状態を表示',
+      showGameStatusHint: 'GameStatus.info のクラック/DRM状態（Steam一致が必要）。',
       showLinks: 'リンク行を表示',
       showSteamOwned: 'Steam所持を表示',
       showSteamOwnedHint:
@@ -568,11 +685,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus 設定',
       cacheHours: 'キャッシュ時間（時間）',
-      cacheHoursHint: 'Steam照会の再利用時間。0で無効。',
+      cacheHoursHint: 'Steam / GameStatus照会の再利用時間。0で無効。',
       clearCache: 'キャッシュを消去',
       cacheCleared: 'キャッシュを消去しました（{count}）',
       cacheEmpty: 'キャッシュは空です',
-      cacheClearHint: 'このブラウザプロファイルのSteam照会を削除します。',
+      cacheClearHint: 'このブラウザプロファイルのSteam / GameStatus照会を削除します。',
       on: 'ON',
       off: 'OFF',
       loading: '読み込み中…',
@@ -580,6 +697,13 @@
       loadError: 'Steamデータを読み込めませんでした',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: '対応済み',
+      gsNotCracked: '未対応',
+      gsBypass: '保護バイパス',
+      gsReleaseToday: '本日リリース',
+      gsUnknown: '不明',
+      gsNotInDatabase: 'データベースになし',
       reviews: 'レビュー',
       price: '価格',
       free: '無料',
@@ -597,7 +721,7 @@
     ko: {
       menuSettings: 'Backloggd Plus — 설정',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · 점수 · 빠른 링크',
+      panelSubtitle: 'Steam · GameStatus · 점수 · 빠른 링크',
       close: '닫기',
       cancel: '취소',
       save: '저장',
@@ -607,6 +731,11 @@
       sectionGame: '게임 페이지',
       sectionGeneral: '일반',
       sectionCache: '캐시',
+      sectionDebug: '디버그',
+      debugMode: '디버그 모드',
+      debugModeHint: '게임 페이지에서 Steam / GameStatus 일치·실패 이유와 잘린 응답을 각 행 아래에 표시합니다.',
+      debugReason: '이유',
+      debugResponse: '응답',
       uiLanguage: '인터페이스 언어',
       uiLanguageHint: '자동은 브라우저 언어를 따릅니다. 저장 후 새로고침 시 적용.',
       uiLanguageAuto: '자동 (브라우저)',
@@ -614,6 +743,8 @@
       steamCountryHint: 'Steam Store API 가격 통화에 영향을 줍니다.',
       showSteam: 'Steam 가격 및 리뷰 표시',
       showMetacritic: 'Metacritic 점수 표시',
+      showGameStatus: 'GameStatus 상태 표시',
+      showGameStatusHint: 'GameStatus.info의 크랙/DRM 상태(Steam 일치 필요).',
       showLinks: '링크 행 표시',
       showSteamOwned: 'Steam 보유 표시',
       showSteamOwnedHint:
@@ -630,11 +761,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus 설정',
       cacheHours: '캐시 시간(시간)',
-      cacheHoursHint: 'Steam 조회 재사용 시간. 0은 캐시 비활성.',
+      cacheHoursHint: 'Steam / GameStatus 조회 재사용 시간. 0은 캐시 비활성.',
       clearCache: '캐시 비우기',
       cacheCleared: '캐시 비움 ({count})',
       cacheEmpty: '캐시가 비어 있음',
-      cacheClearHint: '이 브라우저 프로필의 Steam 조회를 삭제합니다.',
+      cacheClearHint: '이 브라우저 프로필의 Steam / GameStatus 조회를 삭제합니다.',
       on: '켜짐',
       off: '꺼짐',
       loading: '로딩 중…',
@@ -642,6 +773,13 @@
       loadError: 'Steam 데이터를 불러오지 못함',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: '준비됨',
+      gsNotCracked: '대기',
+      gsBypass: '보호 우회',
+      gsReleaseToday: '오늘 출시',
+      gsUnknown: '알 수 없음',
+      gsNotInDatabase: '데이터베이스 없음',
       reviews: '리뷰',
       price: '가격',
       free: '무료',
@@ -659,7 +797,7 @@
     pl: {
       menuSettings: 'Backloggd Plus — Ustawienia',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · oceny · szybkie linki',
+      panelSubtitle: 'Steam · GameStatus · oceny · szybkie linki',
       close: 'Zamknij',
       cancel: 'Anuluj',
       save: 'Zapisz',
@@ -669,6 +807,11 @@
       sectionGame: 'Strona gry',
       sectionGeneral: 'Ogólne',
       sectionCache: 'Cache',
+      sectionDebug: 'Debug',
+      debugMode: 'Tryb debug',
+      debugModeHint: 'Na stronie gry pokazuje powód trafienia/pudła Steam / GameStatus i skrócony dump pod każdym wierszem.',
+      debugReason: 'Powód',
+      debugResponse: 'Odpowiedź',
       uiLanguage: 'Język interfejsu',
       uiLanguageHint: 'Auto podąża za językiem przeglądarki. Działa po przeładowaniu.',
       uiLanguageAuto: 'Auto (przeglądarka)',
@@ -676,6 +819,8 @@
       steamCountryHint: 'Wpływa na walutę ceny z API Steam Store.',
       showSteam: 'Pokaż cenę i opinie Steam',
       showMetacritic: 'Pokaż wynik Metacritic',
+      showGameStatus: 'Pokaż status GameStatus',
+      showGameStatusHint: 'Status crack / DRM z GameStatus.info (wymaga dopasowania Steam).',
       showLinks: 'Pokaż wiersz linków',
       showSteamOwned: 'Pokaż status posiadania Steam',
       showSteamOwnedHint:
@@ -692,11 +837,11 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Ustawienia Backloggd Plus',
       cacheHours: 'Czas cache (godziny)',
-      cacheHoursHint: 'Jak długo ponownie używać zapytań Steam. 0 wyłącza cache.',
+      cacheHoursHint: 'Jak długo ponownie używać zapytań Steam / GameStatus. 0 wyłącza cache.',
       clearCache: 'Wyczyść cache',
       cacheCleared: 'Cache wyczyszczony ({count})',
       cacheEmpty: 'Cache jest pusty',
-      cacheClearHint: 'Usuwa zapisane zapytania Steam z tego profilu.',
+      cacheClearHint: 'Usuwa zapisane zapytania Steam / GameStatus z tego profilu.',
       on: 'WŁ',
       off: 'WYŁ',
       loading: 'Ładowanie…',
@@ -704,6 +849,13 @@
       loadError: 'Nie udało się wczytać danych Steam',
       steam: 'Steam',
       metacritic: 'Metacritic',
+      gameStatus: 'GameStatus',
+      gsCracked: 'Gotowe',
+      gsNotCracked: 'Oczekuje',
+      gsBypass: 'Bypass ochrony',
+      gsReleaseToday: 'Premiera dziś',
+      gsUnknown: 'Nieznany',
+      gsNotInDatabase: 'Brak w bazie',
       reviews: 'Opinie',
       price: 'Cena',
       free: 'Za darmo',
@@ -934,6 +1086,10 @@
         responseType: options.responseType || 'json',
         timeout: options.timeout || 20000,
         onload(res) {
+          if (options.allow404 && res.status === 404) {
+            resolve(null);
+            return;
+          }
           if (res.status >= 200 && res.status < 300) {
             resolve(res.response);
           } else {
@@ -967,6 +1123,18 @@
         --blp-owned: #beee11;
         --blp-owned-bg: #3d4f1a;
         --blp-owned-border: rgba(190, 238, 17, 0.35);
+        --blp-gs-cracked: #beee11;
+        --blp-gs-cracked-bg: #4c6b22;
+        --blp-gs-bypass: #ffb321;
+        --blp-gs-bypass-bg: #5a4630;
+        --blp-gs-pending: #ffb321;
+        --blp-gs-pending-bg: #5a4630;
+        --blp-gs-old: #fecaca;
+        --blp-gs-old-bg: #5a3030;
+        --blp-gs-today: #67c1f5;
+        --blp-gs-today-bg: #2a4a63;
+        --blp-gs-unknown: #b0aeac;
+        --blp-gs-unknown-bg: #3a4149;
         --blp-skel: rgba(128, 128, 128, 0.22);
         --blp-skel-shine: rgba(255, 255, 255, 0.18);
       }
@@ -1108,6 +1276,144 @@
         flex: 0 0 auto;
       }
 
+      [${ENRICH_ATTR}="gamestatus"] {
+        align-items: flex-start;
+      }
+
+      [${ENRICH_ATTR}="gamestatus"] > [class*="col"] {
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.35rem !important;
+      }
+
+      [${ENRICH_ATTR}="gamestatus"] [data-blp-values] {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.4rem;
+      }
+
+      @media (min-width: 768px) {
+        [${ENRICH_ATTR}="gamestatus"] [data-blp-values] {
+          align-items: flex-start;
+        }
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35em;
+        padding: 0.12em 0.55em 0.14em;
+        border-radius: 4px;
+        font-size: 0.82em;
+        font-weight: 700;
+        line-height: 1.45;
+        text-decoration: none !important;
+        width: fit-content;
+        white-space: nowrap;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge__dot {
+        width: 0.45em;
+        height: 0.45em;
+        border-radius: 50%;
+        background: currentColor;
+        flex: 0 0 auto;
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge--cracked {
+        color: var(--blp-gs-cracked) !important;
+        background: linear-gradient(180deg, #5a7d28 0%, var(--blp-gs-cracked-bg) 100%);
+        border: 1px solid rgba(190, 238, 17, 0.35);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge--bypass,
+      [${ENRICH_ATTR}] .blp-gs-badge--not-cracked-recent {
+        color: var(--blp-gs-bypass) !important;
+        background: linear-gradient(180deg, #6a5538 0%, var(--blp-gs-bypass-bg) 100%);
+        border: 1px solid rgba(255, 179, 33, 0.35);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge--not-cracked-old {
+        color: var(--blp-gs-old) !important;
+        background: linear-gradient(180deg, #6a3838 0%, var(--blp-gs-old-bg) 100%);
+        border: 1px solid rgba(254, 202, 202, 0.3);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge--release-today {
+        color: var(--blp-gs-today) !important;
+        background: linear-gradient(180deg, #355a78 0%, var(--blp-gs-today-bg) 100%);
+        border: 1px solid rgba(103, 193, 245, 0.35);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-badge--unknown,
+      [${ENRICH_ATTR}] .blp-gs-badge--missing {
+        color: var(--blp-gs-unknown) !important;
+        background: linear-gradient(180deg, #4a5158 0%, var(--blp-gs-unknown-bg) 100%);
+        border: 1px solid rgba(176, 174, 172, 0.25);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        justify-content: flex-end;
+      }
+
+      @media (min-width: 768px) {
+        [${ENRICH_ATTR}] .blp-gs-chips {
+          justify-content: flex-start;
+        }
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.08em 0.45em;
+        border-radius: 3px;
+        font-size: 0.72em;
+        font-weight: 600;
+        line-height: 1.4;
+        white-space: nowrap;
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--protection {
+        background: #2a3644;
+        color: #acb2b8;
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--cracked {
+        background: var(--blp-gs-cracked-bg);
+        color: var(--blp-gs-cracked);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--bypass,
+      [${ENRICH_ATTR}] .blp-gs-chip--not-cracked-recent {
+        background: var(--blp-gs-bypass-bg);
+        color: var(--blp-gs-bypass);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--not-cracked-old {
+        background: var(--blp-gs-old-bg);
+        color: var(--blp-gs-old);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--release-today {
+        background: var(--blp-gs-today-bg);
+        color: var(--blp-gs-today);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--unknown {
+        background: var(--blp-gs-unknown-bg);
+        color: var(--blp-gs-unknown);
+      }
+
+      [${ENRICH_ATTR}] .blp-gs-chip--aaa {
+        background: linear-gradient(to bottom, #66c0f4 5%, #417a9b 95%);
+        color: #fff;
+        font-weight: 700;
+      }
+
       [${ENRICH_ATTR}] .blp-empty {
         opacity: 0.55;
       }
@@ -1220,6 +1526,28 @@
         color: var(--blp-muted);
       }
 
+      .blp-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--blp-border);
+        background: #0f1319;
+        color: var(--blp-text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.2;
+      }
+
+      .blp-btn:hover {
+        border-color: rgba(61, 184, 154, 0.45);
+        color: var(--blp-accent);
+      }
+
       .blp-toggle {
         display: flex;
         align-items: center;
@@ -1260,6 +1588,7 @@
         background: #0f1319;
         color: var(--blp-text);
         cursor: pointer;
+        font: inherit;
         font-size: 13px;
       }
 
@@ -1268,6 +1597,14 @@
         border-color: transparent;
         color: #0b1210;
         font-weight: 600;
+      }
+
+      .blp-settings__ver {
+        margin-left: 0.4em;
+        font-size: 0.72em;
+        font-weight: 500;
+        color: var(--blp-muted);
+        vertical-align: middle;
       }
 
       .blp-settings__footer {
@@ -1286,6 +1623,48 @@
         margin-top: 6px;
         font-size: 12px;
         color: var(--blp-accent);
+      }
+
+      [${ENRICH_ATTR}] .blp-debug {
+        margin-top: 0.45rem;
+        padding: 0.45rem 0.55rem;
+        border-radius: 6px;
+        border: 1px dashed rgba(255, 179, 33, 0.35);
+        background: rgba(0, 0, 0, 0.28);
+        text-align: left;
+        max-width: min(100%, 36rem);
+      }
+
+      [${ENRICH_ATTR}] .blp-debug__label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #ffb321;
+        margin-bottom: 0.2rem;
+      }
+
+      [${ENRICH_ATTR}] .blp-debug__reason {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--blp-text);
+        margin-bottom: 0.35rem;
+        word-break: break-word;
+      }
+
+      [${ENRICH_ATTR}] .blp-debug__pre {
+        margin: 0;
+        padding: 0.4rem 0.45rem;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.35);
+        color: #b0aeac;
+        font-size: 0.68rem;
+        line-height: 1.35;
+        overflow: auto;
+        max-height: 12rem;
+        white-space: pre-wrap;
+        word-break: break-word;
       }
     `);
   }
@@ -1403,8 +1782,11 @@
 
   async function fetchSteamBundle(title, country) {
     const cacheKey = `steam:${country}:${normalizeTitle(title)}`;
-    const cached = getCached(cacheKey);
-    if (cached) return cached;
+    const debugOn = Boolean(settings.debugMode);
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+    }
 
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
@@ -1415,40 +1797,101 @@
 
       const searchAs = async (anonymous) => {
         const search = await gmRequest({ url: searchUrl, anonymous });
-        return pickSteamSearchItem(search?.items, title) || null;
+        const items = Array.isArray(search?.items) ? search.items : [];
+        const hit = pickSteamSearchItem(items, title) || null;
+        return {
+          hit,
+          summary: {
+            anonymous,
+            total: search?.total ?? items.length,
+            items: items.slice(0, 8).map((i) => ({
+              id: i.id,
+              name: i.name,
+              type: i.type,
+            })),
+          },
+        };
       };
 
-      // Prefer the browser Steam session first; if nothing matches, retry as guest
-      // (cookies can hide apps via region / maturity / filter settings).
-      let hit = await searchAs(false);
-      let anonymous = false;
-      if (!hit) {
-        hit = await searchAs(true);
-        anonymous = true;
+      const debug = {
+        title,
+        country,
+        cacheKey,
+        cacheSkipped: debugOn,
+        searchUrl,
+        searches: [],
+      };
+
+      let session;
+      try {
+        session = await searchAs(false);
+        debug.searches.push(session.summary);
+      } catch (err) {
+        debug.searches.push({ anonymous: false, error: String(err?.message || err) });
+        session = { hit: null, summary: null };
       }
+
+      let hit = session.hit;
+      let anonymous = false;
+      let guest = null;
       if (!hit) {
-        const miss = { found: false };
-        setCached(cacheKey, miss);
+        try {
+          guest = await searchAs(true);
+          debug.searches.push(guest.summary);
+          hit = guest.hit;
+          anonymous = true;
+        } catch (err) {
+          debug.searches.push({ anonymous: true, error: String(err?.message || err) });
+        }
+      }
+
+      if (!hit) {
+        debug.reason = 'No Steam search match (session + guest)';
+        debug.anonymous = anonymous;
+        const miss = { found: false, _debug: debug };
+        if (!debugOn) setCached(cacheKey, { found: false });
         return miss;
       }
 
       const appId = hit.id;
-      const [detailsRoot, reviews] = await Promise.all([
-        gmRequest({
-          url:
-            `${STEAM_DETAILS_URL}?appids=${appId}` +
-            `&cc=${encodeURIComponent(country)}&l=english`,
-          anonymous,
-        }),
-        gmRequest({
-          url:
-            `${STEAM_REVIEWS_URL}/${appId}?json=1&language=all` +
-            `&purchase_type=all&num_per_page=0`,
-          anonymous,
-        }).catch(() => null),
-      ]);
+      debug.picked = { id: hit.id, name: hit.name, type: hit.type };
+      debug.anonymous = anonymous;
+
+      let detailsRoot = null;
+      let reviews = null;
+      try {
+        [detailsRoot, reviews] = await Promise.all([
+          gmRequest({
+            url:
+              `${STEAM_DETAILS_URL}?appids=${appId}` +
+              `&cc=${encodeURIComponent(country)}&l=english`,
+            anonymous,
+          }),
+          gmRequest({
+            url:
+              `${STEAM_REVIEWS_URL}/${appId}?json=1&language=all` +
+              `&purchase_type=all&num_per_page=0`,
+            anonymous,
+          }).catch((err) => {
+            debug.reviewsError = String(err?.message || err);
+            return null;
+          }),
+        ]);
+      } catch (err) {
+        debug.reason = `Steam details/reviews failed: ${err?.message || err}`;
+        debug.anonymous = anonymous;
+        const miss = { found: false, _debug: debug };
+        if (!debugOn) setCached(cacheKey, { found: false });
+        return miss;
+      }
 
       const details = detailsRoot?.[appId]?.success ? detailsRoot[appId].data : null;
+      debug.reason = details
+        ? `Matched Steam app ${appId}${anonymous ? ' (guest search)' : ' (session search)'}`
+        : `Search hit app ${appId}, but appdetails success=false`;
+      debug.detailsSuccess = Boolean(detailsRoot?.[appId]?.success);
+      debug.reviews = reviews?.query_summary || null;
+
       const payload = {
         found: true,
         appId,
@@ -1459,8 +1902,12 @@
         metacritic: details?.metacritic || (hit.metascore ? { score: Number(hit.metascore) } : null),
         recommendations: details?.recommendations?.total || null,
         reviews: reviews?.query_summary || null,
+        _debug: debug,
       };
-      setCached(cacheKey, payload);
+      if (!debugOn) {
+        const { _debug, ...store } = payload;
+        setCached(cacheKey, store);
+      }
       return payload;
     })();
 
@@ -1470,6 +1917,261 @@
     } finally {
       inflight.delete(cacheKey);
     }
+  }
+
+  function getApiLanguage() {
+    if (locale === 'zh') return 'zh-CN';
+    if (locale === 'pt') return 'pt-BR';
+    if (locale === 'en') return 'en-US';
+    return locale || 'en-US';
+  }
+
+  function gsSlugify(text) {
+    return String(text || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[™®©'’":]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-+/g, '-');
+  }
+
+  function extractSteamSlugFromHref(href) {
+    const match = String(href || '').match(/\/app\/\d+\/([^/?#]+)/i);
+    if (!match) return null;
+    return gsSlugify(match[1].replace(/_/g, '-'));
+  }
+
+  function isValidGsSlug(slug) {
+    if (!slug || slug.length < 2) return false;
+    if (!/[a-z]/.test(slug)) return false;
+    if (GS_INVALID_SLUG_RE.test(slug)) return false;
+    if (/^\d+(-\d+)+$/.test(slug)) return false;
+    const segments = slug.split('-').filter(Boolean);
+    if (!segments.length) return false;
+    if (segments.every((part) => /^\d+$/.test(part))) return false;
+    const numericParts = segments.filter((part) => /^\d+$/.test(part)).length;
+    return numericParts / segments.length <= 0.5;
+  }
+
+  function buildGsSlugCandidates({ storeUrl, name, title, pageSlug }) {
+    const candidates = [];
+    const addSlug = (slug) => {
+      if (slug && isValidGsSlug(slug) && !candidates.includes(slug)) {
+        candidates.push(slug);
+      }
+    };
+    const addFromText = (text) => {
+      const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!normalized) return;
+      addSlug(gsSlugify(normalized));
+      addSlug(gsSlugify(normalized.replace(/\s*[-–—:|].*$/, '')));
+    };
+
+    addSlug(extractSteamSlugFromHref(storeUrl));
+    addFromText(name);
+    addFromText(title);
+    addSlug(gsSlugify(pageSlug));
+    return candidates;
+  }
+
+  function isMatchingGsGame(data, appId) {
+    if (!data) return false;
+    if (!data.steam_prod_id) return true;
+    return String(data.steam_prod_id) === String(appId);
+  }
+
+  function buildGsApiUrl(slug) {
+    return `${GAMESTATUS_API_BASE}/${encodeURIComponent(slug)}/`;
+  }
+
+  async function fetchGsBySlug(slug, appId) {
+    const data = await gmRequest({
+      url: buildGsApiUrl(slug),
+      allow404: true,
+      headers: {
+        Accept: 'application/json',
+        'Accept-Language': getApiLanguage(),
+      },
+      timeout: 15000,
+    });
+    if (!data) {
+      return { data: null, match: false, outcome: '404' };
+    }
+    const match = isMatchingGsGame(data, appId);
+    return {
+      data,
+      match,
+      outcome: match ? 'match' : 'steam_prod_id_mismatch',
+      steam_prod_id: data.steam_prod_id ?? null,
+      readable_status: data.readable_status || null,
+      title: data.title || null,
+      slug: data.slug || slug,
+    };
+  }
+
+  async function fetchGameStatus({ appId, storeUrl, name, title, pageSlug }) {
+    const debugOn = Boolean(settings.debugMode);
+    if (!appId) {
+      return {
+        missing: true,
+        data: null,
+        slug: null,
+        _debug: { reason: 'No Steam appId — GameStatus skipped', appId: null },
+      };
+    }
+
+    const cacheKey = `gs:${appId}`;
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+    }
+
+    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+
+    const task = (async () => {
+      const slugs = buildGsSlugCandidates({ storeUrl, name, title, pageSlug });
+      const tried = slugs.slice(0, GAMESTATUS_MAX_SLUG_ATTEMPTS);
+      const debug = {
+        appId,
+        cacheKey,
+        cacheSkipped: debugOn,
+        candidates: slugs,
+        tried,
+        attempts: [],
+      };
+
+      for (const slug of tried) {
+        try {
+          const result = await fetchGsBySlug(slug, appId);
+          debug.attempts.push({
+            slug,
+            url: buildGsApiUrl(slug),
+            outcome: result.outcome,
+            steam_prod_id: result.steam_prod_id,
+            title: result.title,
+            readable_status: result.readable_status,
+          });
+          if (result.match && result.data) {
+            debug.reason = `Matched slug "${result.slug || slug}" (steam_prod_id=${result.steam_prod_id ?? 'empty'})`;
+            const entry = {
+              missing: false,
+              data: result.data,
+              slug: result.data.slug || slug,
+              _debug: debug,
+            };
+            if (!debugOn) {
+              const { _debug, ...store } = entry;
+              setCached(cacheKey, store);
+            }
+            return entry;
+          }
+        } catch (err) {
+          debug.attempts.push({
+            slug,
+            url: buildGsApiUrl(slug),
+            outcome: 'error',
+            error: String(err?.message || err),
+          });
+        }
+      }
+
+      debug.reason = tried.length
+        ? 'No GameStatus match for tried slugs'
+        : 'No valid GameStatus slug candidates';
+      const miss = { missing: true, data: null, slug: tried[0] || null, _debug: debug };
+      if (!debugOn) setCached(cacheKey, { missing: true, data: null, slug: tried[0] || null });
+      return miss;
+    })();
+
+    inflight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(cacheKey);
+    }
+  }
+
+  function parseGsDate(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function getGsNotCrackedVariant(game) {
+    const release = parseGsDate(game.release_date);
+    if (!release) return 'not-cracked-recent';
+    const monthAgo = new Date();
+    monthAgo.setMonth(monthAgo.getMonth() - 1);
+    return release > monthAgo ? 'not-cracked-recent' : 'not-cracked-old';
+  }
+
+  function getGsStatusType(game) {
+    if (!game) return 'missing';
+    const status = String(game.readable_status || '').toLowerCase();
+    const groups = String(game.hacked_groups_en || game.hacked_groups || '').toLowerCase();
+    if (/release today|релиз сегодня|выходит сегодня/.test(status)) return 'release-today';
+    if (/bypass|обход|hypervisor/.test(groups) || /bypass|обход/.test(status)) return 'bypass';
+    if (/not cracked|не взлом|не взломан|unbroken|unreleased crack/.test(status)) {
+      return getGsNotCrackedVariant(game);
+    }
+    if (game.crack_date || /cracked|взлом/.test(status)) return 'cracked';
+    return 'unknown';
+  }
+
+  function getGsStatusLabel(game, type) {
+    if (!game) return t.gsNotInDatabase;
+    if (game.readable_status) return game.readable_status;
+    if (type === 'cracked') return t.gsCracked;
+    if (type === 'not-cracked-recent' || type === 'not-cracked-old') return t.gsNotCracked;
+    if (type === 'bypass') return t.gsBypass;
+    if (type === 'release-today') return t.gsReleaseToday;
+    return t.gsUnknown;
+  }
+
+  function splitGsChipValues(value) {
+    return String(value || '')
+      .split(/[,;/|]+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+
+  function renderGameStatusValues(entry) {
+    const game = entry?.data;
+    if (!game) return '';
+
+    const type = getGsStatusType(game);
+    const label = getGsStatusLabel(game, type);
+    const slug = game.slug || entry.slug;
+    const href = slug ? `${GAMESTATUS_SITE_BASE}/${encodeURIComponent(slug)}` : GAMESTATUS_SITE_BASE;
+    const fav = faviconForUrl(GAMESTATUS_SITE_BASE);
+    const favImg = fav
+      ? `<img class="blp-favicon" src="${escapeAttr(fav)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+      : '';
+
+    const chips = [];
+    for (const prot of splitGsChipValues(game.protections)) {
+      chips.push(`<span class="blp-gs-chip blp-gs-chip--protection">${escapeHtml(prot)}</span>`);
+    }
+    const group = String(game.hacked_groups_en || game.hacked_groups || '').trim();
+    if (group) {
+      const groupType = /bypass|обход|hypervisor/i.test(group) ? 'bypass' : type;
+      chips.push(
+        `<span class="blp-gs-chip blp-gs-chip--${escapeAttr(groupType)}">${escapeHtml(group)}</span>`
+      );
+    }
+    if (game.is_AAA) {
+      chips.push(`<span class="blp-gs-chip blp-gs-chip--aaa">AAA</span>`);
+    }
+
+    const lines = [
+      `<span class="blp-steam-line"><a class="blp-gs-badge blp-gs-badge--${escapeAttr(type)} blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${favImg}<span class="blp-gs-badge__dot" aria-hidden="true"></span>${escapeHtml(label)}</a></span>`,
+    ];
+    if (chips.length) {
+      lines.push(`<span class="blp-steam-line blp-gs-chips">${chips.join('')}</span>`);
+    }
+    return lines.join('');
   }
 
   function buildExternalLinks({ title, slug, igdbUrl, steam }) {
@@ -1558,6 +2260,12 @@
       `;
     }
     if (kind === 'metacritic') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
+    if (kind === 'gamestatus') {
+      return `
+        <span class="blp-skeleton blp-skeleton--md"></span>
+        <span class="blp-skeleton blp-skeleton--sm"></span>
+      `;
+    }
     return '<span class="blp-skeleton blp-skeleton--md"></span>';
   }
 
@@ -1571,6 +2279,7 @@
       return {
         steam: document.querySelector(`[${ENRICH_ATTR}="steam"]`),
         metacritic: document.querySelector(`[${ENRICH_ATTR}="metacritic"]`),
+        gamestatus: document.querySelector(`[${ENRICH_ATTR}="gamestatus"]`),
         links: document.querySelector(`[${ENRICH_ATTR}="links"]`),
       };
     }
@@ -1579,6 +2288,7 @@
     const plan = [];
     if (settings.showSteam) plan.push(['steam', t.steam]);
     if (settings.showMetacritic) plan.push(['metacritic', t.metacritic]);
+    if (settings.showGameStatus) plan.push(['gamestatus', t.gameStatus]);
     if (settings.showLinks) plan.push(['links', t.links]);
 
     for (const [key, label] of plan) {
@@ -1659,15 +2369,54 @@
     return parts.map((part) => `<span class="blp-steam-line">${part.html}</span>`).join('');
   }
 
-  function renderEnrichment(rows, { steam, links, error, owned = false }) {
+  function renderDebugBlock(debug) {
+    if (!settings.debugMode || !debug) return '';
+    const reason = debug.reason || '—';
+    let dump = '';
+    try {
+      dump = JSON.stringify(debug, null, 2);
+    } catch (_) {
+      dump = String(debug);
+    }
+    if (dump.length > 4000) dump = `${dump.slice(0, 4000)}\n…`;
+    return `
+      <div class="blp-debug">
+        <span class="blp-debug__label">${escapeHtml(t.debugReason)}</span>
+        <span class="blp-debug__reason">${escapeHtml(reason)}</span>
+        <span class="blp-debug__label">${escapeHtml(t.debugResponse)}</span>
+        <pre class="blp-debug__pre">${escapeHtml(dump)}</pre>
+      </div>
+    `;
+  }
+
+  function renderEnrichment(rows, { steam, links, error, owned = false, gamestatus = null }) {
+    const debugOn = Boolean(settings.debugMode);
+
     if (rows.steam) {
       if (error) {
-        setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>`);
+        const dbg =
+          steam?._debug ||
+          ({ reason: 'Steam request threw before a payload was built', error: true });
+        setRowValues(
+          rows.steam,
+          `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>${renderDebugBlock(dbg)}`
+        );
         showRow(rows.steam);
       } else if (!steam?.found) {
-        hideRow(rows.steam);
+        if (debugOn) {
+          setRowValues(
+            rows.steam,
+            `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>${renderDebugBlock(steam?._debug)}`
+          );
+          showRow(rows.steam);
+        } else {
+          hideRow(rows.steam);
+        }
       } else {
-        setRowValues(rows.steam, renderSteamValues(steam, { owned }));
+        setRowValues(
+          rows.steam,
+          `${renderSteamValues(steam, { owned })}${renderDebugBlock(steam._debug)}`
+        );
         showRow(rows.steam);
       }
     }
@@ -1689,6 +2438,31 @@
         showRow(rows.metacritic);
       } else {
         hideRow(rows.metacritic);
+      }
+    }
+
+    if (rows.gamestatus) {
+      if (gamestatus && !gamestatus.missing && gamestatus.data) {
+        setRowValues(
+          rows.gamestatus,
+          `${renderGameStatusValues(gamestatus)}${renderDebugBlock(gamestatus._debug)}`
+        );
+        showRow(rows.gamestatus);
+      } else if (debugOn) {
+        const reasonHtml = gamestatus?._debug
+          ? renderDebugBlock(gamestatus._debug)
+          : renderDebugBlock({
+              reason: steam?.found
+                ? 'GameStatus missing / not fetched'
+                : 'GameStatus skipped — Steam app not found',
+            });
+        setRowValues(
+          rows.gamestatus,
+          `<span class="game-details-value blp-empty">${escapeHtml(t.gsNotInDatabase)}</span>${reasonHtml}`
+        );
+        showRow(rows.gamestatus);
+      } else {
+        hideRow(rows.gamestatus);
       }
     }
 
@@ -1717,7 +2491,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showMetacritic}|${settings.showLinks}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showMetacritic}|${settings.showGameStatus}|${settings.showLinks}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
       return;
@@ -1741,9 +2515,11 @@
     let steam = null;
     let error = false;
     let owned = false;
+    let gamestatus = null;
 
     try {
-      const needSteam = settings.showSteam || settings.showMetacritic;
+      const needSteam =
+        settings.showSteam || settings.showMetacritic || settings.showGameStatus;
       const needOwned = settings.showSteam && settings.showSteamOwned;
       const [steamResult, ownedSet] = await Promise.all([
         needSteam ? fetchSteamBundle(title, settings.steamCountry || 'US') : Promise.resolve(null),
@@ -1753,17 +2529,48 @@
       if (ownedSet && steam?.found && steam.appId != null) {
         owned = ownedSet.has(Number(steam.appId));
       }
-    } catch (_) {
+      if (settings.showGameStatus && steam?.found && steam.appId != null) {
+        gamestatus = await fetchGameStatus({
+          appId: steam.appId,
+          storeUrl: steam.storeUrl,
+          name: steam.name,
+          title,
+          pageSlug: ctx.slug,
+        });
+      } else if (settings.showGameStatus && settings.debugMode) {
+        gamestatus = {
+          missing: true,
+          data: null,
+          slug: null,
+          _debug: {
+            reason: steam?.found
+              ? 'GameStatus enabled but Steam appId missing'
+              : 'GameStatus skipped — Steam app not found',
+            steamFound: Boolean(steam?.found),
+            steamDebug: steam?._debug || null,
+          },
+        };
+      }
+    } catch (err) {
       error = true;
-      steam = null;
+      steam = steam || {
+        found: false,
+        _debug: { reason: `Enrichment error: ${err?.message || err}` },
+      };
       owned = false;
+      gamestatus = gamestatus || {
+        missing: true,
+        data: null,
+        slug: null,
+        _debug: { reason: `Enrichment error: ${err?.message || err}` },
+      };
     }
 
     if (runId !== gamePageToken) return;
     if (!getPageContext().isGamePage) return;
 
     const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
-    renderEnrichment(rows, { steam, links, error, owned });
+    renderEnrichment(rows, { steam, links, error, owned, gamestatus });
   }
 
   function openSettings() {
@@ -1793,7 +2600,7 @@
     backdrop.className = 'blp-settings-backdrop';
     backdrop.innerHTML = `
       <div class="blp-settings" role="dialog" aria-modal="true" aria-label="${escapeAttr(t.panelTitle)}">
-        <h2>${escapeHtml(t.panelTitle)}</h2>
+        <h2>${escapeHtml(t.panelTitle)} <span class="blp-settings__ver">v${escapeHtml(SCRIPT_VERSION)}</span></h2>
         <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
         <section>
           <h3>${escapeHtml(t.sectionGeneral)}</h3>
@@ -1838,6 +2645,11 @@
             <button type="button" data-blp-toggle="showMetacritic" class="${draft.showMetacritic ? 'is-on' : ''}">${draft.showMetacritic ? t.on : t.off}</button>
           </div>
           <div class="blp-toggle">
+            <span>${escapeHtml(t.showGameStatus)}</span>
+            <button type="button" data-blp-toggle="showGameStatus" class="${draft.showGameStatus ? 'is-on' : ''}">${draft.showGameStatus ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showGameStatusHint)}</p>
+          <div class="blp-toggle">
             <span>${escapeHtml(t.showLinks)}</span>
             <button type="button" data-blp-toggle="showLinks" class="${draft.showLinks ? 'is-on' : ''}">${draft.showLinks ? t.on : t.off}</button>
           </div>
@@ -1864,9 +2676,17 @@
             <input id="blp-cache-hours" type="number" min="0" max="${CACHE_HOURS_MAX}" value="${Number(draft.cacheHours) || 0}" />
             <p class="blp-hint">${escapeHtml(t.cacheHoursHint)}</p>
           </div>
-          <button type="button" data-blp-clear>${escapeHtml(t.clearCache)}</button>
+          <button type="button" class="blp-btn" data-blp-clear>${escapeHtml(t.clearCache)}</button>
           <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
           <div class="blp-cache-msg" data-blp-cache-msg hidden></div>
+        </section>
+        <section>
+          <h3>${escapeHtml(t.sectionDebug)}</h3>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.debugMode)}</span>
+            <button type="button" data-blp-toggle="debugMode" class="${draft.debugMode ? 'is-on' : ''}">${draft.debugMode ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.debugModeHint)}</p>
         </section>
         <div class="blp-actions">
           <button type="button" data-blp-cancel>${escapeHtml(t.cancel)}</button>

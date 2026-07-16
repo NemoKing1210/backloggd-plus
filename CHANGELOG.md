@@ -5,6 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-07-16
+
+### Changed
+
+- Settings: Debug section moved to the bottom; Clear cache button uses panel button styles
+
+## [0.4.2] - 2026-07-16
+
+### Added
+
+- Settings: **Debug mode** — under Steam / GameStatus rows shows match/fail reason and a truncated response dump (skips cache while enabled)
+
+## [0.4.1] - 2026-07-16
+
+### Added
+
+- Settings panel shows the script version (`SCRIPT_VERSION`) next to the title
+
+### Changed
+
+- `AGENTS.md`: release checklist includes bumping `SCRIPT_VERSION`
+
+## [0.4.0] - 2026-07-16
+
+### Added
+
+- Game pages: **GameStatus** row (crack / DRM status badge + protection chips), resolved via Steam App ID like [steam-gamestatus](https://github.com/NemoKing1210/steam-gamestatus)
+- Settings toggle: show GameStatus
+- `@connect gamestatus.info`
+
 ## [0.3.7] - 2026-07-16
 
 ### Changed
