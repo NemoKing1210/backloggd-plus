@@ -9657,7 +9657,9 @@
     ];
 
     const present = providers.filter((p) => p.score5 != null);
-    if (!present.length) {
+    const externalPresent = present.filter((p) => p.key !== 'backloggd');
+    // Hide when there are no scores outside Backloggd (solo Backloggd ≠ Plus rating).
+    if (!externalPresent.length) {
       const settled =
         state?.steam != null &&
         (state?.opencritic != null || settings.showOpenCritic === false);
