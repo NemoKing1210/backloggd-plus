@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.4.6
+// @version           0.4.8
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -41,6 +41,7 @@
 // @grant              GM_addStyle
 // @grant              GM_registerMenuCommand
 // @connect            store.steampowered.com
+// @connect            api.steampowered.com
 // @connect            gamestatus.info
 // @run-at             document-idle
 // @noframes
@@ -51,9 +52,10 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.4.6';
+  const SCRIPT_VERSION = '0.4.8';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
+  const CACHE_VERSION_KEY = 'blp_cache_script_version';
   const ROOT_ATTR = 'data-blp-root';
   const ENRICH_ATTR = 'data-blp-enrich';
   const FAVICON_URL = 'https://www.google.com/s2/favicons?domain={domain}&sz=32';
@@ -63,12 +65,17 @@
   const STEAM_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
   const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews';
   const STEAM_USERDATA_URL = 'https://store.steampowered.com/dynamicstore/userdata/';
+  const STEAM_POPULAR_TAGS_URL = 'https://store.steampowered.com/tagdata/populartags/english';
+  const STEAM_STORE_ITEMS_URL = 'https://api.steampowered.com/IStoreBrowseService/GetItems/v1/';
+  const STEAM_TAGS_MAX = 12;
   const GAMESTATUS_API_BASE = 'https://gamestatus.info/back/api/gameinfo/game';
   const GAMESTATUS_SITE_BASE = 'https://gamestatus.info';
   const GAMESTATUS_MAX_SLUG_ATTEMPTS = 2;
   const OWNED_CACHE_KEY = 'steam:owned';
   const OWNED_EMPTY_TTL_MS = 5 * 60 * 1000;
   const OWNED_FALLBACK_TTL_MS = 60 * 60 * 1000;
+  const TAG_MAP_CACHE_KEY = 'steam:tagmap:english';
+  const TAG_MAP_TTL_MS = 7 * 24 * 3600 * 1000;
   const GS_INVALID_SLUG_RE =
     /^(https?-)?(store-)?steam(powered|static)?(-[a-z0-9]+)*(-com)?$|steampowered|steamstatic|akamaihd|^(on-)?wishlist$|^gamestatus$|^(soon-)?on-game-pass$/;
 
@@ -92,6 +99,7 @@
     showGameStatus: true,
     showLinks: true,
     showSteamOwned: true,
+    showSteamTags: true,
     showSteamPageLink: true,
     showSteamDbPageLink: true,
     debugMode: false,
@@ -141,6 +149,8 @@
       showSteamOwned: 'Show Steam owned status',
       showSteamOwnedHint:
         'Shows “Owned” when the game is in your Steam library. Requires being logged into Steam in this browser.',
+      showSteamTags: 'Show Steam tags',
+      showSteamTagsHint: 'Popular community tags from the Steam store (Open World, RPG, …).',
       showSteamPageLink: 'Show Backloggd button on Steam',
       showSteamPageLinkHint: 'Adds a SteamDB-style button in Other site info on Steam app pages.',
       showSteamDbPageLink: 'Show Backloggd button on SteamDB',
@@ -219,6 +229,8 @@
       showSteamOwned: 'Показывать «Куплено» в Steam',
       showSteamOwnedHint:
         'Показывает «Куплено», если игра в вашей библиотеке Steam. Нужен вход в Steam в этом браузере.',
+      showSteamTags: 'Показывать теги Steam',
+      showSteamTagsHint: 'Популярные пользовательские теги из Steam Store (Open World, RPG, …).',
       showSteamPageLink: 'Кнопка Backloggd на Steam',
       showSteamPageLinkHint: 'Кнопка в стиле SteamDB в блоке Other site info на страницах игр Steam.',
       showSteamDbPageLink: 'Кнопка Backloggd на SteamDB',
@@ -295,6 +307,8 @@
       showLinks: '显示快捷链接行',
       showSteamOwned: '显示 Steam 已拥有状态',
       showSteamOwnedHint: '若游戏在您的 Steam 库中则显示“已拥有”。需要在此浏览器登录 Steam。',
+      showSteamTags: '显示 Steam 标签',
+      showSteamTagsHint: '来自 Steam 商店的热门社区标签（Open World、RPG 等）。',
       showSteamPageLink: '在 Steam 显示 Backloggd 按钮',
       showSteamPageLinkHint: '在 Steam 游戏页 Other site info 中添加类似 SteamDB 的按钮。',
       showSteamDbPageLink: '在 SteamDB 显示 Backloggd 按钮',
@@ -372,6 +386,8 @@
       showSteamOwned: 'Mostrar si está en tu biblioteca Steam',
       showSteamOwnedHint:
         'Muestra “En propiedad” si el juego está en tu biblioteca de Steam. Requiere estar conectado a Steam en este navegador.',
+      showSteamTags: 'Mostrar etiquetas de Steam',
+      showSteamTagsHint: 'Etiquetas populares de la tienda Steam (Open World, RPG, …).',
       showSteamPageLink: 'Botón Backloggd en Steam',
       showSteamPageLinkHint: 'Añade un botón estilo SteamDB en Other site info en páginas de Steam.',
       showSteamDbPageLink: 'Botón Backloggd en SteamDB',
@@ -449,6 +465,8 @@
       showSteamOwned: 'Mostrar se está na biblioteca Steam',
       showSteamOwnedHint:
         'Mostra “Possui” se o jogo estiver na sua biblioteca Steam. É preciso estar logado na Steam neste navegador.',
+      showSteamTags: 'Mostrar tags da Steam',
+      showSteamTagsHint: 'Tags populares da Steam Store (Open World, RPG, …).',
       showSteamPageLink: 'Botão Backloggd no Steam',
       showSteamPageLinkHint: 'Adiciona um botão estilo SteamDB em Other site info nas páginas da Steam.',
       showSteamDbPageLink: 'Botão Backloggd no SteamDB',
@@ -526,6 +544,8 @@
       showSteamOwned: 'Steam-Besitz anzeigen',
       showSteamOwnedHint:
         'Zeigt „Im Besitz“, wenn das Spiel in Ihrer Steam-Bibliothek ist. Erfordert eine Steam-Anmeldung in diesem Browser.',
+      showSteamTags: 'Steam-Tags anzeigen',
+      showSteamTagsHint: 'Beliebte Community-Tags aus dem Steam Store (Open World, RPG, …).',
       showSteamPageLink: 'Backloggd-Button auf Steam',
       showSteamPageLinkHint: 'SteamDB-ähnlicher Button in Other site info auf Steam-Spieleseiten.',
       showSteamDbPageLink: 'Backloggd-Button auf SteamDB',
@@ -603,6 +623,8 @@
       showSteamOwned: 'Afficher le statut possédé Steam',
       showSteamOwnedHint:
         'Affiche « Possédé » si le jeu est dans votre bibliothèque Steam. Connexion Steam requise dans ce navigateur.',
+      showSteamTags: 'Afficher les tags Steam',
+      showSteamTagsHint: 'Tags communautaires populaires du Steam Store (Open World, RPG, …).',
       showSteamPageLink: 'Bouton Backloggd sur Steam',
       showSteamPageLinkHint: 'Ajoute un bouton style SteamDB dans Other site info sur les pages Steam.',
       showSteamDbPageLink: 'Bouton Backloggd sur SteamDB',
@@ -680,6 +702,8 @@
       showSteamOwned: 'Steam所持を表示',
       showSteamOwnedHint:
         'ライブラリにある場合「所持」を表示します。このブラウザでSteamにログインしている必要があります。',
+      showSteamTags: 'Steamタグを表示',
+      showSteamTagsHint: 'Steamストアの人気コミュニティタグ（Open World、RPG など）。',
       showSteamPageLink: 'SteamにBackloggdボタン',
       showSteamPageLinkHint: 'Steamのゲームページ Other site info にSteamDB風ボタンを追加します。',
       showSteamDbPageLink: 'SteamDBにBackloggdボタン',
@@ -757,6 +781,8 @@
       showSteamOwned: 'Steam 보유 표시',
       showSteamOwnedHint:
         '라이브러리에 있으면 “보유”를 표시합니다. 이 브라우저에서 Steam 로그인이 필요합니다.',
+      showSteamTags: 'Steam 태그 표시',
+      showSteamTagsHint: 'Steam 스토어의 인기 커뮤니티 태그(Open World, RPG 등).',
       showSteamPageLink: 'Steam에 Backloggd 버튼',
       showSteamPageLinkHint: 'Steam 게임 페이지 Other site info에 SteamDB 스타일 버튼을 추가합니다.',
       showSteamDbPageLink: 'SteamDB에 Backloggd 버튼',
@@ -834,6 +860,8 @@
       showSteamOwned: 'Pokaż status posiadania Steam',
       showSteamOwnedHint:
         'Pokazuje „Posiadane”, jeśli gra jest w bibliotece Steam. Wymaga zalogowania do Steam w tej przeglądarce.',
+      showSteamTags: 'Pokaż tagi Steam',
+      showSteamTagsHint: 'Popularne tagi społeczności ze Steam Store (Open World, RPG, …).',
       showSteamPageLink: 'Przycisk Backloggd na Steam',
       showSteamPageLinkHint: 'Dodaje przycisk w stylu SteamDB w Other site info na stronach Steam.',
       showSteamDbPageLink: 'Przycisk Backloggd na SteamDB',
@@ -1043,6 +1071,103 @@
     persistCacheSoon();
   }
 
+  function getLongCached(key, ttlMs) {
+    const entry = readCacheStore()[key];
+    if (!entry?.ts || entry.data == null) return null;
+    if (Date.now() - entry.ts > ttlMs) return null;
+    return entry.data;
+  }
+
+  function setLongCached(key, data) {
+    readCacheStore()[key] = { ts: Date.now(), data };
+    persistCacheSoon();
+  }
+
+  async function fetchSteamPopularTagMap() {
+    const cached = getLongCached(TAG_MAP_CACHE_KEY, TAG_MAP_TTL_MS);
+    if (cached && typeof cached === 'object') return cached;
+
+    if (inflight.has(TAG_MAP_CACHE_KEY)) return inflight.get(TAG_MAP_CACHE_KEY);
+
+    const task = (async () => {
+      const list = await gmRequest({ url: STEAM_POPULAR_TAGS_URL });
+      const map = {};
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (item?.tagid != null && item.name) map[item.tagid] = item.name;
+        }
+      }
+      setLongCached(TAG_MAP_CACHE_KEY, map);
+      return map;
+    })();
+
+    inflight.set(TAG_MAP_CACHE_KEY, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(TAG_MAP_CACHE_KEY);
+    }
+  }
+
+  async function fetchSteamAppTags(appId, country) {
+    const cacheKey = `steam:tags:${appId}`;
+    const debugOn = Boolean(settings.debugMode);
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+    }
+
+    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+
+    const task = (async () => {
+      try {
+        const input = JSON.stringify({
+          ids: [{ appid: Number(appId) }],
+          context: {
+            language: 'english',
+            country_code: String(country || 'US').toUpperCase(),
+            steam_realm: 1,
+          },
+          data_request: { include_tag_count: STEAM_TAGS_MAX },
+        });
+        const [root, map] = await Promise.all([
+          gmRequest({
+            url: `${STEAM_STORE_ITEMS_URL}?input_json=${encodeURIComponent(input)}`,
+          }),
+          fetchSteamPopularTagMap(),
+        ]);
+        const item = root?.response?.store_items?.[0];
+        const rawTags = Array.isArray(item?.tags) ? item.tags : [];
+        const tags = rawTags
+          .slice()
+          .sort((a, b) => (b.weight || 0) - (a.weight || 0))
+          .map((tag) => ({
+            id: tag.tagid,
+            name: map[tag.tagid] || null,
+            weight: tag.weight || 0,
+          }))
+          .filter((tag) => tag.name)
+          .slice(0, STEAM_TAGS_MAX);
+        if (!debugOn) setCached(cacheKey, tags);
+        return tags;
+      } catch (_) {
+        if (!debugOn) setCached(cacheKey, []);
+        return [];
+      }
+    })();
+
+    inflight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(cacheKey);
+    }
+  }
+
+  function steamTagUrl(name) {
+    return `https://store.steampowered.com/tags/en/${encodeURIComponent(name)}/`;
+  }
+
   async function fetchSteamOwnedSet() {
     const cached = getOwnedCached();
     if (cached) return new Set(cached.appIds);
@@ -1085,6 +1210,24 @@
       /* ignore */
     }
     return count;
+  }
+
+  /** Wipe lookup cache when the userscript version changes (stale payloads / schema). */
+  function migrateCacheForScriptVersion() {
+    let stored = null;
+    try {
+      stored = GM_getValue(CACHE_VERSION_KEY, null);
+    } catch (_) {
+      stored = null;
+    }
+    if (stored === SCRIPT_VERSION) return false;
+    clearCache();
+    try {
+      GM_setValue(CACHE_VERSION_KEY, SCRIPT_VERSION);
+    } catch (_) {
+      /* ignore */
+    }
+    return true;
   }
 
   function gmRequest(options) {
@@ -1237,6 +1380,31 @@
       [${ENRICH_ATTR}] .blp-steam-note {
         opacity: 0.65;
         font-size: 0.85em;
+      }
+
+      [${ENRICH_ATTR}] .blp-steam-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        justify-content: flex-end;
+      }
+
+      @media (min-width: 768px) {
+        [${ENRICH_ATTR}] .blp-steam-tags {
+          justify-content: flex-start;
+        }
+      }
+
+      [${ENRICH_ATTR}] .blp-steam-tag {
+        background: #1b2838;
+        color: #66c0f4 !important;
+        border: 1px solid rgba(102, 192, 244, 0.28);
+        text-decoration: none !important;
+      }
+
+      [${ENRICH_ATTR}] .blp-steam-tag:hover {
+        background: #2a475e;
+        color: #fff !important;
       }
 
       [${ENRICH_ATTR}="steam"] {
@@ -1929,8 +2097,10 @@
       const detailsCountry = searchCountry;
       let detailsRoot = null;
       let reviews = null;
+      let tags = [];
       try {
-        [detailsRoot, reviews] = await Promise.all([
+        const needTags = settings.showSteamTags !== false;
+        const jobs = [
           gmRequest({
             url:
               `${STEAM_DETAILS_URL}?appids=${appId}` +
@@ -1946,7 +2116,19 @@
             debug.reviewsError = String(err?.message || err);
             return null;
           }),
-        ]);
+        ];
+        if (needTags) {
+          jobs.push(
+            fetchSteamAppTags(appId, detailsCountry).catch((err) => {
+              debug.tagsError = String(err?.message || err);
+              return [];
+            })
+          );
+        }
+        const results = await Promise.all(jobs);
+        detailsRoot = results[0];
+        reviews = results[1];
+        tags = needTags ? results[2] || [] : [];
       } catch (err) {
         debug.reason = `Steam details/reviews failed: ${err?.message || err}`;
         const miss = { found: false, _debug: debug };
@@ -1965,6 +2147,7 @@
       debug.detailsSuccess = Boolean(detailsRoot?.[appId]?.success);
       debug.detailsCountry = detailsCountry;
       debug.reviews = reviews?.query_summary || null;
+      debug.tags = tags;
 
       const payload = {
         found: true,
@@ -1976,6 +2159,7 @@
         metacritic: details?.metacritic || (hit.metascore ? { score: Number(hit.metascore) } : null),
         recommendations: details?.recommendations?.total || null,
         reviews: reviews?.query_summary || null,
+        tags,
         usedUsFallback,
         requestedCountry,
         searchCountry: detailsCountry,
@@ -2469,19 +2653,26 @@
       });
     }
 
-    if (!parts.length) {
-      const link = `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.steam)}</a>`;
-      const note =
-        steam.usedUsFallback
-          ? `<span class="blp-steam-line"><span class="game-details-value blp-steam-note">${escapeHtml(fmt(t.steamUsFallback, { cc: steam.requestedCountry || '' }))}</span></span>`
-          : '';
-      return `${link}${note}`;
-    }
-
     if (steam.usedUsFallback) {
       parts.push({
         html: `<span class="game-details-value blp-steam-note">${escapeHtml(fmt(t.steamUsFallback, { cc: steam.requestedCountry || '' }))}</span>`,
       });
+    }
+
+    if (settings.showSteamTags !== false && steam.tags?.length) {
+      const chips = steam.tags
+        .map(
+          (tag) =>
+            `<a class="blp-gs-chip blp-steam-tag" href="${escapeAttr(steamTagUrl(tag.name))}" target="_blank" rel="noopener noreferrer">${escapeHtml(tag.name)}</a>`
+        )
+        .join('');
+      parts.push({
+        html: `<span class="blp-steam-tags">${chips}</span>`,
+      });
+    }
+
+    if (!parts.length) {
+      return `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.steam)}</a>`;
     }
 
     return parts.map((part) => `<span class="blp-steam-line">${part.html}</span>`).join('');
@@ -2609,7 +2800,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showMetacritic}|${settings.showGameStatus}|${settings.showLinks}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamTags}|${settings.showMetacritic}|${settings.showGameStatus}|${settings.showLinks}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
       return;
@@ -2758,6 +2949,11 @@
             <button type="button" data-blp-toggle="showSteamOwned" class="${draft.showSteamOwned ? 'is-on' : ''}">${draft.showSteamOwned ? t.on : t.off}</button>
           </div>
           <p class="blp-hint">${escapeHtml(t.showSteamOwnedHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamTags)}</span>
+            <button type="button" data-blp-toggle="showSteamTags" class="${draft.showSteamTags ? 'is-on' : ''}">${draft.showSteamTags ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamTagsHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showMetacritic)}</span>
             <button type="button" data-blp-toggle="showMetacritic" class="${draft.showMetacritic ? 'is-on' : ''}">${draft.showMetacritic ? t.on : t.off}</button>
@@ -3174,6 +3370,7 @@
     settings = loadSettings();
     locale = resolveLocale(settings.uiLocale);
     t = TRANSLATIONS[locale] || TRANSLATIONS.en;
+    migrateCacheForScriptVersion();
 
     injectStyles();
 
