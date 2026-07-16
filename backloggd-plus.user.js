@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.2
+// @version           0.7.3
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -56,7 +56,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.2';
+  const SCRIPT_VERSION = '0.7.3';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -146,6 +146,7 @@
     showSteamOwned: true,
     showSteamWishlist: true,
     showSteamTags: true,
+    showSteamCategories: true,
     showSteamPageLink: true,
     showSteamDbPageLink: true,
     showSteamDbIcon: true,
@@ -243,6 +244,9 @@
         'Shows “Wishlist” when the game is on your Steam wishlist (hidden if already owned). Requires Steam login in this browser.',
       showSteamTags: 'Show Steam tags',
       showSteamTagsHint: 'Popular community tags from the Steam store (Open World, RPG, …).',
+      showSteamCategories: 'Show Steam categories',
+      showSteamCategoriesHint:
+        'Store categories from Steam app details (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Show Backloggd button on Steam',
       showSteamPageLinkHint: 'Adds a SteamDB-style button in Other site info on Steam app pages.',
       showSteamDbPageLink: 'Show Backloggd button on SteamDB',
@@ -408,6 +412,9 @@
         'Показывает «В вишлисте», если игра в списке желаний Steam (скрывается, если уже куплена). Нужен вход в Steam.',
       showSteamTags: 'Показывать теги Steam',
       showSteamTagsHint: 'Популярные пользовательские теги из Steam Store (Open World, RPG, …).',
+      showSteamCategories: 'Показывать категории Steam',
+      showSteamCategoriesHint:
+        'Категории из карточки Steam (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Кнопка Backloggd на Steam',
       showSteamPageLinkHint: 'Кнопка в стиле SteamDB в блоке Other site info на страницах игр Steam.',
       showSteamDbPageLink: 'Кнопка Backloggd на SteamDB',
@@ -571,6 +578,8 @@
       showSteamWishlistHint: '若游戏在您的 Steam 愿望单中则显示“愿望单”（已拥有时隐藏）。需要在此浏览器登录 Steam。',
       showSteamTags: '显示 Steam 标签',
       showSteamTagsHint: '来自 Steam 商店的热门社区标签（Open World、RPG 等）。',
+      showSteamCategories: '显示 Steam 类别',
+      showSteamCategoriesHint: '来自 Steam 应用详情的商店类别（单人、多人、Steam 成就等）。',
       showSteamPageLink: '在 Steam 显示 Backloggd 按钮',
       showSteamPageLinkHint: '在 Steam 游戏页 Other site info 中添加类似 SteamDB 的按钮。',
       showSteamDbPageLink: '在 SteamDB 显示 Backloggd 按钮',
@@ -734,6 +743,9 @@
         'Muestra “Wishlist” si el juego está en tu lista de deseos de Steam (oculto si ya lo tienes). Requiere sesión de Steam.',
       showSteamTags: 'Mostrar etiquetas de Steam',
       showSteamTagsHint: 'Etiquetas populares de la tienda Steam (Open World, RPG, …).',
+      showSteamCategories: 'Mostrar categorías de Steam',
+      showSteamCategoriesHint:
+        'Categorías de la ficha de Steam (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Botón Backloggd en Steam',
       showSteamPageLinkHint: 'Añade un botón estilo SteamDB en Other site info en páginas de Steam.',
       showSteamDbPageLink: 'Botón Backloggd en SteamDB',
@@ -900,6 +912,9 @@
         'Mostra “Wishlist” se o jogo estiver na lista de desejos Steam (oculto se já possuir). Requer login Steam.',
       showSteamTags: 'Mostrar tags da Steam',
       showSteamTagsHint: 'Tags populares da Steam Store (Open World, RPG, …).',
+      showSteamCategories: 'Mostrar categorias da Steam',
+      showSteamCategoriesHint:
+        'Categorias da ficha Steam (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Botão Backloggd no Steam',
       showSteamPageLinkHint: 'Adiciona um botão estilo SteamDB em Other site info nas páginas da Steam.',
       showSteamDbPageLink: 'Botão Backloggd no SteamDB',
@@ -1066,6 +1081,9 @@
         'Zeigt „Wunschliste“, wenn das Spiel auf Ihrer Steam-Wunschliste steht (ausgeblendet bei Besitz). Steam-Login nötig.',
       showSteamTags: 'Steam-Tags anzeigen',
       showSteamTagsHint: 'Beliebte Community-Tags aus dem Steam Store (Open World, RPG, …).',
+      showSteamCategories: 'Steam-Kategorien anzeigen',
+      showSteamCategoriesHint:
+        'Store-Kategorien aus den Steam-Appdetails (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Backloggd-Button auf Steam',
       showSteamPageLinkHint: 'SteamDB-ähnlicher Button in Other site info auf Steam-Spieleseiten.',
       showSteamDbPageLink: 'Backloggd-Button auf SteamDB',
@@ -1232,6 +1250,9 @@
         'Affiche « Wishlist » si le jeu est dans votre liste de souhaits Steam (masqué si déjà possédé). Connexion Steam requise.',
       showSteamTags: 'Afficher les tags Steam',
       showSteamTagsHint: 'Tags communautaires populaires du Steam Store (Open World, RPG, …).',
+      showSteamCategories: 'Afficher les catégories Steam',
+      showSteamCategoriesHint:
+        'Catégories de la fiche Steam (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Bouton Backloggd sur Steam',
       showSteamPageLinkHint: 'Ajoute un bouton style SteamDB dans Other site info sur les pages Steam.',
       showSteamDbPageLink: 'Bouton Backloggd sur SteamDB',
@@ -1398,6 +1419,9 @@
         'ウィッシュリストにある場合「ウィッシュリスト」を表示（所持中は非表示）。このブラウザでSteamログインが必要です。',
       showSteamTags: 'Steamタグを表示',
       showSteamTagsHint: 'Steamストアの人気コミュニティタグ（Open World、RPG など）。',
+      showSteamCategories: 'Steamカテゴリを表示',
+      showSteamCategoriesHint:
+        'Steamアプリ詳細のストアカテゴリ（シングルプレイヤー、マルチプレイヤー、Steam実績など）。',
       showSteamPageLink: 'SteamにBackloggdボタン',
       showSteamPageLinkHint: 'Steamのゲームページ Other site info にSteamDB風ボタンを追加します。',
       showSteamDbPageLink: 'SteamDBにBackloggdボタン',
@@ -1564,6 +1588,9 @@
         '위시리스트에 있으면 “위시리스트”를 표시합니다(보유 중이면 숨김). 이 브라우저에서 Steam 로그인이 필요합니다.',
       showSteamTags: 'Steam 태그 표시',
       showSteamTagsHint: 'Steam 스토어의 인기 커뮤니티 태그(Open World, RPG 등).',
+      showSteamCategories: 'Steam 카테고리 표시',
+      showSteamCategoriesHint:
+        'Steam 앱 상세의 스토어 카테고리(싱글플레이어, 멀티플레이어, Steam 도전 과제 등).',
       showSteamPageLink: 'Steam에 Backloggd 버튼',
       showSteamPageLinkHint: 'Steam 게임 페이지 Other site info에 SteamDB 스타일 버튼을 추가합니다.',
       showSteamDbPageLink: 'SteamDB에 Backloggd 버튼',
@@ -1730,6 +1757,9 @@
         'Pokazuje „Wishlist”, jeśli gra jest na liście życzeń Steam (ukryte, gdy już posiadane). Wymaga logowania Steam.',
       showSteamTags: 'Pokaż tagi Steam',
       showSteamTagsHint: 'Popularne tagi społeczności ze Steam Store (Open World, RPG, …).',
+      showSteamCategories: 'Pokaż kategorie Steam',
+      showSteamCategoriesHint:
+        'Kategorie ze szczegółów aplikacji Steam (Single-player, Multi-player, Steam Achievements, …).',
       showSteamPageLink: 'Przycisk Backloggd na Steam',
       showSteamPageLinkHint: 'Dodaje przycisk w stylu SteamDB w Other site info na stronach Steam.',
       showSteamDbPageLink: 'Przycisk Backloggd na SteamDB',
@@ -2498,6 +2528,20 @@
     return `https://store.steampowered.com/tags/en/${encodeURIComponent(name)}/`;
   }
 
+  function steamCategoryUrl(id) {
+    return `https://store.steampowered.com/search/?category2=${encodeURIComponent(id)}`;
+  }
+
+  function normalizeSteamCategories(details) {
+    if (!Array.isArray(details?.categories)) return [];
+    return details.categories
+      .map((c) => ({
+        id: Number(c.id),
+        description: String(c.description || '').trim(),
+      }))
+      .filter((c) => c.description && Number.isFinite(c.id) && c.id > 0);
+  }
+
   function parseSteamIdList(list) {
     return (Array.isArray(list) ? list : [])
       .map(Number)
@@ -3087,7 +3131,8 @@
         font-size: 0.85em;
       }
 
-      [${ENRICH_ATTR}] .blp-steam-tags {
+      [${ENRICH_ATTR}] .blp-steam-tags,
+      [${ENRICH_ATTR}] .blp-steam-categories {
         display: flex;
         flex-wrap: wrap;
         gap: 0.3rem;
@@ -3095,7 +3140,8 @@
       }
 
       @media (min-width: 768px) {
-        [${ENRICH_ATTR}] .blp-steam-tags {
+        [${ENRICH_ATTR}] .blp-steam-tags,
+        [${ENRICH_ATTR}] .blp-steam-categories {
           justify-content: flex-start;
         }
       }
@@ -3109,6 +3155,18 @@
 
       [${ENRICH_ATTR}] .blp-steam-tag:hover {
         background: #2a475e;
+        color: #fff !important;
+      }
+
+      [${ENRICH_ATTR}] .blp-steam-category {
+        background: rgba(255, 255, 255, 0.06);
+        color: #c7d5e0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        text-decoration: none !important;
+      }
+
+      [${ENRICH_ATTR}] .blp-steam-category:hover {
+        background: rgba(255, 255, 255, 0.12);
         color: #fff !important;
       }
 
@@ -4535,6 +4593,7 @@
       debug.detailsCountry = detailsCountry;
       debug.reviews = reviews?.query_summary || null;
       debug.tags = tags;
+      debug.categories = normalizeSteamCategories(details);
       debug.extras = extras;
       return {
         found: Boolean(details) || Boolean(hit),
@@ -4548,6 +4607,7 @@
         recommendations: details?.recommendations?.total || null,
         reviews: reviews?.query_summary || null,
         tags,
+        categories: normalizeSteamCategories(details),
         deckCompat: extras?.deckCompat ?? null,
         discountEndDate: extras?.discountEndDate ?? null,
         recentLowCents: extras?.recentLowCents ?? null,
@@ -5717,6 +5777,18 @@
       });
     }
 
+    if (settings.showSteamCategories !== false && steam.categories?.length) {
+      const chips = steam.categories
+        .map(
+          (cat) =>
+            `<a class="blp-gs-chip blp-steam-category" href="${escapeAttr(steamCategoryUrl(cat.id))}" target="_blank" rel="noopener noreferrer">${escapeHtml(cat.description)}</a>`
+        )
+        .join('');
+      parts.push({
+        html: `<span class="blp-steam-categories">${chips}</span>`,
+      });
+    }
+
     if (settings.showSteamTags !== false && steam.tags?.length) {
       const chips = steam.tags
         .map(
@@ -5932,6 +6004,7 @@
         showSteamOwned: settings.showSteamOwned,
         showSteamWishlist: settings.showSteamWishlist,
         showSteamTags: settings.showSteamTags,
+        showSteamCategories: settings.showSteamCategories,
         showMetacritic: settings.showMetacritic,
         showOpenCritic: settings.showOpenCritic,
         showHltb: settings.showHltb,
@@ -6141,7 +6214,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
       const needSteamDbUi = settings.showSteamDbIcon || settings.showSteamDbCover;
@@ -6582,6 +6655,11 @@
             <button type="button" data-blp-toggle="showSteamTags" class="${draft.showSteamTags ? 'is-on' : ''}">${draft.showSteamTags ? t.on : t.off}</button>
           </div>
           <p class="blp-hint">${escapeHtml(t.showSteamTagsHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamCategories)}</span>
+            <button type="button" data-blp-toggle="showSteamCategories" class="${draft.showSteamCategories ? 'is-on' : ''}">${draft.showSteamCategories ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamCategoriesHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showMetacritic)}</span>
             <button type="button" data-blp-toggle="showMetacritic" class="${draft.showMetacritic ? 'is-on' : ''}">${draft.showMetacritic ? t.on : t.off}</button>
