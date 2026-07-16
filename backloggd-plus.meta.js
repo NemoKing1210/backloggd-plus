@@ -10,9 +10,9 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.2.7
-// @description       Extends Backloggd with extra game info, richer UI, and quality-of-life features
-// @description:ru    Расширяет Backloggd: больше информации об играх, удобный UI и QoL-улучшения
+// @version           0.3.0
+// @description       Extends Backloggd and adds a Backloggd button on Steam game pages
+// @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
 // @description:es    Amplía Backloggd con más información de juegos, UI enriquecida y mejoras QoL
 // @description:pt-BR  Amplia o Backloggd com mais info de jogos, UI enriquecida e melhorias QoL
@@ -32,6 +32,8 @@
 // @icon               https://www.backloggd.com/favicon.ico
 // @match              https://www.backloggd.com/*
 // @match              https://backloggd.com/*
+// @match              https://store.steampowered.com/app/*
+// @match              https://steamcommunity.com/app/*
 // @grant              GM_xmlhttpRequest
 // @grant              GM_getValue
 // @grant              GM_setValue
@@ -41,3 +43,4 @@
 // @run-at             document-idle
 // @noframes
 // ==/UserScript==
+

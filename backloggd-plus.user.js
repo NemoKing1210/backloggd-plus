@@ -10,9 +10,9 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.2.7
-// @description       Extends Backloggd with extra game info, richer UI, and quality-of-life features
-// @description:ru    Расширяет Backloggd: больше информации об играх, удобный UI и QoL-улучшения
+// @version           0.3.0
+// @description       Extends Backloggd and adds a Backloggd button on Steam game pages
+// @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
 // @description:es    Amplía Backloggd con más información de juegos, UI enriquecida y mejoras QoL
 // @description:pt-BR  Amplia o Backloggd com mais info de jogos, UI enriquecida e melhorias QoL
@@ -32,6 +32,8 @@
 // @icon               https://www.backloggd.com/favicon.ico
 // @match              https://www.backloggd.com/*
 // @match              https://backloggd.com/*
+// @match              https://store.steampowered.com/app/*
+// @match              https://steamcommunity.com/app/*
 // @grant              GM_xmlhttpRequest
 // @grant              GM_getValue
 // @grant              GM_setValue
@@ -75,6 +77,7 @@
     showSteam: true,
     showMetacritic: true,
     showLinks: true,
+    showSteamPageLink: true,
     links: {
       igdb: true,
       steam: true,
@@ -110,6 +113,9 @@
       showSteam: 'Show Steam price & reviews',
       showMetacritic: 'Show Metacritic score',
       showLinks: 'Show quick links row',
+      showSteamPageLink: 'Show Backloggd button on Steam',
+      showSteamPageLinkHint: 'Adds a SteamDB-style button in Other site info on Steam app pages.',
+      steamBackloggdTooltip: 'View on Backloggd',
       sectionLinks: 'Quick links',
       sectionLinksHint: 'Choose which sites appear in the Links row on game pages.',
       navSettings: 'Plus',
@@ -162,6 +168,9 @@
       showSteam: 'Показывать цену и отзывы Steam',
       showMetacritic: 'Показывать оценку Metacritic',
       showLinks: 'Показывать ряд ссылок',
+      showSteamPageLink: 'Кнопка Backloggd на Steam',
+      showSteamPageLinkHint: 'Кнопка в стиле SteamDB в блоке Other site info на страницах игр Steam.',
+      steamBackloggdTooltip: 'Открыть на Backloggd',
       sectionLinks: 'Быстрые ссылки',
       sectionLinksHint: 'Какие сайты показывать в ряду Links на странице игры.',
       navSettings: 'Plus',
@@ -214,6 +223,9 @@
       showSteam: '显示 Steam 价格与评价',
       showMetacritic: '显示 Metacritic 分数',
       showLinks: '显示快捷链接行',
+      showSteamPageLink: '在 Steam 显示 Backloggd 按钮',
+      showSteamPageLinkHint: '在 Steam 游戏页 Other site info 中添加类似 SteamDB 的按钮。',
+      steamBackloggdTooltip: '在 Backloggd 查看',
       sectionLinks: '快捷链接',
       sectionLinksHint: '选择游戏页 Links 行中显示的站点。',
       navSettings: 'Plus',
@@ -266,6 +278,9 @@
       showSteam: 'Mostrar precio y reseñas de Steam',
       showMetacritic: 'Mostrar puntuación de Metacritic',
       showLinks: 'Mostrar fila de enlaces',
+      showSteamPageLink: 'Botón Backloggd en Steam',
+      showSteamPageLinkHint: 'Añade un botón estilo SteamDB en Other site info en páginas de Steam.',
+      steamBackloggdTooltip: 'Ver en Backloggd',
       sectionLinks: 'Enlaces rápidos',
       sectionLinksHint: 'Elige qué sitios aparecen en la fila Links.',
       navSettings: 'Plus',
@@ -318,6 +333,9 @@
       showSteam: 'Mostrar preço e avaliações Steam',
       showMetacritic: 'Mostrar nota Metacritic',
       showLinks: 'Mostrar linha de links',
+      showSteamPageLink: 'Botão Backloggd no Steam',
+      showSteamPageLinkHint: 'Adiciona um botão estilo SteamDB em Other site info nas páginas da Steam.',
+      steamBackloggdTooltip: 'Ver no Backloggd',
       sectionLinks: 'Links rápidos',
       sectionLinksHint: 'Escolha quais sites aparecem na linha Links.',
       navSettings: 'Plus',
@@ -370,6 +388,9 @@
       showSteam: 'Steam-Preis & Bewertungen anzeigen',
       showMetacritic: 'Metacritic-Wertung anzeigen',
       showLinks: 'Link-Zeile anzeigen',
+      showSteamPageLink: 'Backloggd-Button auf Steam',
+      showSteamPageLinkHint: 'SteamDB-ähnlicher Button in Other site info auf Steam-Spieleseiten.',
+      steamBackloggdTooltip: 'Auf Backloggd ansehen',
       sectionLinks: 'Schnelllinks',
       sectionLinksHint: 'Welche Seiten in der Links-Zeile erscheinen.',
       navSettings: 'Plus',
@@ -422,6 +443,9 @@
       showSteam: 'Afficher prix et avis Steam',
       showMetacritic: 'Afficher le score Metacritic',
       showLinks: 'Afficher la rangée de liens',
+      showSteamPageLink: 'Bouton Backloggd sur Steam',
+      showSteamPageLinkHint: 'Ajoute un bouton style SteamDB dans Other site info sur les pages Steam.',
+      steamBackloggdTooltip: 'Voir sur Backloggd',
       sectionLinks: 'Liens rapides',
       sectionLinksHint: 'Choisissez les sites affichés dans la rangée Links.',
       navSettings: 'Plus',
@@ -474,6 +498,9 @@
       showSteam: 'Steamの価格とレビューを表示',
       showMetacritic: 'Metacriticスコアを表示',
       showLinks: 'リンク行を表示',
+      showSteamPageLink: 'SteamにBackloggdボタン',
+      showSteamPageLinkHint: 'Steamのゲームページ Other site info にSteamDB風ボタンを追加します。',
+      steamBackloggdTooltip: 'Backloggdで見る',
       sectionLinks: 'クイックリンク',
       sectionLinksHint: 'Links行に表示するサイトを選択します。',
       navSettings: 'Plus',
@@ -526,6 +553,9 @@
       showSteam: 'Steam 가격 및 리뷰 표시',
       showMetacritic: 'Metacritic 점수 표시',
       showLinks: '링크 행 표시',
+      showSteamPageLink: 'Steam에 Backloggd 버튼',
+      showSteamPageLinkHint: 'Steam 게임 페이지 Other site info에 SteamDB 스타일 버튼을 추가합니다.',
+      steamBackloggdTooltip: 'Backloggd에서 보기',
       sectionLinks: '빠른 링크',
       sectionLinksHint: 'Links 행에 표시할 사이트를 선택합니다.',
       navSettings: 'Plus',
@@ -578,6 +608,9 @@
       showSteam: 'Pokaż cenę i opinie Steam',
       showMetacritic: 'Pokaż wynik Metacritic',
       showLinks: 'Pokaż wiersz linków',
+      showSteamPageLink: 'Przycisk Backloggd na Steam',
+      showSteamPageLinkHint: 'Dodaje przycisk w stylu SteamDB w Other site info na stronach Steam.',
+      steamBackloggdTooltip: 'Zobacz na Backloggd',
       sectionLinks: 'Szybkie linki',
       sectionLinksHint: 'Wybierz witryny widoczne w wierszu Links.',
       navSettings: 'Plus',
@@ -819,6 +852,17 @@
         border-radius: 2px;
         flex: 0 0 auto;
         object-fit: contain;
+      }
+
+      #blp-steam-backloggd-btn {
+        margin-right: 2px;
+      }
+
+      #blp-steam-backloggd-btn img.ico16 {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        border-radius: 2px;
       }
 
       .blp-nav-settings-btn {
@@ -1587,6 +1631,11 @@
             <span>${escapeHtml(t.showLinks)}</span>
             <button type="button" data-blp-toggle="showLinks" class="${draft.showLinks ? 'is-on' : ''}">${draft.showLinks ? t.on : t.off}</button>
           </div>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamPageLink)}</span>
+            <button type="button" data-blp-toggle="showSteamPageLink" class="${draft.showSteamPageLink ? 'is-on' : ''}">${draft.showSteamPageLink ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamPageLinkHint)}</p>
         </section>
         <section>
           <h3>${escapeHtml(t.sectionLinks)}</h3>
@@ -1758,19 +1807,147 @@
     }, 500);
   }
 
+  /* ── Steam store / community: Backloggd button in .apphub_OtherSiteInfo ── */
+
+  const STEAM_BTN_ID = 'blp-steam-backloggd-btn';
+  const BACKLOGGD_SITE = 'https://www.backloggd.com';
+
+  function isSteamHost() {
+    const host = location.hostname;
+    return (
+      host === 'store.steampowered.com' ||
+      host.endsWith('.steampowered.com') ||
+      host === 'steamcommunity.com' ||
+      host.endsWith('.steamcommunity.com')
+    );
+  }
+
+  function isBackloggdHost() {
+    return /(^|\.)backloggd\.com$/i.test(location.hostname);
+  }
+
+  function getSteamAppIdFromPage() {
+    const m = location.pathname.match(/\/app\/(\d+)/i);
+    return m ? m[1] : '';
+  }
+
+  function getSteamPageTitle() {
+    return (
+      document.getElementById('appHubAppName')?.textContent?.trim() ||
+      document.querySelector('.apphub_AppName')?.textContent?.trim() ||
+      document.title.replace(/\s+on\s+Steam.*$/i, '').replace(/\s+::\s+.*$/i, '').trim()
+    );
+  }
+
+  function slugifyForBackloggd(name) {
+    return String(name || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  function getSteamPathSlug() {
+    const m = location.pathname.match(/\/app\/\d+\/([^/?#]+)/i);
+    if (!m) return '';
+    return slugifyForBackloggd(m[1].replace(/_/g, '-'));
+  }
+
+  function resolveBackloggdUrlFromSteam() {
+    const pathSlug = getSteamPathSlug();
+    if (pathSlug) return `${BACKLOGGD_SITE}/games/${encodeURIComponent(pathSlug)}/`;
+    const titleSlug = slugifyForBackloggd(getSteamPageTitle());
+    if (titleSlug) return `${BACKLOGGD_SITE}/games/${encodeURIComponent(titleSlug)}/`;
+    return BACKLOGGD_SITE;
+  }
+
+  function createSteamBackloggdButton(url) {
+    const a = document.createElement('a');
+    a.id = STEAM_BTN_ID;
+    a.className = 'btnv6_blue_hoverfade btn_medium';
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.innerHTML = `
+      <span data-tooltip-text="${escapeAttr(t.steamBackloggdTooltip)}">
+        <img class="ico16" src="${escapeAttr(`${BACKLOGGD_SITE}/favicon.ico`)}" alt="Backloggd" width="16" height="16" />
+      </span>
+    `;
+    return a;
+  }
+
+  function injectSteamBackloggdButton() {
+    if (!settings.showSteamPageLink) {
+      document.getElementById(STEAM_BTN_ID)?.remove();
+      return;
+    }
+
+    const appId = getSteamAppIdFromPage();
+    if (!appId) return;
+
+    const anchor = document.querySelector('.apphub_OtherSiteInfo');
+    if (!anchor) return;
+
+    const url = resolveBackloggdUrlFromSteam();
+    const existing = document.getElementById(STEAM_BTN_ID);
+    if (existing) {
+      existing.href = url;
+      return;
+    }
+
+    const btn = createSteamBackloggdButton(url);
+
+    // Place like SteamDB: before Community Hub / Store Page, after other extension icons when possible
+    const hub =
+      anchor.querySelector('a.btnv6_blue_hoverfade[href*="steamcommunity.com/app/"]') ||
+      anchor.querySelector('a.btnv6_blue_hoverfade[href*="store.steampowered.com/app/"]') ||
+      [...anchor.querySelectorAll('a.btnv6_blue_hoverfade')].find((el) =>
+        /community hub|store page/i.test(el.textContent || '')
+      );
+
+    if (hub) {
+      hub.insertAdjacentElement('beforebegin', btn);
+      // SteamDB leaves a space text node before hub — keep spacing
+      if (hub.previousSibling === btn) {
+        btn.insertAdjacentText('afterend', ' ');
+      }
+    } else {
+      anchor.appendChild(btn);
+    }
+  }
+
+  function scanSteamPage() {
+    injectSteamBackloggdButton();
+  }
+
   function init() {
     if (document.documentElement.hasAttribute(ROOT_ATTR)) return;
     document.documentElement.setAttribute(ROOT_ATTR, '1');
 
     settings = loadSettings();
+    locale = resolveLocale(settings.uiLocale);
+    t = TRANSLATIONS[locale] || TRANSLATIONS.en;
+
     injectStyles();
-    ensureNavSettingsButton();
-    scanPage();
-    observeDom(scanPage);
-    bindSpaNavigation(scanPage);
 
     if (typeof GM_registerMenuCommand === 'function') {
       GM_registerMenuCommand(t.menuSettings, openSettings);
+    }
+
+    if (isSteamHost()) {
+      scanSteamPage();
+      observeDom(scanSteamPage);
+      return;
+    }
+
+    if (isBackloggdHost()) {
+      ensureNavSettingsButton();
+      scanPage();
+      observeDom(scanPage);
+      bindSpaNavigation(scanPage);
     }
   }
 
