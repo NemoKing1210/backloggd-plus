@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.6.5
+// @version           0.6.8
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -52,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.6.5';
+  const SCRIPT_VERSION = '0.6.8';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -69,6 +69,8 @@
   const CARD_SKIP_ANCESTOR =
     '#game-profile, #game-body, #logging-sidebar-section, .blp-settings-backdrop, .blp-fix-match-backdrop';
   const CACHE_HOURS_MAX = 168;
+  /** Soft advisory budget for the settings meter (GM storage has no fixed quota). */
+  const CACHE_SOFT_LIMIT_BYTES = 5 * 1024 * 1024;
   const STEAM_SEARCH_URL = 'https://store.steampowered.com/api/storesearch/';
   const STEAM_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
   const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews';
@@ -238,6 +240,14 @@
       clearCache: 'Clear cache',
       cacheCleared: 'Cache cleared ({count})',
       cacheEmpty: 'Cache is empty',
+      cacheBarFull: 'Full',
+      cacheBarPartial: 'Partial',
+      cacheBarFree: 'Free',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Soft storage budget. Full = game-page Steam resolves (with tags); partial = list/card lite or expired entries.',
+      cacheBarAria: 'Cache usage: {full} full, {partial} partial, {free} free',
       cacheClearHint: 'Removes stored Steam / GameStatus lookups from this browser profile.',
       on: 'ON',
       off: 'OFF',
@@ -373,6 +383,14 @@
       clearCache: 'Очистить кэш',
       cacheCleared: 'Кэш очищен ({count})',
       cacheEmpty: 'Кэш пуст',
+      cacheBarFull: 'Полный',
+      cacheBarPartial: 'Частичный',
+      cacheBarFree: 'Свободно',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Мягкий лимит хранилища. Полный — резолвы со страницы игры (с тегами); частичный — lite с карточек или просроченные.',
+      cacheBarAria: 'Использование кэша: {full} полный, {partial} частичный, {free} свободно',
       cacheClearHint: 'Удаляет сохранённые запросы Steam / GameStatus из этого профиля браузера.',
       on: 'ВКЛ',
       off: 'ВЫКЛ',
@@ -505,6 +523,13 @@
       clearCache: '清除缓存',
       cacheCleared: '已清除缓存（{count}）',
       cacheEmpty: '缓存为空',
+      cacheBarFull: '完整',
+      cacheBarPartial: '部分',
+      cacheBarFree: '可用',
+      cacheBarLegend: '{label}：{count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint: '软性存储上限。完整 = 可用查询；部分 = 不完整或已过期但仍占用空间的条目。',
+      cacheBarAria: '缓存用量：完整 {full}，部分 {partial}，可用 {free}',
       cacheClearHint: '删除此浏览器配置中的 Steam / GameStatus 查询缓存。',
       on: '开',
       off: '关',
@@ -641,6 +666,14 @@
       clearCache: 'Vaciar caché',
       cacheCleared: 'Caché vaciada ({count})',
       cacheEmpty: 'La caché está vacía',
+      cacheBarFull: 'Completo',
+      cacheBarPartial: 'Parcial',
+      cacheBarFree: 'Libre',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Límite blando de almacenamiento. Completo = consultas útiles; parcial = incompletas o caducadas que aún ocupan espacio.',
+      cacheBarAria: 'Uso de caché: {full} completo, {partial} parcial, {free} libre',
       cacheClearHint: 'Elimina las búsquedas de Steam / GameStatus de este perfil.',
       on: 'ON',
       off: 'OFF',
@@ -777,6 +810,14 @@
       clearCache: 'Limpar cache',
       cacheCleared: 'Cache limpo ({count})',
       cacheEmpty: 'Cache vazio',
+      cacheBarFull: 'Completo',
+      cacheBarPartial: 'Parcial',
+      cacheBarFree: 'Livre',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Limite suave de armazenamento. Completo = consultas úteis; parcial = incompletas ou expiradas ainda armazenadas.',
+      cacheBarAria: 'Uso do cache: {full} completo, {partial} parcial, {free} livre',
       cacheClearHint: 'Remove buscas Steam / GameStatus deste perfil do navegador.',
       on: 'ON',
       off: 'OFF',
@@ -913,6 +954,14 @@
       clearCache: 'Cache leeren',
       cacheCleared: 'Cache geleert ({count})',
       cacheEmpty: 'Cache ist leer',
+      cacheBarFull: 'Voll',
+      cacheBarPartial: 'Teilweise',
+      cacheBarFree: 'Frei',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Weiches Speicherbudget. Voll = nutzbare Einträge; teilweise = unvollständig oder abgelaufen, aber noch gespeichert.',
+      cacheBarAria: 'Cache-Nutzung: {full} voll, {partial} teilweise, {free} frei',
       cacheClearHint: 'Entfernt gespeicherte Steam-/GameStatus-Abfragen aus diesem Profil.',
       on: 'AN',
       off: 'AUS',
@@ -1049,6 +1098,14 @@
       clearCache: 'Vider le cache',
       cacheCleared: 'Cache vidé ({count})',
       cacheEmpty: 'Le cache est vide',
+      cacheBarFull: 'Complet',
+      cacheBarPartial: 'Partiel',
+      cacheBarFree: 'Libre',
+      cacheBarLegend: '{label} : {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Budget de stockage indicatif. Complet = requêtes utiles ; partiel = incomplètes ou expirées encore stockées.',
+      cacheBarAria: 'Utilisation du cache : {full} complet, {partial} partiel, {free} libre',
       cacheClearHint: 'Supprime les requêtes Steam / GameStatus de ce profil navigateur.',
       on: 'ON',
       off: 'OFF',
@@ -1185,6 +1242,14 @@
       clearCache: 'キャッシュを消去',
       cacheCleared: 'キャッシュを消去しました（{count}）',
       cacheEmpty: 'キャッシュは空です',
+      cacheBarFull: '完全',
+      cacheBarPartial: '部分',
+      cacheBarFree: '空き',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        '目安の容量上限。完全＝利用可能な照会、部分＝不完全または期限切れでまだ残っている項目。',
+      cacheBarAria: 'キャッシュ使用量: 完全 {full}、部分 {partial}、空き {free}',
       cacheClearHint: 'このブラウザプロファイルのSteam / GameStatus照会を削除します。',
       on: 'ON',
       off: 'OFF',
@@ -1321,6 +1386,14 @@
       clearCache: '캐시 비우기',
       cacheCleared: '캐시 비움 ({count})',
       cacheEmpty: '캐시가 비어 있음',
+      cacheBarFull: '완전',
+      cacheBarPartial: '부분',
+      cacheBarFree: '여유',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        '소프트 저장 한도. 완전 = 사용 가능한 조회, 부분 = 불완전하거나 만료됐지만 아직 남아 있는 항목.',
+      cacheBarAria: '캐시 사용량: 완전 {full}, 부분 {partial}, 여유 {free}',
       cacheClearHint: '이 브라우저 프로필의 Steam / GameStatus 조회를 삭제합니다.',
       on: '켜짐',
       off: '꺼짐',
@@ -1457,6 +1530,14 @@
       clearCache: 'Wyczyść cache',
       cacheCleared: 'Cache wyczyszczony ({count})',
       cacheEmpty: 'Cache jest pusty',
+      cacheBarFull: 'Pełny',
+      cacheBarPartial: 'Częściowy',
+      cacheBarFree: 'Wolne',
+      cacheBarLegend: '{label}: {count} · {size}',
+      cacheBarUsed: '{used} / {limit}',
+      cacheBarHint:
+        'Miękki limit pamięci. Pełny = użyteczne wpisy; częściowy = niekompletne lub wygasłe, nadal zapisane.',
+      cacheBarAria: 'Użycie cache: {full} pełny, {partial} częściowy, {free} wolne',
       cacheClearHint: 'Usuwa zapisane zapytania Steam / GameStatus z tego profilu.',
       on: 'WŁ',
       off: 'WYŁ',
@@ -1888,9 +1969,159 @@
     return data.owned;
   }
 
-  function clearCache() {
+  function isSteamGameResolveKey(key) {
+    return key.startsWith('steam:id:') || /^steam:[A-Z]{2}:/.test(key);
+  }
+
+  function cacheEntryTtlMs(key, entry) {
+    if (Number(entry?.ttlMs) > 0) return Number(entry.ttlMs);
+    if (key === TAG_MAP_CACHE_KEY) return TAG_MAP_TTL_MS;
+    if (key === USERDATA_CACHE_KEY) {
+      const data = entry?.data;
+      const empty =
+        !data ||
+        ((!Array.isArray(data.appIds) || data.appIds.length === 0) &&
+          (!Array.isArray(data.wishlistAppIds) || data.wishlistAppIds.length === 0));
+      return userdataCacheTtlMs(empty);
+    }
+    return cacheTtlMs();
+  }
+
+  function isCacheEntryExpired(key, entry) {
+    if (!entry?.ts) return true;
+    const ttl = cacheEntryTtlMs(key, entry);
+    if (!ttl) return true;
+    return Date.now() - entry.ts > ttl;
+  }
+
+  function isCacheEntryPartial(key, entry) {
+    if (isCacheEntryExpired(key, entry)) return true;
+    if (!isSteamGameResolveKey(key)) return false;
+    const data = entry?.data;
+    if (!data?.found) return true;
+    // Lite list/card resolves are stored without tags.
+    return data.tagsLoaded !== true;
+  }
+
+  function cacheEntryByteSize(key, entry) {
+    try {
+      const raw = JSON.stringify(entry);
+      if (typeof TextEncoder !== 'undefined') {
+        const enc = new TextEncoder();
+        return enc.encode(String(key)).length + enc.encode(raw).length;
+      }
+      return String(key).length + String(raw).length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  function formatCacheBytes(n) {
+    const bytes = Math.max(0, Number(n) || 0);
+    if (bytes < 1024) return `${Math.round(bytes)} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  function getCacheUsageStats() {
     const store = readCacheStore();
-    const count = Object.keys(store).length;
+    let fullBytes = 0;
+    let partialBytes = 0;
+    let fullCount = 0;
+    let partialCount = 0;
+    for (const key of Object.keys(store)) {
+      const entry = store[key];
+      const bytes = cacheEntryByteSize(key, entry);
+      if (isCacheEntryPartial(key, entry)) {
+        partialBytes += bytes;
+        partialCount += 1;
+      } else {
+        fullBytes += bytes;
+        fullCount += 1;
+      }
+    }
+    const usedBytes = fullBytes + partialBytes;
+    const limitBytes = CACHE_SOFT_LIMIT_BYTES;
+    const freeBytes = Math.max(0, limitBytes - usedBytes);
+    return {
+      fullBytes,
+      partialBytes,
+      freeBytes,
+      usedBytes,
+      limitBytes,
+      fullCount,
+      partialCount,
+      totalCount: fullCount + partialCount,
+    };
+  }
+
+  function getCacheEntryCount() {
+    return getCacheUsageStats().totalCount;
+  }
+
+  function cacheMeterPct(part, denom) {
+    if (!denom) return 0;
+    return Math.max(0, Math.min(100, (part / denom) * 100));
+  }
+
+  function buildCacheMeterHtml(stats) {
+    const s = stats || getCacheUsageStats();
+    const denom = Math.max(s.usedBytes, s.limitBytes, 1);
+    const fullPct = cacheMeterPct(s.fullBytes, denom);
+    const partialPct = cacheMeterPct(s.partialBytes, denom);
+    const freePct = cacheMeterPct(s.freeBytes, denom);
+    const aria = fmt(t.cacheBarAria, {
+      full: formatCacheBytes(s.fullBytes),
+      partial: formatCacheBytes(s.partialBytes),
+      free: formatCacheBytes(s.freeBytes),
+    });
+    const legendFull = fmt(t.cacheBarLegend, {
+      label: t.cacheBarFull,
+      count: s.fullCount,
+      size: formatCacheBytes(s.fullBytes),
+    });
+    const legendPartial = fmt(t.cacheBarLegend, {
+      label: t.cacheBarPartial,
+      count: s.partialCount,
+      size: formatCacheBytes(s.partialBytes),
+    });
+    const freeLabel = `${t.cacheBarFree}: ${formatCacheBytes(s.freeBytes)}`;
+    return `
+      <div class="blp-cache-meter" data-blp-cache-meter>
+        <div class="blp-cache-meter__head">
+          <span class="blp-cache-meter__used">${escapeHtml(
+            fmt(t.cacheBarUsed, {
+              used: formatCacheBytes(s.usedBytes),
+              limit: formatCacheBytes(s.limitBytes),
+            })
+          )}</span>
+        </div>
+        <div class="blp-cache-meter__bar" role="img" aria-label="${escapeAttr(aria)}">
+          <span class="blp-cache-meter__seg blp-cache-meter__seg--full" style="width:${fullPct}%"></span>
+          <span class="blp-cache-meter__seg blp-cache-meter__seg--partial" style="width:${partialPct}%"></span>
+          <span class="blp-cache-meter__seg blp-cache-meter__seg--free" style="width:${freePct}%"></span>
+        </div>
+        <ul class="blp-cache-meter__legend">
+          <li><span class="blp-cache-meter__swatch blp-cache-meter__swatch--full"></span>${escapeHtml(legendFull)}</li>
+          <li><span class="blp-cache-meter__swatch blp-cache-meter__swatch--partial"></span>${escapeHtml(legendPartial)}</li>
+          <li><span class="blp-cache-meter__swatch blp-cache-meter__swatch--free"></span>${escapeHtml(freeLabel)}</li>
+        </ul>
+        <p class="blp-hint">${escapeHtml(t.cacheBarHint)}</p>
+      </div>
+    `;
+  }
+
+  function paintCacheMeter(root) {
+    const current = root?.querySelector?.('[data-blp-cache-meter]');
+    if (!current) return;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = buildCacheMeterHtml(getCacheUsageStats()).trim();
+    const next = wrap.firstElementChild;
+    if (next) current.replaceWith(next);
+  }
+
+  function clearCache() {
+    const count = getCacheEntryCount();
     cacheStore = {};
     try {
       GM_setValue(CACHE_KEY, {});
@@ -2853,6 +3084,87 @@
         color: var(--blp-accent);
       }
 
+      .blp-cache-meter {
+        margin: 0 0 12px;
+      }
+
+      .blp-cache-meter__head {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 6px;
+      }
+
+      .blp-cache-meter__used {
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+        color: var(--blp-muted);
+      }
+
+      .blp-cache-meter__bar {
+        display: flex;
+        height: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--blp-border);
+      }
+
+      .blp-cache-meter__seg {
+        display: block;
+        height: 100%;
+        min-width: 0;
+        transition: width 0.2s ease;
+      }
+
+      .blp-cache-meter__seg--full {
+        background: var(--blp-accent);
+      }
+
+      .blp-cache-meter__seg--partial {
+        background: var(--blp-gs-bypass);
+      }
+
+      .blp-cache-meter__seg--free {
+        background: transparent;
+      }
+
+      .blp-cache-meter__legend {
+        list-style: none;
+        margin: 8px 0 0;
+        padding: 0;
+        display: grid;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--blp-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .blp-cache-meter__legend li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .blp-cache-meter__swatch {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        flex: 0 0 auto;
+      }
+
+      .blp-cache-meter__swatch--full {
+        background: var(--blp-accent);
+      }
+
+      .blp-cache-meter__swatch--partial {
+        background: var(--blp-gs-bypass);
+      }
+
+      .blp-cache-meter__swatch--free {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid var(--blp-border);
+      }
+
       .blp-debug-panel {
         margin: 1rem 0 1.25rem;
         padding: 0.75rem 0.85rem;
@@ -3419,14 +3731,33 @@
     if (!detailsRoot?.[id]?.success && !hit) {
       payload.found = false;
     }
-    // Only persist "full" resolves. Card/list lite fetches use includeTags=false and must
-    // not overwrite cache with tagsLoaded=false / empty tags.
-    if (!debugOn && cacheKey && payload.found && includeTags) {
-      const { _debug, ...store } = payload;
-      store.tagsLoaded = true;
-      setCached(cacheKey, store);
+    // Persist Steam resolves. Lite (list cards) may write tagsLoaded=false, but must not
+    // overwrite a still-valid full entry (tagsLoaded=true) — that caused missing tags after
+    // visiting a list before the game page.
+    if (!debugOn && cacheKey && payload.found) {
+      persistSteamResolveCache(cacheKey, payload, includeTags);
     }
     return payload;
+  }
+
+  function persistSteamResolveCache(cacheKey, payload, includeTags) {
+    if (!cacheKey || !payload?.found || !cacheTtlMs()) return;
+    const { _debug, ...store } = payload;
+    if (includeTags) {
+      store.tagsLoaded = true;
+      setCached(cacheKey, store);
+      return;
+    }
+    store.tagsLoaded = false;
+    const existing = readCacheStore()[cacheKey];
+    if (
+      existing?.data?.found &&
+      existing.data.tagsLoaded === true &&
+      !isCacheEntryExpired(cacheKey, existing)
+    ) {
+      return;
+    }
+    setCached(cacheKey, store);
   }
 
   function cachedSteamNeedsTagBackfill(cached, includeTags) {
@@ -3485,8 +3816,7 @@
       anonymous: true,
       onPartial,
       includeTags,
-      // Lite card fetches must not write the shared cache key.
-      cacheKey: includeTags ? cacheKey : '',
+      cacheKey,
       manualOverride,
       debugBase: {
         appId: id,
@@ -3679,7 +4009,7 @@
         onPartial,
         includeTags,
         debugBase: debug,
-        cacheKey: includeTags ? cacheKey : '',
+        cacheKey,
         manualOverride: false,
       });
     })();
@@ -5271,6 +5601,7 @@
         </section>
         <section>
           <h3>${escapeHtml(t.sectionCache)}</h3>
+          ${buildCacheMeterHtml()}
           <div class="blp-field">
             <label for="blp-cache-hours">${escapeHtml(t.cacheHours)}</label>
             <input id="blp-cache-hours" type="number" min="0" max="${CACHE_HOURS_MAX}" value="${Number(draft.cacheHours) || 0}" />
@@ -5334,6 +5665,7 @@
           ? fmt(t.cacheCleared, { count })
           : t.cacheEmpty;
       }
+      paintCacheMeter(backdrop);
     });
 
     backdrop.querySelector('[data-blp-save]')?.addEventListener('click', () => {

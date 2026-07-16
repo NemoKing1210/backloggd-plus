@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.8] - 2026-07-16
+
+### Fixed
+
+- List/card lite Steam results are cached again as partial (`tagsLoaded=false`) without overwriting a valid full entry
+
+## [0.6.7] - 2026-07-16
+
+### Added
+
+- Settings: stacked cache usage meter (full / partial / free) against a soft 5 MB budget
+
+## [0.6.6] - 2026-07-16
+
+### Added
+
+- Settings: show current cache entry count in the Cache section (updates after Clear cache)
+
 ## [0.6.5] - 2026-07-16
 
 ### Fixed
