@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.14
+// @version           0.7.15
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.14';
+  const SCRIPT_VERSION = '0.7.15';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -272,6 +272,7 @@
       viewerZoomOut: 'Zoom out',
       viewerZoomReset: 'Reset zoom',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Open cover',
       showSteamPlayers: 'Show online players',
       showSteamPlayersHint: 'Current players from Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Show badges on list covers',
@@ -452,6 +453,7 @@
       viewerZoomOut: 'Уменьшить',
       viewerZoomReset: 'Сбросить масштаб',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Открыть обложку',
       showSteamPlayers: 'Показывать онлайн игроков',
       showSteamPlayersHint: 'Текущие игроки через Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Бейджи на обложках в списках',
@@ -628,6 +630,7 @@
       viewerZoomOut: '缩小',
       viewerZoomReset: '重置缩放',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: '打开封面',
       showSteamPlayers: '显示在线玩家数',
       showSteamPlayersHint: '当前玩家来自 Steam GetNumberOfCurrentPlayers。',
       showCardBadges: '在列表封面显示徽章',
@@ -806,6 +809,7 @@
       viewerZoomOut: 'Alejar',
       viewerZoomReset: 'Restablecer zoom',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Abrir portada',
       showSteamPlayers: 'Mostrar jugadores en línea',
       showSteamPlayersHint: 'Jugadores actuales desde Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Mostrar insignias en portadas de listas',
@@ -987,6 +991,7 @@
       viewerZoomOut: 'Diminuir zoom',
       viewerZoomReset: 'Redefinir zoom',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Abrir capa',
       showSteamPlayers: 'Mostrar jogadores online',
       showSteamPlayersHint: 'Jogadores atuais via Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Mostrar badges nas capas das listas',
@@ -1168,6 +1173,7 @@
       viewerZoomOut: 'Verkleinern',
       viewerZoomReset: 'Zoom zurücksetzen',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Cover öffnen',
       showSteamPlayers: 'Online-Spieler anzeigen',
       showSteamPlayersHint: 'Aktuelle Spieler über Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Badges auf Listen-Covers anzeigen',
@@ -1349,6 +1355,7 @@
       viewerZoomOut: 'Zoom arrière',
       viewerZoomReset: 'Réinitialiser le zoom',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Ouvrir la jaquette',
       showSteamPlayers: 'Afficher les joueurs en ligne',
       showSteamPlayersHint: 'Joueurs actuels via Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Afficher les badges sur les jaquettes des listes',
@@ -1530,6 +1537,7 @@
       viewerZoomOut: '縮小',
       viewerZoomReset: 'ズームをリセット',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'カバーを開く',
       showSteamPlayers: 'オンラインプレイヤー数を表示',
       showSteamPlayersHint: 'Steam GetNumberOfCurrentPlayers の現在のプレイヤー数。',
       showCardBadges: 'リストのカバーにバッジを表示',
@@ -1711,6 +1719,7 @@
       viewerZoomOut: '축소',
       viewerZoomReset: '줌 초기화',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: '커버 열기',
       showSteamPlayers: '온라인 플레이어 수 표시',
       showSteamPlayersHint: 'Steam GetNumberOfCurrentPlayers의 현재 플레이어 수.',
       showCardBadges: '목록 커버에 배지 표시',
@@ -1892,6 +1901,7 @@
       viewerZoomOut: 'Pomniejsz',
       viewerZoomReset: 'Resetuj zoom',
       viewerOf: '{current} / {total}',
+      viewerOpenCover: 'Otwórz okładkę',
       showSteamPlayers: 'Pokaż graczy online',
       showSteamPlayersHint: 'Bieżąca liczba graczy z Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Pokaż odznaki na okładkach list',
@@ -3412,6 +3422,17 @@
       }
 
       .blp-steamdb-cover.is-gallery:focus-visible {
+        outline: 2px solid var(--back-interact-secondary, #839df9);
+        outline-offset: 2px;
+      }
+
+      #interaction-sidebar .col-cover img.blp-cover-zoomable,
+      img.blp-cover-zoomable {
+        cursor: zoom-in;
+      }
+
+      #interaction-sidebar .col-cover img.blp-cover-zoomable:focus-visible,
+      img.blp-cover-zoomable:focus-visible {
         outline: 2px solid var(--back-interact-secondary, #839df9);
         outline-offset: 2px;
       }
@@ -6201,6 +6222,97 @@
     };
   }
 
+  const GAME_COVER_VIEWER_ATTR = 'data-blp-cover-viewer';
+
+  function gameCoverImageEl() {
+    return (
+      document.querySelector(
+        '#interaction-sidebar > div > div.col.col-cover.px-sm-0.my-auto.mx-auto.mb-0.mb-2.mb-mb-0 > div > div > img'
+      ) ||
+      document.querySelector('#interaction-sidebar .col-cover .game-cover img') ||
+      document.querySelector('#interaction-sidebar .col-cover img')
+    );
+  }
+
+  function gameCoverViewerSrc(img) {
+    if (!img) return '';
+    const dataSrc = String(img.getAttribute('data-src') || '').trim();
+    const src = String(img.currentSrc || img.getAttribute('src') || '').trim();
+    // Prefer lazy hi-res (often t_cover_big_2x) when present.
+    return dataSrc || src;
+  }
+
+  function onGameCoverViewerClick(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    const img = ev.currentTarget;
+    if (!(img instanceof HTMLImageElement)) return;
+    openGameCoverViewer(img);
+  }
+
+  function onGameCoverViewerKeydown(ev) {
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    onGameCoverViewerClick(ev);
+  }
+
+  function unbindGameCoverViewer() {
+    document.querySelectorAll(`img[${GAME_COVER_VIEWER_ATTR}]`).forEach((img) => {
+      img.removeEventListener('click', onGameCoverViewerClick);
+      img.removeEventListener('keydown', onGameCoverViewerKeydown);
+      img.removeAttribute(GAME_COVER_VIEWER_ATTR);
+      img.classList.remove('blp-cover-zoomable');
+      img.removeAttribute('role');
+      img.removeAttribute('tabindex');
+      img.removeAttribute('aria-label');
+    });
+  }
+
+  function openGameCoverViewer(img) {
+    const full = gameCoverViewerSrc(img);
+    const thumb = String(img.currentSrc || img.getAttribute('src') || full).trim();
+    if (!full && !thumb) return;
+    const coverItem = {
+      src: full || thumb,
+      thumb: thumb || full,
+      kind: 'cover',
+      alt: img.getAttribute('alt') || '',
+    };
+    const seen = new Set([coverItem.src, coverItem.thumb].filter(Boolean));
+    const extras = [];
+    for (const shot of steamGalleryItems || []) {
+      const src = String(shot.full || shot.src || shot.thumb || '').trim();
+      const tmb = String(shot.thumb || shot.full || shot.src || '').trim();
+      if (!src || seen.has(src)) continue;
+      seen.add(src);
+      extras.push({
+        src,
+        thumb: tmb || src,
+        kind: shot.kind || 'screenshot',
+        alt: shot.alt || '',
+      });
+    }
+    openBlpImageViewer({
+      items: [coverItem, ...extras],
+      index: 0,
+      title: getGameTitle() || t.viewerOpenCover,
+    });
+  }
+
+  function bindGameCoverViewer() {
+    const img = gameCoverImageEl();
+    if (!img) return;
+    if (img.getAttribute(GAME_COVER_VIEWER_ATTR) === '1') return;
+    img.setAttribute(GAME_COVER_VIEWER_ATTR, '1');
+    img.classList.add('blp-cover-zoomable');
+    img.setAttribute('role', 'button');
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('aria-label', t.viewerOpenCover);
+    img.addEventListener('click', onGameCoverViewerClick);
+    img.addEventListener('keydown', onGameCoverViewerKeydown);
+  }
+
   /**
    * Reusable fullscreen image viewer (zoom / pan / filmstrip).
    * openBlpImageViewer({ items, index, title })
@@ -7235,6 +7347,7 @@
     document.querySelectorAll(`[${ENRICH_ATTR}]`).forEach((el) => el.remove());
     document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
     removeSteamDbUi();
+    unbindGameCoverViewer();
   }
 
   function makeDetailRow(key, headerText) {
@@ -7883,13 +7996,17 @@
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     // Same page/settings: keep the in-flight (or finished) mount. Remounting while
     // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
-    if (marker?.getAttribute('data-blp-token') === token) return;
+    if (marker?.getAttribute('data-blp-token') === token) {
+      bindGameCoverViewer();
+      return;
+    }
 
     removeEnrichment();
     const rows = ensureEnrichmentRows();
     if (!rows) return;
 
     Object.values(rows).forEach((row) => row?.setAttribute('data-blp-token', token));
+    bindGameCoverViewer();
 
     const runId = ++gamePageToken;
     const igdbUrl = getIgdbUrl(ctx.slug);
