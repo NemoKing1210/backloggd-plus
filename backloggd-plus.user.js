@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.5.7
+// @version           0.5.8
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -53,7 +53,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.5.7';
+  const SCRIPT_VERSION = '0.5.8';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3129,6 +3129,16 @@
     return numericParts / segments.length <= 0.5;
   }
 
+  /**
+   * Backloggd remake disambiguator: resident-evil-2--1 → resident-evil-2-remake
+   * (GameStatus uses -remake; plain gsSlugify would yield -1).
+   */
+  function gsRemakeSlugFromPageSlug(pageSlug) {
+    const raw = String(pageSlug || '').replace(/^\/+|\/+$/g, '');
+    if (!/--1$/i.test(raw)) return null;
+    return gsSlugify(raw.replace(/--1$/i, '-remake'));
+  }
+
   function buildGsSlugCandidates({ storeUrl, name, title, pageSlug }) {
     const candidates = [];
     const addSlug = (slug) => {
@@ -3143,6 +3153,8 @@
       addSlug(gsSlugify(normalized.replace(/\s*[-–—:|].*$/, '')));
     };
 
+    // Prefer Backloggd --1 → -remake before store/title fallbacks.
+    addSlug(gsRemakeSlugFromPageSlug(pageSlug));
     addSlug(extractSteamSlugFromHref(storeUrl));
     addFromText(name);
     addFromText(title);
