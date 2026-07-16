@@ -5,6 +5,31 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2026-07-16
+
+### Fixed
+
+- List card badges no longer flicker/reload forever for games with no Steam match (empty result marked settled; session miss memory)
+
+## [0.6.1] - 2026-07-16
+
+### Added
+
+- List/card badges: Steam review % (color-tiered; Metacritic score fallback when reviews are missing)
+
+## [0.6.0] - 2026-07-16
+
+### Added
+
+- List/card badges on browse, search, journal, and other cover grids: Steam price, Owned, Wishlist, GameStatus (viewport-lazy, rate-limited)
+- Manual Steam App ID override via **Fix match** on game pages (persisted per Backloggd slug)
+- Steam Wishlist badge next to Owned (from `dynamicstore/userdata` `rgWishlist`; hidden when owned)
+- Settings: Wishlist toggle, Lists & cards → cover badges
+
+### Changed
+
+- Steam userdata cache now stores owned + wishlist together (`steam:userdata`)
+
 ## [0.5.15] - 2026-07-16
 
 ### Changed

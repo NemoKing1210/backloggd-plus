@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.5.15-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.6.2-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.5.15`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.6.2`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -54,13 +54,18 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Game pages (`/games/{slug}/`):**
 
-- Native detail rows under Platforms — **Steam** (owned · price · reviews · tags), **Metacritic**, **Players**, **GameStatus** (crack / DRM), **Links**
+- Native detail rows under Platforms — **Steam** (owned · wishlist · price · reviews · tags), **Metacritic**, **Players**, **GameStatus** (crack / DRM), **Links**
+- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug)
 - SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
 - Skeleton placeholders while Steam / GameStatus data loads
 - Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
-- Steam **Owned** badge when you are logged into Steam in the same browser (no API key)
+- Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus crack status badges (same classification as steam-gamestatus)
-- Works without API keys (Steam Store public endpoints + session userdata + GameStatus public API; SteamDB HTML when reachable)
+- Works without API keys (Steam Store public endpoints + session userdata + GameStatus public API)
+
+**Lists / search / journal (cover grids):**
+
+- Compact badges on `.game-cover` cards — price, Steam review %, Owned, Wishlist, GameStatus (lazy-loaded in viewport)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):
 
@@ -76,12 +81,10 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / owned / tags / Metacritic / GameStatus / players / SteamDB icon & logo / links / Steam & SteamDB Backloggd buttons
+- Toggles for Steam / owned / wishlist / tags / Metacritic / GameStatus / players / SteamDB icon & logo / list cover badges / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
 - Cache duration + clear cache
-
-Planned: list/card badges, deeper IGDB enrichment, more QoL tweaks.
 
 ## Supported pages
 
@@ -137,7 +140,7 @@ Key `// ==UserScript==` fields used by managers:
 | `@supportURL` | GitHub Issues |
 | `@license` | MIT |
 | `@grant` | `GM_xmlhttpRequest`, `GM_getValue`, `GM_setValue`, `GM_addStyle`, `GM_registerMenuCommand` |
-| `@connect` | `store.steampowered.com` |
+| `@connect` | `store.steampowered.com`, `api.steampowered.com`, `gamestatus.info` |
 | `@match` | Backloggd `/*`, Steam Store/Community `/app/*`, SteamDB `/app/*` |
 
 Localized `@name` and `@description` tags are provided for en, ru, zh-CN, es, pt-BR, de, fr, ja, ko, and pl.
@@ -151,7 +154,7 @@ Localized `@name` and `@description` tags are provided for en, ru, zh-CN, es, pt
 | `GM_addStyle` | Inject UI styles |
 | `GM_registerMenuCommand` | Open settings from the manager menu |
 
-`@connect` is limited to `store.steampowered.com`.
+`@connect` covers Steam Store / Steam Web API and GameStatus.
 
 ## Development
 
