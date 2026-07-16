@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.6
+// @version           0.7.8
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.6';
+  const SCRIPT_VERSION = '0.7.8';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3096,21 +3096,68 @@
         margin-left: 0.5rem;
       }
 
-      #game-profile h1 .blp-title-icon,
-      .game-title-section h1 .blp-title-icon,
-      h1 .blp-title-icon {
+      #game-profile h1 .blp-title-icon-wrap,
+      .game-title-section h1 .blp-title-icon-wrap,
+      h1 .blp-title-icon-wrap {
+        display: inline-block;
+        position: relative;
         width: 32px;
         height: 32px;
         vertical-align: middle;
         margin-right: 0.45em;
         border-radius: 5px;
-        object-fit: cover;
+        overflow: hidden;
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+        background: rgba(128, 128, 128, 0.18);
+      }
+
+      .blp-title-icon-wrap .blp-title-icon-skel {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        background: linear-gradient(
+          90deg,
+          var(--blp-skel) 0%,
+          var(--blp-skel-shine) 45%,
+          var(--blp-skel) 90%
+        );
+        background-size: 200% 100%;
+        animation: blp-shimmer 1.1s ease-in-out infinite;
+        transition: opacity 0.28s ease;
+      }
+
+      .blp-title-icon-wrap:not(.is-loading) .blp-title-icon-skel {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #game-profile h1 .blp-title-icon,
+      .game-title-section h1 .blp-title-icon,
+      h1 .blp-title-icon {
+        position: relative;
+        display: block;
+        width: 32px;
+        height: 32px;
+        border-radius: 5px;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+
+      #game-profile h1 .blp-title-icon-wrap .blp-title-icon.is-ready,
+      .game-title-section h1 .blp-title-icon-wrap .blp-title-icon.is-ready,
+      h1 .blp-title-icon-wrap .blp-title-icon.is-ready,
+      .blp-title-icon-wrap .blp-title-icon.is-ready {
+        opacity: 1;
       }
 
       .col-cover .blp-steamdb-cover,
       #logging-sidebar-section .blp-steamdb-cover,
       .blp-steamdb-cover {
+        position: relative;
         margin-top: 0.75rem;
         width: 100%;
         max-width: 100%;
@@ -3121,6 +3168,35 @@
         background: rgba(0, 0, 0, 0.25);
       }
 
+      .blp-steamdb-cover.is-loading {
+        aspect-ratio: 460 / 215;
+        min-height: 72px;
+      }
+
+      .blp-steamdb-cover .blp-steamdb-cover-skel {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        background: linear-gradient(
+          90deg,
+          var(--blp-skel) 0%,
+          var(--blp-skel-shine) 45%,
+          var(--blp-skel) 90%
+        );
+        background-size: 200% 100%;
+        animation: blp-shimmer 1.1s ease-in-out infinite;
+        transition: opacity 0.32s ease;
+        z-index: 1;
+      }
+
+      .blp-steamdb-cover:not(.is-loading) .blp-steamdb-cover-skel {
+        opacity: 0;
+        pointer-events: none;
+      }
+
       .blp-steamdb-cover img {
         display: block;
         width: 100%;
@@ -3129,6 +3205,12 @@
         object-fit: cover;
         object-position: center top;
         background: #1a1d24;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+
+      .blp-steamdb-cover img.is-ready {
+        opacity: 1;
       }
 
       .blp-steamdb-cover img.blp-steamdb-cover__logo {
@@ -5328,85 +5410,204 @@
     );
   }
 
-  function injectSteamDbTitleIcon(url, appId) {
-    document.querySelectorAll(`[${STEAMDB_ATTR}="icon"]`).forEach((el) => el.remove());
-    if (!settings.showSteamDbIcon || !url) return;
-    const h1 = desktopTitleHeading();
-    if (!h1) return;
-    const img = document.createElement('img');
-    img.setAttribute(STEAMDB_ATTR, 'icon');
-    if (appId) img.setAttribute('data-blp-appid', String(appId));
-    img.className = 'blp-title-icon';
-    img.width = 32;
-    img.height = 32;
-    img.src = url;
-    img.alt = '';
-    img.decoding = 'async';
-    img.loading = 'lazy';
-    img.referrerPolicy = 'no-referrer';
-    img.addEventListener('error', () => {
-      if (img.dataset.blpFallback === '1') {
-        img.remove();
-        return;
-      }
-      img.dataset.blpFallback = '1';
-      const id = img.getAttribute('data-blp-appid');
-      if (id) img.src = steamCdnAsset(id, 'capsule_sm_120.jpg');
-      else img.remove();
-    });
-    h1.insertAdjacentElement('afterbegin', img);
+  function isSteamLogoAsset(url) {
+    return /(?:^|\/)logo\.(png|jpe?g)(?:$|\?)/i.test(String(url || ''));
   }
 
-  function injectSteamDbCover(url, appId, { logoIsPortrait = false } = {}) {
-    document.querySelectorAll(`[${STEAMDB_ATTR}="cover"]`).forEach((el) => el.remove());
-    if (!settings.showSteamDbCover || !url) return;
-    const mount = loggingSidebarMount();
-    if (!mount) return;
+  function revealSteamDbMediaImage(host, img, url) {
+    if (!host || !img || !url) return;
+    const current = img.getAttribute('src') || '';
+    if (current === url && img.classList.contains('is-ready') && img.complete && img.naturalWidth) {
+      host.classList.remove('is-loading');
+      return;
+    }
 
-    const fallbacks = [];
-    const push = (u) => {
-      if (u && !fallbacks.includes(u)) fallbacks.push(u);
+    const markReady = () => {
+      if ((img.getAttribute('src') || '') !== url) return;
+      img.classList.add('is-ready');
+      host.classList.remove('is-loading');
     };
-    // Prefer SteamDB / Steam header cover, then library art, then logo.
-    push(url);
-    push(steamCdnAsset(appId, 'header.jpg'));
-    push(steamCdnAsset(appId, 'library_600x900.jpg'));
-    push(steamCdnAsset(appId, 'logo.png'));
 
-    const box = document.createElement('div');
-    box.setAttribute(STEAMDB_ATTR, 'cover');
-    box.className = 'blp-steamdb-cover';
-    const isLogoAsset = (u) => /(?:^|\/)logo\.(png|jpe?g)(?:$|\?)/i.test(String(u || ''));
-    const firstIsLogo = isLogoAsset(fallbacks[0]) && !logoIsPortrait;
-    box.innerHTML = `<img class="${firstIsLogo ? 'blp-steamdb-cover__logo' : ''}" src="${escapeAttr(fallbacks[0])}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`;
-    const img = box.querySelector('img');
-    let idx = 0;
+    // Same URL still loading — attach handler, don't restart fade/gen.
+    if (current === url) {
+      img.addEventListener('load', markReady, { once: true });
+      if (img.complete && img.naturalWidth) markReady();
+      return;
+    }
+
+    const upgrading = img.classList.contains('is-ready') && Boolean(current);
+    const gen = String((Number(img.dataset.blpRevealGen || '0') || 0) + 1);
+    img.dataset.blpRevealGen = gen;
+
+    const markReadyGen = () => {
+      if (img.dataset.blpRevealGen !== gen) return;
+      markReady();
+    };
+
+    if (upgrading) {
+      // Soft swap: fade out → new src → fade in, keep skeleton hidden.
+      img.classList.remove('is-ready');
+      window.setTimeout(() => {
+        if (img.dataset.blpRevealGen !== gen) return;
+        img.addEventListener('load', markReadyGen, { once: true });
+        img.src = url;
+        if (img.complete && img.naturalWidth) markReadyGen();
+      }, 160);
+      return;
+    }
+
+    img.classList.remove('is-ready');
+    host.classList.add('is-loading');
+    img.addEventListener('load', markReadyGen, { once: true });
+    img.src = url;
+    if (img.complete && img.naturalWidth) markReadyGen();
+  }
+
+  function ensureSteamDbTitleIconMount(token = '') {
+    if (!settings.showSteamDbIcon) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}="icon"]`).forEach((el) => el.remove());
+      return null;
+    }
+    let wrap = document.querySelector(`[${STEAMDB_ATTR}="icon"]`);
+    if (wrap) {
+      if (token) wrap.setAttribute('data-blp-token', token);
+      return wrap;
+    }
+    const h1 = desktopTitleHeading();
+    if (!h1) return null;
+    wrap = document.createElement('span');
+    wrap.setAttribute(STEAMDB_ATTR, 'icon');
+    wrap.className = 'blp-title-icon-wrap is-loading';
+    if (token) wrap.setAttribute('data-blp-token', token);
+    wrap.innerHTML =
+      '<span class="blp-title-icon-skel" aria-hidden="true"></span>' +
+      '<img class="blp-title-icon" alt="" width="32" height="32" decoding="async" referrerpolicy="no-referrer" />';
+    const img = wrap.querySelector('img');
     if (img) {
       img.addEventListener('error', () => {
-        idx += 1;
+        if (img.dataset.blpFallback === '1') {
+          wrap.remove();
+          return;
+        }
+        img.dataset.blpFallback = '1';
+        const id = wrap.getAttribute('data-blp-appid');
+        if (!id) {
+          wrap.remove();
+          return;
+        }
+        revealSteamDbMediaImage(wrap, img, steamCdnAsset(id, 'capsule_sm_120.jpg'));
+      });
+    }
+    h1.insertAdjacentElement('afterbegin', wrap);
+    return wrap;
+  }
+
+  function ensureSteamDbCoverMount(token = '') {
+    if (!settings.showSteamDbCover) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}="cover"]`).forEach((el) => el.remove());
+      return null;
+    }
+    let box = document.querySelector(`[${STEAMDB_ATTR}="cover"]`);
+    if (box) {
+      if (token) box.setAttribute('data-blp-token', token);
+      return box;
+    }
+    const mount = loggingSidebarMount();
+    if (!mount) return null;
+    box = document.createElement('div');
+    box.setAttribute(STEAMDB_ATTR, 'cover');
+    box.className = 'blp-steamdb-cover is-loading';
+    if (token) box.setAttribute('data-blp-token', token);
+    box.innerHTML =
+      '<span class="blp-steamdb-cover-skel" aria-hidden="true"></span>' +
+      '<img alt="" decoding="async" referrerpolicy="no-referrer" />';
+    const img = box.querySelector('img');
+    if (img) {
+      img.addEventListener('error', () => {
+        const fallbacks = String(box.dataset.blpFallbacks || '')
+          .split('\n')
+          .filter(Boolean);
+        let idx = Number(box.dataset.blpFallbackIdx || '0') + 1;
+        box.dataset.blpFallbackIdx = String(idx);
         if (idx < fallbacks.length) {
           const next = fallbacks[idx];
-          img.classList.toggle('blp-steamdb-cover__logo', isLogoAsset(next));
-          img.src = next;
+          img.classList.toggle('blp-steamdb-cover__logo', isSteamLogoAsset(next));
+          revealSteamDbMediaImage(box, img, next);
           return;
         }
         box.remove();
       });
     }
     mount.appendChild(box);
+    return box;
+  }
+
+  function mountSteamDbSkeletons(token = '') {
+    ensureSteamDbTitleIconMount(token);
+    ensureSteamDbCoverMount(token);
+  }
+
+  function injectSteamDbTitleIcon(url, appId, token = '') {
+    if (!settings.showSteamDbIcon) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}="icon"]`).forEach((el) => el.remove());
+      return;
+    }
+    if (!url) return;
+    const wrap = ensureSteamDbTitleIconMount(token);
+    if (!wrap) return;
+    if (appId) wrap.setAttribute('data-blp-appid', String(appId));
+    const img = wrap.querySelector('img.blp-title-icon');
+    if (!img) return;
+    delete img.dataset.blpFallback;
+    revealSteamDbMediaImage(wrap, img, url);
+  }
+
+  function injectSteamDbCover(url, appId, { logoIsPortrait = false, token = '' } = {}) {
+    if (!settings.showSteamDbCover) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}="cover"]`).forEach((el) => el.remove());
+      return;
+    }
+    if (!url) return;
+    const box = ensureSteamDbCoverMount(token);
+    if (!box) return;
+
+    const fallbacks = [];
+    const push = (u) => {
+      if (u && !fallbacks.includes(u)) fallbacks.push(u);
+    };
+    push(url);
+    push(steamCdnAsset(appId, 'header.jpg'));
+    push(steamCdnAsset(appId, 'library_600x900.jpg'));
+    push(steamCdnAsset(appId, 'logo.png'));
+
+    box.dataset.blpFallbacks = fallbacks.join('\n');
+    box.dataset.blpFallbackIdx = '0';
+    if (appId) box.setAttribute('data-blp-appid', String(appId));
+
+    const img = box.querySelector('img');
+    if (!img) return;
+    const firstIsLogo = isSteamLogoAsset(fallbacks[0]) && !logoIsPortrait;
+    img.classList.toggle('blp-steamdb-cover__logo', firstIsLogo);
+    revealSteamDbMediaImage(box, img, fallbacks[0]);
   }
 
   function applySteamDbUi(steamDb, token = '') {
-    removeSteamDbUi();
-    if (!steamDb) return;
-    injectSteamDbTitleIcon(steamDb.iconUrl, steamDb.appId);
+    if (!steamDb) {
+      removeSteamDbUi();
+      return;
+    }
+    // Keep skeleton mounts; only reveal when a URL is ready (empty URL = still loading).
+    if (settings.showSteamDbIcon) ensureSteamDbTitleIconMount(token);
+    if (settings.showSteamDbCover) ensureSteamDbCoverMount(token);
+    injectSteamDbTitleIcon(steamDb.iconUrl, steamDb.appId, token);
     injectSteamDbCover(steamDb.logoUrl, steamDb.appId, {
       logoIsPortrait: Boolean(steamDb.logoIsPortrait),
+      token,
     });
     if (
       steamDb.source === 'steamdb' &&
       steamDb.logoUrl &&
-      /(?:^|\/)logo\.(png|jpe?g)(?:$|\?)/i.test(steamDb.logoUrl)
+      isSteamLogoAsset(steamDb.logoUrl)
     ) {
       document
         .querySelector(`[${STEAMDB_ATTR}="cover"] img`)
@@ -6448,6 +6649,8 @@
 
     const needSteamDb =
       settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamPlayers;
+    const needSteamDbMedia = settings.showSteamDbIcon || settings.showSteamDbCover;
+    if (needSteamDbMedia) mountSteamDbSkeletons(token);
     const needSteam =
       settings.showSteam ||
       settings.showMetacritic ||
@@ -6637,6 +6840,7 @@
                   ? { reason: `SteamDB error: ${err?.message || err}` }
                   : undefined,
               };
+              removeSteamDbUi();
               paintPlayers();
             })
         );
@@ -6747,12 +6951,13 @@
       if (!stillHere()) return;
 
       state.steam = steamResult;
-      if (steamResult) {
+      if (steamResult?.found) {
         paintSteamBlock();
         startDependents(steamResult);
       } else if (needSteam) {
-        state.steam = { found: false };
+        state.steam = steamResult || { found: false };
         paintSteamBlock();
+        if (needSteamDbMedia) removeSteamDbUi();
       }
 
       if (settings.showGameStatus && !dependentsStarted) {
@@ -6780,6 +6985,7 @@
         slug: null,
         _debug: { reason: `Enrichment error: ${err?.message || err}` },
       };
+      if (needSteamDbMedia && !state.steamDb) removeSteamDbUi();
       paintSteamBlock();
       paintOpenCritic();
       paintHltb();
@@ -7445,7 +7651,8 @@
       el.classList?.contains('blp-settings-backdrop') ||
       el.classList?.contains('blp-fix-match-backdrop') ||
       el.classList?.contains('blp-debug-panel') ||
-      el.classList?.contains('blp-steamdb-cover')
+      el.classList?.contains('blp-steamdb-cover') ||
+      el.classList?.contains('blp-title-icon-wrap')
     ) {
       return true;
     }

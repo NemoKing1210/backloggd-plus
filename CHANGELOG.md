@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.8] - 2026-07-16
+
+### Fixed
+
+- SteamDB title icon fade-in: `is-ready` opacity no longer loses to `#game-profile h1` CSS specificity
+
+## [0.7.7] - 2026-07-16
+
+### Changed
+
+- SteamDB icon and cover show shimmer skeletons immediately on game pages, then fade in when assets load
+
 ## [0.7.6] - 2026-07-16
 
 ### Changed
