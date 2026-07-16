@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.1-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.4-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.3.1`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.3.4`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -54,10 +54,11 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Game pages (`/games/{slug}/`):**
 
-- Native detail rows under Platforms — **Steam** (price + reviews), **Metacritic**, **Links** (same layout as Genres/Platforms)
+- Native detail rows under Platforms — **Steam** (owned · price · reviews), **Metacritic**, **Links** (same layout as Genres/Platforms)
 - Skeleton placeholders while Steam data loads
 - Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
-- Works without API keys (Steam Store public endpoints)
+- Steam **Owned** badge when you are logged into Steam in the same browser (no API key)
+- Works without API keys (Steam Store public endpoints + session userdata for ownership)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):
 
@@ -73,7 +74,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / Metacritic / links row / Steam-page & SteamDB Backloggd buttons
+- Toggles for Steam / owned status / Metacritic / links row / Steam-page & SteamDB Backloggd buttons
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
 - Cache duration + clear cache
 

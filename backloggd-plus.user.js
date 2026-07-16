@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.3.1
+// @version           0.3.4
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -59,6 +59,10 @@
   const STEAM_SEARCH_URL = 'https://store.steampowered.com/api/storesearch/';
   const STEAM_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
   const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews';
+  const STEAM_USERDATA_URL = 'https://store.steampowered.com/dynamicstore/userdata/';
+  const OWNED_CACHE_KEY = 'steam:owned';
+  const OWNED_EMPTY_TTL_MS = 5 * 60 * 1000;
+  const OWNED_FALLBACK_TTL_MS = 60 * 60 * 1000;
 
   const LINK_KEYS = ['igdb', 'steam', 'steamdb', 'metacritic', 'opencritic', 'hltb', 'wikipedia'];
   const LINK_DOMAINS = {
@@ -78,6 +82,7 @@
     showSteam: true,
     showMetacritic: true,
     showLinks: true,
+    showSteamOwned: true,
     showSteamPageLink: true,
     showSteamDbPageLink: true,
     links: {
@@ -115,12 +120,16 @@
       showSteam: 'Show Steam price & reviews',
       showMetacritic: 'Show Metacritic score',
       showLinks: 'Show quick links row',
+      showSteamOwned: 'Show Steam owned status',
+      showSteamOwnedHint:
+        'Shows “Owned” when the game is in your Steam library. Requires being logged into Steam in this browser.',
       showSteamPageLink: 'Show Backloggd button on Steam',
       showSteamPageLinkHint: 'Adds a SteamDB-style button in Other site info on Steam app pages.',
       showSteamDbPageLink: 'Show Backloggd button on SteamDB',
       showSteamDbPageLinkHint: 'Adds a Backloggd button next to Store / IGDB in SteamDB app links.',
       steamBackloggdTooltip: 'View on Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'Owned',
       sectionLinks: 'Quick links',
       sectionLinksHint: 'Choose which sites appear in the Links row on game pages.',
       navSettings: 'Plus',
@@ -173,12 +182,16 @@
       showSteam: 'Показывать цену и отзывы Steam',
       showMetacritic: 'Показывать оценку Metacritic',
       showLinks: 'Показывать ряд ссылок',
+      showSteamOwned: 'Показывать «Куплено» в Steam',
+      showSteamOwnedHint:
+        'Показывает «Куплено», если игра в вашей библиотеке Steam. Нужен вход в Steam в этом браузере.',
       showSteamPageLink: 'Кнопка Backloggd на Steam',
       showSteamPageLinkHint: 'Кнопка в стиле SteamDB в блоке Other site info на страницах игр Steam.',
       showSteamDbPageLink: 'Кнопка Backloggd на SteamDB',
       showSteamDbPageLinkHint: 'Кнопка рядом со Store / IGDB в блоке app-links на SteamDB.',
       steamBackloggdTooltip: 'Открыть на Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'Куплено',
       sectionLinks: 'Быстрые ссылки',
       sectionLinksHint: 'Какие сайты показывать в ряду Links на странице игры.',
       navSettings: 'Plus',
@@ -231,12 +244,15 @@
       showSteam: '显示 Steam 价格与评价',
       showMetacritic: '显示 Metacritic 分数',
       showLinks: '显示快捷链接行',
+      showSteamOwned: '显示 Steam 已拥有状态',
+      showSteamOwnedHint: '若游戏在您的 Steam 库中则显示“已拥有”。需要在此浏览器登录 Steam。',
       showSteamPageLink: '在 Steam 显示 Backloggd 按钮',
       showSteamPageLinkHint: '在 Steam 游戏页 Other site info 中添加类似 SteamDB 的按钮。',
       showSteamDbPageLink: '在 SteamDB 显示 Backloggd 按钮',
       showSteamDbPageLinkHint: '在 SteamDB app-links 中、Store / IGDB 旁添加 Backloggd 按钮。',
       steamBackloggdTooltip: '在 Backloggd 查看',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: '已拥有',
       sectionLinks: '快捷链接',
       sectionLinksHint: '选择游戏页 Links 行中显示的站点。',
       navSettings: 'Plus',
@@ -289,12 +305,16 @@
       showSteam: 'Mostrar precio y reseñas de Steam',
       showMetacritic: 'Mostrar puntuación de Metacritic',
       showLinks: 'Mostrar fila de enlaces',
+      showSteamOwned: 'Mostrar si está en tu biblioteca Steam',
+      showSteamOwnedHint:
+        'Muestra “En propiedad” si el juego está en tu biblioteca de Steam. Requiere estar conectado a Steam en este navegador.',
       showSteamPageLink: 'Botón Backloggd en Steam',
       showSteamPageLinkHint: 'Añade un botón estilo SteamDB en Other site info en páginas de Steam.',
       showSteamDbPageLink: 'Botón Backloggd en SteamDB',
       showSteamDbPageLinkHint: 'Añade un botón junto a Store / IGDB en app-links de SteamDB.',
       steamBackloggdTooltip: 'Ver en Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'En propiedad',
       sectionLinks: 'Enlaces rápidos',
       sectionLinksHint: 'Elige qué sitios aparecen en la fila Links.',
       navSettings: 'Plus',
@@ -347,12 +367,16 @@
       showSteam: 'Mostrar preço e avaliações Steam',
       showMetacritic: 'Mostrar nota Metacritic',
       showLinks: 'Mostrar linha de links',
+      showSteamOwned: 'Mostrar se está na biblioteca Steam',
+      showSteamOwnedHint:
+        'Mostra “Possui” se o jogo estiver na sua biblioteca Steam. É preciso estar logado na Steam neste navegador.',
       showSteamPageLink: 'Botão Backloggd no Steam',
       showSteamPageLinkHint: 'Adiciona um botão estilo SteamDB em Other site info nas páginas da Steam.',
       showSteamDbPageLink: 'Botão Backloggd no SteamDB',
       showSteamDbPageLinkHint: 'Adiciona um botão ao lado de Store / IGDB em app-links do SteamDB.',
       steamBackloggdTooltip: 'Ver no Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'Possui',
       sectionLinks: 'Links rápidos',
       sectionLinksHint: 'Escolha quais sites aparecem na linha Links.',
       navSettings: 'Plus',
@@ -405,12 +429,16 @@
       showSteam: 'Steam-Preis & Bewertungen anzeigen',
       showMetacritic: 'Metacritic-Wertung anzeigen',
       showLinks: 'Link-Zeile anzeigen',
+      showSteamOwned: 'Steam-Besitz anzeigen',
+      showSteamOwnedHint:
+        'Zeigt „Im Besitz“, wenn das Spiel in Ihrer Steam-Bibliothek ist. Erfordert eine Steam-Anmeldung in diesem Browser.',
       showSteamPageLink: 'Backloggd-Button auf Steam',
       showSteamPageLinkHint: 'SteamDB-ähnlicher Button in Other site info auf Steam-Spieleseiten.',
       showSteamDbPageLink: 'Backloggd-Button auf SteamDB',
       showSteamDbPageLinkHint: 'Button neben Store / IGDB in den SteamDB app-links.',
       steamBackloggdTooltip: 'Auf Backloggd ansehen',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'Im Besitz',
       sectionLinks: 'Schnelllinks',
       sectionLinksHint: 'Welche Seiten in der Links-Zeile erscheinen.',
       navSettings: 'Plus',
@@ -463,12 +491,16 @@
       showSteam: 'Afficher prix et avis Steam',
       showMetacritic: 'Afficher le score Metacritic',
       showLinks: 'Afficher la rangée de liens',
+      showSteamOwned: 'Afficher le statut possédé Steam',
+      showSteamOwnedHint:
+        'Affiche « Possédé » si le jeu est dans votre bibliothèque Steam. Connexion Steam requise dans ce navigateur.',
       showSteamPageLink: 'Bouton Backloggd sur Steam',
       showSteamPageLinkHint: 'Ajoute un bouton style SteamDB dans Other site info sur les pages Steam.',
       showSteamDbPageLink: 'Bouton Backloggd sur SteamDB',
       showSteamDbPageLinkHint: 'Ajoute un bouton à côté de Store / IGDB dans app-links SteamDB.',
       steamBackloggdTooltip: 'Voir sur Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'Possédé',
       sectionLinks: 'Liens rapides',
       sectionLinksHint: 'Choisissez les sites affichés dans la rangée Links.',
       navSettings: 'Plus',
@@ -521,12 +553,16 @@
       showSteam: 'Steamの価格とレビューを表示',
       showMetacritic: 'Metacriticスコアを表示',
       showLinks: 'リンク行を表示',
+      showSteamOwned: 'Steam所持を表示',
+      showSteamOwnedHint:
+        'ライブラリにある場合「所持」を表示します。このブラウザでSteamにログインしている必要があります。',
       showSteamPageLink: 'SteamにBackloggdボタン',
       showSteamPageLinkHint: 'Steamのゲームページ Other site info にSteamDB風ボタンを追加します。',
       showSteamDbPageLink: 'SteamDBにBackloggdボタン',
       showSteamDbPageLinkHint: 'SteamDBのapp-linksでStore / IGDBの横にボタンを追加します。',
       steamBackloggdTooltip: 'Backloggdで見る',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: '所持',
       sectionLinks: 'クイックリンク',
       sectionLinksHint: 'Links行に表示するサイトを選択します。',
       navSettings: 'Plus',
@@ -579,12 +615,16 @@
       showSteam: 'Steam 가격 및 리뷰 표시',
       showMetacritic: 'Metacritic 점수 표시',
       showLinks: '링크 행 표시',
+      showSteamOwned: 'Steam 보유 표시',
+      showSteamOwnedHint:
+        '라이브러리에 있으면 “보유”를 표시합니다. 이 브라우저에서 Steam 로그인이 필요합니다.',
       showSteamPageLink: 'Steam에 Backloggd 버튼',
       showSteamPageLinkHint: 'Steam 게임 페이지 Other site info에 SteamDB 스타일 버튼을 추가합니다.',
       showSteamDbPageLink: 'SteamDB에 Backloggd 버튼',
       showSteamDbPageLinkHint: 'SteamDB app-links에서 Store / IGDB 옆에 버튼을 추가합니다.',
       steamBackloggdTooltip: 'Backloggd에서 보기',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: '보유',
       sectionLinks: '빠른 링크',
       sectionLinksHint: 'Links 행에 표시할 사이트를 선택합니다.',
       navSettings: 'Plus',
@@ -637,12 +677,16 @@
       showSteam: 'Pokaż cenę i opinie Steam',
       showMetacritic: 'Pokaż wynik Metacritic',
       showLinks: 'Pokaż wiersz linków',
+      showSteamOwned: 'Pokaż status posiadania Steam',
+      showSteamOwnedHint:
+        'Pokazuje „Posiadane”, jeśli gra jest w bibliotece Steam. Wymaga zalogowania do Steam w tej przeglądarce.',
       showSteamPageLink: 'Przycisk Backloggd na Steam',
       showSteamPageLinkHint: 'Dodaje przycisk w stylu SteamDB w Other site info na stronach Steam.',
       showSteamDbPageLink: 'Przycisk Backloggd na SteamDB',
       showSteamDbPageLinkHint: 'Dodaje przycisk obok Store / IGDB w app-links na SteamDB.',
       steamBackloggdTooltip: 'Zobacz na Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
+      steamOwned: 'Posiadane',
       sectionLinks: 'Szybkie linki',
       sectionLinksHint: 'Wybierz witryny widoczne w wierszu Links.',
       navSettings: 'Plus',
@@ -818,6 +862,57 @@
     persistCacheSoon();
   }
 
+  function ownedCacheTtlMs(empty) {
+    if (empty) return OWNED_EMPTY_TTL_MS;
+    const ttl = cacheTtlMs();
+    return ttl > 0 ? ttl : OWNED_FALLBACK_TTL_MS;
+  }
+
+  function getOwnedCached() {
+    const entry = readCacheStore()[OWNED_CACHE_KEY];
+    if (!entry?.ts || !entry.data || !Array.isArray(entry.data.appIds)) return null;
+    const empty = entry.data.appIds.length === 0;
+    if (Date.now() - entry.ts > ownedCacheTtlMs(empty)) return null;
+    return entry.data;
+  }
+
+  function setOwnedCached(data) {
+    readCacheStore()[OWNED_CACHE_KEY] = { ts: Date.now(), data };
+    persistCacheSoon();
+  }
+
+  async function fetchSteamOwnedSet() {
+    const cached = getOwnedCached();
+    if (cached) return new Set(cached.appIds);
+
+    if (inflight.has(OWNED_CACHE_KEY)) return inflight.get(OWNED_CACHE_KEY);
+
+    const task = (async () => {
+      try {
+        const data = await gmRequest({
+          url: `${STEAM_USERDATA_URL}?t=${Date.now()}`,
+          anonymous: false,
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+        const appIds = Array.isArray(data?.rgOwnedApps)
+          ? data.rgOwnedApps.map(Number).filter((id) => Number.isFinite(id) && id > 0)
+          : [];
+        setOwnedCached({ appIds });
+        return new Set(appIds);
+      } catch (_) {
+        setOwnedCached({ appIds: [] });
+        return new Set();
+      }
+    })();
+
+    inflight.set(OWNED_CACHE_KEY, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(OWNED_CACHE_KEY);
+    }
+  }
+
   function clearCache() {
     const store = readCacheStore();
     const count = Object.keys(store).length;
@@ -832,7 +927,7 @@
 
   function gmRequest(options) {
     return new Promise((resolve, reject) => {
-      GM_xmlhttpRequest({
+      const req = {
         method: options.method || 'GET',
         url: options.url,
         headers: options.headers || {},
@@ -847,7 +942,11 @@
         },
         onerror: () => reject(new Error('Network error')),
         ontimeout: () => reject(new Error('Timeout')),
-      });
+      };
+      if (typeof options.anonymous === 'boolean') {
+        req.anonymous = options.anonymous;
+      }
+      GM_xmlhttpRequest(req);
     });
   }
 
@@ -865,6 +964,9 @@
         --blp-rev-positive: #66c0f4;
         --blp-rev-mixed: #b9a404;
         --blp-rev-negative: #c35c2c;
+        --blp-owned: #beee11;
+        --blp-owned-bg: #3d4f1a;
+        --blp-owned-border: rgba(190, 238, 17, 0.35);
         --blp-skel: rgba(128, 128, 128, 0.22);
         --blp-skel-shine: rgba(255, 255, 255, 0.18);
       }
@@ -952,6 +1054,58 @@
       [${ENRICH_ATTR}] .blp-discount {
         opacity: 0.75;
         margin-left: 0.15em;
+      }
+
+      [${ENRICH_ATTR}="steam"] {
+        align-items: flex-start;
+      }
+
+      [${ENRICH_ATTR}="steam"] > [class*="col"] {
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.35rem !important;
+      }
+
+      [${ENRICH_ATTR}="steam"] [data-blp-values] {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.4rem;
+      }
+
+      @media (min-width: 768px) {
+        [${ENRICH_ATTR}="steam"] [data-blp-values] {
+          align-items: flex-start;
+        }
+      }
+
+      [${ENRICH_ATTR}="steam"] .blp-steam-line {
+        display: block;
+        line-height: 1.35;
+      }
+
+      [${ENRICH_ATTR}] .blp-owned-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.28em;
+        padding: 0.1em 0.5em 0.12em;
+        border-radius: 4px;
+        border: 1px solid var(--blp-owned-border);
+        background: linear-gradient(180deg, #4c6b22 0%, var(--blp-owned-bg) 100%);
+        color: var(--blp-owned) !important;
+        font-size: 0.78em;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        line-height: 1.45;
+        vertical-align: middle;
+        white-space: nowrap;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        width: fit-content;
+      }
+
+      [${ENRICH_ATTR}] .blp-owned-badge__icon {
+        width: 0.85em;
+        height: 0.85em;
+        flex: 0 0 auto;
       }
 
       [${ENRICH_ATTR}] .blp-empty {
@@ -1384,8 +1538,8 @@
     }
     if (kind === 'steam') {
       return `
+        <span class="blp-skeleton blp-skeleton--sm"></span>
         <span class="blp-skeleton blp-skeleton--md"></span>
-        <span class="separator">•</span>
         <span class="blp-skeleton blp-skeleton--lg"></span>
       `;
     }
@@ -1451,12 +1605,18 @@
     `;
   }
 
-  function renderSteamValues(steam) {
+  function renderSteamValues(steam, { owned = false } = {}) {
     const parts = [];
     const fav = faviconForUrl(steam.storeUrl);
     const favImg = fav
       ? `<img class="blp-favicon" src="${escapeAttr(fav)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
       : '';
+
+    if (owned) {
+      parts.push({
+        html: `<span class="blp-owned-badge" title="${escapeAttr(t.steamOwned)}"><svg class="blp-owned-badge__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6.4 11.3 2.9 7.8l1.2-1.2 2.3 2.3 5-5.1 1.2 1.2z"/></svg>${escapeHtml(t.steamOwned)}</span>`,
+      });
+    }
 
     const priceText = formatPriceText(steam);
     const discount =
@@ -1486,15 +1646,10 @@
       return `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${favImg}${escapeHtml(t.steam)}</a>`;
     }
 
-    return parts
-      .map((part, i) => {
-        const sep = i < parts.length - 1 ? '<span class="separator">•</span>' : '';
-        return `<span class="game-detail">${part.html}${sep}</span>`;
-      })
-      .join('');
+    return parts.map((part) => `<span class="blp-steam-line">${part.html}</span>`).join('');
   }
 
-  function renderEnrichment(rows, { steam, links, error }) {
+  function renderEnrichment(rows, { steam, links, error, owned = false }) {
     if (rows.steam) {
       if (error) {
         setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>`);
@@ -1503,7 +1658,7 @@
         setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`);
         showRow(rows.steam);
       } else {
-        setRowValues(rows.steam, renderSteamValues(steam));
+        setRowValues(rows.steam, renderSteamValues(steam, { owned }));
         showRow(rows.steam);
       }
     }
@@ -1553,7 +1708,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showMetacritic}|${settings.showLinks}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showMetacritic}|${settings.showLinks}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
       return;
@@ -1576,21 +1731,30 @@
 
     let steam = null;
     let error = false;
+    let owned = false;
 
     try {
-      if (settings.showSteam || settings.showMetacritic) {
-        steam = await fetchSteamBundle(title, settings.steamCountry || 'US');
+      const needSteam = settings.showSteam || settings.showMetacritic;
+      const needOwned = settings.showSteam && settings.showSteamOwned;
+      const [steamResult, ownedSet] = await Promise.all([
+        needSteam ? fetchSteamBundle(title, settings.steamCountry || 'US') : Promise.resolve(null),
+        needOwned ? fetchSteamOwnedSet() : Promise.resolve(null),
+      ]);
+      steam = steamResult;
+      if (ownedSet && steam?.found && steam.appId != null) {
+        owned = ownedSet.has(Number(steam.appId));
       }
     } catch (_) {
       error = true;
       steam = null;
+      owned = false;
     }
 
     if (runId !== gamePageToken) return;
     if (!getPageContext().isGamePage) return;
 
     const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
-    renderEnrichment(rows, { steam, links, error });
+    renderEnrichment(rows, { steam, links, error, owned });
   }
 
   function openSettings() {
@@ -1655,6 +1819,11 @@
             <span>${escapeHtml(t.showSteam)}</span>
             <button type="button" data-blp-toggle="showSteam" class="${draft.showSteam ? 'is-on' : ''}">${draft.showSteam ? t.on : t.off}</button>
           </div>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamOwned)}</span>
+            <button type="button" data-blp-toggle="showSteamOwned" class="${draft.showSteamOwned ? 'is-on' : ''}">${draft.showSteamOwned ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamOwnedHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showMetacritic)}</span>
             <button type="button" data-blp-toggle="showMetacritic" class="${draft.showMetacritic ? 'is-on' : ''}">${draft.showMetacritic ? t.on : t.off}</button>

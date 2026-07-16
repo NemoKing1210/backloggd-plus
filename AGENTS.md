@@ -30,10 +30,10 @@ backloggd-plus/
 
 1. Match Backloggd and Steam app pages at `document-idle`.
 2. On **Backloggd:** IIFE bootstraps styles, settings, DOM scan, `MutationObserver`, and Turbo/href SPA hooks.
-3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = price + reviews, `Metacritic`, `Links`); resolve title + IGDB link from DOM. Skeletons while Steam loads; link favicons via Google s2.
+3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = owned · price · reviews, `Metacritic`, `Links`); resolve title + IGDB link from DOM. Skeletons while Steam loads; link favicons via Google s2.
 4. On **Steam** app pages: inject a SteamDB-style Backloggd button into `.apphub_OtherSiteInfo` (slug from Steam URL or title).
 5. On **SteamDB** app pages: inject a `.btn` into `nav.app-links` (prefer IGDB slug from the page).
-6. Steam enrichment: `storesearch` → pick best app → `appdetails` + `appreviews` via `GM_xmlhttpRequest` (`@connect store.steampowered.com`).
+6. Steam enrichment: `storesearch` → pick best app → `appdetails` + `appreviews` via `GM_xmlhttpRequest` (`@connect store.steampowered.com`). Ownership via `dynamicstore/userdata` (`rgOwnedApps`) using the browser Steam session (no API key).
 7. Cache in `GM_getValue` / `GM_setValue` (`blp_cache_v1`); settings in `blp_settings` (incl. per-link toggles).
 8. UI strings in `TRANSLATIONS` / browser locale; settings via navbar **Plus** button and `GM_registerMenuCommand`.
 
