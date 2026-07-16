@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.0
+// @version           0.7.2
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -56,7 +56,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.0';
+  const SCRIPT_VERSION = '0.7.2';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3282,11 +3282,23 @@
         flex-wrap: wrap;
         gap: 0.2rem;
         pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.15s ease;
+      }
+
+      .game-cover:hover .blp-card-badges {
+        opacity: 0.25;
+        pointer-events: none;
       }
 
       .game-cover .blp-card-badges a,
       .game-cover .blp-card-badges button {
         pointer-events: auto;
+      }
+
+      .game-cover:hover .blp-card-badges a,
+      .game-cover:hover .blp-card-badges button {
+        pointer-events: none;
       }
 
       .blp-card-badge {
