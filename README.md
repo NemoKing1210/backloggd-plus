@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.4.9-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.16-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.4.9`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.4.16`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -56,7 +56,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 - Native detail rows under Platforms — **Steam** (owned · price · reviews · tags), **Metacritic**, **GameStatus** (crack / DRM), **Links**
 - Skeleton placeholders while Steam / GameStatus data loads
-- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
+- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
 - Steam **Owned** badge when you are logged into Steam in the same browser (no API key)
 - GameStatus crack status badges (same classification as steam-gamestatus)
 - Works without API keys (Steam Store public endpoints + session userdata + GameStatus public API)
@@ -77,7 +77,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 - Steam store region (price currency)
 - Toggles for Steam / owned status / Steam tags / Metacritic / GameStatus / links row / Steam-page & SteamDB Backloggd buttons
 - Debug mode: reason + truncated API dump under Steam / GameStatus rows
-- Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
+- Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
 - Cache duration + clear cache
 
 Planned: list/card badges, deeper IGDB enrichment, more QoL tweaks.

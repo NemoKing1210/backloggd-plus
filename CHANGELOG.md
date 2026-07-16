@@ -5,6 +5,48 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.16] - 2026-07-16
+
+### Fixed
+
+- Metacritic `/game/{slug}/` strips Backloggd disambiguators (`--1`, `--2`, …)
+
+## [0.4.15] - 2026-07-16
+
+### Changed
+
+- Metacritic score badge uses the same `/game/{slug}/` URL as quick links (no Steam metacritic URL)
+
+## [0.4.14] - 2026-07-16
+
+### Removed
+
+- Wikipedia from quick links and settings toggles
+
+## [0.4.13] - 2026-07-16
+
+### Changed
+
+- Metacritic score rendered as a color-tier badge (green / yellow / red)
+
+## [0.4.12] - 2026-07-16
+
+### Changed
+
+- Metacritic quick link uses `/game/{slug}/` (from page slug or title) instead of search
+
+## [0.4.11] - 2026-07-16
+
+### Fixed
+
+- Navbar **Plus** button height matches **Log a Game**; icon uses `fa-gear` (available in Backloggd’s Font Awesome set)
+
+## [0.4.10] - 2026-07-16
+
+### Changed
+
+- Navbar settings control matches native **Log a Game** (`btn btn-main mb-2 my-sm-0 py-0`)
+
 ## [0.4.9] - 2026-07-16
 
 ### Fixed

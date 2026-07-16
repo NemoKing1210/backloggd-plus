@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.4.9
+// @version           0.4.16
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -52,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.4.9';
+  const SCRIPT_VERSION = '0.4.16';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -79,7 +79,7 @@
   const GS_INVALID_SLUG_RE =
     /^(https?-)?(store-)?steam(powered|static)?(-[a-z0-9]+)*(-com)?$|steampowered|steamstatic|akamaihd|^(on-)?wishlist$|^gamestatus$|^(soon-)?on-game-pass$/;
 
-  const LINK_KEYS = ['igdb', 'steam', 'steamdb', 'metacritic', 'opencritic', 'hltb', 'wikipedia'];
+  const LINK_KEYS = ['igdb', 'steam', 'steamdb', 'metacritic', 'opencritic', 'hltb'];
   const LINK_DOMAINS = {
     igdb: 'igdb.com',
     steam: 'store.steampowered.com',
@@ -87,7 +87,6 @@
     metacritic: 'metacritic.com',
     opencritic: 'opencritic.com',
     hltb: 'howlongtobeat.com',
-    wikipedia: 'wikipedia.org',
   };
 
   const DEFAULT_SETTINGS = {
@@ -110,7 +109,6 @@
       metacritic: true,
       opencritic: true,
       hltb: true,
-      wikipedia: true,
     },
   };
 
@@ -195,7 +193,6 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
     },
     ru: {
       menuSettings: 'Backloggd Plus — Настройки',
@@ -275,7 +272,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     zh: {
       menuSettings: 'Backloggd Plus — 设置',
@@ -353,7 +350,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     es: {
       menuSettings: 'Backloggd Plus — Ajustes',
@@ -432,7 +429,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     pt: {
       menuSettings: 'Backloggd Plus — Configurações',
@@ -511,7 +508,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     de: {
       menuSettings: 'Backloggd Plus — Einstellungen',
@@ -590,7 +587,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     fr: {
       menuSettings: 'Backloggd Plus — Réglages',
@@ -669,7 +666,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     ja: {
       menuSettings: 'Backloggd Plus — 設定',
@@ -748,7 +745,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     ko: {
       menuSettings: 'Backloggd Plus — 설정',
@@ -827,7 +824,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
     pl: {
       menuSettings: 'Backloggd Plus — Ustawienia',
@@ -906,7 +903,7 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
-      linkWikipedia: 'Wikipedia',
+
     },
   };
 
@@ -997,7 +994,6 @@
       metacritic: 'linkMetacritic',
       opencritic: 'linkOpencritic',
       hltb: 'linkHltb',
-      wikipedia: 'linkWikipedia',
     };
     return map[key] || key;
   }
@@ -1318,47 +1314,56 @@
         border-radius: 2px;
       }
 
-      .blp-nav-settings-btn {
-        display: inline-flex;
-        align-items: center;
-        height: 33px;
-        padding: 1px 12px;
-        cursor: pointer;
+      #blp-nav-settings {
+        white-space: nowrap;
         vertical-align: middle;
       }
 
-      .blp-nav-settings-btn > a {
-        position: relative;
-        z-index: 1;
-        color: #fff !important;
-        text-decoration: none !important;
-        line-height: 1;
+      #add-a-game + #blp-nav-settings {
+        min-height: var(--blp-nav-btn-h, unset);
       }
 
-      .blp-nav-settings-btn .btn-title {
-        font-size: 0.95rem !important;
-        font-weight: 500;
-        margin: 0;
-        color: #fff;
-        white-space: nowrap;
-      }
-
-      .blp-nav-settings-btn .btn-title i {
-        margin-right: 0.35em;
-      }
-
-      #blp-nav-settings {
-        display: inline-flex;
-        align-items: center;
-      }
-
-      #blp-nav-settings.nav-item {
+      #blp-nav-settings.nav-item,
+      li.nav-item > #blp-nav-settings {
         margin-left: 0.5rem;
       }
 
-      [${ENRICH_ATTR}] .blp-mc-score--high { color: var(--blp-mc-high) !important; font-weight: 600; }
-      [${ENRICH_ATTR}] .blp-mc-score--mid { color: var(--blp-mc-mid) !important; font-weight: 600; }
-      [${ENRICH_ATTR}] .blp-mc-score--low { color: var(--blp-mc-low) !important; font-weight: 600; }
+      [${ENRICH_ATTR}] .blp-mc-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.85em;
+        padding: 0.18em 0.42em;
+        border-radius: 3px;
+        font-size: 0.88em;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.01em;
+        line-height: 1.2;
+        text-decoration: none !important;
+        vertical-align: middle;
+        white-space: nowrap;
+        width: fit-content;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      }
+
+      [${ENRICH_ATTR}] .blp-mc-badge--high {
+        background: var(--blp-mc-high);
+        color: #14200a !important;
+        border: 1px solid rgba(102, 204, 51, 0.55);
+      }
+
+      [${ENRICH_ATTR}] .blp-mc-badge--mid {
+        background: var(--blp-mc-mid);
+        color: #2a2200 !important;
+        border: 1px solid rgba(255, 204, 51, 0.55);
+      }
+
+      [${ENRICH_ATTR}] .blp-mc-badge--low {
+        background: var(--blp-mc-low);
+        color: #2a0a12 !important;
+        border: 1px solid rgba(255, 102, 119, 0.5);
+      }
 
       [${ENRICH_ATTR}] .blp-review--overwhelming,
       [${ENRICH_ATTR}] .blp-review--very-positive { color: var(--blp-rev-overwhelming) !important; font-weight: 600; }
@@ -1905,12 +1910,22 @@
     return pool[0];
   }
 
-  function mcScoreClass(score) {
+  function mcScoreTier(score) {
     const n = Number(score);
     if (!Number.isFinite(n)) return '';
-    if (n >= 75) return 'blp-mc-score--high';
-    if (n >= 50) return 'blp-mc-score--mid';
-    return 'blp-mc-score--low';
+    if (n >= 75) return 'high';
+    if (n >= 50) return 'mid';
+    return 'low';
+  }
+
+  function renderMetacriticBadge(score, url) {
+    const tier = mcScoreTier(score);
+    const cls = `blp-mc-badge${tier ? ` blp-mc-badge--${tier}` : ''}`;
+    const label = escapeHtml(String(score));
+    if (url) {
+      return `<a class="${cls} blp-ext-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    }
+    return `<span class="${cls}">${label}</span>`;
   }
 
   /** Steam review_score: 1..9 (Overwhelmingly Negative → Overwhelmingly Positive). */
@@ -2486,14 +2501,9 @@
         url: `https://steamdb.info/search/?a=app&q=${q}`,
       });
     }
-    if (steam?.metacritic?.url) {
-      links.push({ key: 'metacritic', label: t.linkMetacritic, url: steam.metacritic.url });
-    } else if (q) {
-      links.push({
-        key: 'metacritic',
-        label: t.linkMetacritic,
-        url: `https://www.metacritic.com/search/${q}/`,
-      });
+    const mcUrl = metacriticGameUrl(title, slug);
+    if (mcUrl) {
+      links.push({ key: 'metacritic', label: t.linkMetacritic, url: mcUrl });
     }
     if (q) {
       links.push({
@@ -2505,11 +2515,6 @@
         key: 'hltb',
         label: t.linkHltb,
         url: `https://howlongtobeat.com/?q=${q}`,
-      });
-      links.push({
-        key: 'wikipedia',
-        label: t.linkWikipedia,
-        url: `https://en.wikipedia.org/wiki/Special:Search?search=${q}`,
       });
     }
     return links.filter((l) => isLinkEnabled(l.key));
@@ -2693,7 +2698,7 @@
     `;
   }
 
-  function renderEnrichment(rows, { steam, links, error, owned = false, gamestatus = null }) {
+  function renderEnrichment(rows, { steam, links, error, owned = false, gamestatus = null, title = '', slug = '' }) {
     const debugOn = Boolean(settings.debugMode);
 
     if (rows.steam) {
@@ -2728,17 +2733,7 @@
     if (rows.metacritic) {
       const score = steam?.metacritic?.score;
       if (score != null && !error) {
-        const href = steam.metacritic.url
-          ? `href="${escapeAttr(steam.metacritic.url)}" target="_blank" rel="noopener noreferrer"`
-          : '';
-        const tag = steam.metacritic.url ? 'a' : 'span';
-        const icon = steam.metacritic.url
-          ? `<img class="blp-favicon" src="${escapeAttr(faviconForUrl(steam.metacritic.url))}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
-          : '';
-        setRowValues(
-          rows.metacritic,
-          `<${tag} class="game-details-value blp-ext-link ${mcScoreClass(score)}" ${href}>${icon}${escapeHtml(String(score))}</${tag}>`
-        );
+        setRowValues(rows.metacritic, renderMetacriticBadge(score, metacriticGameUrl(title, slug)));
         showRow(rows.metacritic);
       } else {
         hideRow(rows.metacritic);
@@ -2874,7 +2869,7 @@
     if (!getPageContext().isGamePage) return;
 
     const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
-    renderEnrichment(rows, { steam, links, error, owned, gamestatus });
+    renderEnrichment(rows, { steam, links, error, owned, gamestatus, title, slug: ctx.slug });
   }
 
   function openSettings() {
@@ -3068,16 +3063,14 @@
   function ensureNavSettingsButton() {
     if (document.getElementById(NAV_BTN_ID)) return;
 
-    const btn = document.createElement('div');
+    const btn = document.createElement('button');
     btn.id = NAV_BTN_ID;
-    btn.className = 'gradient-btn gradient-btn-small blp-nav-settings-btn text-center';
-    btn.innerHTML = `
-      <div class="gradient-bg gradient-blue" aria-hidden="true"></div>
-      <a href="#" role="button" title="${escapeAttr(t.navSettingsTitle)}">
-        <p class="btn-title"><i class="fa-solid fa-plus" aria-hidden="true"></i>${escapeHtml(t.navSettings)}</p>
-      </a>
-    `;
-    btn.querySelector('a')?.addEventListener('click', (e) => {
+    btn.type = 'button';
+    btn.className = 'btn btn-main mb-2 my-sm-0 py-0';
+    btn.title = t.navSettingsTitle;
+    // fa-gear is in Backloggd’s FA set (fa-sliders often is not → empty icon + short button)
+    btn.innerHTML = `<i class="fa-solid fa-gear fa-xs" aria-hidden="true"></i> ${escapeHtml(t.navSettings)}`;
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
       openSettings();
     });
@@ -3085,7 +3078,9 @@
     // Same slot as native #add-a-game ("Log a Game")
     const logGame = document.getElementById('add-a-game');
     if (logGame?.parentElement) {
-      btn.style.marginLeft = '8px';
+      btn.classList.add('ml-2');
+      const h = logGame.getBoundingClientRect().height;
+      if (h > 0) document.documentElement.style.setProperty('--blp-nav-btn-h', `${Math.round(h)}px`);
       logGame.insertAdjacentElement('afterend', btn);
       return;
     }
@@ -3094,6 +3089,7 @@
       '#navbarSupportedContent .col.my-auto, #primary-nav .col.my-auto'
     );
     if (logSlot) {
+      btn.classList.add('ml-2');
       logSlot.appendChild(btn);
       return;
     }
@@ -3192,6 +3188,29 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
+  }
+
+  /** Metacritic `/game/{slug}/` — drop apostrophes (Assassin's → assassins), not hyphenate them. */
+  function slugifyForMetacritic(name) {
+    return String(name || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[''`´]/g, '')
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  function metacriticGameUrl(title, slug) {
+    // Backloggd disambiguators: meccha-chameleon--1 → meccha-chameleon
+    const raw =
+      String(slug || '')
+        .replace(/^\/+|\/+$/g, '')
+        .replace(/--\d+$/i, '') || slugifyForMetacritic(title);
+    if (!raw) return '';
+    return `https://www.metacritic.com/game/${encodeURIComponent(raw)}/`;
   }
 
   function getSteamPathSlug() {
