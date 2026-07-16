@@ -30,7 +30,7 @@ backloggd-plus/
 
 1. Match Backloggd and Steam app pages at `document-idle`.
 2. On **Backloggd:** IIFE bootstraps styles, settings, DOM scan, `MutationObserver`, and Turbo/href SPA hooks.
-3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = owned · price · reviews, `Metacritic`, `Players`, `GameStatus`, `Links`); SteamDB icon before `h1`, logo under **Change cover**; resolve title + IGDB link from DOM. Skeletons while Steam/GS loads; link favicons via Google s2.
+3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = owned · price · reviews, `Metacritic`, `Players`, `GameStatus`, `Links`); SteamDB icon before `h1`, logo under **Change cover**; resolve title + IGDB link from DOM. Skeletons while Steam/GS loads; rows paint progressively as each source returns; link favicons via Google s2.
 4. On **Steam** app pages: inject a SteamDB-style Backloggd button into `.apphub_OtherSiteInfo` (slug from Steam URL or title).
 5. On **SteamDB** app pages: inject a `.btn` into `nav.app-links` (prefer IGDB slug from the page).
 6. Steam enrichment: parallel `storesearch` (session + guest) → merge items → pick best app → `appdetails` + `appreviews` + popular tags (`IStoreBrowseService/GetItems` + `tagdata/populartags`) via `GM_xmlhttpRequest` (`@connect store.steampowered.com`, `api.steampowered.com`). If both miss and region ≠ US, retry search with `cc=US` and note it on the Steam row. Ownership via `dynamicstore/userdata` (`rgOwnedApps`) using the browser Steam session (no API key).

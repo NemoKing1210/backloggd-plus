@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.5.8
+// @version           0.5.9
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -53,7 +53,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.5.8';
+  const SCRIPT_VERSION = '0.5.9';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -2566,7 +2566,7 @@
     return priceText || null;
   }
 
-  async function fetchSteamBundle(title, country) {
+  async function fetchSteamBundle(title, country, { onPartial } = {}) {
     const requestedCountry = String(country || 'US').toUpperCase();
     const cacheKey = `steam:${requestedCountry}:${normalizeTitle(title)}`;
     const debugOn = Boolean(settings.debugMode);
@@ -2715,72 +2715,85 @@
         debug.tagsUrl = `${STEAM_STORE_ITEMS_URL}?input_json=${encodeURIComponent(tagsInput)}`;
         debug.tagMapUrl = STEAM_POPULAR_TAGS_URL;
       }
+
+      const detailsPromise = gmRequest({ url: detailsUrl, anonymous });
+      const reviewsPromise = gmRequest({ url: reviewsUrl, anonymous }).catch((err) => {
+        debug.reviewsError = String(err?.message || err);
+        return null;
+      });
+      const tagsPromise = needTags
+        ? fetchSteamAppTags(appId, detailsCountry).catch((err) => {
+            debug.tagsError = String(err?.message || err);
+            return [];
+          })
+        : Promise.resolve([]);
+
       let detailsRoot = null;
-      let reviews = null;
-      let tags = [];
       try {
-        const jobs = [
-          gmRequest({
-            url: detailsUrl,
-            anonymous,
-          }),
-          gmRequest({
-            url: reviewsUrl,
-            anonymous,
-          }).catch((err) => {
-            debug.reviewsError = String(err?.message || err);
-            return null;
-          }),
-        ];
-        if (needTags) {
-          jobs.push(
-            fetchSteamAppTags(appId, detailsCountry).catch((err) => {
-              debug.tagsError = String(err?.message || err);
-              return [];
-            })
-          );
-        }
-        const results = await Promise.all(jobs);
-        detailsRoot = results[0];
-        reviews = results[1];
-        tags = needTags ? results[2] || [] : [];
+        detailsRoot = await detailsPromise;
       } catch (err) {
-        debug.reason = `Steam details/reviews failed: ${err?.message || err}`;
-        const miss = { found: false, _debug: debug };
-        return miss;
+        debug.reason = `Steam details failed: ${err?.message || err}`;
+        return { found: false, _debug: debug };
       }
 
-      const details = detailsRoot?.[appId]?.success ? detailsRoot[appId].data : null;
-      const sourceBits = [
-        anonymous ? 'guest items' : 'session items',
-        usedUsFallback ? `US fallback (requested ${requestedCountry})` : detailsCountry,
-      ];
-      debug.reason = details
-        ? `Matched Steam app ${appId} (${sourceBits.join(', ')})`
-        : `Search hit app ${appId}, but appdetails success=false`;
-      debug.detailsSuccess = Boolean(detailsRoot?.[appId]?.success);
-      debug.detailsCountry = detailsCountry;
-      debug.reviews = reviews?.query_summary || null;
-      debug.tags = tags;
+      let reviews = null;
+      let tags = [];
+      let canEmit = false;
 
-      const payload = {
-        found: true,
-        appId,
-        name: details?.name || hit.name,
-        storeUrl: `https://store.steampowered.com/app/${appId}/`,
-        isFree: Boolean(details?.is_free),
-        price: details?.price_overview || hit.price || null,
-        metacritic: details?.metacritic || (hit.metascore ? { score: Number(hit.metascore) } : null),
-        recommendations: details?.recommendations?.total || null,
-        reviews: reviews?.query_summary || null,
-        tags,
-        tinyImage: hit.tiny_image || hit.small_capsule || null,
-        headerImage: details?.header_image || null,
-        usedUsFallback,
-        requestedCountry,
-        searchCountry: detailsCountry,
-        _debug: debug,
+      const buildPayload = () => {
+        const details = detailsRoot?.[appId]?.success ? detailsRoot[appId].data : null;
+        const sourceBits = [
+          anonymous ? 'guest items' : 'session items',
+          usedUsFallback ? `US fallback (requested ${requestedCountry})` : detailsCountry,
+        ];
+        debug.reason = details
+          ? `Matched Steam app ${appId} (${sourceBits.join(', ')})`
+          : `Search hit app ${appId}, but appdetails success=false`;
+        debug.detailsSuccess = Boolean(detailsRoot?.[appId]?.success);
+        debug.detailsCountry = detailsCountry;
+        debug.reviews = reviews?.query_summary || null;
+        debug.tags = tags;
+        return {
+          found: true,
+          appId,
+          name: details?.name || hit.name,
+          storeUrl: `https://store.steampowered.com/app/${appId}/`,
+          isFree: Boolean(details?.is_free),
+          price: details?.price_overview || hit.price || null,
+          metacritic: details?.metacritic || (hit.metascore ? { score: Number(hit.metascore) } : null),
+          recommendations: details?.recommendations?.total || null,
+          reviews: reviews?.query_summary || null,
+          tags,
+          tinyImage: hit.tiny_image || hit.small_capsule || null,
+          headerImage: details?.header_image || null,
+          usedUsFallback,
+          requestedCountry,
+          searchCountry: detailsCountry,
+          _debug: debug,
+        };
       };
+
+      const emitPartial = () => {
+        if (!canEmit || typeof onPartial !== 'function') return;
+        onPartial(buildPayload());
+      };
+
+      const reviewsReady = reviewsPromise.then((value) => {
+        reviews = value;
+        emitPartial();
+        return value;
+      });
+      const tagsReady = tagsPromise.then((value) => {
+        tags = value || [];
+        emitPartial();
+        return tags;
+      });
+
+      canEmit = true;
+      emitPartial();
+      await Promise.all([reviewsReady, tagsReady]);
+
+      const payload = buildPayload();
       if (!debugOn) {
         const { _debug, ...store } = payload;
         setCached(cacheKey, store);
@@ -2882,7 +2895,7 @@
     }
   }
 
-  async function fetchSteamDbExtras(appId, { tinyImage = null } = {}) {
+  async function fetchSteamDbExtras(appId, { tinyImage = null, onPartial } = {}) {
     const id = Number(appId);
     if (!Number.isFinite(id) || id <= 0) return null;
 
@@ -2893,92 +2906,132 @@
     const mediaKey = `steamdb:media:${id}`;
     const debugOn = Boolean(settings.debugMode);
     let media = !debugOn ? getCached(mediaKey) : null;
-    let parsed = null;
     let scrapeError = null;
+    let latestPlayers = null;
+    let latestPlayersSource = null;
 
-    if (!media && needMedia) {
-      try {
-        const pageUrl = `${STEAMDB_APP_URL}/${id}/`;
-        const html = await gmRequest({
-          url: pageUrl,
-          responseType: 'text',
-          headers: {
-            Accept: 'text/html,application/xhtml+xml',
-            'Accept-Language': 'en-US,en;q=0.9',
-          },
-          timeout: 25000,
-        });
-        parsed = parseSteamDbHtml(html);
-        if (parsed) {
-          media = {
-            iconUrl: parsed.iconUrl || '',
-            logoUrl: parsed.logoUrl || '',
-            players: parsed.players,
-            source: 'steamdb',
-            pageUrl,
-          };
-          if (!debugOn) setCached(mediaKey, media);
-        }
-      } catch (err) {
-        scrapeError = String(err?.message || err);
+    const emit = (payload) => {
+      if (typeof onPartial === 'function') onPartial(payload);
+    };
+
+    const resolveMediaUrls = () => {
+      const iconUrl =
+        media?.iconUrl ||
+        tinyImage ||
+        steamCdnAsset(id, 'capsule_sm_120.jpg') ||
+        steamCdnAsset(id, 'library_600x900.jpg');
+      const logoUrl =
+        media?.logoUrl || steamCdnAsset(id, 'logo.png') || steamCdnAsset(id, 'library_600x900.jpg');
+      const logoIsPortrait = Boolean(logoUrl && /library_600x900/i.test(logoUrl) && !media?.logoUrl);
+      return { iconUrl, logoUrl, logoIsPortrait };
+    };
+
+    const buildResult = () => {
+      const { iconUrl, logoUrl, logoIsPortrait } = resolveMediaUrls();
+      return {
+        appId: id,
+        iconUrl: needMedia && settings.showSteamDbIcon ? iconUrl : '',
+        logoUrl: needMedia && settings.showSteamDbCover ? logoUrl : '',
+        logoIsPortrait: Boolean(logoIsPortrait),
+        players: needPlayers ? latestPlayers : null,
+        source: media?.source || (scrapeError ? 'steam-fallback' : 'steam'),
+        _debug: debugOn
+          ? {
+              reason: media?.source
+                ? 'Parsed SteamDB app page'
+                : scrapeError
+                  ? `SteamDB scrape failed (${scrapeError}); using Steam CDN / players API`
+                  : 'SteamDB HTML unavailable; using Steam CDN / players API',
+              pageUrl: `${STEAMDB_APP_URL}/${id}/`,
+              chartsUrl: `${STEAMDB_APP_URL}/${id}/charts/`,
+              playersApiUrl: `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(id)}`,
+              playersSource: latestPlayersSource,
+              media,
+              scrapeError,
+              players: latestPlayers,
+              iconUrl,
+              logoUrl,
+            }
+          : undefined,
+      };
+    };
+
+    // CDN / cached media first — do not wait for SteamDB HTML.
+    if (needMedia) emit(buildResult());
+
+    const scrapePromise =
+      !media && needMedia
+        ? (async () => {
+            try {
+              const pageUrl = `${STEAMDB_APP_URL}/${id}/`;
+              const html = await gmRequest({
+                url: pageUrl,
+                responseType: 'text',
+                headers: {
+                  Accept: 'text/html,application/xhtml+xml',
+                  'Accept-Language': 'en-US,en;q=0.9',
+                },
+                timeout: 25000,
+              });
+              const parsed = parseSteamDbHtml(html);
+              if (parsed) {
+                media = {
+                  iconUrl: parsed.iconUrl || '',
+                  logoUrl: parsed.logoUrl || '',
+                  players: parsed.players,
+                  source: 'steamdb',
+                  pageUrl,
+                };
+                if (!debugOn) setCached(mediaKey, media);
+                if (needPlayers && parsed.players != null) {
+                  latestPlayers = parsed.players;
+                  latestPlayersSource = 'steamdb';
+                }
+                emit(buildResult());
+              }
+            } catch (err) {
+              scrapeError = String(err?.message || err);
+            }
+          })()
+        : Promise.resolve();
+
+    const playersPromise = (async () => {
+      if (!needPlayers) return;
+      if (media?.players != null && media?.source === 'steamdb') {
+        latestPlayers = media.players;
+        latestPlayersSource = 'steamdb';
+        emit(buildResult());
+        return;
       }
-    }
-
-    const iconUrl =
-      media?.iconUrl ||
-      tinyImage ||
-      steamCdnAsset(id, 'capsule_sm_120.jpg') ||
-      steamCdnAsset(id, 'library_600x900.jpg');
-    // Prefer SteamDB app-logo; CDN logo.png mirrors it when scrape fails.
-    const logoUrl =
-      media?.logoUrl || steamCdnAsset(id, 'logo.png') || steamCdnAsset(id, 'library_600x900.jpg');
-    const logoIsPortrait = Boolean(logoUrl && /library_600x900/i.test(logoUrl) && !media?.logoUrl);
-
-    const playersApiUrl = `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(id)}`;
-    let players = needPlayers ? media?.players ?? null : null;
-    let playersSource = players != null && media?.source === 'steamdb' ? 'steamdb' : null;
-    if (needPlayers && players == null) {
-      // Honor short TTL stored on players cache entries.
       const entry = readCacheStore()[`steam:players:${id}`];
       if (entry?.ts && entry.data && typeof entry.data.players === 'number') {
         const ttl = entry.ttlMs || PLAYERS_CACHE_TTL_MS;
         if (Date.now() - entry.ts <= ttl) {
-          players = entry.data.players;
-          playersSource = 'cache';
+          latestPlayers = entry.data.players;
+          latestPlayersSource = 'cache';
+          emit(buildResult());
+          return;
         }
       }
-      if (players == null) {
-        players = await fetchSteamPlayers(id);
-        if (players != null) playersSource = 'steam-api';
+      const players = await fetchSteamPlayers(id);
+      if (players != null && latestPlayersSource !== 'steamdb') {
+        latestPlayers = players;
+        latestPlayersSource = 'steam-api';
+        emit(buildResult());
       }
+    })();
+
+    await Promise.all([scrapePromise, playersPromise]);
+
+    // Scrape may have won the players race after the API emit.
+    if (needPlayers && media?.players != null && media?.source === 'steamdb') {
+      latestPlayers = media.players;
+      latestPlayersSource = 'steamdb';
     }
 
-    return {
-      appId: id,
-      iconUrl: needMedia && settings.showSteamDbIcon ? iconUrl : '',
-      logoUrl: needMedia && settings.showSteamDbCover ? logoUrl : '',
-      logoIsPortrait: Boolean(logoIsPortrait),
-      players: needPlayers ? players : null,
-      source: media?.source || (scrapeError ? 'steam-fallback' : 'steam'),
-      _debug: debugOn
-        ? {
-            reason: media?.source
-              ? 'Parsed SteamDB app page'
-              : scrapeError
-                ? `SteamDB scrape failed (${scrapeError}); using Steam CDN / players API`
-                : 'SteamDB HTML unavailable; using Steam CDN / players API',
-            pageUrl: `${STEAMDB_APP_URL}/${id}/`,
-            chartsUrl: `${STEAMDB_APP_URL}/${id}/charts/`,
-            playersApiUrl,
-            playersSource,
-            media,
-            scrapeError,
-            players,
-            iconUrl,
-            logoUrl,
-          }
-        : undefined,
-    };
+    const result = buildResult();
+    emit(result);
+    return result;
   }
 
   function removeSteamDbUi() {
@@ -3984,92 +4037,250 @@
 
     const runId = ++gamePageToken;
     const igdbUrl = getIgdbUrl(ctx.slug);
+    const stillHere = () => runId === gamePageToken && getPageContext().isGamePage;
 
-    // Links that don't depend on Steam can appear immediately (skeletons stay on Steam rows).
-    if (rows.links) {
-      const earlyLinks = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam: null });
-      renderEnrichment({ links: rows.links }, { steam: null, links: earlyLinks, error: false, skipDebug: true });
-    }
+    const needSteamDb =
+      settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamPlayers;
+    const needSteam =
+      settings.showSteam ||
+      settings.showMetacritic ||
+      settings.showGameStatus ||
+      needSteamDb;
+    const needOwned = settings.showSteam && settings.showSteamOwned;
 
-    let steam = null;
-    let error = false;
-    let owned = false;
-    let gamestatus = null;
-    let steamDb = null;
+    const state = {
+      steam: null,
+      owned: false,
+      ownedSet: null,
+      gamestatus: null,
+      steamDb: null,
+      error: false,
+    };
 
-    try {
-      const needSteamDb =
-        settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamPlayers;
-      const needSteam =
-        settings.showSteam ||
-        settings.showMetacritic ||
-        settings.showGameStatus ||
-        needSteamDb;
-      const needOwned = settings.showSteam && settings.showSteamOwned;
-      const [steamResult, ownedSet] = await Promise.all([
-        needSteam ? fetchSteamBundle(title, settings.steamCountry || 'US') : Promise.resolve(null),
-        needOwned ? fetchSteamOwnedSet() : Promise.resolve(null),
-      ]);
-      steam = steamResult;
-      if (ownedSet && steam?.found && steam.appId != null) {
-        owned = ownedSet.has(Number(steam.appId));
+    const paintLinks = (steam) => {
+      if (!stillHere() || !rows.links) return;
+      const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
+      renderEnrichment(
+        { links: rows.links },
+        { steam, links, error: state.error, skipDebug: true }
+      );
+    };
+
+    const syncOwned = () => {
+      if (state.ownedSet && state.steam?.found && state.steam.appId != null) {
+        state.owned = state.ownedSet.has(Number(state.steam.appId));
+      } else {
+        state.owned = false;
       }
-      if (needSteamDb && steam?.found && steam.appId != null) {
-        steamDb = await fetchSteamDbExtras(steam.appId, { tinyImage: steam.tinyImage });
-      }
-      if (settings.showGameStatus && steam?.found && steam.appId != null) {
-        gamestatus = await fetchGameStatus({
-          appId: steam.appId,
-          storeUrl: steam.storeUrl,
-          name: steam.name,
+    };
+
+    const paintSteamBlock = () => {
+      if (!stillHere() || state.steam == null) return;
+      syncOwned();
+      renderEnrichment(
+        { steam: rows.steam, metacritic: rows.metacritic },
+        {
+          steam: state.steam,
+          error: state.error,
+          owned: state.owned,
           title,
-          pageSlug: ctx.slug,
-        });
-      } else if (settings.showGameStatus && settings.debugMode) {
-        gamestatus = {
-          missing: true,
-          data: null,
-          slug: null,
-          _debug: {
-            reason: steam?.found
-              ? 'GameStatus enabled but Steam appId missing'
-              : 'GameStatus skipped — Steam app not found',
+          slug: ctx.slug,
+          skipDebug: true,
+        }
+      );
+      paintLinks(state.steam);
+    };
+
+    const paintPlayers = () => {
+      if (!stillHere() || !rows.players) return;
+      renderEnrichment(
+        { players: rows.players },
+        { steamDb: state.steamDb, error: state.error, skipDebug: true }
+      );
+    };
+
+    const paintGameStatus = () => {
+      if (!stillHere() || !rows.gamestatus) return;
+      renderEnrichment(
+        { gamestatus: rows.gamestatus },
+        { gamestatus: state.gamestatus, skipDebug: true }
+      );
+    };
+
+    const paintFinal = () => {
+      if (!stillHere()) return;
+      syncOwned();
+      const links = buildExternalLinks({
+        title,
+        slug: ctx.slug,
+        igdbUrl,
+        steam: state.steam,
+      });
+      renderEnrichment(rows, {
+        steam: state.steam,
+        links,
+        error: state.error,
+        owned: state.owned,
+        gamestatus: state.gamestatus,
+        title,
+        slug: ctx.slug,
+        steamDb: state.steamDb,
+      });
+      if (state.steamDb) applySteamDbUi(state.steamDb, token);
+    };
+
+    // Links that don't depend on Steam can appear immediately.
+    paintLinks(null);
+
+    let dependentsStarted = false;
+    let dependentsPromise = Promise.resolve();
+
+    const gsSkippedPayload = (steam, reason) => ({
+      missing: true,
+      data: null,
+      slug: null,
+      _debug: settings.debugMode
+        ? {
+            reason,
             steamFound: Boolean(steam?.found),
             steamDebug: steam?._debug || null,
-          },
-        };
+          }
+        : undefined,
+    });
+
+    const startDependents = (steam) => {
+      if (dependentsStarted || !steam?.found || steam.appId == null) return;
+      dependentsStarted = true;
+      const jobs = [];
+
+      if (needSteamDb) {
+        jobs.push(
+          fetchSteamDbExtras(steam.appId, {
+            tinyImage: steam.tinyImage,
+            onPartial: (partial) => {
+              if (!stillHere()) return;
+              state.steamDb = partial;
+              applySteamDbUi(partial, token);
+              // Keep players skeleton until a count arrives (final paint clears misses).
+              if (partial?.players != null) paintPlayers();
+            },
+          })
+            .then((full) => {
+              if (!stillHere() || !full) return;
+              state.steamDb = full;
+              applySteamDbUi(full, token);
+              paintPlayers();
+            })
+            .catch((err) => {
+              if (!stillHere()) return;
+              state.steamDb = {
+                appId: steam.appId,
+                iconUrl: '',
+                logoUrl: '',
+                players: null,
+                _debug: settings.debugMode
+                  ? { reason: `SteamDB error: ${err?.message || err}` }
+                  : undefined,
+              };
+              paintPlayers();
+            })
+        );
       }
+
+      if (settings.showGameStatus) {
+        jobs.push(
+          fetchGameStatus({
+            appId: steam.appId,
+            storeUrl: steam.storeUrl,
+            name: steam.name,
+            title,
+            pageSlug: ctx.slug,
+          })
+            .then((gs) => {
+              if (!stillHere()) return;
+              state.gamestatus = gs;
+              paintGameStatus();
+            })
+            .catch((err) => {
+              if (!stillHere()) return;
+              state.gamestatus = gsSkippedPayload(
+                steam,
+                `GameStatus error: ${err?.message || err}`
+              );
+              paintGameStatus();
+            })
+        );
+      }
+
+      dependentsPromise = Promise.all(jobs);
+    };
+
+    try {
+      const ownedPromise = needOwned
+        ? fetchSteamOwnedSet()
+            .then((set) => {
+              if (!stillHere()) return null;
+              state.ownedSet = set;
+              if (state.steam) paintSteamBlock();
+              return set;
+            })
+            .catch(() => null)
+        : Promise.resolve(null);
+
+      const steamPromise = needSteam
+        ? fetchSteamBundle(title, settings.steamCountry || 'US', {
+            onPartial: (partial) => {
+              if (!stillHere()) return;
+              state.steam = partial;
+              paintSteamBlock();
+              startDependents(partial);
+            },
+          })
+        : Promise.resolve(null);
+
+      const [steamResult] = await Promise.all([steamPromise, ownedPromise]);
+      if (!stillHere()) return;
+
+      state.steam = steamResult;
+      if (steamResult) {
+        paintSteamBlock();
+        startDependents(steamResult);
+      } else if (needSteam) {
+        state.steam = { found: false };
+        paintSteamBlock();
+      }
+
+      if (settings.showGameStatus && !dependentsStarted) {
+        state.gamestatus = gsSkippedPayload(
+          state.steam,
+          state.steam?.found
+            ? 'GameStatus enabled but Steam appId missing'
+            : 'GameStatus skipped — Steam app not found'
+        );
+        paintGameStatus();
+      }
+
+      await dependentsPromise;
     } catch (err) {
-      error = true;
-      steam = steam || {
+      state.error = true;
+      state.steam = state.steam || {
         found: false,
         _debug: { reason: `Enrichment error: ${err?.message || err}` },
       };
-      owned = false;
-      gamestatus = gamestatus || {
+      state.owned = false;
+      state.gamestatus = state.gamestatus || {
         missing: true,
         data: null,
         slug: null,
         _debug: { reason: `Enrichment error: ${err?.message || err}` },
       };
+      paintSteamBlock();
+      paintGameStatus();
+      paintPlayers();
     }
 
-    if (runId !== gamePageToken) return;
-    if (!getPageContext().isGamePage) return;
-
-    const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
-    renderEnrichment(rows, {
-      steam,
-      links,
-      error,
-      owned,
-      gamestatus,
-      title,
-      slug: ctx.slug,
-      steamDb,
-    });
-    // Apply after rows so MutationObserver / Turbo do not wipe icon & cover mid-flight.
-    if (steamDb) applySteamDbUi(steamDb, token);
+    if (!stillHere()) return;
+    paintFinal();
   }
 
   function openSettings() {

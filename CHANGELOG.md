@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9] - 2026-07-16
+
+### Changed
+
+- Enrichment renders progressively: Steam price/reviews first, then tags, owned, SteamDB media/players, and GameStatus as each response arrives (no wait for the full batch)
+
 ## [0.5.8] - 2026-07-16
 
 ### Fixed
