@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.6.10
+// @version           0.7.0
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -43,6 +43,10 @@
 // @connect            store.steampowered.com
 // @connect            api.steampowered.com
 // @connect            gamestatus.info
+// @connect            howlongtobeat.com
+// @connect            api.opencritic.com
+// @connect            www.protondb.com
+// @connect            protondb.com
 // @run-at             document-idle
 // @noframes
 // ==/UserScript==
@@ -52,7 +56,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.6.10';
+  const SCRIPT_VERSION = '0.7.0';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -78,6 +82,16 @@
   const STEAM_POPULAR_TAGS_URL = 'https://store.steampowered.com/tagdata/populartags/english';
   const STEAM_STORE_ITEMS_URL = 'https://api.steampowered.com/IStoreBrowseService/GetItems/v1/';
   const STEAM_PLAYERS_URL = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/';
+  const STEAM_DECK_REPORT_URL =
+    'https://store.steampowered.com/saleaction/ajaxgetdeckappcompatibilityreport';
+  const PROTONDB_SUMMARY_URL = 'https://www.protondb.com/api/v1/reports/summaries';
+  const OPENCRITIC_API_BASE = 'https://api.opencritic.com/api';
+  const HLTB_SITE = 'https://howlongtobeat.com';
+  const HLTB_INIT_URL = `${HLTB_SITE}/api/bleed/init`;
+  const HLTB_SEARCH_URL = `${HLTB_SITE}/api/bleed`;
+  const ITAD_SITE = 'https://isthereanydeal.com';
+  const PCGW_SITE = 'https://www.pcgamingwiki.com';
+  const GOGDB_SITE = 'https://www.gogdb.org';
   const STEAM_CDN_APPS = 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps';
   const STEAM_CDN_STORE_ASSETS = 'https://shared.fastly.steamstatic.com/store_item_assets';
   const STEAM_CDN_COMMUNITY_ICONS = 'https://shared.fastly.steamstatic.com/community_assets/images/apps';
@@ -95,7 +109,17 @@
   const GS_INVALID_SLUG_RE =
     /^(https?-)?(store-)?steam(powered|static)?(-[a-z0-9]+)*(-com)?$|steampowered|steamstatic|akamaihd|^(on-)?wishlist$|^gamestatus$|^(soon-)?on-game-pass$/;
 
-  const LINK_KEYS = ['igdb', 'steam', 'steamdb', 'metacritic', 'opencritic', 'hltb'];
+  const LINK_KEYS = [
+    'igdb',
+    'steam',
+    'steamdb',
+    'metacritic',
+    'opencritic',
+    'hltb',
+    'pcgamingwiki',
+    'itad',
+    'gogdb',
+  ];
   const LINK_DOMAINS = {
     igdb: 'igdb.com',
     steam: 'store.steampowered.com',
@@ -103,6 +127,9 @@
     metacritic: 'metacritic.com',
     opencritic: 'opencritic.com',
     hltb: 'howlongtobeat.com',
+    pcgamingwiki: 'pcgamingwiki.com',
+    itad: 'isthereanydeal.com',
+    gogdb: 'gogdb.org',
   };
 
   const DEFAULT_SETTINGS = {
@@ -111,6 +138,9 @@
     steamCountry: 'US',
     showSteam: true,
     showMetacritic: true,
+    showOpenCritic: true,
+    showHltb: true,
+    showDeckProton: true,
     showGameStatus: true,
     showLinks: true,
     showSteamOwned: true,
@@ -130,6 +160,9 @@
       metacritic: true,
       opencritic: true,
       hltb: true,
+      pcgamingwiki: true,
+      itad: true,
+      gogdb: true,
     },
   };
 
@@ -139,7 +172,7 @@
     en: {
       menuSettings: 'Backloggd Plus — Settings',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · scores · list badges · quick links',
+      panelSubtitle: 'Steam · scores · Deck/Proton · HLTB · list badges · links',
       close: 'Close',
       cancel: 'Cancel',
       save: 'Save',
@@ -193,6 +226,12 @@
       steamCountryHint: 'Affects price currency from the Steam Store API.',
       showSteam: 'Show Steam price & reviews',
       showMetacritic: 'Show Metacritic score',
+      showOpenCritic: 'Show OpenCritic score',
+      showOpenCriticHint: 'Tier + Top Critic average from OpenCritic (searched by title).',
+      showHltb: 'Show HowLongToBeat times',
+      showHltbHint: 'Main / Extra / Complete hours from HowLongToBeat.',
+      showDeckProton: 'Show Steam Deck & ProtonDB',
+      showDeckProtonHint: 'Steam Deck Verified/Playable plus ProtonDB tier (needs a Steam App ID).',
       showGameStatus: 'Show GameStatus crack status',
       showGameStatusHint: 'Crack / DRM status from GameStatus.info (needs a Steam match).',
       showLinks: 'Show quick links row',
@@ -267,6 +306,8 @@
       price: 'Price',
       free: 'Free',
       discount: '-{n}%',
+      discountEnds: 'ends {date}',
+      steamRecentLow: 'recent low {price}',
       steamUsFallback: 'Found via US store ({cc} search returned nothing)',
       recommendations: '{n} recommendations',
       links: 'Links',
@@ -276,13 +317,27 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
       players: 'Players',
       playersOnline: '{n} playing',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      hltbMain: 'Main {n}h',
+      hltbExtra: 'Extra {n}h',
+      hltbComplete: 'Complete {n}h',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
     },
     ru: {
       menuSettings: 'Backloggd Plus — Настройки',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · оценки · бейджи в списках · быстрые ссылки',
+      panelSubtitle: 'Steam · оценки · Deck/Proton · HLTB · бейджи · ссылки',
       close: 'Закрыть',
       cancel: 'Отмена',
       save: 'Сохранить',
@@ -336,6 +391,12 @@
       steamCountryHint: 'Влияет на валюту цены из Steam Store API.',
       showSteam: 'Показывать цену и отзывы Steam',
       showMetacritic: 'Показывать оценку Metacritic',
+      showOpenCritic: 'Показывать оценку OpenCritic',
+      showOpenCriticHint: 'Tier + средний балл Top Critic с OpenCritic (поиск по названию).',
+      showHltb: 'Показывать время HowLongToBeat',
+      showHltbHint: 'Main / Extra / Complete в часах с HowLongToBeat.',
+      showDeckProton: 'Показывать Steam Deck и ProtonDB',
+      showDeckProtonHint: 'Verified/Playable для Steam Deck и тир ProtonDB (нужен Steam App ID).',
       showGameStatus: 'Показывать статус GameStatus',
       showGameStatusHint: 'Статус взлома / DRM с GameStatus.info (нужно совпадение со Steam).',
       showLinks: 'Показывать ряд ссылок',
@@ -410,6 +471,8 @@
       price: 'Цена',
       free: 'Бесплатно',
       discount: '-{n}%',
+      discountEnds: 'до {date}',
+      steamRecentLow: 'недавний минимум {price}',
       steamUsFallback: 'Найдено через магазин US (в {cc} ничего не нашлось)',
       recommendations: '{n} рекомендаций',
       links: 'Ссылки',
@@ -419,14 +482,27 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
       players: 'Игроки',
       playersOnline: '{n} в игре',
-
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      hltbMain: 'Main {n}ч',
+      hltbExtra: 'Extra {n}ч',
+      hltbComplete: 'Complete {n}ч',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
     },
     zh: {
       menuSettings: 'Backloggd Plus — 设置',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · 评分 · 列表徽章 · 快捷链接',
+      panelSubtitle: 'Steam · 评分 · Deck/Proton · HLTB · 列表徽章 · 链接',
       close: '关闭',
       cancel: '取消',
       save: '保存',
@@ -480,6 +556,12 @@
       steamCountryHint: '影响 Steam Store API 返回的货币。',
       showSteam: '显示 Steam 价格与评价',
       showMetacritic: '显示 Metacritic 分数',
+      showOpenCritic: '显示 OpenCritic 分数',
+      showOpenCriticHint: '来自 OpenCritic 的 Tier + Top Critic 均分（按标题搜索）。',
+      showHltb: '显示 HowLongToBeat 时长',
+      showHltbHint: '来自 HowLongToBeat 的 Main / Extra / Complete 小时数。',
+      showDeckProton: '显示 Steam Deck 与 ProtonDB',
+      showDeckProtonHint: 'Steam Deck Verified/Playable 与 ProtonDB 等级（需要 Steam App ID）。',
       showGameStatus: '显示 GameStatus 破解状态',
       showGameStatusHint: '来自 GameStatus.info 的破解/DRM 状态（需要匹配到 Steam）。',
       showLinks: '显示快捷链接行',
@@ -558,6 +640,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: '至 {date}',
+      steamRecentLow: '近期最低 {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}小时',
+      hltbExtra: 'Extra {n}小时',
+      hltbComplete: 'Complete {n}小时',
       players: '玩家',
       playersOnline: '{n} 在玩',
 
@@ -565,7 +663,7 @@
     es: {
       menuSettings: 'Backloggd Plus — Ajustes',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · notas · insignias en listas · enlaces rápidos',
+      panelSubtitle: 'Steam · notas · Deck/Proton · HLTB · insignias · enlaces',
       close: 'Cerrar',
       cancel: 'Cancelar',
       save: 'Guardar',
@@ -619,6 +717,12 @@
       steamCountryHint: 'Afecta la moneda del precio de la API de Steam.',
       showSteam: 'Mostrar precio y reseñas de Steam',
       showMetacritic: 'Mostrar puntuación de Metacritic',
+      showOpenCritic: 'Mostrar puntuación de OpenCritic',
+      showOpenCriticHint: 'Tier + media Top Critic de OpenCritic (búsqueda por título).',
+      showHltb: 'Mostrar tiempos de HowLongToBeat',
+      showHltbHint: 'Horas Main / Extra / Complete de HowLongToBeat.',
+      showDeckProton: 'Mostrar Steam Deck y ProtonDB',
+      showDeckProtonHint: 'Verified/Playable de Steam Deck y nivel ProtonDB (hace falta un Steam App ID).',
       showGameStatus: 'Mostrar estado GameStatus',
       showGameStatusHint: 'Estado de crack / DRM de GameStatus.info (requiere coincidencia con Steam).',
       showLinks: 'Mostrar fila de enlaces',
@@ -702,6 +806,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: 'hasta {date}',
+      steamRecentLow: 'mínimo reciente {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}h',
+      hltbExtra: 'Extra {n}h',
+      hltbComplete: 'Complete {n}h',
       players: 'Jugadores',
       playersOnline: '{n} jugando',
 
@@ -709,7 +829,7 @@
     pt: {
       menuSettings: 'Backloggd Plus — Configurações',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · notas · badges em listas · links rápidos',
+      panelSubtitle: 'Steam · notas · Deck/Proton · HLTB · badges · links',
       close: 'Fechar',
       cancel: 'Cancelar',
       save: 'Salvar',
@@ -763,6 +883,12 @@
       steamCountryHint: 'Afeta a moeda do preço da API da Steam.',
       showSteam: 'Mostrar preço e avaliações Steam',
       showMetacritic: 'Mostrar nota Metacritic',
+      showOpenCritic: 'Mostrar nota OpenCritic',
+      showOpenCriticHint: 'Tier + média Top Critic do OpenCritic (busca pelo título).',
+      showHltb: 'Mostrar tempos do HowLongToBeat',
+      showHltbHint: 'Horas Main / Extra / Complete do HowLongToBeat.',
+      showDeckProton: 'Mostrar Steam Deck e ProtonDB',
+      showDeckProtonHint: 'Verified/Playable do Steam Deck e nível ProtonDB (precisa de Steam App ID).',
       showGameStatus: 'Mostrar status GameStatus',
       showGameStatusHint: 'Status de crack / DRM do GameStatus.info (precisa bater com a Steam).',
       showLinks: 'Mostrar linha de links',
@@ -846,6 +972,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: 'até {date}',
+      steamRecentLow: 'mínimo recente {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}h',
+      hltbExtra: 'Extra {n}h',
+      hltbComplete: 'Complete {n}h',
       players: 'Jogadores',
       playersOnline: '{n} jogando',
 
@@ -853,7 +995,7 @@
     de: {
       menuSettings: 'Backloggd Plus — Einstellungen',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · Wertungen · Listen-Badges · Schnelllinks',
+      panelSubtitle: 'Steam · Wertungen · Deck/Proton · HLTB · Badges · Links',
       close: 'Schließen',
       cancel: 'Abbrechen',
       save: 'Speichern',
@@ -907,6 +1049,12 @@
       steamCountryHint: 'Beeinflusst die Währung der Steam-Store-API.',
       showSteam: 'Steam-Preis & Bewertungen anzeigen',
       showMetacritic: 'Metacritic-Wertung anzeigen',
+      showOpenCritic: 'OpenCritic-Wertung anzeigen',
+      showOpenCriticHint: 'Tier + Top-Critic-Schnitt von OpenCritic (Suche nach Titel).',
+      showHltb: 'HowLongToBeat-Zeiten anzeigen',
+      showHltbHint: 'Main / Extra / Complete in Stunden von HowLongToBeat.',
+      showDeckProton: 'Steam Deck & ProtonDB anzeigen',
+      showDeckProtonHint: 'Steam Deck Verified/Playable plus ProtonDB-Stufe (braucht eine Steam App ID).',
       showGameStatus: 'GameStatus-Status anzeigen',
       showGameStatusHint: 'Crack-/DRM-Status von GameStatus.info (Steam-Treffer erforderlich).',
       showLinks: 'Link-Zeile anzeigen',
@@ -990,6 +1138,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: 'bis {date}',
+      steamRecentLow: 'kürzliches Tief {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}h',
+      hltbExtra: 'Extra {n}h',
+      hltbComplete: 'Complete {n}h',
       players: 'Spieler',
       playersOnline: '{n} spielen',
 
@@ -997,7 +1161,7 @@
     fr: {
       menuSettings: 'Backloggd Plus — Réglages',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · notes · badges listes · liens rapides',
+      panelSubtitle: 'Steam · notes · Deck/Proton · HLTB · badges · liens',
       close: 'Fermer',
       cancel: 'Annuler',
       save: 'Enregistrer',
@@ -1051,6 +1215,12 @@
       steamCountryHint: 'Affecte la devise du prix via l’API Steam Store.',
       showSteam: 'Afficher prix et avis Steam',
       showMetacritic: 'Afficher le score Metacritic',
+      showOpenCritic: 'Afficher le score OpenCritic',
+      showOpenCriticHint: 'Tier + moyenne Top Critic d’OpenCritic (recherche par titre).',
+      showHltb: 'Afficher les temps HowLongToBeat',
+      showHltbHint: 'Heures Main / Extra / Complete depuis HowLongToBeat.',
+      showDeckProton: 'Afficher Steam Deck et ProtonDB',
+      showDeckProtonHint: 'Verified/Playable Steam Deck et palier ProtonDB (nécessite un Steam App ID).',
       showGameStatus: 'Afficher le statut GameStatus',
       showGameStatusHint: 'Statut crack / DRM via GameStatus.info (correspondance Steam requise).',
       showLinks: 'Afficher la rangée de liens',
@@ -1134,6 +1304,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: 'jusqu’au {date}',
+      steamRecentLow: 'plus bas récent {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}h',
+      hltbExtra: 'Extra {n}h',
+      hltbComplete: 'Complete {n}h',
       players: 'Joueurs',
       playersOnline: '{n} en jeu',
 
@@ -1141,7 +1327,7 @@
     ja: {
       menuSettings: 'Backloggd Plus — 設定',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · スコア · リストバッジ · クイックリンク',
+      panelSubtitle: 'Steam · スコア · Deck/Proton · HLTB · バッジ · リンク',
       close: '閉じる',
       cancel: 'キャンセル',
       save: '保存',
@@ -1195,6 +1381,12 @@
       steamCountryHint: 'Steam Store APIの価格通貨に影響します。',
       showSteam: 'Steamの価格とレビューを表示',
       showMetacritic: 'Metacriticスコアを表示',
+      showOpenCritic: 'OpenCriticスコアを表示',
+      showOpenCriticHint: 'OpenCriticのTierとTop Critic平均（タイトル検索）。',
+      showHltb: 'HowLongToBeatの時間を表示',
+      showHltbHint: 'HowLongToBeatのMain / Extra / Complete時間。',
+      showDeckProton: 'Steam DeckとProtonDBを表示',
+      showDeckProtonHint: 'Steam DeckのVerified/PlayableとProtonDBティア（Steam App IDが必要）。',
       showGameStatus: 'GameStatusの状態を表示',
       showGameStatusHint: 'GameStatus.info のクラック/DRM状態（Steam一致が必要）。',
       showLinks: 'リンク行を表示',
@@ -1278,6 +1470,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: '{date}まで',
+      steamRecentLow: '直近最安 {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}時間',
+      hltbExtra: 'Extra {n}時間',
+      hltbComplete: 'Complete {n}時間',
       players: 'プレイヤー',
       playersOnline: '{n} 人がプレイ中',
 
@@ -1285,7 +1493,7 @@
     ko: {
       menuSettings: 'Backloggd Plus — 설정',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · 점수 · 목록 배지 · 빠른 링크',
+      panelSubtitle: 'Steam · 점수 · Deck/Proton · HLTB · 배지 · 링크',
       close: '닫기',
       cancel: '취소',
       save: '저장',
@@ -1339,6 +1547,12 @@
       steamCountryHint: 'Steam Store API 가격 통화에 영향을 줍니다.',
       showSteam: 'Steam 가격 및 리뷰 표시',
       showMetacritic: 'Metacritic 점수 표시',
+      showOpenCritic: 'OpenCritic 점수 표시',
+      showOpenCriticHint: 'OpenCritic Tier + Top Critic 평균(제목 검색).',
+      showHltb: 'HowLongToBeat 시간 표시',
+      showHltbHint: 'HowLongToBeat의 Main / Extra / Complete 시간.',
+      showDeckProton: 'Steam Deck 및 ProtonDB 표시',
+      showDeckProtonHint: 'Steam Deck Verified/Playable과 ProtonDB 등급(Steam App ID 필요).',
       showGameStatus: 'GameStatus 상태 표시',
       showGameStatusHint: 'GameStatus.info의 크랙/DRM 상태(Steam 일치 필요).',
       showLinks: '링크 행 표시',
@@ -1422,6 +1636,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: '{date}까지',
+      steamRecentLow: '최근 최저 {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}시간',
+      hltbExtra: 'Extra {n}시간',
+      hltbComplete: 'Complete {n}시간',
       players: '플레이어',
       playersOnline: '{n}명 플레이 중',
 
@@ -1429,7 +1659,7 @@
     pl: {
       menuSettings: 'Backloggd Plus — Ustawienia',
       panelTitle: 'Backloggd Plus',
-      panelSubtitle: 'Steam · GameStatus · oceny · odznaki na listach · szybkie linki',
+      panelSubtitle: 'Steam · oceny · Deck/Proton · HLTB · odznaki · linki',
       close: 'Zamknij',
       cancel: 'Anuluj',
       save: 'Zapisz',
@@ -1483,6 +1713,12 @@
       steamCountryHint: 'Wpływa na walutę ceny z API Steam Store.',
       showSteam: 'Pokaż cenę i opinie Steam',
       showMetacritic: 'Pokaż wynik Metacritic',
+      showOpenCritic: 'Pokaż wynik OpenCritic',
+      showOpenCriticHint: 'Tier + średnia Top Critic z OpenCritic (wyszukiwanie po tytule).',
+      showHltb: 'Pokaż czasy HowLongToBeat',
+      showHltbHint: 'Godziny Main / Extra / Complete z HowLongToBeat.',
+      showDeckProton: 'Pokaż Steam Deck i ProtonDB',
+      showDeckProtonHint: 'Verified/Playable Steam Deck oraz poziom ProtonDB (wymaga Steam App ID).',
       showGameStatus: 'Pokaż status GameStatus',
       showGameStatusHint: 'Status crack / DRM z GameStatus.info (wymaga dopasowania Steam).',
       showLinks: 'Pokaż wiersz linków',
@@ -1566,6 +1802,22 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      discountEnds: 'do {date}',
+      steamRecentLow: 'niedawne minimum {price}',
+      linkPcgamingwiki: 'PCGamingWiki',
+      linkItad: 'IsThereAnyDeal',
+      linkGogdb: 'GOG DB',
+      openCritic: 'OpenCritic',
+      hltb: 'HLTB',
+      deckProton: 'Deck / Proton',
+      deckVerified: 'Verified',
+      deckPlayable: 'Playable',
+      deckUnsupported: 'Unsupported',
+      deckUnknown: 'Unknown',
+      protonTier: 'ProtonDB {tier}',
+      hltbMain: 'Main {n}h',
+      hltbExtra: 'Extra {n}h',
+      hltbComplete: 'Complete {n}h',
       players: 'Gracze',
       playersOnline: '{n} gra',
 
@@ -1659,6 +1911,9 @@
       metacritic: 'linkMetacritic',
       opencritic: 'linkOpencritic',
       hltb: 'linkHltb',
+      pcgamingwiki: 'linkPcgamingwiki',
+      itad: 'linkItad',
+      gogdb: 'linkGogdb',
     };
     return map[key] || key;
   }
@@ -1836,18 +2091,54 @@
     return { iconUrl, logoUrl, source: 'steam-assets' };
   }
 
+  function parseSteamPurchaseExtras(item) {
+    const opt = item?.best_purchase_option || null;
+    if (!opt || typeof opt !== 'object') {
+      return {
+        discountEndDate: null,
+        recentLowCents: null,
+        recentLowFormatted: null,
+      };
+    }
+    let discountEndDate = null;
+    const discounts = Array.isArray(opt.active_discounts) ? opt.active_discounts : [];
+    for (const d of discounts) {
+      const end = Number(d?.discount_end_date);
+      if (Number.isFinite(end) && end > 0) {
+        discountEndDate = end;
+        break;
+      }
+    }
+    const recentLowCents = Number(opt.lowest_recent_price_in_cents);
+    return {
+      discountEndDate,
+      recentLowCents: Number.isFinite(recentLowCents) && recentLowCents >= 0 ? recentLowCents : null,
+      recentLowFormatted:
+        typeof opt.formatted_lowest_recent_price === 'string' && opt.formatted_lowest_recent_price
+          ? opt.formatted_lowest_recent_price
+          : null,
+    };
+  }
+
+  function parseSteamDeckCompat(item) {
+    const cat = Number(item?.platforms?.steam_deck_compat_category);
+    return Number.isFinite(cat) ? cat : null;
+  }
+
   async function fetchSteamStoreItem(appId, country) {
     const id = Number(appId);
     const cc = String(country || 'US').toUpperCase();
     const inflightKey = `steam:storeitem:${id}:${cc}`;
     const tagsKey = `steam:tags:${id}`;
     const assetsKey = `steam:assets:${id}`;
+    const extrasKey = `steam:extras:${id}:${cc}`;
     const debugOn = Boolean(settings.debugMode);
 
     const cachedTags = !debugOn ? getCached(tagsKey) : null;
     const cachedAssets = !debugOn ? getCached(assetsKey) : null;
-    if (cachedTags && cachedAssets) {
-      return { tags: cachedTags, assets: cachedAssets };
+    const cachedExtras = !debugOn ? getCached(extrasKey) : null;
+    if (cachedTags && cachedAssets && cachedExtras) {
+      return { tags: cachedTags, assets: cachedAssets, extras: cachedExtras };
     }
 
     if (inflight.has(inflightKey)) return inflight.get(inflightKey);
@@ -1864,6 +2155,8 @@
           data_request: {
             include_tag_count: STEAM_TAGS_MAX,
             include_assets: true,
+            include_platforms: true,
+            include_all_purchase_options: true,
           },
         });
         const [root, map] = await Promise.all([
@@ -1885,16 +2178,27 @@
           .filter((tag) => tag.name)
           .slice(0, STEAM_TAGS_MAX);
         const assets = parseSteamStoreAssets(id, item?.assets);
+        const purchase = parseSteamPurchaseExtras(item);
+        const extras = {
+          deckCompat: parseSteamDeckCompat(item),
+          ...purchase,
+        };
         if (!debugOn) {
           setCached(tagsKey, tags);
           if (assets) setCached(assetsKey, assets);
+          setCached(extrasKey, extras);
         }
         return {
           tags: tags.length ? tags : cachedTags || [],
           assets: assets || cachedAssets || null,
+          extras: extras || cachedExtras || null,
         };
       } catch (_) {
-        return { tags: cachedTags || [], assets: cachedAssets || null };
+        return {
+          tags: cachedTags || [],
+          assets: cachedAssets || null,
+          extras: cachedExtras || null,
+        };
       }
     })();
 
@@ -1914,6 +2218,280 @@
   async function fetchSteamStoreAssets(appId, country) {
     const { assets } = await fetchSteamStoreItem(appId, country);
     return assets;
+  }
+
+  const HLTB_UA =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  const TITLE_MATCH_MIN_SCORE = 85;
+  let hltbTokenCache = null;
+
+  function formatHoursCompact(hours) {
+    if (!Number.isFinite(hours) || hours <= 0) return null;
+    const rounded = Math.round(hours * 10) / 10;
+    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  }
+
+  function secondsToHours(seconds) {
+    const n = Number(seconds);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return n / 3600;
+  }
+
+  function pickBestTitleMatch(candidates, title, getName) {
+    let best = null;
+    let bestScore = 0;
+    for (const item of candidates || []) {
+      const name = getName(item);
+      const score = scoreSteamTitleMatch(name, title);
+      if (score > bestScore) {
+        bestScore = score;
+        best = item;
+      }
+    }
+    if (!best || bestScore < TITLE_MATCH_MIN_SCORE) return null;
+    return { item: best, score: bestScore };
+  }
+
+  async function fetchHltbAuthToken(force = false) {
+    if (!force && hltbTokenCache && Date.now() < hltbTokenCache.expiresAt) {
+      return hltbTokenCache;
+    }
+    const data = await gmRequest({
+      url: `${HLTB_INIT_URL}?t=${Date.now()}`,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': HLTB_UA,
+        Origin: HLTB_SITE,
+        Referer: `${HLTB_SITE}/`,
+      },
+      timeout: 15000,
+    });
+    const token = data?.token;
+    const hpKey = data?.hpKey;
+    const hpVal = data?.hpVal;
+    if (
+      typeof token !== 'string' ||
+      !token ||
+      typeof hpKey !== 'string' ||
+      !hpKey ||
+      typeof hpVal !== 'string' ||
+      !hpVal
+    ) {
+      throw new Error('Invalid HLTB token response');
+    }
+    hltbTokenCache = {
+      token,
+      hpKey,
+      hpVal,
+      expiresAt: Date.now() + 50 * 60 * 1000,
+    };
+    return hltbTokenCache;
+  }
+
+  function buildHltbSearchPayload(query, auth) {
+    return {
+      searchType: 'games',
+      searchTerms: String(query || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean),
+      searchPage: 1,
+      size: 10,
+      searchOptions: {
+        games: {
+          userId: 0,
+          platform: '',
+          sortCategory: 'popular',
+          rangeCategory: 'main',
+          rangeTime: { min: null, max: null },
+          gameplay: { perspective: '', flow: '', genre: '', difficulty: '' },
+          rangeYear: { min: '', max: '' },
+          modifier: '',
+        },
+        users: { sortCategory: 'postcount' },
+        lists: { sortCategory: 'follows' },
+        filter: '',
+        sort: 0,
+        randomizer: 0,
+      },
+      useCache: true,
+      [auth.hpKey]: auth.hpVal,
+    };
+  }
+
+  async function fetchHltb(title) {
+    const q = String(title || '').trim();
+    if (!q) return null;
+    const cacheKey = `hltb:${normalizeTitle(q)}`;
+    const debugOn = Boolean(settings.debugMode);
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+    }
+    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+
+    const task = (async () => {
+      const runSearch = async (forceToken) => {
+        const auth = await fetchHltbAuthToken(forceToken);
+        return gmRequest({
+          method: 'POST',
+          url: HLTB_SEARCH_URL,
+          data: buildHltbSearchPayload(q, auth),
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: '*/*',
+            'User-Agent': HLTB_UA,
+            Origin: HLTB_SITE,
+            Referer: `${HLTB_SITE}/`,
+            'x-auth-token': auth.token,
+            'x-hp-key': auth.hpKey,
+            'x-hp-val': auth.hpVal,
+          },
+          timeout: 20000,
+        });
+      };
+
+      let root;
+      try {
+        root = await runSearch(false);
+      } catch (err) {
+        const msg = String(err?.message || err);
+        if (/HTTP 401|HTTP 403/.test(msg)) {
+          hltbTokenCache = null;
+          root = await runSearch(true);
+        } else {
+          throw err;
+        }
+      }
+
+      const list = Array.isArray(root?.data) ? root.data : [];
+      const picked = pickBestTitleMatch(list, q, (g) => g.game_name);
+      if (!picked) return null;
+      const raw = picked.item;
+      const gameId = raw.game_id;
+      const payload = {
+        id: gameId != null ? String(gameId) : null,
+        name: raw.game_name || q,
+        url: gameId
+          ? `${HLTB_SITE}/game/${gameId}`
+          : `${HLTB_SITE}/?q=${encodeURIComponent(q)}`,
+        main: secondsToHours(raw.comp_main),
+        extra: secondsToHours(raw.comp_plus),
+        complete: secondsToHours(raw.comp_100),
+        matchScore: picked.score,
+      };
+      if (!payload.main && !payload.extra && !payload.complete) return null;
+      if (!debugOn) setCached(cacheKey, payload);
+      return payload;
+    })().catch(() => null);
+
+    inflight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(cacheKey);
+    }
+  }
+
+  async function fetchOpenCritic(title) {
+    const q = String(title || '').trim();
+    if (!q) return null;
+    const cacheKey = `opencritic:${normalizeTitle(q)}`;
+    const debugOn = Boolean(settings.debugMode);
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+    }
+    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+
+    const task = (async () => {
+      const searchUrl = `${OPENCRITIC_API_BASE}/game/search?criteria=${encodeURIComponent(q)}`;
+      const results = await gmRequest({
+        url: searchUrl,
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': HLTB_UA,
+        },
+        timeout: 15000,
+      });
+      const list = Array.isArray(results) ? results : [];
+      const picked = pickBestTitleMatch(list, q, (g) => g.name || g.distilledName);
+      if (!picked?.item?.id) return null;
+      const id = Number(picked.item.id);
+      const detail = await gmRequest({
+        url: `${OPENCRITIC_API_BASE}/game/${id}`,
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': HLTB_UA,
+        },
+        timeout: 15000,
+      });
+      if (!detail) return null;
+      const score = Number(detail.topCriticScore);
+      const tier = typeof detail.tier === 'string' ? detail.tier : null;
+      const slug = detail.slug || picked.item.slug;
+      const payload = {
+        id,
+        name: detail.name || picked.item.name || q,
+        tier,
+        score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
+        url: slug
+          ? `https://opencritic.com/game/${id}/${encodeURIComponent(slug)}`
+          : `https://opencritic.com/game/${id}`,
+        matchScore: picked.score,
+      };
+      if (!payload.tier && payload.score == null) return null;
+      if (!debugOn) setCached(cacheKey, payload);
+      return payload;
+    })().catch(() => null);
+
+    inflight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(cacheKey);
+    }
+  }
+
+  async function fetchProtonDb(appId) {
+    const id = Number(appId);
+    if (!Number.isFinite(id) || id <= 0) return null;
+    const cacheKey = `protondb:${id}`;
+    const debugOn = Boolean(settings.debugMode);
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+    }
+    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+
+    const task = (async () => {
+      const data = await gmRequest({
+        url: `${PROTONDB_SUMMARY_URL}/${id}.json`,
+        allow404: true,
+        headers: { Accept: 'application/json' },
+        timeout: 15000,
+      });
+      if (!data || typeof data !== 'object') return null;
+      const tier = typeof data.tier === 'string' ? data.tier : null;
+      if (!tier) return null;
+      const payload = {
+        tier,
+        bestReportedTier: data.bestReportedTier || null,
+        confidence: data.confidence || null,
+        score: data.score != null ? Number(data.score) : null,
+        total: data.total != null ? Number(data.total) : null,
+        url: `https://www.protondb.com/app/${id}`,
+      };
+      if (!debugOn) setCached(cacheKey, payload);
+      return payload;
+    })().catch(() => null);
+
+    inflight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(cacheKey);
+    }
   }
 
   function steamTagUrl(name) {
@@ -2184,6 +2762,10 @@
       if (typeof options.anonymous === 'boolean') {
         req.anonymous = options.anonymous;
       }
+      if (options.data != null) {
+        req.data =
+          typeof options.data === 'string' ? options.data : JSON.stringify(options.data);
+      }
       GM_xmlhttpRequest(req);
     });
   }
@@ -2371,6 +2953,118 @@
         background: var(--blp-mc-low);
         color: #2a0a12 !important;
         border: 1px solid rgba(255, 102, 119, 0.5);
+      }
+
+      [${ENRICH_ATTR}] .blp-oc-badge,
+      [${ENRICH_ATTR}] .blp-deck-badge,
+      [${ENRICH_ATTR}] .blp-proton-badge,
+      [${ENRICH_ATTR}] .blp-hltb-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.18em 0.5em;
+        border-radius: 3px;
+        font-size: 0.82em;
+        font-weight: 700;
+        line-height: 1.2;
+        text-decoration: none !important;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+
+      [${ENRICH_ATTR}] .blp-oc-badge--mighty {
+        background: #fc4;
+        color: #1a1400 !important;
+        border: 1px solid rgba(255, 204, 68, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-oc-badge--strong {
+        background: #6c3;
+        color: #14200a !important;
+        border: 1px solid rgba(102, 204, 51, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-oc-badge--fair {
+        background: #fc3;
+        color: #2a2200 !important;
+        border: 1px solid rgba(255, 204, 51, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-oc-badge--weak {
+        background: #f67;
+        color: #2a0a12 !important;
+        border: 1px solid rgba(255, 102, 119, 0.5);
+      }
+      [${ENRICH_ATTR}] .blp-oc-badge:not([class*='blp-oc-badge--']) {
+        background: #3a4149;
+        color: #e8eaed !important;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      [${ENRICH_ATTR}] .blp-hltb-chips,
+      [${ENRICH_ATTR}] .blp-deck-proton-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        justify-content: flex-end;
+      }
+      @media (min-width: 768px) {
+        [${ENRICH_ATTR}] .blp-hltb-chips,
+        [${ENRICH_ATTR}] .blp-deck-proton-chips {
+          justify-content: flex-start;
+        }
+      }
+      [${ENRICH_ATTR}] .blp-hltb-chip {
+        background: #1b2838;
+        color: #c6d4df !important;
+        border: 1px solid rgba(198, 212, 223, 0.28);
+      }
+
+      [${ENRICH_ATTR}] .blp-deck-badge--verified {
+        background: #1a9fff;
+        color: #061018 !important;
+        border: 1px solid rgba(26, 159, 255, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-deck-badge--playable {
+        background: #ffc82c;
+        color: #1a1400 !important;
+        border: 1px solid rgba(255, 200, 44, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-deck-badge--unsupported,
+      [${ENRICH_ATTR}] .blp-deck-badge--unknown {
+        background: #3a4149;
+        color: #e8eaed !important;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      [${ENRICH_ATTR}] .blp-proton-badge--platinum {
+        background: #e5e4e2;
+        color: #1a1a1a !important;
+        border: 1px solid rgba(229, 228, 226, 0.6);
+      }
+      [${ENRICH_ATTR}] .blp-proton-badge--gold {
+        background: #d4af37;
+        color: #1a1400 !important;
+        border: 1px solid rgba(212, 175, 55, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-proton-badge--silver {
+        background: #c0c0c0;
+        color: #1a1a1a !important;
+        border: 1px solid rgba(192, 192, 192, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-proton-badge--bronze {
+        background: #cd7f32;
+        color: #1a0e04 !important;
+        border: 1px solid rgba(205, 127, 50, 0.55);
+      }
+      [${ENRICH_ATTR}] .blp-proton-badge--borked {
+        background: #c35c2c;
+        color: #fff !important;
+        border: 1px solid rgba(195, 92, 44, 0.55);
+      }
+
+      [${ENRICH_ATTR}] .blp-discount-ends {
+        opacity: 0.7;
+        margin-left: 0.25em;
+        font-size: 0.9em;
+        font-weight: 500;
       }
 
       [${ENRICH_ATTR}] .blp-review--overwhelming,
@@ -3559,7 +4253,98 @@
     return `<span class="${cls}">${label}</span>`;
   }
 
-  /** Steam review_score: 1..9 (Overwhelmingly Negative → Overwhelmingly Positive). */
+  function ocTierClass(tier) {
+    const key = String(tier || '')
+      .toLowerCase()
+      .replace(/\s+/g, '');
+    if (key === 'mighty') return 'blp-oc-badge--mighty';
+    if (key === 'strong') return 'blp-oc-badge--strong';
+    if (key === 'fair') return 'blp-oc-badge--fair';
+    if (key === 'weak') return 'blp-oc-badge--weak';
+    return '';
+  }
+
+  function renderOpenCriticValues(oc) {
+    if (!oc) return '';
+    const parts = [];
+    if (oc.tier) {
+      const cls = `blp-oc-badge ${ocTierClass(oc.tier)}`.trim();
+      parts.push(
+        `<a class="${cls} blp-ext-link" href="${escapeAttr(oc.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(oc.tier)}</a>`
+      );
+    }
+    if (oc.score != null) {
+      parts.push(
+        `<a class="game-details-value blp-ext-link" href="${escapeAttr(oc.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(String(oc.score))}</a>`
+      );
+    }
+    if (!parts.length) return '';
+    return parts.map((html) => `<span class="blp-steam-line">${html}</span>`).join('');
+  }
+
+  function renderHltbValues(hltb) {
+    if (!hltb) return '';
+    const chips = [];
+    const main = formatHoursCompact(hltb.main);
+    const extra = formatHoursCompact(hltb.extra);
+    const complete = formatHoursCompact(hltb.complete);
+    if (main) {
+      chips.push(
+        `<a class="blp-hltb-chip blp-ext-link" href="${escapeAttr(hltb.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(fmt(t.hltbMain, { n: main }))}</a>`
+      );
+    }
+    if (extra) {
+      chips.push(
+        `<a class="blp-hltb-chip blp-ext-link" href="${escapeAttr(hltb.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(fmt(t.hltbExtra, { n: extra }))}</a>`
+      );
+    }
+    if (complete) {
+      chips.push(
+        `<a class="blp-hltb-chip blp-ext-link" href="${escapeAttr(hltb.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(fmt(t.hltbComplete, { n: complete }))}</a>`
+      );
+    }
+    return chips.length ? `<span class="blp-hltb-chips">${chips.join('')}</span>` : '';
+  }
+
+  function deckCompatLabel(category) {
+    const cat = Number(category);
+    if (cat === 3) return { key: 'verified', label: t.deckVerified, cls: 'blp-deck-badge--verified' };
+    if (cat === 2) return { key: 'playable', label: t.deckPlayable, cls: 'blp-deck-badge--playable' };
+    if (cat === 1) return { key: 'unsupported', label: t.deckUnsupported, cls: 'blp-deck-badge--unsupported' };
+    if (cat === 0) return { key: 'unknown', label: t.deckUnknown, cls: 'blp-deck-badge--unknown' };
+    return null;
+  }
+
+  function protonTierClass(tier) {
+    const key = String(tier || '').toLowerCase();
+    if (key === 'platinum') return 'blp-proton-badge--platinum';
+    if (key === 'gold') return 'blp-proton-badge--gold';
+    if (key === 'silver') return 'blp-proton-badge--silver';
+    if (key === 'bronze') return 'blp-proton-badge--bronze';
+    if (key === 'borked') return 'blp-proton-badge--borked';
+    return '';
+  }
+
+  function renderDeckProtonValues({ steam, proton }) {
+    const parts = [];
+    const deck = deckCompatLabel(steam?.deckCompat);
+    if (deck) {
+      const href = steam?.appId
+        ? `https://store.steampowered.com/app/${steam.appId}/`
+        : steam?.storeUrl || '#';
+      parts.push(
+        `<a class="blp-deck-badge ${deck.cls} blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer" title="Steam Deck">${escapeHtml(deck.label)}</a>`
+      );
+    }
+    if (proton?.tier) {
+      const tierLabel = proton.tier.charAt(0).toUpperCase() + proton.tier.slice(1);
+      const cls = `blp-proton-badge ${protonTierClass(proton.tier)}`.trim();
+      parts.push(
+        `<a class="${cls} blp-ext-link" href="${escapeAttr(proton.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(fmt(t.protonTier, { tier: tierLabel }))}</a>`
+      );
+    }
+    return parts.length ? `<span class="blp-deck-proton-chips">${parts.join('')}</span>` : '';
+  }
   function reviewScoreClass(summary) {
     const score = Number(summary?.review_score);
     if (!Number.isFinite(score) || score <= 0) {
@@ -3618,6 +4403,29 @@
     return priceText || null;
   }
 
+  function formatDiscountEndDate(unixSeconds) {
+    const sec = Number(unixSeconds);
+    if (!Number.isFinite(sec) || sec <= 0) return null;
+    try {
+      return new Date(sec * 1000).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function formatRecentLowPrice(steam) {
+    if (steam?.recentLowFormatted) return steam.recentLowFormatted;
+    const cents = Number(steam?.recentLowCents);
+    if (!Number.isFinite(cents) || cents < 0) return null;
+    const amount = (cents / 100).toFixed(2);
+    const currency = steam?.price?.currency;
+    return currency ? `${amount} ${currency}` : amount;
+  }
+
   async function hydrateSteamApp({
     appId,
     country,
@@ -3654,7 +4462,8 @@
     debug.manualOverride = Boolean(manualOverride);
 
     const needTags = includeTags && settings.showSteamTags !== false;
-    if (needTags) {
+    const needExtras = includeTags;
+    if (needTags || needExtras) {
       const tagsInput = JSON.stringify({
         ids: [{ appid: id }],
         context: {
@@ -3662,7 +4471,12 @@
           country_code: detailsCountry,
           steam_realm: 1,
         },
-        data_request: { include_tag_count: STEAM_TAGS_MAX },
+        data_request: {
+          include_tag_count: STEAM_TAGS_MAX,
+          include_assets: true,
+          include_platforms: true,
+          include_all_purchase_options: true,
+        },
       });
       debug.tagsUrl = `${STEAM_STORE_ITEMS_URL}?input_json=${encodeURIComponent(tagsInput)}`;
       debug.tagMapUrl = STEAM_POPULAR_TAGS_URL;
@@ -3673,12 +4487,13 @@
       debug.reviewsError = String(err?.message || err);
       return null;
     });
-    const tagsPromise = needTags
-      ? fetchSteamAppTags(id, detailsCountry).catch((err) => {
-          debug.tagsError = String(err?.message || err);
-          return [];
-        })
-      : Promise.resolve([]);
+    const storeItemPromise =
+      needTags || needExtras
+        ? fetchSteamStoreItem(id, detailsCountry).catch((err) => {
+            debug.tagsError = String(err?.message || err);
+            return { tags: [], assets: null, extras: null };
+          })
+        : Promise.resolve({ tags: [], assets: null, extras: null });
 
     let detailsRoot = null;
     try {
@@ -3690,6 +4505,7 @@
 
     let reviews = null;
     let tags = [];
+    let extras = null;
     let canEmit = false;
 
     const buildPayload = () => {
@@ -3707,6 +4523,7 @@
       debug.detailsCountry = detailsCountry;
       debug.reviews = reviews?.query_summary || null;
       debug.tags = tags;
+      debug.extras = extras;
       return {
         found: Boolean(details) || Boolean(hit),
         appId: id,
@@ -3719,6 +4536,10 @@
         recommendations: details?.recommendations?.total || null,
         reviews: reviews?.query_summary || null,
         tags,
+        deckCompat: extras?.deckCompat ?? null,
+        discountEndDate: extras?.discountEndDate ?? null,
+        recentLowCents: extras?.recentLowCents ?? null,
+        recentLowFormatted: extras?.recentLowFormatted ?? null,
         tinyImage: hit?.tiny_image || hit?.small_capsule || null,
         headerImage: details?.header_image || null,
         usedUsFallback: Boolean(usedUsFallback),
@@ -3739,15 +4560,16 @@
       emitPartial();
       return value;
     });
-    const tagsReady = tagsPromise.then((value) => {
-      tags = value || [];
+    const storeReady = storeItemPromise.then((value) => {
+      tags = needTags ? value?.tags || [] : [];
+      extras = value?.extras || null;
       emitPartial();
-      return tags;
+      return value;
     });
 
     canEmit = true;
     emitPartial();
-    await Promise.all([reviewsReady, tagsReady]);
+    await Promise.all([reviewsReady, storeReady]);
 
     const payload = buildPayload();
     if (!detailsRoot?.[id]?.success && !hit) {
@@ -4655,6 +5477,29 @@
         label: t.linkHltb,
         url: `https://howlongtobeat.com/?q=${q}`,
       });
+      links.push({
+        key: 'pcgamingwiki',
+        label: t.linkPcgamingwiki,
+        url: `${PCGW_SITE}/wiki/Special:Search?search=${q}`,
+      });
+      if (steam?.appId) {
+        links.push({
+          key: 'itad',
+          label: t.linkItad,
+          url: `${ITAD_SITE}/steam/app/${steam.appId}/`,
+        });
+      } else {
+        links.push({
+          key: 'itad',
+          label: t.linkItad,
+          url: `${ITAD_SITE}/search/?q=${q}`,
+        });
+      }
+      links.push({
+        key: 'gogdb',
+        label: t.linkGogdb,
+        url: `${GOGDB_SITE}/?q=${q}`,
+      });
     }
     return links.filter((l) => isLinkEnabled(l.key));
   }
@@ -4692,6 +5537,20 @@
       `;
     }
     if (kind === 'metacritic') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
+    if (kind === 'opencritic') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
+    if (kind === 'hltb') {
+      return `
+        <span class="blp-skeleton blp-skeleton--md"></span>
+        <span class="blp-skeleton blp-skeleton--md"></span>
+        <span class="blp-skeleton blp-skeleton--md"></span>
+      `;
+    }
+    if (kind === 'deckproton') {
+      return `
+        <span class="blp-skeleton blp-skeleton--md"></span>
+        <span class="blp-skeleton blp-skeleton--md"></span>
+      `;
+    }
     if (kind === 'players') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
     if (kind === 'gamestatus') {
       return `
@@ -4712,6 +5571,9 @@
       return {
         steam: document.querySelector(`[${ENRICH_ATTR}="steam"]`),
         metacritic: document.querySelector(`[${ENRICH_ATTR}="metacritic"]`),
+        opencritic: document.querySelector(`[${ENRICH_ATTR}="opencritic"]`),
+        hltb: document.querySelector(`[${ENRICH_ATTR}="hltb"]`),
+        deckproton: document.querySelector(`[${ENRICH_ATTR}="deckproton"]`),
         players: document.querySelector(`[${ENRICH_ATTR}="players"]`),
         gamestatus: document.querySelector(`[${ENRICH_ATTR}="gamestatus"]`),
         links: document.querySelector(`[${ENRICH_ATTR}="links"]`),
@@ -4722,6 +5584,9 @@
     const plan = [];
     if (settings.showSteam) plan.push(['steam', t.steam]);
     if (settings.showMetacritic) plan.push(['metacritic', t.metacritic]);
+    if (settings.showOpenCritic) plan.push(['opencritic', t.openCritic]);
+    if (settings.showHltb) plan.push(['hltb', t.hltb]);
+    if (settings.showDeckProton) plan.push(['deckproton', t.deckProton]);
     if (settings.showSteamPlayers) plan.push(['players', t.players]);
     if (settings.showGameStatus) plan.push(['gamestatus', t.gameStatus]);
     if (settings.showLinks) plan.push(['links', t.links]);
@@ -4803,10 +5668,22 @@
       steam.price?.discount_percent > 0
         ? ` <span class="blp-discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
         : '';
+    const endsLabel = formatDiscountEndDate(steam.discountEndDate);
+    const discountEnds =
+      steam.price?.discount_percent > 0 && endsLabel
+        ? ` <span class="blp-discount-ends">${escapeHtml(fmt(t.discountEnds, { date: endsLabel }))}</span>`
+        : '';
 
     if (priceText) {
       parts.push({
-        html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}</a>`,
+        html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}${discountEnds}</a>`,
+      });
+    }
+
+    const recentLow = formatRecentLowPrice(steam);
+    if (recentLow) {
+      parts.push({
+        html: `<span class="game-details-value blp-steam-note">${escapeHtml(fmt(t.steamRecentLow, { price: recentLow }))}</span>`,
       });
     }
 
@@ -5044,6 +5921,9 @@
         showSteamWishlist: settings.showSteamWishlist,
         showSteamTags: settings.showSteamTags,
         showMetacritic: settings.showMetacritic,
+        showOpenCritic: settings.showOpenCritic,
+        showHltb: settings.showHltb,
+        showDeckProton: settings.showDeckProton,
         showGameStatus: settings.showGameStatus,
         showSteamDbIcon: settings.showSteamDbIcon,
         showSteamDbCover: settings.showSteamDbCover,
@@ -5118,7 +5998,7 @@
     else document.querySelector('#game-body')?.appendChild(panel);
   }
 
-  function renderEnrichment(rows, { steam, links, error, owned = false, wishlist = false, gamestatus = null, title = '', slug = '', steamDb = null, skipDebug = false }) {
+  function renderEnrichment(rows, { steam, links, error, owned = false, wishlist = false, gamestatus = null, title = '', slug = '', steamDb = null, opencritic = null, hltb = null, proton = null, skipDebug = false }) {
     const debugOn = Boolean(settings.debugMode);
 
     if (rows.steam) {
@@ -5155,6 +6035,39 @@
         showRow(rows.metacritic);
       } else {
         hideRow(rows.metacritic);
+      }
+    }
+
+    if (rows.opencritic) {
+      const html = renderOpenCriticValues(opencritic);
+      if (html && !error) {
+        setRowValues(rows.opencritic, html);
+        showRow(rows.opencritic);
+      } else {
+        hideRow(rows.opencritic);
+      }
+    }
+
+    if (rows.hltb) {
+      const html = renderHltbValues(hltb);
+      if (html && !error) {
+        setRowValues(rows.hltb, html);
+        showRow(rows.hltb);
+      } else {
+        hideRow(rows.hltb);
+      }
+    }
+
+    if (rows.deckproton) {
+      const html = renderDeckProtonValues({ steam, proton });
+      if (html && !error) {
+        setRowValues(rows.deckproton, html);
+        showRow(rows.deckproton);
+      } else if (debugOn && steam?.found) {
+        setRowValues(rows.deckproton, `<span class="game-details-value blp-empty">—</span>`);
+        showRow(rows.deckproton);
+      } else {
+        hideRow(rows.deckproton);
       }
     }
 
@@ -5216,7 +6129,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showMetacritic}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
       const needSteamDbUi = settings.showSteamDbIcon || settings.showSteamDbCover;
@@ -5238,8 +6151,10 @@
     const needSteam =
       settings.showSteam ||
       settings.showMetacritic ||
+      settings.showDeckProton ||
       settings.showGameStatus ||
-      needSteamDb;
+      needSteamDb ||
+      (settings.showLinks && (settings.links?.itad !== false || settings.links?.steamdb !== false));
     const needUserdata =
       settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
 
@@ -5250,6 +6165,9 @@
       userdata: null,
       gamestatus: null,
       steamDb: null,
+      opencritic: null,
+      hltb: null,
+      proton: null,
       error: false,
     };
 
@@ -5280,9 +6198,10 @@
       if (!stillHere() || state.steam == null) return;
       syncLibrary();
       renderEnrichment(
-        { steam: rows.steam, metacritic: rows.metacritic },
+        { steam: rows.steam, metacritic: rows.metacritic, deckproton: rows.deckproton },
         {
           steam: state.steam,
+          proton: state.proton,
           error: state.error,
           owned: state.owned,
           wishlist: state.wishlist,
@@ -5292,6 +6211,35 @@
         }
       );
       paintLinks(state.steam);
+    };
+
+    const paintOpenCritic = () => {
+      if (!stillHere() || !rows.opencritic) return;
+      renderEnrichment(
+        { opencritic: rows.opencritic },
+        { opencritic: state.opencritic, error: state.error, skipDebug: true }
+      );
+    };
+
+    const paintHltb = () => {
+      if (!stillHere() || !rows.hltb) return;
+      renderEnrichment(
+        { hltb: rows.hltb },
+        { hltb: state.hltb, error: state.error, skipDebug: true }
+      );
+    };
+
+    const paintDeckProton = () => {
+      if (!stillHere() || !rows.deckproton) return;
+      renderEnrichment(
+        { deckproton: rows.deckproton },
+        {
+          steam: state.steam,
+          proton: state.proton,
+          error: state.error,
+          skipDebug: true,
+        }
+      );
     };
 
     const paintPlayers = () => {
@@ -5329,6 +6277,9 @@
         title,
         slug: ctx.slug,
         steamDb: state.steamDb,
+        opencritic: state.opencritic,
+        hltb: state.hltb,
+        proton: state.proton,
       });
       if (state.steamDb) applySteamDbUi(state.steamDb, token);
     };
@@ -5416,10 +6367,55 @@
         );
       }
 
+      if (settings.showDeckProton) {
+        jobs.push(
+          fetchProtonDb(steam.appId)
+            .then((proton) => {
+              if (!stillHere()) return;
+              state.proton = proton;
+              paintDeckProton();
+            })
+            .catch(() => {
+              if (!stillHere()) return;
+              paintDeckProton();
+            })
+        );
+      }
+
       dependentsPromise = Promise.all(jobs);
     };
 
     try {
+      const scoreJobs = [];
+      if (settings.showOpenCritic) {
+        scoreJobs.push(
+          fetchOpenCritic(title)
+            .then((oc) => {
+              if (!stillHere()) return;
+              state.opencritic = oc;
+              paintOpenCritic();
+            })
+            .catch(() => {
+              if (!stillHere()) return;
+              paintOpenCritic();
+            })
+        );
+      }
+      if (settings.showHltb) {
+        scoreJobs.push(
+          fetchHltb(title)
+            .then((hltb) => {
+              if (!stillHere()) return;
+              state.hltb = hltb;
+              paintHltb();
+            })
+            .catch(() => {
+              if (!stillHere()) return;
+              paintHltb();
+            })
+        );
+      }
+
       const userdataPromise = needUserdata
         ? fetchSteamUserdata()
             .then((data) => {
@@ -5445,7 +6441,7 @@
           })
         : Promise.resolve(null);
 
-      const [steamResult] = await Promise.all([steamPromise, userdataPromise]);
+      const [steamResult] = await Promise.all([steamPromise, userdataPromise, ...scoreJobs]);
       if (!stillHere()) return;
 
       state.steam = steamResult;
@@ -5483,6 +6479,9 @@
         _debug: { reason: `Enrichment error: ${err?.message || err}` },
       };
       paintSteamBlock();
+      paintOpenCritic();
+      paintHltb();
+      paintDeckProton();
       paintGameStatus();
       paintPlayers();
     }
@@ -5575,6 +6574,21 @@
             <span>${escapeHtml(t.showMetacritic)}</span>
             <button type="button" data-blp-toggle="showMetacritic" class="${draft.showMetacritic ? 'is-on' : ''}">${draft.showMetacritic ? t.on : t.off}</button>
           </div>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showOpenCritic)}</span>
+            <button type="button" data-blp-toggle="showOpenCritic" class="${draft.showOpenCritic ? 'is-on' : ''}">${draft.showOpenCritic ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showOpenCriticHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showHltb)}</span>
+            <button type="button" data-blp-toggle="showHltb" class="${draft.showHltb ? 'is-on' : ''}">${draft.showHltb ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showHltbHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showDeckProton)}</span>
+            <button type="button" data-blp-toggle="showDeckProton" class="${draft.showDeckProton ? 'is-on' : ''}">${draft.showDeckProton ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showDeckProtonHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showGameStatus)}</span>
             <button type="button" data-blp-toggle="showGameStatus" class="${draft.showGameStatus ? 'is-on' : ''}">${draft.showGameStatus ? t.on : t.off}</button>

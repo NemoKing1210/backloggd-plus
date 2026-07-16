@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.6.10-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.0-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.6.10`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.0`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -54,14 +54,14 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Game pages (`/games/{slug}/`):**
 
-- Native detail rows under Platforms — **Steam** (owned · wishlist · price · reviews · tags), **Metacritic**, **Players**, **GameStatus** (crack / DRM), **Links**
+- Native detail rows under Platforms — **Steam** (owned · wishlist · price · sale end / recent low · reviews · tags), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Players**, **GameStatus** (crack / DRM), **Links**
 - **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug)
 - SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
-- Skeleton placeholders while Steam / GameStatus data loads
-- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
+- Skeleton placeholders while Steam / GameStatus / score data loads
+- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB)
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus crack status badges (same classification as steam-gamestatus)
-- Works without API keys (Steam Store public endpoints + session userdata + GameStatus public API)
+- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / OpenCritic / ProtonDB public APIs)
 
 **Lists / search / journal (cover grids):**
 
@@ -81,9 +81,9 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / owned / wishlist / tags / Metacritic / GameStatus / players / SteamDB icon & logo / list cover badges / links / Steam & SteamDB Backloggd buttons
+- Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / list cover badges / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump
-- Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
+- Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB)
 - Cache duration + clear cache
 
 ## Supported pages

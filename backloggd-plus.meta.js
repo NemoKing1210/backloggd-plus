@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.6.10
+// @version           0.7.0
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -43,6 +43,10 @@
 // @connect            store.steampowered.com
 // @connect            api.steampowered.com
 // @connect            gamestatus.info
+// @connect            howlongtobeat.com
+// @connect            api.opencritic.com
+// @connect            www.protondb.com
+// @connect            protondb.com
 // @run-at             document-idle
 // @noframes
 // ==/UserScript==

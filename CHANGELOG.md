@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-07-16
+
+### Added
+
+- Game page rows for **OpenCritic** (tier + Top Critic score) and **HowLongToBeat** (Main / Extra / Complete)
+- **Steam Deck / ProtonDB** row — Deck Verified/Playable (from Steam GetItems) plus ProtonDB tier by App ID
+- Steam sale **end date** and **recent low** price when Steam Store exposes them on the purchase option
+- Quick links: **PCGamingWiki**, **IsThereAnyDeal**, **GOG DB** (same per-link toggles as IGDB / HLTB)
+
+### Changed
+
+- `@connect` expanded for HowLongToBeat, OpenCritic, and ProtonDB
+- Settings toggles for OpenCritic, HLTB, and Deck/Proton rows
+
 ## [0.6.10] - 2026-07-16
 
 ### Changed
