@@ -5,6 +5,58 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.7] - 2026-07-16
+
+### Changed
+
+- Debug Sources grouped by module (Page, Steam, SteamDB / players, GameStatus)
+
+## [0.5.6] - 2026-07-16
+
+### Changed
+
+- Debug Sources marks URLs that the script actually requests (badge + yellow edge); requested entries listed first
+
+## [0.5.5] - 2026-07-16
+
+### Changed
+
+- Debug Sources list shows what each URL is for (search, price, tags, ownership, SteamDB scrape, etc.)
+
+## [0.5.4] - 2026-07-16
+
+### Changed
+
+- Debug mode shows a single panel with clickable source URLs and a full (untruncated) dump
+
+## [0.5.3] - 2026-07-16
+
+### Changed
+
+- SteamDB title icon size is 32?32px
+
+## [0.5.2] - 2026-07-16
+
+### Fixed
+
+- SteamDB app-icon goes into desktop `.game-title-section` `h1`; app-logo appends to `#logging-sidebar-section > div > div`
+
+## [0.5.1] - 2026-07-16
+
+### Fixed
+
+- SteamDB icon injects into both desktop and mobile title `h1`s
+- Cover mounts under `.game-cover` with library portrait fallback (logo.png alone was often invisible)
+- Re-apply icon/cover after enrichment so MutationObserver does not wipe them
+
+## [0.5.0] - 2026-07-16
+
+### Added
+
+- SteamDB extras on game pages: app icon before the title (`.app-icon`), logo under **Change cover** (`.app-logo`), and online players (`.header-thing-number` / Steam API)
+- Settings toggles for icon, logo, and players
+- `@connect steamdb.info` (HTML scrape with Steam CDN / players API fallback)
+
 ## [0.4.16] - 2026-07-16
 
 ### Fixed

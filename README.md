@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.4.16-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.7-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.4.16`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.5.7`). Backloggd enrichment + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -54,12 +54,13 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Game pages (`/games/{slug}/`):**
 
-- Native detail rows under Platforms — **Steam** (owned · price · reviews · tags), **Metacritic**, **GameStatus** (crack / DRM), **Links**
+- Native detail rows under Platforms — **Steam** (owned · price · reviews · tags), **Metacritic**, **Players**, **GameStatus** (crack / DRM), **Links**
+- SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
 - Skeleton placeholders while Steam / GameStatus data loads
 - Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
 - Steam **Owned** badge when you are logged into Steam in the same browser (no API key)
 - GameStatus crack status badges (same classification as steam-gamestatus)
-- Works without API keys (Steam Store public endpoints + session userdata + GameStatus public API)
+- Works without API keys (Steam Store public endpoints + session userdata + GameStatus public API; SteamDB HTML when reachable)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):
 
@@ -75,8 +76,8 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / owned status / Steam tags / Metacritic / GameStatus / links row / Steam-page & SteamDB Backloggd buttons
-- Debug mode: reason + truncated API dump under Steam / GameStatus rows
+- Toggles for Steam / owned / tags / Metacritic / GameStatus / players / SteamDB icon & logo / links / Steam & SteamDB Backloggd buttons
+- Debug mode: one panel with clickable source links and a full response dump
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB)
 - Cache duration + clear cache
 

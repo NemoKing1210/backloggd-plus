@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.4.16
+// @version           0.5.7
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -43,6 +43,7 @@
 // @connect            store.steampowered.com
 // @connect            api.steampowered.com
 // @connect            gamestatus.info
+// @connect            steamdb.info
 // @run-at             document-idle
 // @noframes
 // ==/UserScript==
@@ -52,12 +53,13 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.4.16';
+  const SCRIPT_VERSION = '0.5.7';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
   const ROOT_ATTR = 'data-blp-root';
   const ENRICH_ATTR = 'data-blp-enrich';
+  const STEAMDB_ATTR = 'data-blp-steamdb';
   const FAVICON_URL = 'https://www.google.com/s2/favicons?domain={domain}&sz=32';
   const SCAN_DEBOUNCE_MS = 400;
   const CACHE_HOURS_MAX = 168;
@@ -67,7 +69,11 @@
   const STEAM_USERDATA_URL = 'https://store.steampowered.com/dynamicstore/userdata/';
   const STEAM_POPULAR_TAGS_URL = 'https://store.steampowered.com/tagdata/populartags/english';
   const STEAM_STORE_ITEMS_URL = 'https://api.steampowered.com/IStoreBrowseService/GetItems/v1/';
+  const STEAM_PLAYERS_URL = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/';
+  const STEAM_CDN_APPS = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps';
+  const STEAMDB_APP_URL = 'https://steamdb.info/app';
   const STEAM_TAGS_MAX = 12;
+  const PLAYERS_CACHE_TTL_MS = 10 * 60 * 1000;
   const GAMESTATUS_API_BASE = 'https://gamestatus.info/back/api/gameinfo/game';
   const GAMESTATUS_SITE_BASE = 'https://gamestatus.info';
   const GAMESTATUS_MAX_SLUG_ATTEMPTS = 2;
@@ -101,6 +107,9 @@
     showSteamTags: true,
     showSteamPageLink: true,
     showSteamDbPageLink: true,
+    showSteamDbIcon: true,
+    showSteamDbCover: true,
+    showSteamPlayers: true,
     debugMode: false,
     links: {
       igdb: true,
@@ -131,9 +140,39 @@
       sectionDebug: 'Debug',
       debugMode: 'Debug mode',
       debugModeHint:
-        'On game pages, show why Steam / GameStatus matched or failed and a truncated response dump under each row.',
+        'Show one debug panel on the game page with sources (what each URL is for) and a full response dump.',
       debugReason: 'Reason',
       debugResponse: 'Response',
+      debugPanelTitle: 'Debug',
+      debugSources: 'Sources',
+      debugDump: 'Full dump',
+      debugSectionPage: 'Page',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / players',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'Owned',
+      debugSrcRequest: 'request',
+      debugSrcBackloggd: 'Current Backloggd game page',
+      debugSrcIgdb: 'Game slug / Links row (IGDB)',
+      debugSrcMetacritic: 'Links row — Metacritic URL (slug guess)',
+      debugSrcSteamStore: 'Steam store page — Links row + Steam row link',
+      debugSrcSteamDb: 'Links row — SteamDB app page',
+      debugSrcSteamDbCharts: 'SteamDB charts (reference; not scraped)',
+      debugSrcSteamDbInfo: 'SteamDB info (reference; not scraped)',
+      debugSrcSteamTiny: 'Tiny capsule — icon fallback',
+      debugSrcSteamHeader: 'Header image from appdetails',
+      debugSrcSteamSearch: 'storesearch — resolve Steam App ID',
+      debugSrcSteamDetails: 'appdetails — price, free, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — review summary for Steam row',
+      debugSrcSteamTags: 'GetItems — popular tags for Steam row',
+      debugSrcSteamTagMap: 'populartags — tag id → name map',
+      debugSrcSteamOwned: 'dynamicstore/userdata — owned library check',
+      debugSrcSteamDbPage: 'SteamDB HTML scrape — icon, logo, players',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — players fallback',
+      debugSrcIcon: 'Title icon (SteamDB / CDN)',
+      debugSrcLogo: 'Cover logo under Change cover',
+      debugSrcGameStatusApi: 'GameStatus API — crack / DRM status',
+      debugSrcGameStatusPage: 'GameStatus site page for matched slug',
       uiLanguage: 'Interface language',
       uiLanguageHint: 'Auto follows your browser language. Saved choice applies after reload.',
       uiLanguageAuto: 'Auto (browser)',
@@ -153,6 +192,12 @@
       showSteamPageLinkHint: 'Adds a SteamDB-style button in Other site info on Steam app pages.',
       showSteamDbPageLink: 'Show Backloggd button on SteamDB',
       showSteamDbPageLinkHint: 'Adds a Backloggd button next to Store / IGDB in SteamDB app links.',
+      showSteamDbIcon: 'Show SteamDB icon before title',
+      showSteamDbIconHint: 'App icon from SteamDB (.app-icon), with Steam capsule fallback.',
+      showSteamDbCover: 'Show SteamDB logo under Change cover',
+      showSteamDbCoverHint: 'App logo from SteamDB (.app-logo) below the cover / Change cover control.',
+      showSteamPlayers: 'Show online players',
+      showSteamPlayersHint: 'Current players from SteamDB (.header-thing-number) or Steam API.',
       steamBackloggdTooltip: 'View on Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Owned',
@@ -193,6 +238,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Players',
+      playersOnline: '{n} playing',
     },
     ru: {
       menuSettings: 'Backloggd Plus — Настройки',
@@ -210,9 +257,39 @@
       sectionDebug: 'Отладка',
       debugMode: 'Режим отладки',
       debugModeHint:
-        'На странице игры показывает причину совпадения/промаха Steam / GameStatus и урезанный дамп ответа под строкой.',
+        'Одна панель отладки на странице игры: источники (за что отвечает каждая ссылка) и полный дамп ответов.',
       debugReason: 'Причина',
       debugResponse: 'Ответ',
+      debugPanelTitle: 'Отладка',
+      debugSources: 'Источники',
+      debugDump: 'Полный дамп',
+      debugSectionPage: 'Страница',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / игроки',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'Куплено',
+      debugSrcRequest: 'запрос',
+      debugSrcBackloggd: 'Текущая страница игры на Backloggd',
+      debugSrcIgdb: 'Слаг игры / ряд Links (IGDB)',
+      debugSrcMetacritic: 'Ряд Links — URL Metacritic (по слагу)',
+      debugSrcSteamStore: 'Страница в Steam — Links + ссылка в ряду Steam',
+      debugSrcSteamDb: 'Ряд Links — страница приложения SteamDB',
+      debugSrcSteamDbCharts: 'SteamDB charts (справочно; не скрапится)',
+      debugSrcSteamDbInfo: 'SteamDB info (справочно; не скрапится)',
+      debugSrcSteamTiny: 'Маленькая капсула — запасной icon',
+      debugSrcSteamHeader: 'Header-картинка из appdetails',
+      debugSrcSteamSearch: 'storesearch — поиск Steam App ID',
+      debugSrcSteamDetails: 'appdetails — цена, free, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — сводка отзывов для ряда Steam',
+      debugSrcSteamTags: 'GetItems — популярные теги для ряда Steam',
+      debugSrcSteamTagMap: 'populartags — карта id тега → имя',
+      debugSrcSteamOwned: 'dynamicstore/userdata — проверка библиотеки',
+      debugSrcSteamDbPage: 'HTML SteamDB — icon, logo, игроки',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — запасной онлайн',
+      debugSrcIcon: 'Иконка у заголовка (SteamDB / CDN)',
+      debugSrcLogo: 'Логотип обложки под Change cover',
+      debugSrcGameStatusApi: 'API GameStatus — статус взлома / DRM',
+      debugSrcGameStatusPage: 'Страница GameStatus для найденного слага',
       uiLanguage: 'Язык интерфейса',
       uiLanguageHint: 'Авто — язык браузера. Выбор применится после перезагрузки.',
       uiLanguageAuto: 'Авто (браузер)',
@@ -232,6 +309,12 @@
       showSteamPageLinkHint: 'Кнопка в стиле SteamDB в блоке Other site info на страницах игр Steam.',
       showSteamDbPageLink: 'Кнопка Backloggd на SteamDB',
       showSteamDbPageLinkHint: 'Кнопка рядом со Store / IGDB в блоке app-links на SteamDB.',
+      showSteamDbIcon: 'Иконка SteamDB перед названием',
+      showSteamDbIconHint: 'Иконка приложения со SteamDB (.app-icon), запасной вариант — капсула Steam.',
+      showSteamDbCover: 'Логотип SteamDB под Change cover',
+      showSteamDbCoverHint: 'Логотип (.app-logo) под обложкой / кнопкой Change cover.',
+      showSteamPlayers: 'Показывать онлайн игроков',
+      showSteamPlayersHint: 'Текущие игроки со SteamDB (.header-thing-number) или Steam API.',
       steamBackloggdTooltip: 'Открыть на Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Куплено',
@@ -272,6 +355,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Игроки',
+      playersOnline: '{n} в игре',
 
     },
     zh: {
@@ -289,9 +374,40 @@
       sectionCache: '缓存',
       sectionDebug: '调试',
       debugMode: '调试模式',
-      debugModeHint: '在游戏页显示 Steam / GameStatus 匹配或失败的原因，以及截断的响应内容。',
+      debugModeHint:
+        '在游戏页显示单个调试面板，含来源用途说明和完整响应转储。',
       debugReason: '原因',
       debugResponse: '响应',
+      debugPanelTitle: '调试',
+      debugSources: '来源',
+      debugDump: '完整转储',
+      debugSectionPage: '页面',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / 玩家',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: '已拥有',
+      debugSrcRequest: '请求',
+      debugSrcBackloggd: '当前 Backloggd 游戏页',
+      debugSrcIgdb: '游戏 slug / Links 行（IGDB）',
+      debugSrcMetacritic: 'Links 行 — Metacritic URL（按 slug 猜测）',
+      debugSrcSteamStore: 'Steam 商店页 — Links + Steam 行链接',
+      debugSrcSteamDb: 'Links 行 — SteamDB 应用页',
+      debugSrcSteamDbCharts: 'SteamDB charts（参考；不抓取）',
+      debugSrcSteamDbInfo: 'SteamDB info（参考；不抓取）',
+      debugSrcSteamTiny: '小胶囊图 — 图标回退',
+      debugSrcSteamHeader: '来自 appdetails 的 header 图',
+      debugSrcSteamSearch: 'storesearch — 解析 Steam App ID',
+      debugSrcSteamDetails: 'appdetails — 价格、免费、Metacritic、header',
+      debugSrcSteamReviews: 'appreviews — Steam 行评价摘要',
+      debugSrcSteamTags: 'GetItems — Steam 行热门标签',
+      debugSrcSteamTagMap: 'populartags — 标签 id → 名称',
+      debugSrcSteamOwned: 'dynamicstore/userdata — 库拥有检查',
+      debugSrcSteamDbPage: 'SteamDB HTML — icon、logo、玩家数',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — 玩家数回退',
+      debugSrcIcon: '标题图标（SteamDB / CDN）',
+      debugSrcLogo: 'Change cover 下的封面 logo',
+      debugSrcGameStatusApi: 'GameStatus API — 破解 / DRM 状态',
+      debugSrcGameStatusPage: '匹配 slug 的 GameStatus 页面',
       uiLanguage: '界面语言',
       uiLanguageHint: '自动跟随浏览器语言。保存后刷新生效。',
       uiLanguageAuto: '自动（浏览器）',
@@ -310,6 +426,12 @@
       showSteamPageLinkHint: '在 Steam 游戏页 Other site info 中添加类似 SteamDB 的按钮。',
       showSteamDbPageLink: '在 SteamDB 显示 Backloggd 按钮',
       showSteamDbPageLinkHint: '在 SteamDB app-links 中、Store / IGDB 旁添加 Backloggd 按钮。',
+      showSteamDbIcon: '在标题前显示 SteamDB 图标',
+      showSteamDbIconHint: '来自 SteamDB 的应用图标（.app-icon），失败时回退到 Steam 胶囊图。',
+      showSteamDbCover: '在 Change cover 下显示 SteamDB Logo',
+      showSteamDbCoverHint: '在封面 / Change cover 下方显示 SteamDB 应用 Logo（.app-logo）。',
+      showSteamPlayers: '显示在线玩家数',
+      showSteamPlayersHint: '来自 SteamDB（.header-thing-number）或 Steam API 的当前玩家数。',
       steamBackloggdTooltip: '在 Backloggd 查看',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: '已拥有',
@@ -350,6 +472,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: '玩家',
+      playersOnline: '{n} 在玩',
 
     },
     es: {
@@ -367,9 +491,40 @@
       sectionCache: 'Caché',
       sectionDebug: 'Depuración',
       debugMode: 'Modo depuración',
-      debugModeHint: 'En la página del juego muestra por qué Steam / GameStatus coincidió o falló y un volcado truncado bajo cada fila.',
+      debugModeHint:
+        'Una sola panel de depuración en la página del juego con fuentes (para qué sirve cada URL) y volcado completo.',
       debugReason: 'Motivo',
       debugResponse: 'Respuesta',
+      debugPanelTitle: 'Depuración',
+      debugSources: 'Fuentes',
+      debugDump: 'Volcado completo',
+      debugSectionPage: 'Página',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / jugadores',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'En biblioteca',
+      debugSrcRequest: 'petición',
+      debugSrcBackloggd: 'Página actual del juego en Backloggd',
+      debugSrcIgdb: 'Slug del juego / fila Links (IGDB)',
+      debugSrcMetacritic: 'Fila Links — URL Metacritic (por slug)',
+      debugSrcSteamStore: 'Página Steam — Links + enlace en la fila Steam',
+      debugSrcSteamDb: 'Fila Links — página de app SteamDB',
+      debugSrcSteamDbCharts: 'SteamDB charts (referencia; no se scrapea)',
+      debugSrcSteamDbInfo: 'SteamDB info (referencia; no se scrapea)',
+      debugSrcSteamTiny: 'Cápsula pequeña — fallback de icono',
+      debugSrcSteamHeader: 'Imagen header de appdetails',
+      debugSrcSteamSearch: 'storesearch — resolver Steam App ID',
+      debugSrcSteamDetails: 'appdetails — precio, free, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — resumen de reseñas para Steam',
+      debugSrcSteamTags: 'GetItems — etiquetas populares para Steam',
+      debugSrcSteamTagMap: 'populartags — mapa id → nombre',
+      debugSrcSteamOwned: 'dynamicstore/userdata — comprobar biblioteca',
+      debugSrcSteamDbPage: 'HTML SteamDB — icono, logo, jugadores',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback de jugadores',
+      debugSrcIcon: 'Icono del título (SteamDB / CDN)',
+      debugSrcLogo: 'Logo de portada bajo Change cover',
+      debugSrcGameStatusApi: 'API GameStatus — estado crack / DRM',
+      debugSrcGameStatusPage: 'Página GameStatus del slug encontrado',
       uiLanguage: 'Idioma de la interfaz',
       uiLanguageHint: 'Auto sigue el idioma del navegador. Se aplica al recargar.',
       uiLanguageAuto: 'Auto (navegador)',
@@ -389,6 +544,12 @@
       showSteamPageLinkHint: 'Añade un botón estilo SteamDB en Other site info en páginas de Steam.',
       showSteamDbPageLink: 'Botón Backloggd en SteamDB',
       showSteamDbPageLinkHint: 'Añade un botón junto a Store / IGDB en app-links de SteamDB.',
+      showSteamDbIcon: 'Icono SteamDB antes del título',
+      showSteamDbIconHint: 'Icono de la app desde SteamDB (.app-icon); reserva: cápsula de Steam.',
+      showSteamDbCover: 'Logo SteamDB bajo Change cover',
+      showSteamDbCoverHint: 'Logo de la app (.app-logo) debajo de la portada / Change cover.',
+      showSteamPlayers: 'Mostrar jugadores en línea',
+      showSteamPlayersHint: 'Jugadores actuales desde SteamDB (.header-thing-number) o API de Steam.',
       steamBackloggdTooltip: 'Ver en Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'En propiedad',
@@ -429,6 +590,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Jugadores',
+      playersOnline: '{n} jugando',
 
     },
     pt: {
@@ -446,9 +609,40 @@
       sectionCache: 'Cache',
       sectionDebug: 'Depuração',
       debugMode: 'Modo debug',
-      debugModeHint: 'Na página do jogo mostra por que Steam / GameStatus bateu ou falhou e um dump truncado sob cada linha.',
+      debugModeHint:
+        'Um único painel de debug na página do jogo com fontes (para que serve cada URL) e dump completo.',
       debugReason: 'Motivo',
       debugResponse: 'Resposta',
+      debugPanelTitle: 'Debug',
+      debugSources: 'Fontes',
+      debugDump: 'Dump completo',
+      debugSectionPage: 'Página',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / jogadores',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'Na biblioteca',
+      debugSrcRequest: 'requisição',
+      debugSrcBackloggd: 'Página atual do jogo no Backloggd',
+      debugSrcIgdb: 'Slug do jogo / linha Links (IGDB)',
+      debugSrcMetacritic: 'Linha Links — URL Metacritic (por slug)',
+      debugSrcSteamStore: 'Página Steam — Links + link na linha Steam',
+      debugSrcSteamDb: 'Linha Links — página do app SteamDB',
+      debugSrcSteamDbCharts: 'SteamDB charts (referência; não é scrape)',
+      debugSrcSteamDbInfo: 'SteamDB info (referência; não é scrape)',
+      debugSrcSteamTiny: 'Cápsula pequena — fallback de ícone',
+      debugSrcSteamHeader: 'Imagem header do appdetails',
+      debugSrcSteamSearch: 'storesearch — resolver Steam App ID',
+      debugSrcSteamDetails: 'appdetails — preço, free, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — resumo de reviews para Steam',
+      debugSrcSteamTags: 'GetItems — tags populares para Steam',
+      debugSrcSteamTagMap: 'populartags — mapa id → nome',
+      debugSrcSteamOwned: 'dynamicstore/userdata — checagem da biblioteca',
+      debugSrcSteamDbPage: 'HTML SteamDB — ícone, logo, jogadores',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback de jogadores',
+      debugSrcIcon: 'Ícone do título (SteamDB / CDN)',
+      debugSrcLogo: 'Logo da capa sob Change cover',
+      debugSrcGameStatusApi: 'API GameStatus — status crack / DRM',
+      debugSrcGameStatusPage: 'Página GameStatus do slug encontrado',
       uiLanguage: 'Idioma da interface',
       uiLanguageHint: 'Auto segue o idioma do navegador. Aplica ao recarregar.',
       uiLanguageAuto: 'Auto (navegador)',
@@ -468,6 +662,12 @@
       showSteamPageLinkHint: 'Adiciona um botão estilo SteamDB em Other site info nas páginas da Steam.',
       showSteamDbPageLink: 'Botão Backloggd no SteamDB',
       showSteamDbPageLinkHint: 'Adiciona um botão ao lado de Store / IGDB em app-links do SteamDB.',
+      showSteamDbIcon: 'Ícone SteamDB antes do título',
+      showSteamDbIconHint: 'Ícone do app no SteamDB (.app-icon); fallback: cápsula da Steam.',
+      showSteamDbCover: 'Logo SteamDB sob Change cover',
+      showSteamDbCoverHint: 'Logo do app (.app-logo) abaixo da capa / Change cover.',
+      showSteamPlayers: 'Mostrar jogadores online',
+      showSteamPlayersHint: 'Jogadores atuais do SteamDB (.header-thing-number) ou API da Steam.',
       steamBackloggdTooltip: 'Ver no Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Possui',
@@ -508,6 +708,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Jogadores',
+      playersOnline: '{n} jogando',
 
     },
     de: {
@@ -525,9 +727,40 @@
       sectionCache: 'Cache',
       sectionDebug: 'Debug',
       debugMode: 'Debug-Modus',
-      debugModeHint: 'Auf der Spieleseite: Grund für Steam-/GameStatus-Treffer oder Fehlschlag und gekürzter Response unter jeder Zeile.',
+      debugModeHint:
+        'Ein Debug-Panel auf der Spieleseite mit Quellen (wofür jede URL dient) und vollständigem Dump.',
       debugReason: 'Grund',
       debugResponse: 'Antwort',
+      debugPanelTitle: 'Debug',
+      debugSources: 'Quellen',
+      debugDump: 'Vollständiger Dump',
+      debugSectionPage: 'Seite',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / Spieler',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'Im Besitz',
+      debugSrcRequest: 'Anfrage',
+      debugSrcBackloggd: 'Aktuelle Backloggd-Spieleseite',
+      debugSrcIgdb: 'Spiel-Slug / Links-Zeile (IGDB)',
+      debugSrcMetacritic: 'Links-Zeile — Metacritic-URL (Slug-Schätzung)',
+      debugSrcSteamStore: 'Steam-Store-Seite — Links + Steam-Zeilenlink',
+      debugSrcSteamDb: 'Links-Zeile — SteamDB-App-Seite',
+      debugSrcSteamDbCharts: 'SteamDB charts (Referenz; kein Scraping)',
+      debugSrcSteamDbInfo: 'SteamDB info (Referenz; kein Scraping)',
+      debugSrcSteamTiny: 'Kleine Capsule — Icon-Fallback',
+      debugSrcSteamHeader: 'Header-Bild aus appdetails',
+      debugSrcSteamSearch: 'storesearch — Steam App ID auflösen',
+      debugSrcSteamDetails: 'appdetails — Preis, free, Metacritic, Header',
+      debugSrcSteamReviews: 'appreviews — Review-Zusammenfassung für Steam',
+      debugSrcSteamTags: 'GetItems — beliebte Tags für Steam',
+      debugSrcSteamTagMap: 'populartags — Tag-id → Name',
+      debugSrcSteamOwned: 'dynamicstore/userdata — Bibliotheksprüfung',
+      debugSrcSteamDbPage: 'SteamDB-HTML — Icon, Logo, Spieler',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — Spieler-Fallback',
+      debugSrcIcon: 'Titel-Icon (SteamDB / CDN)',
+      debugSrcLogo: 'Cover-Logo unter Change cover',
+      debugSrcGameStatusApi: 'GameStatus-API — Crack-/DRM-Status',
+      debugSrcGameStatusPage: 'GameStatus-Seite für gefundenen Slug',
       uiLanguage: 'Oberflächensprache',
       uiLanguageHint: 'Auto folgt der Browsersprache. Gilt nach dem Neuladen.',
       uiLanguageAuto: 'Auto (Browser)',
@@ -547,6 +780,12 @@
       showSteamPageLinkHint: 'SteamDB-ähnlicher Button in Other site info auf Steam-Spieleseiten.',
       showSteamDbPageLink: 'Backloggd-Button auf SteamDB',
       showSteamDbPageLinkHint: 'Button neben Store / IGDB in den SteamDB app-links.',
+      showSteamDbIcon: 'SteamDB-Icon vor dem Titel',
+      showSteamDbIconHint: 'App-Icon von SteamDB (.app-icon), Fallback: Steam-Kapsel.',
+      showSteamDbCover: 'SteamDB-Logo unter Change cover',
+      showSteamDbCoverHint: 'App-Logo (.app-logo) unter Cover / Change cover.',
+      showSteamPlayers: 'Online-Spieler anzeigen',
+      showSteamPlayersHint: 'Aktuelle Spieler von SteamDB (.header-thing-number) oder Steam-API.',
       steamBackloggdTooltip: 'Auf Backloggd ansehen',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Im Besitz',
@@ -587,6 +826,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Spieler',
+      playersOnline: '{n} spielen',
 
     },
     fr: {
@@ -604,9 +845,40 @@
       sectionCache: 'Cache',
       sectionDebug: 'Débogage',
       debugMode: 'Mode debug',
-      debugModeHint: 'Sur la page jeu : raison du match/échec Steam / GameStatus et dump tronqué sous chaque ligne.',
+      debugModeHint:
+        'Un seul panneau debug sur la page jeu avec sources (rôle de chaque URL) et dump complet.',
       debugReason: 'Raison',
       debugResponse: 'Réponse',
+      debugPanelTitle: 'Debug',
+      debugSources: 'Sources',
+      debugDump: 'Dump complet',
+      debugSectionPage: 'Page',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / joueurs',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'Possédé',
+      debugSrcRequest: 'requête',
+      debugSrcBackloggd: 'Page jeu Backloggd actuelle',
+      debugSrcIgdb: 'Slug du jeu / rangée Links (IGDB)',
+      debugSrcMetacritic: 'Rangée Links — URL Metacritic (slug)',
+      debugSrcSteamStore: 'Page Steam — Links + lien rangée Steam',
+      debugSrcSteamDb: 'Rangée Links — page app SteamDB',
+      debugSrcSteamDbCharts: 'SteamDB charts (référence ; non scrapé)',
+      debugSrcSteamDbInfo: 'SteamDB info (référence ; non scrapé)',
+      debugSrcSteamTiny: 'Petite capsule — fallback icône',
+      debugSrcSteamHeader: 'Image header depuis appdetails',
+      debugSrcSteamSearch: 'storesearch — résoudre le Steam App ID',
+      debugSrcSteamDetails: 'appdetails — prix, free, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — résumé des avis pour Steam',
+      debugSrcSteamTags: 'GetItems — tags populaires pour Steam',
+      debugSrcSteamTagMap: 'populartags — carte id → nom',
+      debugSrcSteamOwned: 'dynamicstore/userdata — contrôle bibliothèque',
+      debugSrcSteamDbPage: 'HTML SteamDB — icône, logo, joueurs',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback joueurs',
+      debugSrcIcon: 'Icône du titre (SteamDB / CDN)',
+      debugSrcLogo: 'Logo couverture sous Change cover',
+      debugSrcGameStatusApi: 'API GameStatus — statut crack / DRM',
+      debugSrcGameStatusPage: 'Page GameStatus du slug trouvé',
       uiLanguage: 'Langue de l’interface',
       uiLanguageHint: 'Auto suit la langue du navigateur. Appliqué après rechargement.',
       uiLanguageAuto: 'Auto (navigateur)',
@@ -626,6 +898,12 @@
       showSteamPageLinkHint: 'Ajoute un bouton style SteamDB dans Other site info sur les pages Steam.',
       showSteamDbPageLink: 'Bouton Backloggd sur SteamDB',
       showSteamDbPageLinkHint: 'Ajoute un bouton à côté de Store / IGDB dans app-links SteamDB.',
+      showSteamDbIcon: 'Icône SteamDB avant le titre',
+      showSteamDbIconHint: 'Icône app SteamDB (.app-icon), repli : capsule Steam.',
+      showSteamDbCover: 'Logo SteamDB sous Change cover',
+      showSteamDbCoverHint: 'Logo app (.app-logo) sous la jaquette / Change cover.',
+      showSteamPlayers: 'Afficher les joueurs en ligne',
+      showSteamPlayersHint: 'Joueurs actuels via SteamDB (.header-thing-number) ou API Steam.',
       steamBackloggdTooltip: 'Voir sur Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Possédé',
@@ -666,6 +944,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Joueurs',
+      playersOnline: '{n} en jeu',
 
     },
     ja: {
@@ -683,9 +963,40 @@
       sectionCache: 'キャッシュ',
       sectionDebug: 'デバッグ',
       debugMode: 'デバッグモード',
-      debugModeHint: 'ゲームページで Steam / GameStatus の一致・失敗理由と短縮レスポンスを各行の下に表示します。',
+      debugModeHint:
+        'ゲームページにデバッグパネルを1つ表示。各URLの用途と完全なダンプ。',
       debugReason: '理由',
       debugResponse: 'レスポンス',
+      debugPanelTitle: 'デバッグ',
+      debugSources: 'ソース',
+      debugDump: '完全ダンプ',
+      debugSectionPage: 'ページ',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / プレイヤー',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: '所持',
+      debugSrcRequest: 'リクエスト',
+      debugSrcBackloggd: '現在の Backloggd ゲームページ',
+      debugSrcIgdb: 'ゲーム slug / Links 行（IGDB）',
+      debugSrcMetacritic: 'Links 行 — Metacritic URL（slug 推定）',
+      debugSrcSteamStore: 'Steam ストアページ — Links + Steam 行リンク',
+      debugSrcSteamDb: 'Links 行 — SteamDB アプリページ',
+      debugSrcSteamDbCharts: 'SteamDB charts（参考；スクレイプしない）',
+      debugSrcSteamDbInfo: 'SteamDB info（参考；スクレイプしない）',
+      debugSrcSteamTiny: '小さいカプセル — アイコン用フォールバック',
+      debugSrcSteamHeader: 'appdetails のヘッダー画像',
+      debugSrcSteamSearch: 'storesearch — Steam App ID の解決',
+      debugSrcSteamDetails: 'appdetails — 価格・無料・Metacritic・header',
+      debugSrcSteamReviews: 'appreviews — Steam 行のレビュー概要',
+      debugSrcSteamTags: 'GetItems — Steam 行の人気タグ',
+      debugSrcSteamTagMap: 'populartags — タグ id → 名前',
+      debugSrcSteamOwned: 'dynamicstore/userdata — ライブラリ所持確認',
+      debugSrcSteamDbPage: 'SteamDB HTML — icon / logo / プレイヤー',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — プレイヤー数フォールバック',
+      debugSrcIcon: 'タイトル横アイコン（SteamDB / CDN）',
+      debugSrcLogo: 'Change cover 下のカバー logo',
+      debugSrcGameStatusApi: 'GameStatus API — クラック / DRM 状態',
+      debugSrcGameStatusPage: '一致した slug の GameStatus ページ',
       uiLanguage: '表示言語',
       uiLanguageHint: '自動はブラウザ言語に従います。保存後の再読み込みで反映。',
       uiLanguageAuto: '自動（ブラウザ）',
@@ -705,6 +1016,12 @@
       showSteamPageLinkHint: 'Steamのゲームページ Other site info にSteamDB風ボタンを追加します。',
       showSteamDbPageLink: 'SteamDBにBackloggdボタン',
       showSteamDbPageLinkHint: 'SteamDBのapp-linksでStore / IGDBの横にボタンを追加します。',
+      showSteamDbIcon: 'タイトル前に SteamDB アイコン',
+      showSteamDbIconHint: 'SteamDB のアプリアイコン（.app-icon）。失敗時は Steam カプセル。',
+      showSteamDbCover: 'Change cover の下に SteamDB ロゴ',
+      showSteamDbCoverHint: 'カバー / Change cover の下に SteamDB のアプリロゴ（.app-logo）。',
+      showSteamPlayers: 'オンラインプレイヤー数を表示',
+      showSteamPlayersHint: 'SteamDB（.header-thing-number）または Steam API の現在のプレイヤー数。',
       steamBackloggdTooltip: 'Backloggdで見る',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: '所持',
@@ -745,6 +1062,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'プレイヤー',
+      playersOnline: '{n} 人がプレイ中',
 
     },
     ko: {
@@ -762,9 +1081,40 @@
       sectionCache: '캐시',
       sectionDebug: '디버그',
       debugMode: '디버그 모드',
-      debugModeHint: '게임 페이지에서 Steam / GameStatus 일치·실패 이유와 잘린 응답을 각 행 아래에 표시합니다.',
+      debugModeHint:
+        '게임 페이지에 디버그 패널 하나: 각 URL 용도와 전체 덤프.',
       debugReason: '이유',
       debugResponse: '응답',
+      debugPanelTitle: '디버그',
+      debugSources: '소스',
+      debugDump: '전체 덤프',
+      debugSectionPage: '페이지',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / 플레이어',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: '보유',
+      debugSrcRequest: '요청',
+      debugSrcBackloggd: '현재 Backloggd 게임 페이지',
+      debugSrcIgdb: '게임 slug / Links 행 (IGDB)',
+      debugSrcMetacritic: 'Links 행 — Metacritic URL (slug 추정)',
+      debugSrcSteamStore: 'Steam 스토어 페이지 — Links + Steam 행 링크',
+      debugSrcSteamDb: 'Links 행 — SteamDB 앱 페이지',
+      debugSrcSteamDbCharts: 'SteamDB charts (참고; 스크래핑 안 함)',
+      debugSrcSteamDbInfo: 'SteamDB info (참고; 스크래핑 안 함)',
+      debugSrcSteamTiny: '작은 캡슐 — 아이콘 폴백',
+      debugSrcSteamHeader: 'appdetails 헤더 이미지',
+      debugSrcSteamSearch: 'storesearch — Steam App ID 해석',
+      debugSrcSteamDetails: 'appdetails — 가격, 무료, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — Steam 행 리뷰 요약',
+      debugSrcSteamTags: 'GetItems — Steam 행 인기 태그',
+      debugSrcSteamTagMap: 'populartags — 태그 id → 이름',
+      debugSrcSteamOwned: 'dynamicstore/userdata — 라이브러리 보유 확인',
+      debugSrcSteamDbPage: 'SteamDB HTML — icon, logo, 플레이어',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — 플레이어 폴백',
+      debugSrcIcon: '제목 아이콘 (SteamDB / CDN)',
+      debugSrcLogo: 'Change cover 아래 커버 logo',
+      debugSrcGameStatusApi: 'GameStatus API — 크랙 / DRM 상태',
+      debugSrcGameStatusPage: '일치한 slug의 GameStatus 페이지',
       uiLanguage: '인터페이스 언어',
       uiLanguageHint: '자동은 브라우저 언어를 따릅니다. 저장 후 새로고침 시 적용.',
       uiLanguageAuto: '자동 (브라우저)',
@@ -784,6 +1134,12 @@
       showSteamPageLinkHint: 'Steam 게임 페이지 Other site info에 SteamDB 스타일 버튼을 추가합니다.',
       showSteamDbPageLink: 'SteamDB에 Backloggd 버튼',
       showSteamDbPageLinkHint: 'SteamDB app-links에서 Store / IGDB 옆에 버튼을 추가합니다.',
+      showSteamDbIcon: '제목 앞에 SteamDB 아이콘',
+      showSteamDbIconHint: 'SteamDB 앱 아이콘(.app-icon). 실패 시 Steam 캡슐.',
+      showSteamDbCover: 'Change cover 아래 SteamDB 로고',
+      showSteamDbCoverHint: '커버 / Change cover 아래 SteamDB 앱 로고(.app-logo).',
+      showSteamPlayers: '온라인 플레이어 수 표시',
+      showSteamPlayersHint: 'SteamDB(.header-thing-number) 또는 Steam API의 현재 플레이어 수.',
       steamBackloggdTooltip: 'Backloggd에서 보기',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: '보유',
@@ -824,6 +1180,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: '플레이어',
+      playersOnline: '{n}명 플레이 중',
 
     },
     pl: {
@@ -841,9 +1199,40 @@
       sectionCache: 'Cache',
       sectionDebug: 'Debug',
       debugMode: 'Tryb debug',
-      debugModeHint: 'Na stronie gry pokazuje powód trafienia/pudła Steam / GameStatus i skrócony dump pod każdym wierszem.',
+      debugModeHint:
+        'Jeden panel debug na stronie gry: źródła (do czego służy każdy URL) i pełny dump.',
       debugReason: 'Powód',
       debugResponse: 'Odpowiedź',
+      debugPanelTitle: 'Debug',
+      debugSources: 'Źródła',
+      debugDump: 'Pełny dump',
+      debugSectionPage: 'Strona',
+      debugSectionSteam: 'Steam',
+      debugSectionSteamDb: 'SteamDB / gracze',
+      debugSectionGameStatus: 'GameStatus',
+      debugOwned: 'Posiadane',
+      debugSrcRequest: 'żądanie',
+      debugSrcBackloggd: 'Bieżąca strona gry na Backloggd',
+      debugSrcIgdb: 'Slug gry / wiersz Links (IGDB)',
+      debugSrcMetacritic: 'Wiersz Links — URL Metacritic (po slugu)',
+      debugSrcSteamStore: 'Strona Steam — Links + link w wierszu Steam',
+      debugSrcSteamDb: 'Wiersz Links — strona aplikacji SteamDB',
+      debugSrcSteamDbCharts: 'SteamDB charts (referencja; bez scrapowania)',
+      debugSrcSteamDbInfo: 'SteamDB info (referencja; bez scrapowania)',
+      debugSrcSteamTiny: 'Mała kapsuła — fallback ikony',
+      debugSrcSteamHeader: 'Obraz header z appdetails',
+      debugSrcSteamSearch: 'storesearch — rozwiązanie Steam App ID',
+      debugSrcSteamDetails: 'appdetails — cena, free, Metacritic, header',
+      debugSrcSteamReviews: 'appreviews — podsumowanie recenzji dla Steam',
+      debugSrcSteamTags: 'GetItems — popularne tagi dla Steam',
+      debugSrcSteamTagMap: 'populartags — mapa id → nazwa',
+      debugSrcSteamOwned: 'dynamicstore/userdata — sprawdzenie biblioteki',
+      debugSrcSteamDbPage: 'HTML SteamDB — ikona, logo, gracze',
+      debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback graczy',
+      debugSrcIcon: 'Ikona tytułu (SteamDB / CDN)',
+      debugSrcLogo: 'Logo okładki pod Change cover',
+      debugSrcGameStatusApi: 'API GameStatus — status crack / DRM',
+      debugSrcGameStatusPage: 'Strona GameStatus dla znalezionego sluga',
       uiLanguage: 'Język interfejsu',
       uiLanguageHint: 'Auto podąża za językiem przeglądarki. Działa po przeładowaniu.',
       uiLanguageAuto: 'Auto (przeglądarka)',
@@ -863,6 +1252,12 @@
       showSteamPageLinkHint: 'Dodaje przycisk w stylu SteamDB w Other site info na stronach Steam.',
       showSteamDbPageLink: 'Przycisk Backloggd na SteamDB',
       showSteamDbPageLinkHint: 'Dodaje przycisk obok Store / IGDB w app-links na SteamDB.',
+      showSteamDbIcon: 'Ikona SteamDB przed tytułem',
+      showSteamDbIconHint: 'Ikona aplikacji ze SteamDB (.app-icon); zapasowo kapsuła Steam.',
+      showSteamDbCover: 'Logo SteamDB pod Change cover',
+      showSteamDbCoverHint: 'Logo aplikacji (.app-logo) pod okładką / Change cover.',
+      showSteamPlayers: 'Pokaż graczy online',
+      showSteamPlayersHint: 'Bieżąca liczba graczy ze SteamDB (.header-thing-number) lub API Steam.',
       steamBackloggdTooltip: 'Zobacz na Backloggd',
       steamDbBackloggdLabel: 'Backloggd',
       steamOwned: 'Posiadane',
@@ -903,6 +1298,8 @@
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
+      players: 'Gracze',
+      playersOnline: '{n} gra',
 
     },
   };
@@ -1326,6 +1723,82 @@
       #blp-nav-settings.nav-item,
       li.nav-item > #blp-nav-settings {
         margin-left: 0.5rem;
+      }
+
+      #game-profile h1 .blp-title-icon,
+      .game-title-section h1 .blp-title-icon,
+      h1 .blp-title-icon {
+        width: 32px;
+        height: 32px;
+        vertical-align: middle;
+        margin-right: 0.45em;
+        border-radius: 5px;
+        object-fit: cover;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+      }
+
+      .col-cover .blp-steamdb-cover,
+      #logging-sidebar-section .blp-steamdb-cover,
+      .blp-steamdb-cover {
+        margin-top: 0.75rem;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .blp-steamdb-cover a {
+        display: block;
+        line-height: 0;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.25);
+      }
+
+      .blp-steamdb-cover img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+        object-position: center top;
+        background: #1a1d24;
+      }
+
+      .blp-steamdb-cover img.blp-steamdb-cover__logo {
+        aspect-ratio: auto;
+        max-height: 110px;
+        object-fit: contain;
+        object-position: center;
+        padding: 0.65rem 0.5rem;
+        background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.06), transparent 65%);
+      }
+
+      [${ENRICH_ATTR}="players"] .blp-players-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35em;
+        padding: 0.12em 0.55em 0.14em;
+        border-radius: 4px;
+        font-size: 0.82em;
+        font-weight: 700;
+        line-height: 1.45;
+        text-decoration: none !important;
+        color: #67c1f5 !important;
+        background: linear-gradient(180deg, #355a78 0%, #2a4a63 100%);
+        border: 1px solid rgba(103, 193, 245, 0.35);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        width: fit-content;
+        white-space: nowrap;
+      }
+
+      [${ENRICH_ATTR}="players"] .blp-players-badge__dot {
+        width: 0.45em;
+        height: 0.45em;
+        border-radius: 50%;
+        background: currentColor;
+        flex: 0 0 auto;
+        box-shadow: 0 0 6px currentColor;
       }
 
       [${ENRICH_ATTR}] .blp-mc-badge {
@@ -1817,44 +2290,155 @@
         color: var(--blp-accent);
       }
 
-      [${ENRICH_ATTR}] .blp-debug {
-        margin-top: 0.45rem;
-        padding: 0.45rem 0.55rem;
-        border-radius: 6px;
-        border: 1px dashed rgba(255, 179, 33, 0.35);
-        background: rgba(0, 0, 0, 0.28);
+      .blp-debug-panel {
+        margin: 1rem 0 1.25rem;
+        padding: 0.75rem 0.85rem;
+        border-radius: 8px;
+        border: 1px dashed rgba(255, 179, 33, 0.45);
+        background: rgba(0, 0, 0, 0.32);
         text-align: left;
-        max-width: min(100%, 36rem);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
 
-      [${ENRICH_ATTR}] .blp-debug__label {
+      .blp-debug-panel__title {
+        margin: 0 0 0.55rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #ffb321;
+      }
+
+      .blp-debug-panel__section {
+        margin-bottom: 0.65rem;
+      }
+
+      .blp-debug-panel__label {
         display: block;
         font-size: 0.7rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
         color: #ffb321;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.25rem;
       }
 
-      [${ENRICH_ATTR}] .blp-debug__reason {
+      .blp-debug-panel__reason {
         display: block;
-        font-size: 0.8rem;
+        font-size: 0.82rem;
         color: var(--blp-text);
         margin-bottom: 0.35rem;
         word-break: break-word;
       }
 
-      [${ENRICH_ATTR}] .blp-debug__pre {
+      .blp-debug-panel__sources {
+        list-style: none;
+        margin: 0 0 0.45rem;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+
+      .blp-debug-panel__source-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .blp-debug-panel__source-group-title {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #c9a227;
         margin: 0;
-        padding: 0.4rem 0.45rem;
-        border-radius: 4px;
-        background: rgba(0, 0, 0, 0.35);
+      }
+
+      .blp-debug-panel__source-group-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .blp-debug-panel__source-group-list li {
+        display: flex;
+        flex-direction: column;
+        gap: 0.12rem;
+      }
+
+      .blp-debug-panel__source-group-list li.is-request {
+        padding-left: 0.4rem;
+        border-left: 2px solid #ffb321;
+      }
+
+      .blp-debug-panel__source-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.25rem 0.45rem;
+        font-size: 0.78rem;
+        line-height: 1.35;
+        color: var(--blp-text);
+      }
+
+      .blp-debug-panel__source-head strong {
+        color: #ffb321;
+        font-weight: 700;
+      }
+
+      .blp-debug-panel__source-badge {
+        display: inline-block;
+        flex-shrink: 0;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #1a1d24;
+        background: #ffb321;
+        padding: 0.08rem 0.32rem;
+        border-radius: 3px;
+        line-height: 1.2;
+      }
+
+      .blp-debug-panel__source-purpose {
+        color: var(--blp-muted);
+        font-size: 0.74rem;
+      }
+
+      .blp-debug-panel__sources a {
+        color: #67c1f5 !important;
+        text-decoration: underline !important;
+        word-break: break-all;
+        font-size: 0.74rem;
+        line-height: 1.35;
+      }
+
+      .blp-debug-panel__sources a:hover {
+        color: #9ad4f8 !important;
+      }
+
+      .blp-debug-panel__meta {
+        font-size: 0.75rem;
+        color: var(--blp-muted);
+        margin-bottom: 0.35rem;
+      }
+
+      .blp-debug-panel__pre {
+        margin: 0;
+        padding: 0.5rem 0.55rem;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.4);
         color: #b0aeac;
         font-size: 0.68rem;
         line-height: 1.35;
         overflow: auto;
-        max-height: 12rem;
+        max-height: 28rem;
         white-space: pre-wrap;
         word-break: break-word;
       }
@@ -2021,6 +2605,7 @@
             summary: {
               anonymous,
               country: cc,
+              url,
               total: search?.total ?? items.length,
               items: items.slice(0, 8).map((i) => ({
                 id: i.id,
@@ -2039,6 +2624,7 @@
             summary: {
               anonymous,
               country: cc,
+              url,
               error: String(err?.message || err),
             },
           };
@@ -2107,22 +2693,39 @@
 
       // Price/details use the country that actually found the game.
       const detailsCountry = searchCountry;
+      const detailsUrl =
+        `${STEAM_DETAILS_URL}?appids=${appId}` +
+        `&cc=${encodeURIComponent(detailsCountry)}&l=english`;
+      const reviewsUrl =
+        `${STEAM_REVIEWS_URL}/${appId}?json=1&language=all` +
+        `&purchase_type=all&num_per_page=0`;
+      debug.detailsUrl = detailsUrl;
+      debug.reviewsUrl = reviewsUrl;
+      const needTags = settings.showSteamTags !== false;
+      if (needTags) {
+        const tagsInput = JSON.stringify({
+          ids: [{ appid: Number(appId) }],
+          context: {
+            language: 'english',
+            country_code: String(detailsCountry || 'US').toUpperCase(),
+            steam_realm: 1,
+          },
+          data_request: { include_tag_count: STEAM_TAGS_MAX },
+        });
+        debug.tagsUrl = `${STEAM_STORE_ITEMS_URL}?input_json=${encodeURIComponent(tagsInput)}`;
+        debug.tagMapUrl = STEAM_POPULAR_TAGS_URL;
+      }
       let detailsRoot = null;
       let reviews = null;
       let tags = [];
       try {
-        const needTags = settings.showSteamTags !== false;
         const jobs = [
           gmRequest({
-            url:
-              `${STEAM_DETAILS_URL}?appids=${appId}` +
-              `&cc=${encodeURIComponent(detailsCountry)}&l=english`,
+            url: detailsUrl,
             anonymous,
           }),
           gmRequest({
-            url:
-              `${STEAM_REVIEWS_URL}/${appId}?json=1&language=all` +
-              `&purchase_type=all&num_per_page=0`,
+            url: reviewsUrl,
             anonymous,
           }).catch((err) => {
             debug.reviewsError = String(err?.message || err);
@@ -2171,6 +2774,8 @@
         recommendations: details?.recommendations?.total || null,
         reviews: reviews?.query_summary || null,
         tags,
+        tinyImage: hit.tiny_image || hit.small_capsule || null,
+        headerImage: details?.header_image || null,
         usedUsFallback,
         requestedCountry,
         searchCountry: detailsCountry,
@@ -2188,6 +2793,303 @@
       return await task;
     } finally {
       inflight.delete(cacheKey);
+    }
+  }
+
+  function steamCdnAsset(appId, file) {
+    return `${STEAM_CDN_APPS}/${Number(appId)}/${file}`;
+  }
+
+  function absolutizeSteamDbUrl(url) {
+    const raw = String(url || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.startsWith('//')) return `https:${raw}`;
+    if (raw.startsWith('/')) return `https://steamdb.info${raw}`;
+    return raw;
+  }
+
+  function parsePlayerCountText(text) {
+    const cleaned = String(text || '').replace(/[^\d]/g, '');
+    if (!cleaned) return null;
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function parseSteamDbHtml(html) {
+    if (!html || typeof html !== 'string') return null;
+    if (/just a moment|cf-browser-verification|challenge-platform|cdn-cgi\/challenge/i.test(html)) {
+      return null;
+    }
+    let doc;
+    try {
+      doc = new DOMParser().parseFromString(html, 'text/html');
+    } catch (_) {
+      return null;
+    }
+    const iconEl =
+      doc.querySelector('img.app-icon') ||
+      doc.querySelector('.app-icon img') ||
+      doc.querySelector('img[class*="app-icon"]');
+    const logoEl =
+      doc.querySelector('img.app-logo') ||
+      doc.querySelector('.app-logo img') ||
+      doc.querySelector('img[class*="app-logo"]');
+
+    let players = null;
+    const things = doc.querySelectorAll('.header-thing');
+    for (const thing of things) {
+      const label = (thing.textContent || '').toLowerCase();
+      const numEl = thing.querySelector('.header-thing-number');
+      if (!numEl) continue;
+      const n = parsePlayerCountText(numEl.textContent);
+      if (n == null) continue;
+      if (/play|online|игрок|joueur|spieler|プレイヤー|플레이/.test(label)) {
+        players = n;
+        break;
+      }
+      if (players == null) players = n;
+    }
+    if (players == null) {
+      const first = doc.querySelector('.header-thing-number');
+      if (first) players = parsePlayerCountText(first.textContent);
+    }
+
+    const iconUrl = absolutizeSteamDbUrl(iconEl?.getAttribute('src') || iconEl?.getAttribute('data-src'));
+    const logoUrl = absolutizeSteamDbUrl(logoEl?.getAttribute('src') || logoEl?.getAttribute('data-src'));
+    if (!iconUrl && !logoUrl && players == null) return null;
+    return { iconUrl, logoUrl, players, source: 'steamdb' };
+  }
+
+  async function fetchSteamPlayers(appId) {
+    const cacheKey = `steam:players:${appId}`;
+    const cached = getCached(cacheKey);
+    if (cached && typeof cached.players === 'number') return cached.players;
+    try {
+      const data = await gmRequest({
+        url: `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(appId)}`,
+        anonymous: true,
+      });
+      const players = Number(data?.response?.player_count);
+      if (!Number.isFinite(players)) return null;
+      // Short TTL for live counts — store via raw cache entry when global TTL is longer.
+      const store = readCacheStore();
+      store[cacheKey] = { ts: Date.now(), data: { players }, ttlMs: PLAYERS_CACHE_TTL_MS };
+      persistCacheSoon();
+      return players;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function fetchSteamDbExtras(appId, { tinyImage = null } = {}) {
+    const id = Number(appId);
+    if (!Number.isFinite(id) || id <= 0) return null;
+
+    const needMedia = settings.showSteamDbIcon || settings.showSteamDbCover;
+    const needPlayers = settings.showSteamPlayers;
+    if (!needMedia && !needPlayers) return null;
+
+    const mediaKey = `steamdb:media:${id}`;
+    const debugOn = Boolean(settings.debugMode);
+    let media = !debugOn ? getCached(mediaKey) : null;
+    let parsed = null;
+    let scrapeError = null;
+
+    if (!media && needMedia) {
+      try {
+        const pageUrl = `${STEAMDB_APP_URL}/${id}/`;
+        const html = await gmRequest({
+          url: pageUrl,
+          responseType: 'text',
+          headers: {
+            Accept: 'text/html,application/xhtml+xml',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+          timeout: 25000,
+        });
+        parsed = parseSteamDbHtml(html);
+        if (parsed) {
+          media = {
+            iconUrl: parsed.iconUrl || '',
+            logoUrl: parsed.logoUrl || '',
+            players: parsed.players,
+            source: 'steamdb',
+            pageUrl,
+          };
+          if (!debugOn) setCached(mediaKey, media);
+        }
+      } catch (err) {
+        scrapeError = String(err?.message || err);
+      }
+    }
+
+    const iconUrl =
+      media?.iconUrl ||
+      tinyImage ||
+      steamCdnAsset(id, 'capsule_sm_120.jpg') ||
+      steamCdnAsset(id, 'library_600x900.jpg');
+    // Prefer SteamDB app-logo; CDN logo.png mirrors it when scrape fails.
+    const logoUrl =
+      media?.logoUrl || steamCdnAsset(id, 'logo.png') || steamCdnAsset(id, 'library_600x900.jpg');
+    const logoIsPortrait = Boolean(logoUrl && /library_600x900/i.test(logoUrl) && !media?.logoUrl);
+
+    const playersApiUrl = `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(id)}`;
+    let players = needPlayers ? media?.players ?? null : null;
+    let playersSource = players != null && media?.source === 'steamdb' ? 'steamdb' : null;
+    if (needPlayers && players == null) {
+      // Honor short TTL stored on players cache entries.
+      const entry = readCacheStore()[`steam:players:${id}`];
+      if (entry?.ts && entry.data && typeof entry.data.players === 'number') {
+        const ttl = entry.ttlMs || PLAYERS_CACHE_TTL_MS;
+        if (Date.now() - entry.ts <= ttl) {
+          players = entry.data.players;
+          playersSource = 'cache';
+        }
+      }
+      if (players == null) {
+        players = await fetchSteamPlayers(id);
+        if (players != null) playersSource = 'steam-api';
+      }
+    }
+
+    return {
+      appId: id,
+      iconUrl: needMedia && settings.showSteamDbIcon ? iconUrl : '',
+      logoUrl: needMedia && settings.showSteamDbCover ? logoUrl : '',
+      logoIsPortrait: Boolean(logoIsPortrait),
+      players: needPlayers ? players : null,
+      source: media?.source || (scrapeError ? 'steam-fallback' : 'steam'),
+      _debug: debugOn
+        ? {
+            reason: media?.source
+              ? 'Parsed SteamDB app page'
+              : scrapeError
+                ? `SteamDB scrape failed (${scrapeError}); using Steam CDN / players API`
+                : 'SteamDB HTML unavailable; using Steam CDN / players API',
+            pageUrl: `${STEAMDB_APP_URL}/${id}/`,
+            chartsUrl: `${STEAMDB_APP_URL}/${id}/charts/`,
+            playersApiUrl,
+            playersSource,
+            media,
+            scrapeError,
+            players,
+            iconUrl,
+            logoUrl,
+          }
+        : undefined,
+    };
+  }
+
+  function removeSteamDbUi() {
+    document.querySelectorAll(`[${STEAMDB_ATTR}]`).forEach((el) => el.remove());
+  }
+
+  function desktopTitleHeading() {
+    return (
+      document.querySelector(
+        '#game-body > div:nth-child(2) > div.row.d-none.d-sm-flex.mx-n1.game-title-section h1'
+      ) ||
+      document.querySelector(
+        '#game-body .row.d-none.d-sm-flex.game-title-section h1'
+      ) ||
+      document.querySelector('#game-body .game-title-section.d-none.d-sm-flex h1')
+    );
+  }
+
+  function loggingSidebarMount() {
+    return (
+      document.querySelector('#logging-sidebar-section > div > div') ||
+      document.querySelector('#logging-sidebar-section .col.col-md-5') ||
+      document.querySelector('#logging-sidebar-section .col-md-5') ||
+      document.querySelector('#logging-sidebar-section .col')
+    );
+  }
+
+  function injectSteamDbTitleIcon(url, appId) {
+    document.querySelectorAll(`[${STEAMDB_ATTR}="icon"]`).forEach((el) => el.remove());
+    if (!settings.showSteamDbIcon || !url) return;
+    const h1 = desktopTitleHeading();
+    if (!h1) return;
+    const img = document.createElement('img');
+    img.setAttribute(STEAMDB_ATTR, 'icon');
+    if (appId) img.setAttribute('data-blp-appid', String(appId));
+    img.className = 'blp-title-icon';
+    img.width = 32;
+    img.height = 32;
+    img.src = url;
+    img.alt = '';
+    img.decoding = 'async';
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.addEventListener('error', () => {
+      if (img.dataset.blpFallback === '1') {
+        img.remove();
+        return;
+      }
+      img.dataset.blpFallback = '1';
+      const id = img.getAttribute('data-blp-appid');
+      if (id) img.src = steamCdnAsset(id, 'capsule_sm_120.jpg');
+      else img.remove();
+    });
+    h1.insertAdjacentElement('afterbegin', img);
+  }
+
+  function injectSteamDbCover(url, appId, { logoIsPortrait = false } = {}) {
+    document.querySelectorAll(`[${STEAMDB_ATTR}="cover"]`).forEach((el) => el.remove());
+    if (!settings.showSteamDbCover || !url) return;
+    const mount = loggingSidebarMount();
+    if (!mount) return;
+
+    const fallbacks = [];
+    const push = (u) => {
+      if (u && !fallbacks.includes(u)) fallbacks.push(u);
+    };
+    // Prefer SteamDB / CDN app-logo, then portrait library art.
+    push(url);
+    push(steamCdnAsset(appId, 'logo.png'));
+    push(steamCdnAsset(appId, 'library_600x900.jpg'));
+    push(steamCdnAsset(appId, 'header.jpg'));
+
+    const box = document.createElement('div');
+    box.setAttribute(STEAMDB_ATTR, 'cover');
+    box.className = 'blp-steamdb-cover';
+    const href = `${STEAMDB_APP_URL}/${Number(appId)}/`;
+    const firstIsLogo = /logo\.(png|jpg)/i.test(fallbacks[0]) || !logoIsPortrait;
+    box.innerHTML = `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer" title="SteamDB"><img class="${firstIsLogo ? 'blp-steamdb-cover__logo' : ''}" src="${escapeAttr(fallbacks[0])}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></a>`;
+    const img = box.querySelector('img');
+    let idx = 0;
+    if (img) {
+      img.addEventListener('error', () => {
+        idx += 1;
+        if (idx < fallbacks.length) {
+          const next = fallbacks[idx];
+          img.classList.toggle('blp-steamdb-cover__logo', /logo\.(png|jpg)/i.test(next));
+          img.src = next;
+          return;
+        }
+        box.remove();
+      });
+    }
+    mount.appendChild(box);
+  }
+
+  function applySteamDbUi(steamDb, token = '') {
+    removeSteamDbUi();
+    if (!steamDb) return;
+    injectSteamDbTitleIcon(steamDb.iconUrl, steamDb.appId);
+    injectSteamDbCover(steamDb.logoUrl, steamDb.appId, {
+      logoIsPortrait: steamDb.logoIsPortrait !== false,
+    });
+    if (steamDb.source === 'steamdb' && steamDb.logoUrl && /logo/i.test(steamDb.logoUrl)) {
+      document
+        .querySelector(`[${STEAMDB_ATTR}="cover"] img`)
+        ?.classList.add('blp-steamdb-cover__logo');
+    }
+    if (token) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}]`).forEach((el) => {
+        el.setAttribute('data-blp-token', token);
+      });
     }
   }
 
@@ -2522,6 +3424,8 @@
 
   function removeEnrichment() {
     document.querySelectorAll(`[${ENRICH_ATTR}]`).forEach((el) => el.remove());
+    document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
+    removeSteamDbUi();
   }
 
   function makeDetailRow(key, headerText) {
@@ -2551,6 +3455,7 @@
       `;
     }
     if (kind === 'metacritic') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
+    if (kind === 'players') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
     if (kind === 'gamestatus') {
       return `
         <span class="blp-skeleton blp-skeleton--md"></span>
@@ -2570,6 +3475,7 @@
       return {
         steam: document.querySelector(`[${ENRICH_ATTR}="steam"]`),
         metacritic: document.querySelector(`[${ENRICH_ATTR}="metacritic"]`),
+        players: document.querySelector(`[${ENRICH_ATTR}="players"]`),
         gamestatus: document.querySelector(`[${ENRICH_ATTR}="gamestatus"]`),
         links: document.querySelector(`[${ENRICH_ATTR}="links"]`),
       };
@@ -2579,6 +3485,7 @@
     const plan = [];
     if (settings.showSteam) plan.push(['steam', t.steam]);
     if (settings.showMetacritic) plan.push(['metacritic', t.metacritic]);
+    if (settings.showSteamPlayers) plan.push(['players', t.players]);
     if (settings.showGameStatus) plan.push(['gamestatus', t.gameStatus]);
     if (settings.showLinks) plan.push(['links', t.links]);
 
@@ -2678,54 +3585,300 @@
     return parts.map((part) => `<span class="blp-steam-line">${part.html}</span>`).join('');
   }
 
-  function renderDebugBlock(debug) {
-    if (!settings.debugMode || !debug) return '';
-    const reason = debug.reason || '—';
-    let dump = '';
-    try {
-      dump = JSON.stringify(debug, null, 2);
-    } catch (_) {
-      dump = String(debug);
-    }
-    if (dump.length > 4000) dump = `${dump.slice(0, 4000)}\n…`;
-    return `
-      <div class="blp-debug">
-        <span class="blp-debug__label">${escapeHtml(t.debugReason)}</span>
-        <span class="blp-debug__reason">${escapeHtml(reason)}</span>
-        <span class="blp-debug__label">${escapeHtml(t.debugResponse)}</span>
-        <pre class="blp-debug__pre">${escapeHtml(dump)}</pre>
+  function debugLink(label, url, purpose, request) {
+    if (!url) return '';
+    const badge = request
+      ? `<span class="blp-debug-panel__source-badge">${escapeHtml(t.debugSrcRequest)}</span>`
+      : '';
+    const purposeHtml = purpose
+      ? `<span class="blp-debug-panel__source-purpose">${escapeHtml(purpose)}</span>`
+      : '';
+    return `<li class="${request ? 'is-request' : ''}">
+      <div class="blp-debug-panel__source-head">
+        ${badge}<strong>${escapeHtml(label)}</strong>${purposeHtml}
       </div>
-    `;
+      <a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>
+    </li>`;
   }
 
-  function renderEnrichment(rows, { steam, links, error, owned = false, gamestatus = null, title = '', slug = '' }) {
+  function collectDebugSources({ steam, steamDb, gamestatus, title, slug }) {
+    const items = [];
+    const add = (module, label, url, purpose, request = false) => {
+      if (!url || items.some((x) => x.url === url && x.label === label && x.module === module)) {
+        return;
+      }
+      items.push({
+        module,
+        label,
+        url,
+        purpose: purpose || '',
+        request: Boolean(request),
+      });
+    };
+
+    add('page', 'Backloggd', location.href, t.debugSrcBackloggd);
+    if (slug) add('page', 'IGDB', getIgdbUrl(slug), t.debugSrcIgdb);
+    const mc = metacriticGameUrl(title, slug);
+    if (mc) add('page', 'Metacritic', mc, t.debugSrcMetacritic);
+
+    if (steam?.storeUrl) add('steam', 'Steam Store', steam.storeUrl, t.debugSrcSteamStore);
+    if (steam?.tinyImage) {
+      add('steam', 'Steam tiny image', steam.tinyImage, t.debugSrcSteamTiny);
+    }
+    if (steam?.headerImage) {
+      add('steam', 'Steam header image', steam.headerImage, t.debugSrcSteamHeader);
+    }
+    if (settings.showSteamOwned) {
+      add('steam', 'Steam userdata', STEAM_USERDATA_URL, t.debugSrcSteamOwned, true);
+    }
+
+    const steamDbg = steam?._debug || {};
+    for (const search of steamDbg.searches || []) {
+      if (!search?.url) continue;
+      const kind = search.anonymous ? 'guest' : 'session';
+      add(
+        'steam',
+        `Steam search (${kind}, ${search.country || '?'})`,
+        search.url,
+        t.debugSrcSteamSearch,
+        true
+      );
+    }
+    if (steamDbg.detailsUrl) {
+      add('steam', 'Steam appdetails', steamDbg.detailsUrl, t.debugSrcSteamDetails, true);
+    }
+    if (steamDbg.reviewsUrl) {
+      add('steam', 'Steam appreviews', steamDbg.reviewsUrl, t.debugSrcSteamReviews, true);
+    }
+    if (steamDbg.tagsUrl) {
+      add('steam', 'Steam GetItems (tags)', steamDbg.tagsUrl, t.debugSrcSteamTags, true);
+    }
+    if (steamDbg.tagMapUrl) {
+      add('steam', 'Steam populartags', steamDbg.tagMapUrl, t.debugSrcSteamTagMap, true);
+    }
+
+    if (steam?.appId) {
+      add('steamdb', 'SteamDB', `${STEAMDB_APP_URL}/${steam.appId}/`, t.debugSrcSteamDb);
+      add(
+        'steamdb',
+        'SteamDB charts',
+        `${STEAMDB_APP_URL}/${steam.appId}/charts/`,
+        t.debugSrcSteamDbCharts
+      );
+      add(
+        'steamdb',
+        'SteamDB info',
+        `${STEAMDB_APP_URL}/${steam.appId}/info/`,
+        t.debugSrcSteamDbInfo
+      );
+    }
+
+    const sdb = steamDb?._debug || {};
+    if (sdb.pageUrl || steamDb?.appId) {
+      add(
+        'steamdb',
+        'SteamDB page',
+        sdb.pageUrl || `${STEAMDB_APP_URL}/${steamDb.appId}/`,
+        t.debugSrcSteamDbPage,
+        true
+      );
+    }
+    if (sdb.chartsUrl) {
+      add('steamdb', 'SteamDB charts', sdb.chartsUrl, t.debugSrcSteamDbCharts);
+    }
+    if (sdb.playersApiUrl) {
+      add('steamdb', 'Steam players API', sdb.playersApiUrl, t.debugSrcSteamPlayersApi, true);
+    }
+    if (sdb.iconUrl || steamDb?.iconUrl) {
+      add('steamdb', 'Icon URL', sdb.iconUrl || steamDb.iconUrl, t.debugSrcIcon);
+    }
+    if (sdb.logoUrl || steamDb?.logoUrl) {
+      add('steamdb', 'Logo URL', sdb.logoUrl || steamDb.logoUrl, t.debugSrcLogo);
+    }
+
+    const gs = gamestatus?._debug || {};
+    for (const attempt of gs.attempts || []) {
+      if (attempt?.url) {
+        add(
+          'gamestatus',
+          `GameStatus API (${attempt.slug || '?'})`,
+          attempt.url,
+          t.debugSrcGameStatusApi,
+          true
+        );
+      }
+    }
+    if (gamestatus?.slug) {
+      add(
+        'gamestatus',
+        'GameStatus page',
+        `${GAMESTATUS_SITE_BASE}/${encodeURIComponent(gamestatus.slug)}`,
+        t.debugSrcGameStatusPage
+      );
+    }
+
+    return items;
+  }
+
+  function renderDebugSourcesHtml(sources) {
+    const groups = [
+      { key: 'page', label: t.debugSectionPage },
+      { key: 'steam', label: t.debugSectionSteam },
+      { key: 'steamdb', label: t.debugSectionSteamDb },
+      { key: 'gamestatus', label: t.debugSectionGameStatus },
+    ];
+    const blocks = [];
+    for (const group of groups) {
+      const list = sources
+        .filter((s) => s.module === group.key)
+        .sort((a, b) => Number(b.request) - Number(a.request));
+      if (!list.length) continue;
+      const itemsHtml = list.map((s) => debugLink(s.label, s.url, s.purpose, s.request)).join('');
+      blocks.push(`
+        <div class="blp-debug-panel__source-group">
+          <div class="blp-debug-panel__source-group-title">${escapeHtml(group.label)}</div>
+          <ul class="blp-debug-panel__source-group-list">${itemsHtml}</ul>
+        </div>
+      `);
+    }
+    return blocks.join('') || `<div>${escapeHtml('—')}</div>`;
+  }
+
+  function renderUnifiedDebugPanel({
+    steam,
+    steamDb,
+    gamestatus,
+    owned = false,
+    error = false,
+    title = '',
+    slug = '',
+  }) {
+    document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
+    if (!settings.debugMode) return;
+
+    const sources = collectDebugSources({ steam, steamDb, gamestatus, title, slug });
+    const sourcesHtml = renderDebugSourcesHtml(sources);
+
+    const sections = [];
+    const pushSection = (label, reason, dumpObj) => {
+      let dump = '';
+      try {
+        dump = JSON.stringify(dumpObj, null, 2);
+      } catch (_) {
+        dump = String(dumpObj);
+      }
+      sections.push(`
+        <div class="blp-debug-panel__section">
+          <span class="blp-debug-panel__label">${escapeHtml(label)}</span>
+          <span class="blp-debug-panel__reason">${escapeHtml(reason || '—')}</span>
+          <pre class="blp-debug-panel__pre">${escapeHtml(dump)}</pre>
+        </div>
+      `);
+    };
+
+    pushSection(t.debugSectionPage, `${title || '—'} / ${slug || '—'}`, {
+      href: location.href,
+      title,
+      slug,
+      settings: {
+        steamCountry: settings.steamCountry,
+        showSteam: settings.showSteam,
+        showSteamOwned: settings.showSteamOwned,
+        showSteamTags: settings.showSteamTags,
+        showMetacritic: settings.showMetacritic,
+        showGameStatus: settings.showGameStatus,
+        showSteamDbIcon: settings.showSteamDbIcon,
+        showSteamDbCover: settings.showSteamDbCover,
+        showSteamPlayers: settings.showSteamPlayers,
+        showLinks: settings.showLinks,
+        links: settings.links,
+      },
+      owned,
+      error,
+      SCRIPT_VERSION,
+    });
+
+    pushSection(
+      t.debugSectionSteam,
+      steam?._debug?.reason || (steam?.found ? `appId=${steam.appId}` : t.notOnSteam),
+      steam?._debug || steam || { reason: 'Steam payload missing' }
+    );
+
+    pushSection(
+      t.debugSectionSteamDb,
+      steamDb?._debug?.reason || (steamDb ? `source=${steamDb.source}` : 'SteamDB extras not fetched'),
+      steamDb?._debug || steamDb || { reason: 'SteamDB payload missing' }
+    );
+
+    pushSection(
+      t.debugSectionGameStatus,
+      gamestatus?._debug?.reason ||
+        (gamestatus && !gamestatus.missing
+          ? `slug=${gamestatus.slug}`
+          : t.gsNotInDatabase),
+      gamestatus?._debug || gamestatus || { reason: 'GameStatus payload missing' }
+    );
+
+    const fullDump = {
+      page: { href: location.href, title, slug, owned, error, SCRIPT_VERSION },
+      steam: steam?._debug || steam || null,
+      steamDb: steamDb?._debug || steamDb || null,
+      gamestatus: gamestatus?._debug || gamestatus || null,
+      sources,
+    };
+    let fullJson = '';
+    try {
+      fullJson = JSON.stringify(fullDump, null, 2);
+    } catch (_) {
+      fullJson = String(fullDump);
+    }
+
+    const panel = document.createElement('div');
+    panel.className = 'blp-debug-panel';
+    panel.setAttribute('data-blp-debug', '1');
+    panel.innerHTML = `
+      <h3 class="blp-debug-panel__title">${escapeHtml(t.debugPanelTitle)} · v${escapeHtml(SCRIPT_VERSION)}</h3>
+      <div class="blp-debug-panel__meta">${escapeHtml(t.debugOwned)}: ${owned ? t.on : t.off}</div>
+      <div class="blp-debug-panel__section">
+        <span class="blp-debug-panel__label">${escapeHtml(t.debugSources)}</span>
+        <div class="blp-debug-panel__sources">${sourcesHtml}</div>
+      </div>
+      ${sections.join('')}
+      <div class="blp-debug-panel__section">
+        <span class="blp-debug-panel__label">${escapeHtml(t.debugDump)}</span>
+        <pre class="blp-debug-panel__pre">${escapeHtml(fullJson)}</pre>
+      </div>
+    `;
+
+    const lastRow = document.querySelector(`[${ENRICH_ATTR}]:last-of-type`);
+    const platforms = document.querySelector('#game-body #game-page-platforms, #game-page-platforms');
+    const anchor = lastRow || platforms;
+    if (anchor) anchor.insertAdjacentElement('afterend', panel);
+    else document.querySelector('#game-body')?.appendChild(panel);
+  }
+
+  function renderEnrichment(rows, { steam, links, error, owned = false, gamestatus = null, title = '', slug = '', steamDb = null, skipDebug = false }) {
     const debugOn = Boolean(settings.debugMode);
 
     if (rows.steam) {
       if (error) {
-        const dbg =
-          steam?._debug ||
-          ({ reason: 'Steam request threw before a payload was built', error: true });
         setRowValues(
           rows.steam,
-          `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>${renderDebugBlock(dbg)}`
+          `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>`
         );
         showRow(rows.steam);
       } else if (!steam?.found) {
         if (debugOn) {
           setRowValues(
             rows.steam,
-            `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>${renderDebugBlock(steam?._debug)}`
+            `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`
           );
           showRow(rows.steam);
         } else {
           hideRow(rows.steam);
         }
       } else {
-        setRowValues(
-          rows.steam,
-          `${renderSteamValues(steam, { owned })}${renderDebugBlock(steam._debug)}`
-        );
+        setRowValues(rows.steam, renderSteamValues(steam, { owned }));
         showRow(rows.steam);
       }
     }
@@ -2740,24 +3893,34 @@
       }
     }
 
+    if (rows.players) {
+      const count = steamDb?.players;
+      if (count != null && !error) {
+        const href = steamDb?.appId
+          ? `${STEAMDB_APP_URL}/${steamDb.appId}/charts/`
+          : `${STEAMDB_APP_URL}/`;
+        const label = fmt(t.playersOnline, { n: Number(count).toLocaleString() });
+        setRowValues(
+          rows.players,
+          `<a class="blp-players-badge blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"><span class="blp-players-badge__dot" aria-hidden="true"></span>${escapeHtml(label)}</a>`
+        );
+        showRow(rows.players);
+      } else if (debugOn) {
+        setRowValues(rows.players, `<span class="game-details-value blp-empty">—</span>`);
+        showRow(rows.players);
+      } else {
+        hideRow(rows.players);
+      }
+    }
+
     if (rows.gamestatus) {
       if (gamestatus && !gamestatus.missing && gamestatus.data) {
-        setRowValues(
-          rows.gamestatus,
-          `${renderGameStatusValues(gamestatus)}${renderDebugBlock(gamestatus._debug)}`
-        );
+        setRowValues(rows.gamestatus, renderGameStatusValues(gamestatus));
         showRow(rows.gamestatus);
       } else if (debugOn) {
-        const reasonHtml = gamestatus?._debug
-          ? renderDebugBlock(gamestatus._debug)
-          : renderDebugBlock({
-              reason: steam?.found
-                ? 'GameStatus missing / not fetched'
-                : 'GameStatus skipped — Steam app not found',
-            });
         setRowValues(
           rows.gamestatus,
-          `<span class="game-details-value blp-empty">${escapeHtml(t.gsNotInDatabase)}</span>${reasonHtml}`
+          `<span class="game-details-value blp-empty">${escapeHtml(t.gsNotInDatabase)}</span>`
         );
         showRow(rows.gamestatus);
       } else {
@@ -2776,6 +3939,10 @@
         hideRow(rows.links);
       }
     }
+
+    if (!skipDebug) {
+      renderUnifiedDebugPanel({ steam, steamDb, gamestatus, owned, error, title, slug });
+    }
   }
 
   let gamePageToken = 0;
@@ -2790,10 +3957,11 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamTags}|${settings.showMetacritic}|${settings.showGameStatus}|${settings.showLinks}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamTags}|${settings.showMetacritic}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
-      return;
+      const needSteamDbUi = settings.showSteamDbIcon || settings.showSteamDbCover;
+      if (!needSteamDbUi || document.querySelector(`[${STEAMDB_ATTR}]`)) return;
     }
 
     removeEnrichment();
@@ -2808,17 +3976,23 @@
     // Links that don't depend on Steam can appear immediately (skeletons stay on Steam rows).
     if (rows.links) {
       const earlyLinks = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam: null });
-      renderEnrichment({ links: rows.links }, { steam: null, links: earlyLinks, error: false });
+      renderEnrichment({ links: rows.links }, { steam: null, links: earlyLinks, error: false, skipDebug: true });
     }
 
     let steam = null;
     let error = false;
     let owned = false;
     let gamestatus = null;
+    let steamDb = null;
 
     try {
+      const needSteamDb =
+        settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamPlayers;
       const needSteam =
-        settings.showSteam || settings.showMetacritic || settings.showGameStatus;
+        settings.showSteam ||
+        settings.showMetacritic ||
+        settings.showGameStatus ||
+        needSteamDb;
       const needOwned = settings.showSteam && settings.showSteamOwned;
       const [steamResult, ownedSet] = await Promise.all([
         needSteam ? fetchSteamBundle(title, settings.steamCountry || 'US') : Promise.resolve(null),
@@ -2827,6 +4001,9 @@
       steam = steamResult;
       if (ownedSet && steam?.found && steam.appId != null) {
         owned = ownedSet.has(Number(steam.appId));
+      }
+      if (needSteamDb && steam?.found && steam.appId != null) {
+        steamDb = await fetchSteamDbExtras(steam.appId, { tinyImage: steam.tinyImage });
       }
       if (settings.showGameStatus && steam?.found && steam.appId != null) {
         gamestatus = await fetchGameStatus({
@@ -2869,7 +4046,18 @@
     if (!getPageContext().isGamePage) return;
 
     const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
-    renderEnrichment(rows, { steam, links, error, owned, gamestatus, title, slug: ctx.slug });
+    renderEnrichment(rows, {
+      steam,
+      links,
+      error,
+      owned,
+      gamestatus,
+      title,
+      slug: ctx.slug,
+      steamDb,
+    });
+    // Apply after rows so MutationObserver / Turbo do not wipe icon & cover mid-flight.
+    if (steamDb) applySteamDbUi(steamDb, token);
   }
 
   function openSettings() {
@@ -2967,6 +4155,21 @@
             <button type="button" data-blp-toggle="showSteamDbPageLink" class="${draft.showSteamDbPageLink ? 'is-on' : ''}">${draft.showSteamDbPageLink ? t.on : t.off}</button>
           </div>
           <p class="blp-hint">${escapeHtml(t.showSteamDbPageLinkHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamDbIcon)}</span>
+            <button type="button" data-blp-toggle="showSteamDbIcon" class="${draft.showSteamDbIcon ? 'is-on' : ''}">${draft.showSteamDbIcon ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamDbIconHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamDbCover)}</span>
+            <button type="button" data-blp-toggle="showSteamDbCover" class="${draft.showSteamDbCover ? 'is-on' : ''}">${draft.showSteamDbCover ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamDbCoverHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamPlayers)}</span>
+            <button type="button" data-blp-toggle="showSteamPlayers" class="${draft.showSteamPlayers ? 'is-on' : ''}">${draft.showSteamPlayers ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamPlayersHint)}</p>
         </section>
         <section>
           <h3>${escapeHtml(t.sectionLinks)}</h3>
