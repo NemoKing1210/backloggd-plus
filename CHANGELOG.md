@@ -5,6 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.6] - 2026-07-16
+
+### Fixed
+
+- GameStatus chips: strip quotes/brackets from protection and group labels; parse JSON-array payloads
+
+### Changed
+
+- Denuvo protection chips highlighted in red
+
+## [0.4.5] - 2026-07-16
+
+### Changed
+
+- GameStatus badge no longer shows a favicon
+
 ## [0.4.4] - 2026-07-16
 
 ### Changed

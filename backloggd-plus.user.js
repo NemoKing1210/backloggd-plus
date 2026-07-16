@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.4.4
+// @version           0.4.6
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -51,7 +51,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.4.4';
+  const SCRIPT_VERSION = '0.4.6';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const ROOT_ATTR = 'data-blp-root';
@@ -1397,6 +1397,12 @@
         color: #acb2b8;
       }
 
+      [${ENRICH_ATTR}] .blp-gs-chip--denuvo {
+        background: #6b1f1f;
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.35);
+      }
+
       [${ENRICH_ATTR}] .blp-gs-chip--cracked {
         background: var(--blp-gs-cracked-bg);
         color: var(--blp-gs-cracked);
@@ -2201,11 +2207,44 @@
     return t.gsUnknown;
   }
 
-  function splitGsChipValues(value) {
+  function cleanGsChipToken(value) {
     return String(value || '')
+      .replace(/^[\s\[\(\{"'`]+|[\]\)\}"'`\s]+$/g, '')
+      .replace(/^["'`]+|["'`]+$/g, '')
+      .trim();
+  }
+
+  function splitGsChipValues(value) {
+    if (value == null || value === '') return [];
+    if (Array.isArray(value)) {
+      return value.map(cleanGsChipToken).filter(Boolean);
+    }
+
+    const raw = String(value).trim();
+    if (!raw) return [];
+
+    if (/^[\[{"]/.test(raw)) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map(cleanGsChipToken).filter(Boolean);
+        }
+        if (typeof parsed === 'string') {
+          return [cleanGsChipToken(parsed)].filter(Boolean);
+        }
+      } catch (_) {
+        /* fall through to delimiter split */
+      }
+    }
+
+    return raw
       .split(/[,;/|]+/)
-      .map((part) => part.trim())
+      .map(cleanGsChipToken)
       .filter(Boolean);
+  }
+
+  function gsProtectionChipClass(name) {
+    return /denuvo/i.test(name) ? 'blp-gs-chip--denuvo' : 'blp-gs-chip--protection';
   }
 
   function renderGameStatusValues(entry) {
@@ -2216,17 +2255,14 @@
     const label = getGsStatusLabel(game, type);
     const slug = game.slug || entry.slug;
     const href = slug ? `${GAMESTATUS_SITE_BASE}/${encodeURIComponent(slug)}` : GAMESTATUS_SITE_BASE;
-    const fav = faviconForUrl(GAMESTATUS_SITE_BASE);
-    const favImg = fav
-      ? `<img class="blp-favicon" src="${escapeAttr(fav)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
-      : '';
 
     const chips = [];
     for (const prot of splitGsChipValues(game.protections)) {
-      chips.push(`<span class="blp-gs-chip blp-gs-chip--protection">${escapeHtml(prot)}</span>`);
+      chips.push(
+        `<span class="blp-gs-chip ${gsProtectionChipClass(prot)}">${escapeHtml(prot)}</span>`
+      );
     }
-    const group = String(game.hacked_groups_en || game.hacked_groups || '').trim();
-    if (group) {
+    for (const group of splitGsChipValues(game.hacked_groups_en || game.hacked_groups)) {
       const groupType = /bypass|обход|hypervisor/i.test(group) ? 'bypass' : type;
       chips.push(
         `<span class="blp-gs-chip blp-gs-chip--${escapeAttr(groupType)}">${escapeHtml(group)}</span>`
@@ -2237,7 +2273,7 @@
     }
 
     const lines = [
-      `<span class="blp-steam-line"><a class="blp-gs-badge blp-gs-badge--${escapeAttr(type)} blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${favImg}<span class="blp-gs-badge__dot" aria-hidden="true"></span>${escapeHtml(label)}</a></span>`,
+      `<span class="blp-steam-line"><a class="blp-gs-badge blp-gs-badge--${escapeAttr(type)} blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"><span class="blp-gs-badge__dot" aria-hidden="true"></span>${escapeHtml(label)}</a></span>`,
     ];
     if (chips.length) {
       lines.push(`<span class="blp-steam-line blp-gs-chips">${chips.join('')}</span>`);
