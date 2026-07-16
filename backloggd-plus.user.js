@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.9
+// @version           0.7.10
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.9';
+  const SCRIPT_VERSION = '0.7.10';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3366,6 +3366,15 @@
         animation: blp-shimmer 1.1s ease-in-out infinite;
       }
 
+      .blp-steamdb-cover.is-gallery {
+        cursor: zoom-in;
+      }
+
+      .blp-steamdb-cover.is-gallery:focus-visible {
+        outline: 2px solid rgba(61, 184, 154, 0.65);
+        outline-offset: 2px;
+      }
+
       .blp-steam-gallery__item {
         flex: 0 0 auto;
         width: min(42vw, 220px);
@@ -3378,6 +3387,10 @@
         cursor: zoom-in;
         scroll-snap-align: start;
         transition: border-color 0.15s ease, transform 0.15s ease;
+      }
+
+      .blp-steam-gallery__item--cover {
+        aspect-ratio: 460 / 215;
       }
 
       .blp-steam-gallery__item:hover,
@@ -5705,6 +5718,7 @@
 
   function removeSteamDbUi() {
     closeSteamGalleryLightbox();
+    steamGalleryItems = [];
     document.querySelectorAll(`[${STEAMDB_ATTR}]`).forEach((el) => el.remove());
   }
 
@@ -5902,6 +5916,60 @@
     return host;
   }
 
+  let steamGalleryItems = [];
+
+  function buildSteamGalleryItems(screenshots, coverUrl) {
+    const items = [];
+    const cover = String(coverUrl || '').trim();
+    if (cover) {
+      items.push({ thumb: cover, full: cover, kind: 'cover' });
+    }
+    if (Array.isArray(screenshots)) {
+      for (const shot of screenshots) {
+        const thumb = String(shot?.thumb || '').trim();
+        const full = String(shot?.full || thumb).trim();
+        if (!thumb && !full) continue;
+        items.push({
+          id: shot?.id,
+          thumb: thumb || full,
+          full: full || thumb,
+          kind: 'screenshot',
+        });
+      }
+    }
+    return items;
+  }
+
+  function bindSteamDbCoverGallery(items) {
+    const box = document.querySelector(`[${STEAMDB_ATTR}="cover"]`);
+    if (!box) return;
+    const coverIdx = Array.isArray(items) ? items.findIndex((s) => s.kind === 'cover') : -1;
+    if (!settings.showSteamDbCover || coverIdx < 0 || !items.length) {
+      box.classList.remove('is-gallery');
+      box.removeAttribute('role');
+      box.removeAttribute('tabindex');
+      box.removeAttribute('aria-label');
+      box.onclick = null;
+      box.onkeydown = null;
+      return;
+    }
+    box.classList.add('is-gallery');
+    box.setAttribute('role', 'button');
+    box.setAttribute('tabindex', '0');
+    box.setAttribute('aria-label', t.steamGalleryOpen);
+    const open = () => openSteamGalleryLightbox(items, coverIdx);
+    box.onclick = (ev) => {
+      ev.preventDefault();
+      open();
+    };
+    box.onkeydown = (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        open();
+      }
+    };
+  }
+
   function closeSteamGalleryLightbox() {
     document.querySelectorAll('.blp-steam-gallery-lb').forEach((el) => el.remove());
     document.removeEventListener('keydown', onSteamGalleryKeydown, true);
@@ -5943,6 +6011,12 @@
       <button type="button" class="blp-steam-gallery-lb__btn blp-steam-gallery-lb__btn--next" data-blp-gallery-next aria-label="${escapeAttr(t.steamGalleryNext)}">›</button>
     `;
     const img = lb.querySelector('img');
+    const prevBtn = lb.querySelector('[data-blp-gallery-prev]');
+    const nextBtn = lb.querySelector('[data-blp-gallery-next]');
+    if (shots.length < 2) {
+      prevBtn?.setAttribute('hidden', '');
+      nextBtn?.setAttribute('hidden', '');
+    }
     const show = (i) => {
       index = (i + shots.length) % shots.length;
       const shot = shots[index];
@@ -5955,11 +6029,11 @@
         closeSteamGalleryLightbox();
       }
     });
-    lb.querySelector('[data-blp-gallery-prev]')?.addEventListener('click', (ev) => {
+    prevBtn?.addEventListener('click', (ev) => {
       ev.stopPropagation();
       show(index - 1);
     });
-    lb.querySelector('[data-blp-gallery-next]')?.addEventListener('click', (ev) => {
+    nextBtn?.addEventListener('click', (ev) => {
       ev.stopPropagation();
       show(index + 1);
     });
@@ -5968,45 +6042,57 @@
     document.addEventListener('keydown', onSteamGalleryKeydown, true);
   }
 
-  function applySteamGallery(screenshots, appId, token = '', { final = false } = {}) {
+  function applySteamGallery(screenshots, appId, token = '', { final = false, coverUrl = '' } = {}) {
     if (!settings.showSteamDbGallery) {
+      steamGalleryItems = [];
       document.querySelectorAll(`[${STEAMDB_ATTR}="gallery"]`).forEach((el) => el.remove());
+      bindSteamDbCoverGallery([]);
       return;
     }
-    if (!Array.isArray(screenshots)) {
+
+    const shotsPending = !Array.isArray(screenshots);
+    const items = buildSteamGalleryItems(shotsPending ? [] : screenshots, coverUrl);
+    // While screenshots load, still show the cover in the strip if we have it.
+    if (shotsPending && !coverUrl) {
       ensureSteamGalleryMount(token);
       return;
     }
-    if (!screenshots.length) {
+    if (!items.length) {
+      steamGalleryItems = [];
       if (final) {
         document.querySelectorAll(`[${STEAMDB_ATTR}="gallery"]`).forEach((el) => el.remove());
       } else {
         ensureSteamGalleryMount(token);
       }
+      bindSteamDbCoverGallery([]);
       return;
     }
 
     const host = ensureSteamGalleryMount(token);
     if (!host) return;
-    if (
-      host.dataset.blpGalleryReady === '1' &&
-      host.getAttribute('data-blp-appid') === String(appId || '') &&
-      Number(host.dataset.blpGalleryCount) === screenshots.length
-    ) {
+    const readyKey = `${appId || ''}|${items.length}|${items[0]?.full || ''}|${shotsPending ? 'p' : 'd'}`;
+    if (host.dataset.blpGalleryReady === '1' && host.dataset.blpGalleryKey === readyKey) {
       if (token) host.setAttribute('data-blp-token', token);
+      steamGalleryItems = items;
+      bindSteamDbCoverGallery(items);
       return;
     }
     if (appId) host.setAttribute('data-blp-appid', String(appId));
     if (token) host.setAttribute('data-blp-token', token);
     host.dataset.blpGalleryReady = '1';
-    host.dataset.blpGalleryCount = String(screenshots.length);
+    host.dataset.blpGalleryKey = readyKey;
+    host.dataset.blpGalleryCount = String(items.length);
+    steamGalleryItems = items;
 
-    const steamDbUrl = appId ? `${STEAMDB_APP_URL}/${appId}/` : STEAMDB_APP_URL;
-    const items = screenshots
+    const steamDbUrl = appId
+      ? `${STEAMDB_APP_URL}/${appId}/screenshots/`
+      : `${STEAMDB_APP_URL}/`;
+    const htmlItems = items
       .map((shot, i) => {
         const src = escapeAttr(shot.thumb || shot.full);
+        const coverClass = shot.kind === 'cover' ? ' blp-steam-gallery__item--cover' : '';
         return `
-          <button type="button" class="blp-steam-gallery__item" data-blp-gallery-index="${i}" aria-label="${escapeAttr(t.steamGalleryOpen)}">
+          <button type="button" class="blp-steam-gallery__item${coverClass}" data-blp-gallery-index="${i}" aria-label="${escapeAttr(t.steamGalleryOpen)}">
             <img src="${src}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
           </button>
         `;
@@ -6019,7 +6105,7 @@
         <span class="blp-steam-gallery__title">${escapeHtml(t.steamGalleryTitle)}</span>
         <a class="blp-steam-gallery__link" href="${escapeAttr(steamDbUrl)}" target="_blank" rel="noopener noreferrer">SteamDB</a>
       </div>
-      <div class="blp-steam-gallery__track" data-blp-gallery-track>${items}</div>
+      <div class="blp-steam-gallery__track" data-blp-gallery-track>${htmlItems}</div>
     `;
 
     host.querySelectorAll('.blp-steam-gallery__item img').forEach((img) => {
@@ -6031,9 +6117,11 @@
     host.querySelectorAll('[data-blp-gallery-index]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const idx = Number(btn.getAttribute('data-blp-gallery-index'));
-        openSteamGalleryLightbox(screenshots, idx);
+        openSteamGalleryLightbox(items, idx);
       });
     });
+
+    bindSteamDbCoverGallery(items);
   }
 
   function injectSteamDbTitleIcon(url, appId, token = '') {
@@ -6093,7 +6181,10 @@
       logoIsPortrait: Boolean(steamDb.logoIsPortrait),
       token,
     });
-    applySteamGallery(steamDb.screenshots, steamDb.appId, token, { final });
+    applySteamGallery(steamDb.screenshots, steamDb.appId, token, {
+      final,
+      coverUrl: steamDb.logoUrl || '',
+    });
     if (
       steamDb.source === 'steamdb' &&
       steamDb.logoUrl &&

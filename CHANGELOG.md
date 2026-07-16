@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.10] - 2026-07-16
+
+### Changed
+
+- Screenshots gallery SteamDB link points to `/app/{id}/screenshots/`
+- SteamDB cover is included in the gallery strip and opens the lightbox on click
+
 ## [0.7.9] - 2026-07-16
 
 ### Added
