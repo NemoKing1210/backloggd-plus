@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.8
+// @version           0.7.9
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.8';
+  const SCRIPT_VERSION = '0.7.9';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -155,6 +155,7 @@
     showSteamDbPageLink: true,
     showSteamDbIcon: true,
     showSteamDbCover: true,
+    showSteamDbGallery: true,
     showSteamPlayers: true,
     showCardBadges: true,
     debugMode: false,
@@ -259,6 +260,14 @@
       showSteamDbIconHint: 'App icon from Steam store assets (community_icon), same CDN as SteamDB.',
       showSteamDbCover: 'Show SteamDB logo under Change cover',
       showSteamDbCoverHint: 'Steam header image under the cover / Change cover control.',
+      showSteamDbGallery: 'Show Steam screenshots gallery',
+      showSteamDbGalleryHint:
+        'Horizontal screenshot strip after game stats (Steam store assets, same as SteamDB). Click to enlarge.',
+      steamGalleryTitle: 'Screenshots',
+      steamGalleryOpen: 'Open screenshot',
+      steamGalleryClose: 'Close',
+      steamGalleryPrev: 'Previous',
+      steamGalleryNext: 'Next',
       showSteamPlayers: 'Show online players',
       showSteamPlayersHint: 'Current players from Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Show badges on list covers',
@@ -427,6 +436,14 @@
       showSteamDbIconHint: 'Иконка из Steam store assets (community_icon), тот же CDN, что у SteamDB.',
       showSteamDbCover: 'Логотип SteamDB под Change cover',
       showSteamDbCoverHint: 'Steam header под обложкой / кнопкой Change cover.',
+      showSteamDbGallery: 'Галерея скриншотов Steam',
+      showSteamDbGalleryHint:
+        'Горизонтальная лента скриншотов после блока статистики (ассеты Steam Store, как на SteamDB). Клик — увеличить.',
+      steamGalleryTitle: 'Скриншоты',
+      steamGalleryOpen: 'Открыть скриншот',
+      steamGalleryClose: 'Закрыть',
+      steamGalleryPrev: 'Назад',
+      steamGalleryNext: 'Вперёд',
       showSteamPlayers: 'Показывать онлайн игроков',
       showSteamPlayersHint: 'Текущие игроки через Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Бейджи на обложках в списках',
@@ -592,6 +609,13 @@
       showSteamDbIconHint: '来自 SteamDB 页面标题的应用图标，失败时回退到 Steam 胶囊图。',
       showSteamDbCover: '在 Change cover 下显示 SteamDB Logo',
       showSteamDbCoverHint: '在封面 / Change cover 下方显示 SteamDB 封面图。',
+      showSteamDbGallery: '显示 Steam 截图库',
+      showSteamDbGalleryHint: '在游戏统计下方显示横向截图条（Steam 商店资源，与 SteamDB 相同）。点击放大。',
+      steamGalleryTitle: '截图',
+      steamGalleryOpen: '打开截图',
+      steamGalleryClose: '关闭',
+      steamGalleryPrev: '上一张',
+      steamGalleryNext: '下一张',
       showSteamPlayers: '显示在线玩家数',
       showSteamPlayersHint: '当前玩家来自 Steam GetNumberOfCurrentPlayers。',
       showCardBadges: '在列表封面显示徽章',
@@ -758,6 +782,14 @@
       showSteamDbIconHint: 'Icono de la app desde la cabecera de SteamDB; reserva: cápsula de Steam.',
       showSteamDbCover: 'Logo SteamDB bajo Change cover',
       showSteamDbCoverHint: 'Portada de SteamDB debajo de la portada / Change cover.',
+      showSteamDbGallery: 'Galería de capturas de Steam',
+      showSteamDbGalleryHint:
+        'Franja horizontal de capturas tras las estadísticas (assets de Steam Store, como SteamDB). Clic para ampliar.',
+      steamGalleryTitle: 'Capturas',
+      steamGalleryOpen: 'Abrir captura',
+      steamGalleryClose: 'Cerrar',
+      steamGalleryPrev: 'Anterior',
+      steamGalleryNext: 'Siguiente',
       showSteamPlayers: 'Mostrar jugadores en línea',
       showSteamPlayersHint: 'Jugadores actuales desde Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Mostrar insignias en portadas de listas',
@@ -927,6 +959,14 @@
       showSteamDbIconHint: 'Ícone do app no cabeçalho do SteamDB; fallback: cápsula da Steam.',
       showSteamDbCover: 'Logo SteamDB sob Change cover',
       showSteamDbCoverHint: 'Capa do SteamDB abaixo da capa / Change cover.',
+      showSteamDbGallery: 'Galeria de screenshots da Steam',
+      showSteamDbGalleryHint:
+        'Faixa horizontal de screenshots após as estatísticas (assets da Steam Store, como no SteamDB). Clique para ampliar.',
+      steamGalleryTitle: 'Screenshots',
+      steamGalleryOpen: 'Abrir screenshot',
+      steamGalleryClose: 'Fechar',
+      steamGalleryPrev: 'Anterior',
+      steamGalleryNext: 'Próximo',
       showSteamPlayers: 'Mostrar jogadores online',
       showSteamPlayersHint: 'Jogadores atuais via Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Mostrar badges nas capas das listas',
@@ -1096,6 +1136,14 @@
       showSteamDbIconHint: 'App-Icon aus dem SteamDB-Seitenkopf, Fallback: Steam-Kapsel.',
       showSteamDbCover: 'SteamDB-Logo unter Change cover',
       showSteamDbCoverHint: 'Cover-Bild von SteamDB unter Cover / Change cover.',
+      showSteamDbGallery: 'Steam-Screenshot-Galerie zeigen',
+      showSteamDbGalleryHint:
+        'Horizontale Screenshot-Leiste nach den Spielstatistiken (Steam-Store-Assets wie bei SteamDB). Klick zum Vergrößern.',
+      steamGalleryTitle: 'Screenshots',
+      steamGalleryOpen: 'Screenshot öffnen',
+      steamGalleryClose: 'Schließen',
+      steamGalleryPrev: 'Zurück',
+      steamGalleryNext: 'Weiter',
       showSteamPlayers: 'Online-Spieler anzeigen',
       showSteamPlayersHint: 'Aktuelle Spieler über Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Badges auf Listen-Covers anzeigen',
@@ -1265,6 +1313,14 @@
       showSteamDbIconHint: 'Icône app dans l’en-tête SteamDB, repli : capsule Steam.',
       showSteamDbCover: 'Logo SteamDB sous Change cover',
       showSteamDbCoverHint: 'Jaquette SteamDB sous la jaquette / Change cover.',
+      showSteamDbGallery: 'Galerie de captures Steam',
+      showSteamDbGalleryHint:
+        'Bandeau horizontal de captures après les stats (assets Steam Store, comme SteamDB). Clic pour agrandir.',
+      steamGalleryTitle: 'Captures',
+      steamGalleryOpen: 'Ouvrir la capture',
+      steamGalleryClose: 'Fermer',
+      steamGalleryPrev: 'Précédente',
+      steamGalleryNext: 'Suivante',
       showSteamPlayers: 'Afficher les joueurs en ligne',
       showSteamPlayersHint: 'Joueurs actuels via Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Afficher les badges sur les jaquettes des listes',
@@ -1434,6 +1490,14 @@
       showSteamDbIconHint: 'SteamDB ページ見出しのアプリアイコン。失敗時は Steam カプセル。',
       showSteamDbCover: 'Change cover の下に SteamDB ロゴ',
       showSteamDbCoverHint: 'カバー / Change cover の下に SteamDB のカバー画像。',
+      showSteamDbGallery: 'Steam スクリーンショットギャラリー',
+      showSteamDbGalleryHint:
+        '統計ブロックの下に横スクロールのスクショ（Steam Store アセット、SteamDB と同じ）。クリックで拡大。',
+      steamGalleryTitle: 'スクリーンショット',
+      steamGalleryOpen: 'スクリーンショットを開く',
+      steamGalleryClose: '閉じる',
+      steamGalleryPrev: '前へ',
+      steamGalleryNext: '次へ',
       showSteamPlayers: 'オンラインプレイヤー数を表示',
       showSteamPlayersHint: 'Steam GetNumberOfCurrentPlayers の現在のプレイヤー数。',
       showCardBadges: 'リストのカバーにバッジを表示',
@@ -1603,6 +1667,14 @@
       showSteamDbIconHint: 'SteamDB 페이지 헤더 앱 아이콘. 실패 시 Steam 캡슐.',
       showSteamDbCover: 'Change cover 아래 SteamDB 로고',
       showSteamDbCoverHint: '커버 / Change cover 아래 SteamDB 커버 이미지.',
+      showSteamDbGallery: 'Steam 스크린샷 갤러리',
+      showSteamDbGalleryHint:
+        '통계 블록 아래 가로 스크린샷 스트립(Steam 스토어 에셋, SteamDB와 동일). 클릭하면 확대.',
+      steamGalleryTitle: '스크린샷',
+      steamGalleryOpen: '스크린샷 열기',
+      steamGalleryClose: '닫기',
+      steamGalleryPrev: '이전',
+      steamGalleryNext: '다음',
       showSteamPlayers: '온라인 플레이어 수 표시',
       showSteamPlayersHint: 'Steam GetNumberOfCurrentPlayers의 현재 플레이어 수.',
       showCardBadges: '목록 커버에 배지 표시',
@@ -1772,6 +1844,14 @@
       showSteamDbIconHint: 'Ikona aplikacji z nagłówka SteamDB; zapasowo kapsuła Steam.',
       showSteamDbCover: 'Logo SteamDB pod Change cover',
       showSteamDbCoverHint: 'Okładka ze SteamDB pod okładką / Change cover.',
+      showSteamDbGallery: 'Galeria screenshotów Steam',
+      showSteamDbGalleryHint:
+        'Poziomy pasek screenshotów po statystykach (assetty Steam Store, jak na SteamDB). Kliknij, by powiększyć.',
+      steamGalleryTitle: 'Screenshoty',
+      steamGalleryOpen: 'Otwórz screenshot',
+      steamGalleryClose: 'Zamknij',
+      steamGalleryPrev: 'Poprzedni',
+      steamGalleryNext: 'Następny',
       showSteamPlayers: 'Pokaż graczy online',
       showSteamPlayersHint: 'Bieżąca liczba graczy z Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Pokaż odznaki na okładkach list',
@@ -3219,6 +3299,172 @@
         object-position: center;
         padding: 0.65rem 0.5rem;
         background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.06), transparent 65%);
+      }
+
+      .blp-steam-gallery {
+        margin-top: 1rem;
+        width: 100%;
+      }
+
+      .blp-steam-gallery__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.45rem;
+      }
+
+      .blp-steam-gallery__title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--blp-muted);
+      }
+
+      .blp-steam-gallery__link {
+        font-size: 0.78rem;
+        color: var(--blp-accent);
+        text-decoration: none;
+      }
+
+      .blp-steam-gallery__link:hover {
+        text-decoration: underline;
+      }
+
+      .blp-steam-gallery__track {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 0.35rem;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .blp-steam-gallery__track::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .blp-steam-gallery__track::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+      }
+
+      .blp-steam-gallery__skel {
+        flex: 0 0 auto;
+        width: min(42vw, 220px);
+        aspect-ratio: 16 / 9;
+        border-radius: 6px;
+        background: linear-gradient(
+          90deg,
+          var(--blp-skel) 0%,
+          var(--blp-skel-shine) 45%,
+          var(--blp-skel) 90%
+        );
+        background-size: 200% 100%;
+        animation: blp-shimmer 1.1s ease-in-out infinite;
+      }
+
+      .blp-steam-gallery__item {
+        flex: 0 0 auto;
+        width: min(42vw, 220px);
+        aspect-ratio: 16 / 9;
+        padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        background: #12151c;
+        cursor: zoom-in;
+        scroll-snap-align: start;
+        transition: border-color 0.15s ease, transform 0.15s ease;
+      }
+
+      .blp-steam-gallery__item:hover,
+      .blp-steam-gallery__item:focus-visible {
+        border-color: rgba(61, 184, 154, 0.55);
+        transform: translateY(-1px);
+        outline: none;
+      }
+
+      .blp-steam-gallery__item img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+
+      .blp-steam-gallery__item img.is-ready {
+        opacity: 1;
+      }
+
+      .blp-steam-gallery-lb {
+        position: fixed;
+        inset: 0;
+        z-index: 1000001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(0, 0, 0, 0.82);
+        backdrop-filter: blur(2px);
+      }
+
+      .blp-steam-gallery-lb[hidden] {
+        display: none !important;
+      }
+
+      .blp-steam-gallery-lb__img {
+        max-width: min(96vw, 1280px);
+        max-height: min(88vh, 820px);
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+        background: #0b0d12;
+      }
+
+      .blp-steam-gallery-lb__btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        background: rgba(21, 25, 33, 0.85);
+        color: #fff;
+        font-size: 1.35rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .blp-steam-gallery-lb__btn:hover {
+        background: rgba(61, 184, 154, 0.35);
+      }
+
+      .blp-steam-gallery-lb__btn--prev { left: 16px; }
+      .blp-steam-gallery-lb__btn--next { right: 16px; }
+
+      .blp-steam-gallery-lb__close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        background: rgba(21, 25, 33, 0.85);
+        color: #fff;
+        font-size: 1.25rem;
+        cursor: pointer;
+      }
+
+      .blp-steam-gallery-lb__close:hover {
+        background: rgba(61, 184, 154, 0.35);
       }
 
       [${ENRICH_ATTR}="players"] .blp-players-badge {
@@ -5252,21 +5498,26 @@
   }
 
   /**
-   * Icon / cover / players via Steam APIs only.
+   * Icon / cover / screenshots / players via Steam APIs only.
    * SteamDB has no public JSON API (internal /api/* is extension-only + Cloudflare).
-   * Media: GetItems community_icon + header. Players: GetNumberOfCurrentPlayers.
+   * Media: GetItems community_icon + header. Screenshots: appdetails.
+   * Players: GetNumberOfCurrentPlayers.
    */
   async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
     const id = Number(appId);
     if (!Number.isFinite(id) || id <= 0) return null;
 
     const needMedia = settings.showSteamDbIcon || settings.showSteamDbCover;
+    const needGallery = settings.showSteamDbGallery;
     const needPlayers = settings.showSteamPlayers;
-    if (!needMedia && !needPlayers) return null;
+    if (!needMedia && !needGallery && !needPlayers) return null;
 
     const mediaKey = `steamdb:media:${id}`;
+    const shotsKey = `steam:screenshots:${id}`;
     const debugOn = Boolean(settings.debugMode);
     let media = !debugOn ? getCached(mediaKey) : null;
+    let screenshots = needGallery && !debugOn ? getCached(shotsKey) : null;
+    if (screenshots && !Array.isArray(screenshots)) screenshots = null;
     let latestPlayers = null;
     let latestPlayersSource = null;
     let playersApiUrl = null;
@@ -5291,6 +5542,7 @@
         iconUrl: needMedia && settings.showSteamDbIcon ? iconUrl : '',
         logoUrl: needMedia && settings.showSteamDbCover ? logoUrl : '',
         logoIsPortrait: Boolean(logoIsPortrait),
+        screenshots: needGallery ? (Array.isArray(screenshots) ? screenshots : null) : null,
         players: needPlayers ? latestPlayers : null,
         source: media?.source || 'steam',
         _debug: debugOn
@@ -5303,6 +5555,11 @@
                     : needMedia
                       ? 'Waiting for Steam assets'
                       : null,
+                needGallery
+                  ? Array.isArray(screenshots)
+                    ? `Screenshots: ${screenshots.length} from appdetails`
+                    : 'Screenshots pending'
+                  : null,
                 latestPlayersSource === 'steam-api'
                   ? 'Players from GetNumberOfCurrentPlayers'
                   : latestPlayersSource === 'cache'
@@ -5317,6 +5574,7 @@
               playersApiUrl,
               playersSource: latestPlayersSource,
               media,
+              screenshots,
               players: latestPlayers,
               iconUrl,
               logoUrl,
@@ -5332,7 +5590,7 @@
         source: 'steam-cdn-early',
       };
       emit(buildResult());
-    } else if (needMedia) {
+    } else if (needMedia || needGallery) {
       emit(buildResult());
     }
 
@@ -5352,6 +5610,15 @@
       ? fetchSteamStoreAssets(id, cc).catch(() => null)
       : Promise.resolve(null);
 
+    const shotsPromise =
+      needGallery && !Array.isArray(screenshots)
+        ? fetchSteamScreenshots(id).then((shots) => {
+            screenshots = Array.isArray(shots) ? shots : [];
+            emit(buildResult());
+            return screenshots;
+          })
+        : Promise.resolve(screenshots);
+
     const playersPromise =
       needPlayers && latestPlayers == null
         ? (async () => {
@@ -5365,7 +5632,7 @@
           })()
         : Promise.resolve();
 
-    const [storeAssets] = await Promise.all([assetsPromise, playersPromise]);
+    const [storeAssets] = await Promise.all([assetsPromise, shotsPromise, playersPromise]);
     if (storeAssets && (storeAssets.iconUrl || storeAssets.logoUrl)) {
       media = {
         iconUrl: storeAssets.iconUrl || media?.iconUrl || '',
@@ -5380,12 +5647,64 @@
       media = { ...media, iconUrl: steamCdnAsset(id, 'capsule_sm_120.jpg') };
     }
 
+    if (needGallery && !Array.isArray(screenshots)) screenshots = [];
+
     const result = buildResult();
     emit(result);
     return result;
   }
 
+  function parseSteamScreenshots(details) {
+    const list = Array.isArray(details?.screenshots) ? details.screenshots : [];
+    const out = [];
+    for (const shot of list) {
+      const thumb = String(shot?.path_thumbnail || '').trim();
+      const full = String(shot?.path_full || thumb).trim();
+      if (!thumb && !full) continue;
+      out.push({
+        id: shot?.id != null ? Number(shot.id) : out.length,
+        thumb: thumb || full,
+        full: full || thumb,
+      });
+    }
+    return out;
+  }
+
+  async function fetchSteamScreenshots(appId) {
+    const id = Number(appId);
+    if (!Number.isFinite(id) || id <= 0) return [];
+    const cacheKey = `steam:screenshots:${id}`;
+    const debugOn = Boolean(settings.debugMode);
+    if (!debugOn) {
+      const cached = getCached(cacheKey);
+      if (Array.isArray(cached)) return cached;
+    }
+    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+
+    const task = (async () => {
+      try {
+        const url =
+          `${STEAM_DETAILS_URL}?appids=${encodeURIComponent(id)}` +
+          `&filters=screenshots&l=english`;
+        const root = await gmRequest({ url, anonymous: true });
+        const shots = parseSteamScreenshots(root?.[id]?.success ? root[id].data : null);
+        if (shots.length && !debugOn) setCached(cacheKey, shots);
+        return shots;
+      } catch (_) {
+        return [];
+      }
+    })();
+
+    inflight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(cacheKey);
+    }
+  }
+
   function removeSteamDbUi() {
+    closeSteamGalleryLightbox();
     document.querySelectorAll(`[${STEAMDB_ATTR}]`).forEach((el) => el.remove());
   }
 
@@ -5545,6 +5864,176 @@
   function mountSteamDbSkeletons(token = '') {
     ensureSteamDbTitleIconMount(token);
     ensureSteamDbCoverMount(token);
+    ensureSteamGalleryMount(token);
+  }
+
+  function gameStatsMountAnchor() {
+    return document.querySelector('turbo-frame#game-stats');
+  }
+
+  function ensureSteamGalleryMount(token = '') {
+    if (!settings.showSteamDbGallery) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}="gallery"]`).forEach((el) => el.remove());
+      return null;
+    }
+    let host = document.querySelector(`[${STEAMDB_ATTR}="gallery"]`);
+    if (host) {
+      if (token) host.setAttribute('data-blp-token', token);
+      return host;
+    }
+    const anchor = gameStatsMountAnchor();
+    if (!anchor) return null;
+    host = document.createElement('section');
+    host.setAttribute(STEAMDB_ATTR, 'gallery');
+    host.className = 'blp-steam-gallery is-loading';
+    if (token) host.setAttribute('data-blp-token', token);
+    host.innerHTML = `
+      <div class="blp-steam-gallery__head">
+        <span class="blp-steam-gallery__title">${escapeHtml(t.steamGalleryTitle)}</span>
+      </div>
+      <div class="blp-steam-gallery__track" data-blp-gallery-track>
+        <span class="blp-steam-gallery__skel" aria-hidden="true"></span>
+        <span class="blp-steam-gallery__skel" aria-hidden="true"></span>
+        <span class="blp-steam-gallery__skel" aria-hidden="true"></span>
+        <span class="blp-steam-gallery__skel" aria-hidden="true"></span>
+      </div>
+    `;
+    anchor.insertAdjacentElement('afterend', host);
+    return host;
+  }
+
+  function closeSteamGalleryLightbox() {
+    document.querySelectorAll('.blp-steam-gallery-lb').forEach((el) => el.remove());
+    document.removeEventListener('keydown', onSteamGalleryKeydown, true);
+  }
+
+  function onSteamGalleryKeydown(ev) {
+    const lb = document.querySelector('.blp-steam-gallery-lb');
+    if (!lb) return;
+    if (ev.key === 'Escape') {
+      ev.preventDefault();
+      closeSteamGalleryLightbox();
+      return;
+    }
+    if (ev.key === 'ArrowLeft') {
+      ev.preventDefault();
+      lb.querySelector('[data-blp-gallery-prev]')?.click();
+      return;
+    }
+    if (ev.key === 'ArrowRight') {
+      ev.preventDefault();
+      lb.querySelector('[data-blp-gallery-next]')?.click();
+    }
+  }
+
+  function openSteamGalleryLightbox(shots, startIndex) {
+    closeSteamGalleryLightbox();
+    if (!shots?.length) return;
+    let index = Math.max(0, Math.min(startIndex | 0, shots.length - 1));
+
+    const lb = document.createElement('div');
+    lb.className = 'blp-steam-gallery-lb';
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.setAttribute('aria-label', t.steamGalleryTitle);
+    lb.innerHTML = `
+      <button type="button" class="blp-steam-gallery-lb__close" data-blp-gallery-close aria-label="${escapeAttr(t.steamGalleryClose)}">×</button>
+      <button type="button" class="blp-steam-gallery-lb__btn blp-steam-gallery-lb__btn--prev" data-blp-gallery-prev aria-label="${escapeAttr(t.steamGalleryPrev)}">‹</button>
+      <img class="blp-steam-gallery-lb__img" alt="" decoding="async" referrerpolicy="no-referrer" />
+      <button type="button" class="blp-steam-gallery-lb__btn blp-steam-gallery-lb__btn--next" data-blp-gallery-next aria-label="${escapeAttr(t.steamGalleryNext)}">›</button>
+    `;
+    const img = lb.querySelector('img');
+    const show = (i) => {
+      index = (i + shots.length) % shots.length;
+      const shot = shots[index];
+      if (img && shot) img.src = shot.full || shot.thumb;
+    };
+    show(index);
+
+    lb.addEventListener('click', (ev) => {
+      if (ev.target === lb || ev.target.closest('[data-blp-gallery-close]')) {
+        closeSteamGalleryLightbox();
+      }
+    });
+    lb.querySelector('[data-blp-gallery-prev]')?.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      show(index - 1);
+    });
+    lb.querySelector('[data-blp-gallery-next]')?.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      show(index + 1);
+    });
+
+    document.body.appendChild(lb);
+    document.addEventListener('keydown', onSteamGalleryKeydown, true);
+  }
+
+  function applySteamGallery(screenshots, appId, token = '', { final = false } = {}) {
+    if (!settings.showSteamDbGallery) {
+      document.querySelectorAll(`[${STEAMDB_ATTR}="gallery"]`).forEach((el) => el.remove());
+      return;
+    }
+    if (!Array.isArray(screenshots)) {
+      ensureSteamGalleryMount(token);
+      return;
+    }
+    if (!screenshots.length) {
+      if (final) {
+        document.querySelectorAll(`[${STEAMDB_ATTR}="gallery"]`).forEach((el) => el.remove());
+      } else {
+        ensureSteamGalleryMount(token);
+      }
+      return;
+    }
+
+    const host = ensureSteamGalleryMount(token);
+    if (!host) return;
+    if (
+      host.dataset.blpGalleryReady === '1' &&
+      host.getAttribute('data-blp-appid') === String(appId || '') &&
+      Number(host.dataset.blpGalleryCount) === screenshots.length
+    ) {
+      if (token) host.setAttribute('data-blp-token', token);
+      return;
+    }
+    if (appId) host.setAttribute('data-blp-appid', String(appId));
+    if (token) host.setAttribute('data-blp-token', token);
+    host.dataset.blpGalleryReady = '1';
+    host.dataset.blpGalleryCount = String(screenshots.length);
+
+    const steamDbUrl = appId ? `${STEAMDB_APP_URL}/${appId}/` : STEAMDB_APP_URL;
+    const items = screenshots
+      .map((shot, i) => {
+        const src = escapeAttr(shot.thumb || shot.full);
+        return `
+          <button type="button" class="blp-steam-gallery__item" data-blp-gallery-index="${i}" aria-label="${escapeAttr(t.steamGalleryOpen)}">
+            <img src="${src}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+          </button>
+        `;
+      })
+      .join('');
+
+    host.classList.remove('is-loading');
+    host.innerHTML = `
+      <div class="blp-steam-gallery__head">
+        <span class="blp-steam-gallery__title">${escapeHtml(t.steamGalleryTitle)}</span>
+        <a class="blp-steam-gallery__link" href="${escapeAttr(steamDbUrl)}" target="_blank" rel="noopener noreferrer">SteamDB</a>
+      </div>
+      <div class="blp-steam-gallery__track" data-blp-gallery-track>${items}</div>
+    `;
+
+    host.querySelectorAll('.blp-steam-gallery__item img').forEach((img) => {
+      const mark = () => img.classList.add('is-ready');
+      img.addEventListener('load', mark, { once: true });
+      if (img.complete && img.naturalWidth) mark();
+    });
+
+    host.querySelectorAll('[data-blp-gallery-index]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-blp-gallery-index'));
+        openSteamGalleryLightbox(screenshots, idx);
+      });
+    });
   }
 
   function injectSteamDbTitleIcon(url, appId, token = '') {
@@ -5591,7 +6080,7 @@
     revealSteamDbMediaImage(box, img, fallbacks[0]);
   }
 
-  function applySteamDbUi(steamDb, token = '') {
+  function applySteamDbUi(steamDb, token = '', { final = false } = {}) {
     if (!steamDb) {
       removeSteamDbUi();
       return;
@@ -5604,6 +6093,7 @@
       logoIsPortrait: Boolean(steamDb.logoIsPortrait),
       token,
     });
+    applySteamGallery(steamDb.screenshots, steamDb.appId, token, { final });
     if (
       steamDb.source === 'steamdb' &&
       steamDb.logoUrl &&
@@ -6420,6 +6910,7 @@
         showGameStatus: settings.showGameStatus,
         showSteamDbIcon: settings.showSteamDbIcon,
         showSteamDbCover: settings.showSteamDbCover,
+        showSteamDbGallery: settings.showSteamDbGallery,
         showSteamPlayers: settings.showSteamPlayers,
         showCardBadges: settings.showCardBadges,
         showLinks: settings.showLinks,
@@ -6631,7 +7122,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     // Same page/settings: keep the in-flight (or finished) mount. Remounting while
     // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
@@ -6648,8 +7139,12 @@
     const stillHere = () => runId === gamePageToken && getPageContext().isGamePage;
 
     const needSteamDb =
-      settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamPlayers;
-    const needSteamDbMedia = settings.showSteamDbIcon || settings.showSteamDbCover;
+      settings.showSteamDbIcon ||
+      settings.showSteamDbCover ||
+      settings.showSteamDbGallery ||
+      settings.showSteamPlayers;
+    const needSteamDbMedia =
+      settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamDbGallery;
     if (needSteamDbMedia) mountSteamDbSkeletons(token);
     const needSteam =
       settings.showSteam ||
@@ -6784,7 +7279,7 @@
         hltb: state.hltb,
         proton: state.proton,
       });
-      if (state.steamDb) applySteamDbUi(state.steamDb, token);
+      if (state.steamDb) applySteamDbUi(state.steamDb, token, { final: true });
     };
 
     // Links that don't depend on Steam can appear immediately.
@@ -6826,7 +7321,7 @@
             .then((full) => {
               if (!stillHere() || !full) return;
               state.steamDb = full;
-              applySteamDbUi(full, token);
+              applySteamDbUi(full, token, { final: true });
               paintPlayers();
             })
             .catch((err) => {
@@ -7131,6 +7626,11 @@
             <button type="button" data-blp-toggle="showSteamDbCover" class="${draft.showSteamDbCover ? 'is-on' : ''}">${draft.showSteamDbCover ? t.on : t.off}</button>
           </div>
           <p class="blp-hint">${escapeHtml(t.showSteamDbCoverHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSteamDbGallery)}</span>
+            <button type="button" data-blp-toggle="showSteamDbGallery" class="${draft.showSteamDbGallery ? 'is-on' : ''}">${draft.showSteamDbGallery ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSteamDbGalleryHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showSteamPlayers)}</span>
             <button type="button" data-blp-toggle="showSteamPlayers" class="${draft.showSteamPlayers ? 'is-on' : ''}">${draft.showSteamPlayers ? t.on : t.off}</button>
@@ -7652,6 +8152,8 @@
       el.classList?.contains('blp-fix-match-backdrop') ||
       el.classList?.contains('blp-debug-panel') ||
       el.classList?.contains('blp-steamdb-cover') ||
+      el.classList?.contains('blp-steam-gallery') ||
+      el.classList?.contains('blp-steam-gallery-lb') ||
       el.classList?.contains('blp-title-icon-wrap')
     ) {
       return true;

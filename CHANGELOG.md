@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.9] - 2026-07-16
+
+### Added
+
+- Game page: Steam screenshots gallery after `#game-stats` (horizontal strip + lightbox; Steam store assets, same as SteamDB), with settings toggle
+
 ## [0.7.8] - 2026-07-16
 
 ### Fixed
