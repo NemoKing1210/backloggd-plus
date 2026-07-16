@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.6.2
+// @version           0.6.3
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -52,7 +52,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.6.2';
+  const SCRIPT_VERSION = '0.6.3';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3269,11 +3269,44 @@
     if (!detailsRoot?.[id]?.success && !hit) {
       payload.found = false;
     }
-    if (!debugOn && cacheKey && payload.found) {
+    // Only persist "full" resolves. Card/list lite fetches use includeTags=false and must
+    // not overwrite cache with tagsLoaded=false / empty tags.
+    if (!debugOn && cacheKey && payload.found && includeTags) {
       const { _debug, ...store } = payload;
+      store.tagsLoaded = true;
       setCached(cacheKey, store);
     }
     return payload;
+  }
+
+  function cachedSteamNeedsTagBackfill(cached, includeTags) {
+    if (!includeTags || settings.showSteamTags === false) return false;
+    if (!cached?.found || cached.appId == null) return false;
+    return cached.tagsLoaded !== true;
+  }
+
+  async function backfillSteamTags(cached, country) {
+    const tags = await fetchSteamAppTags(cached.appId, country).catch(() => []);
+    return {
+      ...cached,
+      tags: Array.isArray(tags) ? tags : [],
+      tagsLoaded: true,
+    };
+  }
+
+  async function readSteamCacheOrBackfill(cacheKey, { includeTags, country, manualOverride }) {
+    const cached = getCached(cacheKey);
+    if (!cached) return null;
+    let result = {
+      ...cached,
+      manualOverride: Boolean(manualOverride || cached.manualOverride),
+    };
+    if (cachedSteamNeedsTagBackfill(result, includeTags)) {
+      result = await backfillSteamTags(result, country);
+      const { _debug, ...store } = result;
+      setCached(cacheKey, store);
+    }
+    return result;
   }
 
   async function fetchSteamByAppId(appId, country, { onPartial, includeTags = true, manualOverride = false } = {}) {
@@ -3283,14 +3316,17 @@
     }
     const requestedCountry = String(country || 'US').toUpperCase();
     const cacheKey = `steam:id:${requestedCountry}:${id}`;
+    const inflightKey = includeTags ? cacheKey : `${cacheKey}:lite`;
     const debugOn = Boolean(settings.debugMode);
     if (!debugOn) {
-      const cached = getCached(cacheKey);
-      if (cached) {
-        return { ...cached, manualOverride: Boolean(manualOverride || cached.manualOverride) };
-      }
+      const cached = await readSteamCacheOrBackfill(cacheKey, {
+        includeTags,
+        country: requestedCountry,
+        manualOverride,
+      });
+      if (cached) return cached;
     }
-    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+    if (inflight.has(inflightKey)) return inflight.get(inflightKey);
 
     const task = hydrateSteamApp({
       appId: id,
@@ -3299,7 +3335,8 @@
       anonymous: true,
       onPartial,
       includeTags,
-      cacheKey,
+      // Lite card fetches must not write the shared cache key.
+      cacheKey: includeTags ? cacheKey : '',
       manualOverride,
       debugBase: {
         appId: id,
@@ -3311,11 +3348,11 @@
       },
     });
 
-    inflight.set(cacheKey, task);
+    inflight.set(inflightKey, task);
     try {
       return await task;
     } finally {
-      inflight.delete(cacheKey);
+      inflight.delete(inflightKey);
     }
   }
 
@@ -3355,13 +3392,18 @@
   async function fetchSteamBundle(title, country, { onPartial, includeTags = true } = {}) {
     const requestedCountry = String(country || 'US').toUpperCase();
     const cacheKey = `steam:${requestedCountry}:${normalizeTitle(title)}`;
+    const inflightKey = includeTags ? cacheKey : `${cacheKey}:lite`;
     const debugOn = Boolean(settings.debugMode);
     if (!debugOn) {
-      const cached = getCached(cacheKey);
+      const cached = await readSteamCacheOrBackfill(cacheKey, {
+        includeTags,
+        country: requestedCountry,
+        manualOverride: false,
+      });
       if (cached) return cached;
     }
 
-    if (inflight.has(cacheKey)) return inflight.get(cacheKey);
+    if (inflight.has(inflightKey)) return inflight.get(inflightKey);
 
     const task = (async () => {
       const debug = {
@@ -3487,16 +3529,16 @@
         onPartial,
         includeTags,
         debugBase: debug,
-        cacheKey,
+        cacheKey: includeTags ? cacheKey : '',
         manualOverride: false,
       });
     })();
 
-    inflight.set(cacheKey, task);
+    inflight.set(inflightKey, task);
     try {
       return await task;
     } finally {
-      inflight.delete(cacheKey);
+      inflight.delete(inflightKey);
     }
   }
 
