@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.15
+// @version           0.7.16
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.15';
+  const SCRIPT_VERSION = '0.7.16';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -223,7 +223,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — players fallback',
       debugSrcIcon: 'Title icon (SteamDB / CDN)',
       debugSrcLogo: 'Cover logo under Change cover',
-      debugSrcGameStatusApi: 'GameStatus API — crack / DRM status',
+      debugSrcGameStatusApi: 'GameStatus API — status',
       debugSrcGameStatusPage: 'GameStatus site page for matched slug',
       uiLanguage: 'Interface language',
       uiLanguageHint: 'Auto follows your browser language. Saved choice applies after reload.',
@@ -238,8 +238,8 @@
       showHltbHint: 'Main / Extra / Complete hours from HowLongToBeat.',
       showDeckProton: 'Show Steam Deck & ProtonDB',
       showDeckProtonHint: 'Steam Deck Verified/Playable plus ProtonDB tier (needs a Steam App ID).',
-      showGameStatus: 'Show GameStatus crack status',
-      showGameStatusHint: 'Crack / DRM status from GameStatus.info (needs a Steam match).',
+      showGameStatus: 'Show GameStatus',
+      showGameStatusHint: 'Status from GameStatus.info (needs a Steam match).',
       showLinks: 'Show quick links row',
       showSteamOwned: 'Show Steam owned status',
       showSteamOwnedHint:
@@ -318,9 +318,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Ready',
-      gsNotCracked: 'Pending',
-      gsBypass: 'Protection bypass',
+      gsReady: 'Ready',
+      gsPending: 'Pending',
+      gsPartial: 'Partial',
       gsReleaseToday: 'Release today',
       gsUnknown: 'Unknown',
       gsNotInDatabase: 'Not in database',
@@ -404,7 +404,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — запасной онлайн',
       debugSrcIcon: 'Иконка у заголовка (SteamDB / CDN)',
       debugSrcLogo: 'Логотип обложки под Change cover',
-      debugSrcGameStatusApi: 'API GameStatus — статус взлома / DRM',
+      debugSrcGameStatusApi: 'API GameStatus — статус',
       debugSrcGameStatusPage: 'Страница GameStatus для найденного слага',
       uiLanguage: 'Язык интерфейса',
       uiLanguageHint: 'Авто — язык браузера. Выбор применится после перезагрузки.',
@@ -420,7 +420,7 @@
       showDeckProton: 'Показывать Steam Deck и ProtonDB',
       showDeckProtonHint: 'Verified/Playable для Steam Deck и тир ProtonDB (нужен Steam App ID).',
       showGameStatus: 'Показывать статус GameStatus',
-      showGameStatusHint: 'Статус взлома / DRM с GameStatus.info (нужно совпадение со Steam).',
+      showGameStatusHint: 'Статус с GameStatus.info (нужно совпадение со Steam).',
       showLinks: 'Показывать ряд ссылок',
       showSteamOwned: 'Показывать «Куплено» в Steam',
       showSteamOwnedHint:
@@ -499,9 +499,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Готово',
-      gsNotCracked: 'Ожидание',
-      gsBypass: 'Обход защиты',
+      gsReady: 'Готово',
+      gsPending: 'Ожидание',
+      gsPartial: 'Частично',
       gsReleaseToday: 'Релиз сегодня',
       gsUnknown: 'Неизвестно',
       gsNotInDatabase: 'Нет в базе',
@@ -585,7 +585,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — 玩家数回退',
       debugSrcIcon: '标题图标（SteamDB / CDN）',
       debugSrcLogo: 'Change cover 下的封面 logo',
-      debugSrcGameStatusApi: 'GameStatus API — 破解 / DRM 状态',
+      debugSrcGameStatusApi: 'GameStatus API — 状态',
       debugSrcGameStatusPage: '匹配 slug 的 GameStatus 页面',
       uiLanguage: '界面语言',
       uiLanguageHint: '自动跟随浏览器语言。保存后刷新生效。',
@@ -600,8 +600,8 @@
       showHltbHint: '来自 HowLongToBeat 的 Main / Extra / Complete 小时数。',
       showDeckProton: '显示 Steam Deck 与 ProtonDB',
       showDeckProtonHint: 'Steam Deck Verified/Playable 与 ProtonDB 等级（需要 Steam App ID）。',
-      showGameStatus: '显示 GameStatus 破解状态',
-      showGameStatusHint: '来自 GameStatus.info 的破解/DRM 状态（需要匹配到 Steam）。',
+      showGameStatus: '显示 GameStatus',
+      showGameStatusHint: '来自 GameStatus.info 的状态（需要匹配到 Steam）。',
       showLinks: '显示快捷链接行',
       showSteamOwned: '显示 Steam 已拥有状态',
       showSteamOwnedHint: '若游戏在您的 Steam 库中则显示“已拥有”。需要在此浏览器登录 Steam。',
@@ -673,9 +673,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: '已破解',
-      gsNotCracked: '未破解',
-      gsBypass: '保护绕过',
+      gsReady: '就绪',
+      gsPending: '待定',
+      gsPartial: '部分',
       gsReleaseToday: '今日发售',
       gsUnknown: '未知',
       gsNotInDatabase: '不在数据库',
@@ -760,7 +760,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback de jugadores',
       debugSrcIcon: 'Icono del título (SteamDB / CDN)',
       debugSrcLogo: 'Logo de portada bajo Change cover',
-      debugSrcGameStatusApi: 'API GameStatus — estado crack / DRM',
+      debugSrcGameStatusApi: 'API GameStatus — estado',
       debugSrcGameStatusPage: 'Página GameStatus del slug encontrado',
       uiLanguage: 'Idioma de la interfaz',
       uiLanguageHint: 'Auto sigue el idioma del navegador. Se aplica al recargar.',
@@ -776,7 +776,7 @@
       showDeckProton: 'Mostrar Steam Deck y ProtonDB',
       showDeckProtonHint: 'Verified/Playable de Steam Deck y nivel ProtonDB (hace falta un Steam App ID).',
       showGameStatus: 'Mostrar estado GameStatus',
-      showGameStatusHint: 'Estado de crack / DRM de GameStatus.info (requiere coincidencia con Steam).',
+      showGameStatusHint: 'Estado de GameStatus.info (requiere coincidencia con Steam).',
       showLinks: 'Mostrar fila de enlaces',
       showSteamOwned: 'Mostrar si está en tu biblioteca Steam',
       showSteamOwnedHint:
@@ -855,9 +855,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Listo',
-      gsNotCracked: 'Pendiente',
-      gsBypass: 'Bypass de protección',
+      gsReady: 'Listo',
+      gsPending: 'Pendiente',
+      gsPartial: 'Parcial',
       gsReleaseToday: 'Lanzamiento hoy',
       gsUnknown: 'Desconocido',
       gsNotInDatabase: 'No está en la base',
@@ -942,7 +942,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback de jogadores',
       debugSrcIcon: 'Ícone do título (SteamDB / CDN)',
       debugSrcLogo: 'Logo da capa sob Change cover',
-      debugSrcGameStatusApi: 'API GameStatus — status crack / DRM',
+      debugSrcGameStatusApi: 'API GameStatus — status',
       debugSrcGameStatusPage: 'Página GameStatus do slug encontrado',
       uiLanguage: 'Idioma da interface',
       uiLanguageHint: 'Auto segue o idioma do navegador. Aplica ao recarregar.',
@@ -958,7 +958,7 @@
       showDeckProton: 'Mostrar Steam Deck e ProtonDB',
       showDeckProtonHint: 'Verified/Playable do Steam Deck e nível ProtonDB (precisa de Steam App ID).',
       showGameStatus: 'Mostrar status GameStatus',
-      showGameStatusHint: 'Status de crack / DRM do GameStatus.info (precisa bater com a Steam).',
+      showGameStatusHint: 'Status do GameStatus.info (precisa bater com a Steam).',
       showLinks: 'Mostrar linha de links',
       showSteamOwned: 'Mostrar se está na biblioteca Steam',
       showSteamOwnedHint:
@@ -1037,9 +1037,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Pronto',
-      gsNotCracked: 'Pendente',
-      gsBypass: 'Bypass de proteção',
+      gsReady: 'Pronto',
+      gsPending: 'Pendente',
+      gsPartial: 'Parcial',
       gsReleaseToday: 'Lançamento hoje',
       gsUnknown: 'Desconhecido',
       gsNotInDatabase: 'Não está na base',
@@ -1124,7 +1124,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — Spieler-Fallback',
       debugSrcIcon: 'Titel-Icon (SteamDB / CDN)',
       debugSrcLogo: 'Cover-Logo unter Change cover',
-      debugSrcGameStatusApi: 'GameStatus-API — Crack-/DRM-Status',
+      debugSrcGameStatusApi: 'GameStatus-API — Status',
       debugSrcGameStatusPage: 'GameStatus-Seite für gefundenen Slug',
       uiLanguage: 'Oberflächensprache',
       uiLanguageHint: 'Auto folgt der Browsersprache. Gilt nach dem Neuladen.',
@@ -1140,7 +1140,7 @@
       showDeckProton: 'Steam Deck & ProtonDB anzeigen',
       showDeckProtonHint: 'Steam Deck Verified/Playable plus ProtonDB-Stufe (braucht eine Steam App ID).',
       showGameStatus: 'GameStatus-Status anzeigen',
-      showGameStatusHint: 'Crack-/DRM-Status von GameStatus.info (Steam-Treffer erforderlich).',
+      showGameStatusHint: 'Status von GameStatus.info (Steam-Treffer erforderlich).',
       showLinks: 'Link-Zeile anzeigen',
       showSteamOwned: 'Steam-Besitz anzeigen',
       showSteamOwnedHint:
@@ -1219,9 +1219,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Bereit',
-      gsNotCracked: 'Ausstehend',
-      gsBypass: 'Schutz-Bypass',
+      gsReady: 'Bereit',
+      gsPending: 'Ausstehend',
+      gsPartial: 'Eingeschränkt',
       gsReleaseToday: 'Release heute',
       gsUnknown: 'Unbekannt',
       gsNotInDatabase: 'Nicht in der Datenbank',
@@ -1306,7 +1306,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback joueurs',
       debugSrcIcon: 'Icône du titre (SteamDB / CDN)',
       debugSrcLogo: 'Logo couverture sous Change cover',
-      debugSrcGameStatusApi: 'API GameStatus — statut crack / DRM',
+      debugSrcGameStatusApi: 'API GameStatus — statut',
       debugSrcGameStatusPage: 'Page GameStatus du slug trouvé',
       uiLanguage: 'Langue de l’interface',
       uiLanguageHint: 'Auto suit la langue du navigateur. Appliqué après rechargement.',
@@ -1322,7 +1322,7 @@
       showDeckProton: 'Afficher Steam Deck et ProtonDB',
       showDeckProtonHint: 'Verified/Playable Steam Deck et palier ProtonDB (nécessite un Steam App ID).',
       showGameStatus: 'Afficher le statut GameStatus',
-      showGameStatusHint: 'Statut crack / DRM via GameStatus.info (correspondance Steam requise).',
+      showGameStatusHint: 'Statut via GameStatus.info (correspondance Steam requise).',
       showLinks: 'Afficher la rangée de liens',
       showSteamOwned: 'Afficher le statut possédé Steam',
       showSteamOwnedHint:
@@ -1401,9 +1401,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Prêt',
-      gsNotCracked: 'En attente',
-      gsBypass: 'Contournement',
+      gsReady: 'Prêt',
+      gsPending: 'En attente',
+      gsPartial: 'Partiel',
       gsReleaseToday: 'Sortie aujourd’hui',
       gsUnknown: 'Inconnu',
       gsNotInDatabase: 'Absent de la base',
@@ -1488,7 +1488,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — プレイヤー数フォールバック',
       debugSrcIcon: 'タイトル横アイコン（SteamDB / CDN）',
       debugSrcLogo: 'Change cover 下のカバー logo',
-      debugSrcGameStatusApi: 'GameStatus API — クラック / DRM 状態',
+      debugSrcGameStatusApi: 'GameStatus API — 状態',
       debugSrcGameStatusPage: '一致した slug の GameStatus ページ',
       uiLanguage: '表示言語',
       uiLanguageHint: '自動はブラウザ言語に従います。保存後の再読み込みで反映。',
@@ -1504,7 +1504,7 @@
       showDeckProton: 'Steam DeckとProtonDBを表示',
       showDeckProtonHint: 'Steam DeckのVerified/PlayableとProtonDBティア（Steam App IDが必要）。',
       showGameStatus: 'GameStatusの状態を表示',
-      showGameStatusHint: 'GameStatus.info のクラック/DRM状態（Steam一致が必要）。',
+      showGameStatusHint: 'GameStatus.info の状態（Steam一致が必要）。',
       showLinks: 'リンク行を表示',
       showSteamOwned: 'Steam所持を表示',
       showSteamOwnedHint:
@@ -1583,9 +1583,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: '対応済み',
-      gsNotCracked: '未対応',
-      gsBypass: '保護バイパス',
+      gsReady: '対応済み',
+      gsPending: '未対応',
+      gsPartial: '一部対応',
       gsReleaseToday: '本日リリース',
       gsUnknown: '不明',
       gsNotInDatabase: 'データベースになし',
@@ -1670,7 +1670,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — 플레이어 폴백',
       debugSrcIcon: '제목 아이콘 (SteamDB / CDN)',
       debugSrcLogo: 'Change cover 아래 커버 logo',
-      debugSrcGameStatusApi: 'GameStatus API — 크랙 / DRM 상태',
+      debugSrcGameStatusApi: 'GameStatus API — 상태',
       debugSrcGameStatusPage: '일치한 slug의 GameStatus 페이지',
       uiLanguage: '인터페이스 언어',
       uiLanguageHint: '자동은 브라우저 언어를 따릅니다. 저장 후 새로고침 시 적용.',
@@ -1686,7 +1686,7 @@
       showDeckProton: 'Steam Deck 및 ProtonDB 표시',
       showDeckProtonHint: 'Steam Deck Verified/Playable과 ProtonDB 등급(Steam App ID 필요).',
       showGameStatus: 'GameStatus 상태 표시',
-      showGameStatusHint: 'GameStatus.info의 크랙/DRM 상태(Steam 일치 필요).',
+      showGameStatusHint: 'GameStatus.info의 상태(Steam 일치 필요).',
       showLinks: '링크 행 표시',
       showSteamOwned: 'Steam 보유 표시',
       showSteamOwnedHint:
@@ -1765,9 +1765,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: '준비됨',
-      gsNotCracked: '대기',
-      gsBypass: '보호 우회',
+      gsReady: '준비됨',
+      gsPending: '대기',
+      gsPartial: '부분',
       gsReleaseToday: '오늘 출시',
       gsUnknown: '알 수 없음',
       gsNotInDatabase: '데이터베이스 없음',
@@ -1852,7 +1852,7 @@
       debugSrcSteamPlayersApi: 'GetNumberOfCurrentPlayers — fallback graczy',
       debugSrcIcon: 'Ikona tytułu (SteamDB / CDN)',
       debugSrcLogo: 'Logo okładki pod Change cover',
-      debugSrcGameStatusApi: 'API GameStatus — status crack / DRM',
+      debugSrcGameStatusApi: 'API GameStatus — status',
       debugSrcGameStatusPage: 'Strona GameStatus dla znalezionego sluga',
       uiLanguage: 'Język interfejsu',
       uiLanguageHint: 'Auto podąża za językiem przeglądarki. Działa po przeładowaniu.',
@@ -1868,7 +1868,7 @@
       showDeckProton: 'Pokaż Steam Deck i ProtonDB',
       showDeckProtonHint: 'Verified/Playable Steam Deck oraz poziom ProtonDB (wymaga Steam App ID).',
       showGameStatus: 'Pokaż status GameStatus',
-      showGameStatusHint: 'Status crack / DRM z GameStatus.info (wymaga dopasowania Steam).',
+      showGameStatusHint: 'Status z GameStatus.info (wymaga dopasowania Steam).',
       showLinks: 'Pokaż wiersz linków',
       showSteamOwned: 'Pokaż status posiadania Steam',
       showSteamOwnedHint:
@@ -1947,9 +1947,9 @@
       steam: 'Steam',
       metacritic: 'Metacritic',
       gameStatus: 'GameStatus',
-      gsCracked: 'Gotowe',
-      gsNotCracked: 'Oczekuje',
-      gsBypass: 'Bypass ochrony',
+      gsReady: 'Gotowe',
+      gsPending: 'Oczekuje',
+      gsPartial: 'Częściowo',
       gsReleaseToday: 'Premiera dziś',
       gsUnknown: 'Nieznany',
       gsNotInDatabase: 'Brak w bazie',
@@ -3168,10 +3168,10 @@
         --blp-wishlist: #67c1f5;
         --blp-wishlist-bg: #2a4a63;
         --blp-wishlist-border: rgba(103, 193, 245, 0.4);
-        --blp-gs-cracked: #beee11;
-        --blp-gs-cracked-bg: #4c6b22;
-        --blp-gs-bypass: #ffb321;
-        --blp-gs-bypass-bg: #5a4630;
+        --blp-gs-ready: #beee11;
+        --blp-gs-ready-bg: #4c6b22;
+        --blp-gs-partial: #ffb321;
+        --blp-gs-partial-bg: #5a4630;
         --blp-gs-pending: #ffb321;
         --blp-gs-pending-bg: #5a4630;
         --blp-gs-old: #fecaca;
@@ -4254,18 +4254,18 @@
         text-transform: none;
       }
 
-      .blp-card-badge--gs.blp-gs-badge--cracked {
-        color: var(--blp-gs-cracked) !important;
+      .blp-card-badge--gs.blp-gs-badge--ready {
+        color: var(--blp-gs-ready) !important;
         background: rgba(76, 107, 34, 0.92);
       }
 
-      .blp-card-badge--gs.blp-gs-badge--bypass,
-      .blp-card-badge--gs.blp-gs-badge--not-cracked-recent {
+      .blp-card-badge--gs.blp-gs-badge--partial,
+      .blp-card-badge--gs.blp-gs-badge--pending-recent {
         color: var(--blp-gs-pending) !important;
         background: rgba(90, 70, 48, 0.92);
       }
 
-      .blp-card-badge--gs.blp-gs-badge--not-cracked-old {
+      .blp-card-badge--gs.blp-gs-badge--pending-old {
         color: var(--blp-gs-old) !important;
         background: rgba(90, 48, 48, 0.92);
       }
@@ -4334,20 +4334,20 @@
         flex: 0 0 auto;
       }
 
-      [${ENRICH_ATTR}] .blp-gs-badge--cracked {
-        color: var(--blp-gs-cracked) !important;
-        background: linear-gradient(180deg, #5a7d28 0%, var(--blp-gs-cracked-bg) 100%);
+      [${ENRICH_ATTR}] .blp-gs-badge--ready {
+        color: var(--blp-gs-ready) !important;
+        background: linear-gradient(180deg, #5a7d28 0%, var(--blp-gs-ready-bg) 100%);
         border: 1px solid rgba(190, 238, 17, 0.35);
       }
 
-      [${ENRICH_ATTR}] .blp-gs-badge--bypass,
-      [${ENRICH_ATTR}] .blp-gs-badge--not-cracked-recent {
-        color: var(--blp-gs-bypass) !important;
-        background: linear-gradient(180deg, #6a5538 0%, var(--blp-gs-bypass-bg) 100%);
+      [${ENRICH_ATTR}] .blp-gs-badge--partial,
+      [${ENRICH_ATTR}] .blp-gs-badge--pending-recent {
+        color: var(--blp-gs-partial) !important;
+        background: linear-gradient(180deg, #6a5538 0%, var(--blp-gs-partial-bg) 100%);
         border: 1px solid rgba(255, 179, 33, 0.35);
       }
 
-      [${ENRICH_ATTR}] .blp-gs-badge--not-cracked-old {
+      [${ENRICH_ATTR}] .blp-gs-badge--pending-old {
         color: var(--blp-gs-old) !important;
         background: linear-gradient(180deg, #6a3838 0%, var(--blp-gs-old-bg) 100%);
         border: 1px solid rgba(254, 202, 202, 0.3);
@@ -4395,24 +4395,24 @@
         color: #acb2b8;
       }
 
-      [${ENRICH_ATTR}] .blp-gs-chip--denuvo {
+      [${ENRICH_ATTR}] .blp-gs-chip--highlight {
         background: #6b1f1f;
         color: #ff6b6b;
         border: 1px solid rgba(255, 107, 107, 0.35);
       }
 
-      [${ENRICH_ATTR}] .blp-gs-chip--cracked {
-        background: var(--blp-gs-cracked-bg);
-        color: var(--blp-gs-cracked);
+      [${ENRICH_ATTR}] .blp-gs-chip--ready {
+        background: var(--blp-gs-ready-bg);
+        color: var(--blp-gs-ready);
       }
 
-      [${ENRICH_ATTR}] .blp-gs-chip--bypass,
-      [${ENRICH_ATTR}] .blp-gs-chip--not-cracked-recent {
-        background: var(--blp-gs-bypass-bg);
-        color: var(--blp-gs-bypass);
+      [${ENRICH_ATTR}] .blp-gs-chip--partial,
+      [${ENRICH_ATTR}] .blp-gs-chip--pending-recent {
+        background: var(--blp-gs-partial-bg);
+        color: var(--blp-gs-partial);
       }
 
-      [${ENRICH_ATTR}] .blp-gs-chip--not-cracked-old {
+      [${ENRICH_ATTR}] .blp-gs-chip--pending-old {
         background: var(--blp-gs-old-bg);
         color: var(--blp-gs-old);
       }
@@ -4707,7 +4707,7 @@
       }
 
       .blp-cache-meter__seg--partial {
-        background: var(--blp-gs-bypass);
+        background: var(--blp-gs-partial);
       }
 
       .blp-cache-meter__seg--free {
@@ -4743,7 +4743,7 @@
       }
 
       .blp-cache-meter__swatch--partial {
-        background: var(--blp-gs-bypass);
+        background: var(--blp-gs-partial);
       }
 
       .blp-cache-meter__swatch--free {
@@ -7170,12 +7170,12 @@
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  function getGsNotCrackedVariant(game) {
+  function getGsPendingVariant(game) {
     const release = parseGsDate(game.release_date);
-    if (!release) return 'not-cracked-recent';
+    if (!release) return 'pending-recent';
     const monthAgo = new Date();
     monthAgo.setMonth(monthAgo.getMonth() - 1);
-    return release > monthAgo ? 'not-cracked-recent' : 'not-cracked-old';
+    return release > monthAgo ? 'pending-recent' : 'pending-old';
   }
 
   function getGsStatusType(game) {
@@ -7183,20 +7183,20 @@
     const status = String(game.readable_status || '').toLowerCase();
     const groups = String(game.hacked_groups_en || game.hacked_groups || '').toLowerCase();
     if (/release today|релиз сегодня|выходит сегодня/.test(status)) return 'release-today';
-    if (/bypass|обход|hypervisor/.test(groups) || /bypass|обход/.test(status)) return 'bypass';
+    if (/bypass|обход|hypervisor/.test(groups) || /bypass|обход/.test(status)) return 'partial';
     if (/not cracked|не взлом|не взломан|unbroken|unreleased crack/.test(status)) {
-      return getGsNotCrackedVariant(game);
+      return getGsPendingVariant(game);
     }
-    if (game.crack_date || /cracked|взлом/.test(status)) return 'cracked';
+    if (game.crack_date || /cracked|взлом/.test(status)) return 'ready';
     return 'unknown';
   }
 
   function getGsStatusLabel(game, type) {
     if (!game) return t.gsNotInDatabase;
     if (game.readable_status) return game.readable_status;
-    if (type === 'cracked') return t.gsCracked;
-    if (type === 'not-cracked-recent' || type === 'not-cracked-old') return t.gsNotCracked;
-    if (type === 'bypass') return t.gsBypass;
+    if (type === 'ready') return t.gsReady;
+    if (type === 'pending-recent' || type === 'pending-old') return t.gsPending;
+    if (type === 'partial') return t.gsPartial;
     if (type === 'release-today') return t.gsReleaseToday;
     return t.gsUnknown;
   }
@@ -7238,7 +7238,7 @@
   }
 
   function gsProtectionChipClass(name) {
-    return /denuvo/i.test(name) ? 'blp-gs-chip--denuvo' : 'blp-gs-chip--protection';
+    return /denuvo/i.test(name) ? 'blp-gs-chip--highlight' : 'blp-gs-chip--protection';
   }
 
   function renderGameStatusValues(entry) {
@@ -7257,7 +7257,7 @@
       );
     }
     for (const group of splitGsChipValues(game.hacked_groups_en || game.hacked_groups)) {
-      const groupType = /bypass|обход|hypervisor/i.test(group) ? 'bypass' : type;
+      const groupType = /bypass|обход|hypervisor/i.test(group) ? 'partial' : type;
       chips.push(
         `<span class="blp-gs-chip blp-gs-chip--${escapeAttr(groupType)}">${escapeHtml(group)}</span>`
       );

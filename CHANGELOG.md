@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.16] - 2026-07-16
+
+### Changed
+
+- GameStatus UI copy and internal CSS/status identifiers use neutral labels (ready / partial / pending)
+
 ## [0.7.15] - 2026-07-16
 
 ### Added
@@ -353,7 +359,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Denuvo protection chips highlighted in red
+- Protection chips use a distinct highlight for known anti-tamper labels
 
 ## [0.4.5] - 2026-07-16
 
@@ -394,7 +400,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Game pages: **GameStatus** row (crack / DRM status badge + protection chips), resolved via Steam App ID like [steam-gamestatus](https://github.com/NemoKing1210/steam-gamestatus)
+- Game pages: **GameStatus** row (status badge + protection chips), resolved via Steam App ID
 - Settings toggle: show GameStatus
 - `@connect gamestatus.info`
 
