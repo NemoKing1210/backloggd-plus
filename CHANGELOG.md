@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.7] - 2026-07-16
+
+### Changed
+
+- Steam price no longer shows the Steam favicon
+
+## [0.3.6] - 2026-07-16
+
+### Changed
+
+- Hide the Steam row entirely when the game is not found on Steam (no “Not found” message)
+
+## [0.3.5] - 2026-07-16
+
+### Fixed
+
+- Steam lookup: if the session search finds nothing, retry as guest (no cookies) before showing “Not found”
+
 ## [0.3.4] - 2026-07-16
 
 ### Changed

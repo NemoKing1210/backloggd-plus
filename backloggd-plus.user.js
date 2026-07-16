@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.3.4
+// @version           0.3.7
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -1412,8 +1412,20 @@
       const searchUrl =
         `${STEAM_SEARCH_URL}?term=${encodeURIComponent(title)}` +
         `&l=english&cc=${encodeURIComponent(country)}`;
-      const search = await gmRequest({ url: searchUrl });
-      const hit = pickSteamSearchItem(search?.items, title);
+
+      const searchAs = async (anonymous) => {
+        const search = await gmRequest({ url: searchUrl, anonymous });
+        return pickSteamSearchItem(search?.items, title) || null;
+      };
+
+      // Prefer the browser Steam session first; if nothing matches, retry as guest
+      // (cookies can hide apps via region / maturity / filter settings).
+      let hit = await searchAs(false);
+      let anonymous = false;
+      if (!hit) {
+        hit = await searchAs(true);
+        anonymous = true;
+      }
       if (!hit) {
         const miss = { found: false };
         setCached(cacheKey, miss);
@@ -1426,11 +1438,13 @@
           url:
             `${STEAM_DETAILS_URL}?appids=${appId}` +
             `&cc=${encodeURIComponent(country)}&l=english`,
+          anonymous,
         }),
         gmRequest({
           url:
             `${STEAM_REVIEWS_URL}/${appId}?json=1&language=all` +
             `&purchase_type=all&num_per_page=0`,
+          anonymous,
         }).catch(() => null),
       ]);
 
@@ -1607,10 +1621,6 @@
 
   function renderSteamValues(steam, { owned = false } = {}) {
     const parts = [];
-    const fav = faviconForUrl(steam.storeUrl);
-    const favImg = fav
-      ? `<img class="blp-favicon" src="${escapeAttr(fav)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
-      : '';
 
     if (owned) {
       parts.push({
@@ -1626,7 +1636,7 @@
 
     if (priceText) {
       parts.push({
-        html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${favImg}${escapeHtml(priceText)}${discount}</a>`,
+        html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}</a>`,
       });
     }
 
@@ -1643,7 +1653,7 @@
     }
 
     if (!parts.length) {
-      return `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${favImg}${escapeHtml(t.steam)}</a>`;
+      return `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.steam)}</a>`;
     }
 
     return parts.map((part) => `<span class="blp-steam-line">${part.html}</span>`).join('');
@@ -1655,8 +1665,7 @@
         setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>`);
         showRow(rows.steam);
       } else if (!steam?.found) {
-        setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`);
-        showRow(rows.steam);
+        hideRow(rows.steam);
       } else {
         setRowValues(rows.steam, renderSteamValues(steam, { owned }));
         showRow(rows.steam);
