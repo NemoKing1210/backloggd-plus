@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.13] - 2026-07-16
+
+### Changed
+
+- Image viewer shows a spinner while switching images and prefetches nearby full-size frames
+
+## [0.7.12] - 2026-07-16
+
+### Changed
+
+- Image viewer uses Backloggd CSS variables (`--back-field-selected`, `--back-interact`, …); filmstrip centered; click empty backdrop (not the image) closes the viewer
+
 ## [0.7.11] - 2026-07-16
 
 ### Changed

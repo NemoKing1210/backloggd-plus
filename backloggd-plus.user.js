@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.11
+// @version           0.7.13
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.11';
+  const SCRIPT_VERSION = '0.7.13';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3364,11 +3364,12 @@
 
       .blp-steam-gallery__link {
         font-size: 0.78rem;
-        color: var(--blp-accent);
+        color: var(--back-interact-secondary, #839df9);
         text-decoration: none;
       }
 
       .blp-steam-gallery__link:hover {
+        color: var(--back-text, #badefc);
         text-decoration: underline;
       }
 
@@ -3411,7 +3412,7 @@
       }
 
       .blp-steamdb-cover.is-gallery:focus-visible {
-        outline: 2px solid rgba(61, 184, 154, 0.65);
+        outline: 2px solid var(--back-interact-secondary, #839df9);
         outline-offset: 2px;
       }
 
@@ -3435,7 +3436,7 @@
 
       .blp-steam-gallery__item:hover,
       .blp-steam-gallery__item:focus-visible {
-        border-color: rgba(61, 184, 154, 0.55);
+        border-color: var(--back-interact-secondary, #839df9);
         transform: translateY(-1px);
         outline: none;
       }
@@ -3459,9 +3460,9 @@
         z-index: 1000001;
         display: flex;
         flex-direction: column;
-        background: rgba(6, 8, 12, 0.92);
+        background: color-mix(in srgb, var(--back-primary, #16181c) 88%, transparent);
         backdrop-filter: blur(4px);
-        color: #e8eaed;
+        color: var(--back-text, #badefc);
         font: 13px/1.35 system-ui, sans-serif;
         user-select: none;
         -webkit-user-select: none;
@@ -3474,7 +3475,11 @@
         justify-content: space-between;
         gap: 0.75rem;
         padding: 0.65rem 0.85rem;
-        background: linear-gradient(180deg, rgba(0,0,0,0.55), transparent);
+        background: linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--back-primary, #16181c) 75%, transparent),
+          transparent
+        );
         z-index: 2;
       }
 
@@ -3491,7 +3496,7 @@
         letter-spacing: 0.03em;
         text-transform: uppercase;
         font-size: 0.72rem;
-        color: rgba(232, 234, 237, 0.72);
+        color: var(--back-text-secondary, #8f9ca7);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3500,20 +3505,20 @@
 
       .blp-viewer__counter {
         font-variant-numeric: tabular-nums;
-        color: rgba(232, 234, 237, 0.9);
+        color: var(--back-text, #badefc);
         padding: 0.2rem 0.55rem;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--back-field, #30394c);
+        border: 1px solid var(--back-field-border, #3b414e);
       }
 
       .blp-viewer__tool {
         width: 36px;
         height: 36px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        border: 1px solid var(--back-field-border, #3b414e);
         border-radius: 8px;
-        background: rgba(21, 25, 33, 0.88);
-        color: #fff;
+        background: var(--back-secondary, #242832);
+        color: var(--back-text, #badefc);
         font-size: 1.05rem;
         line-height: 1;
         cursor: pointer;
@@ -3521,7 +3526,9 @@
 
       .blp-viewer__tool:hover,
       .blp-viewer__tool:focus-visible {
-        background: rgba(61, 184, 154, 0.35);
+        background: var(--back-field-highlight, #3b4760);
+        border-color: var(--back-field-border-hover, #3f4b64);
+        color: var(--back-btn-toggled-text, #fff);
         outline: none;
       }
 
@@ -3545,10 +3552,10 @@
         align-self: center;
         width: 44px;
         height: 44px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        border: 1px solid var(--back-field-border, #3b414e);
         border-radius: 999px;
-        background: rgba(21, 25, 33, 0.88);
-        color: #fff;
+        background: var(--back-secondary, #242832);
+        color: var(--back-text, #badefc);
         font-size: 1.45rem;
         line-height: 1;
         cursor: pointer;
@@ -3557,7 +3564,9 @@
 
       .blp-viewer__nav:hover,
       .blp-viewer__nav:focus-visible {
-        background: rgba(61, 184, 154, 0.35);
+        background: var(--back-interact, #4a5e8d);
+        border-color: var(--back-interact-secondary, #839df9);
+        color: var(--back-btn-toggled-text, #fff);
         outline: none;
       }
 
@@ -3601,20 +3610,53 @@
         object-fit: contain;
         border-radius: 6px;
         box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
-        background: #0b0d12;
+        background: var(--back-field-background, #272c37);
+        pointer-events: auto;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+      }
+
+      .blp-viewer__stage.is-loading .blp-viewer__img {
+        opacity: 0.28;
+      }
+
+      .blp-viewer__spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 42px;
+        height: 42px;
+        margin: -21px 0 0 -21px;
+        border-radius: 50%;
+        border: 3px solid var(--back-field-border, #3b414e);
+        border-top-color: var(--back-field-selected, var(--back-pink-dk, #ea377a));
+        opacity: 0;
         pointer-events: none;
+        z-index: 3;
+        transition: opacity 0.15s ease;
+      }
+
+      .blp-viewer__stage.is-loading .blp-viewer__spinner {
+        opacity: 1;
+        animation: blp-viewer-spin 0.7s linear infinite;
+      }
+
+      @keyframes blp-viewer-spin {
+        to { transform: rotate(360deg); }
       }
 
       .blp-viewer__film {
         flex: 0 0 auto;
         display: flex;
+        justify-content: safe center;
+        justify-content: center;
         gap: 0.45rem;
         overflow-x: auto;
         overflow-y: hidden;
         padding: 0.55rem 0.85rem 0.85rem;
         scroll-snap-type: x proximity;
-        background: linear-gradient(0deg, rgba(0,0,0,0.62), rgba(0,0,0,0.28));
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        background: color-mix(in srgb, var(--back-secondary, #242832) 88%, transparent);
+        border-top: 1px solid var(--back-dropdown-divider, #3f4b64);
         z-index: 2;
       }
 
@@ -3623,7 +3665,7 @@
       }
 
       .blp-viewer__film::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.18);
+        background: var(--back-field-border-hover, #3f4b64);
         border-radius: 999px;
       }
 
@@ -3635,7 +3677,7 @@
         border: 2px solid transparent;
         border-radius: 6px;
         overflow: hidden;
-        background: #12151c;
+        background: var(--back-field-background, #272c37);
         cursor: pointer;
         opacity: 0.55;
         scroll-snap-align: center;
@@ -3649,18 +3691,20 @@
       .blp-viewer__thumb:hover,
       .blp-viewer__thumb:focus-visible {
         opacity: 0.9;
+        border-color: var(--back-field-border-hover, #3f4b64);
         outline: none;
       }
 
       .blp-viewer__thumb.is-active {
         opacity: 1;
-        border-color: var(--blp-accent);
+        border-color: var(--back-field-selected, var(--back-pink-dk, #ea377a));
         transform: translateY(-2px);
-        box-shadow: 0 0 0 1px rgba(61, 184, 154, 0.35);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--back-pink-dk, #ea377a) 45%, transparent);
       }
 
       .blp-viewer__thumb.is-near {
         opacity: 0.78;
+        border-color: var(--back-field-border, #3b414e);
       }
 
       .blp-viewer__thumb img {
@@ -3668,6 +3712,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        pointer-events: none;
       }
 
       [${ENRICH_ATTR}="players"] .blp-players-badge {
@@ -6292,6 +6337,31 @@
       if (session.nextBtn) session.nextBtn.hidden = !multi;
     }
 
+    function setStageLoading(on) {
+      if (!session) return;
+      session.stage?.classList.toggle('is-loading', Boolean(on));
+      session.root?.setAttribute('aria-busy', on ? 'true' : 'false');
+      if (session.spinner) {
+        session.spinner.setAttribute('aria-hidden', on ? 'false' : 'true');
+      }
+    }
+
+    function prefetchAround(index) {
+      if (!session) return;
+      const { items } = session;
+      if (items.length < 2) return;
+      for (const offset of [-1, 1, 2]) {
+        const item = items[((index + offset) % items.length + items.length) % items.length];
+        const src = item?.src;
+        if (!src || session.prefetched.has(src)) continue;
+        session.prefetched.add(src);
+        const probe = new Image();
+        probe.decoding = 'async';
+        probe.referrerPolicy = 'no-referrer';
+        probe.src = src;
+      }
+    }
+
     function show(index, { keepZoom = false } = {}) {
       if (!session) return;
       const { items, img } = session;
@@ -6299,10 +6369,30 @@
       session.index = next;
       const item = items[next];
       if (!item || !img) return;
+
+      const gen = ++session.loadGen;
       img.alt = item.alt || '';
-      if (img.getAttribute('src') !== item.src) img.src = item.src;
       if (!keepZoom) resetTransform();
       updateFilmHighlight();
+      prefetchAround(next);
+
+      const src = item.src;
+      const already =
+        (img.getAttribute('src') || '') === src && img.complete && img.naturalWidth > 0;
+      if (already) {
+        setStageLoading(false);
+        return;
+      }
+
+      setStageLoading(true);
+      const finish = () => {
+        if (!session || session.loadGen !== gen) return;
+        setStageLoading(false);
+      };
+      img.addEventListener('load', finish, { once: true });
+      img.addEventListener('error', finish, { once: true });
+      img.src = src;
+      if (img.complete && img.naturalWidth > 0) finish();
     }
 
     function go(delta) {
@@ -6392,19 +6482,37 @@
       stage.addEventListener('pointercancel', endPointer);
       stage.addEventListener('dblclick', onDblClick);
 
-      // Backdrop click (chrome / empty body margins) closes; stage click without drag does nothing.
+      const pointHitsImage = (clientX, clientY) => {
+        const img = session.img;
+        if (!img) return false;
+        const r = img.getBoundingClientRect();
+        return (
+          clientX >= r.left &&
+          clientX <= r.right &&
+          clientY >= r.top &&
+          clientY <= r.bottom
+        );
+      };
+
+      // Close when clicking backdrop / empty stage around the image (not the image itself).
       root.addEventListener('click', (ev) => {
         if (ev.target.closest('[data-blp-viewer-close]')) {
           close();
+          return;
+        }
+        if (
+          ev.target.closest(
+            '.blp-viewer__tool, .blp-viewer__nav, .blp-viewer__film, .blp-viewer__chrome, .blp-viewer__counter, .blp-viewer__title'
+          )
+        ) {
           return;
         }
         if (moved) {
           moved = false;
           return;
         }
-        if (ev.target === root || ev.target.classList.contains('blp-viewer__body')) {
-          close();
-        }
+        if (pointHitsImage(ev.clientX, ev.clientY)) return;
+        close();
       });
     }
 
@@ -6439,6 +6547,7 @@
         <div class="blp-viewer__body">
           <button type="button" class="blp-viewer__nav" data-blp-viewer-prev aria-label="${escapeAttr(t.steamGalleryPrev)}">‹</button>
           <div class="blp-viewer__stage" data-blp-viewer-stage>
+            <div class="blp-viewer__spinner" data-blp-viewer-spinner aria-hidden="true" aria-label="${escapeAttr(t.loading)}"></div>
             <div class="blp-viewer__frame" data-blp-viewer-frame>
               <img class="blp-viewer__img" alt="" decoding="async" referrerpolicy="no-referrer" draggable="false" />
             </div>
@@ -6510,10 +6619,13 @@
         scale: MIN_SCALE,
         tx: 0,
         ty: 0,
+        loadGen: 0,
+        prefetched: new Set(),
         prevOverflow: document.documentElement.style.overflow,
         img: root.querySelector('.blp-viewer__img'),
         frame: root.querySelector('[data-blp-viewer-frame]'),
         stage: root.querySelector('[data-blp-viewer-stage]'),
+        spinner: root.querySelector('[data-blp-viewer-spinner]'),
         film,
         counter: root.querySelector('[data-blp-viewer-counter]'),
         prevBtn: root.querySelector('[data-blp-viewer-prev]'),
