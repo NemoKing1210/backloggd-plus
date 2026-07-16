@@ -33,7 +33,7 @@ backloggd-plus/
 3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = owned · price · reviews, `Metacritic`, `GameStatus`, `Links`); resolve title + IGDB link from DOM. Skeletons while Steam/GS loads; link favicons via Google s2.
 4. On **Steam** app pages: inject a SteamDB-style Backloggd button into `.apphub_OtherSiteInfo` (slug from Steam URL or title).
 5. On **SteamDB** app pages: inject a `.btn` into `nav.app-links` (prefer IGDB slug from the page).
-6. Steam enrichment: `storesearch` → pick best app → `appdetails` + `appreviews` via `GM_xmlhttpRequest` (`@connect store.steampowered.com`). If session search misses, retry `storesearch` as guest (`anonymous: true`). Ownership via `dynamicstore/userdata` (`rgOwnedApps`) using the browser Steam session (no API key).
+6. Steam enrichment: parallel `storesearch` (session + guest) → merge items → pick best app → `appdetails` + `appreviews` via `GM_xmlhttpRequest` (`@connect store.steampowered.com`). If both miss and region ≠ US, retry search with `cc=US` and note it on the Steam row. Ownership via `dynamicstore/userdata` (`rgOwnedApps`) using the browser Steam session (no API key).
 7. GameStatus enrichment (after Steam App ID): slug candidates from store URL / title → `GET gamestatus.info/back/api/gameinfo/game/{slug}/` (match `steam_prod_id`, ≤2 attempts, 404 = miss). Status chips: cracked / bypass / pending / release-today (`@connect gamestatus.info`).
 8. Cache in `GM_getValue` / `GM_setValue` (`blp_cache_v1`); settings in `blp_settings` (incl. per-link toggles).
 9. UI strings in `TRANSLATIONS` / browser locale; settings via navbar **Plus** button and `GM_registerMenuCommand`.

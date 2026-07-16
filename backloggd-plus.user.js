@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.4.3
+// @version           0.4.4
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -51,7 +51,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.4.3';
+  const SCRIPT_VERSION = '0.4.4';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const ROOT_ATTR = 'data-blp-root';
@@ -176,6 +176,7 @@
       price: 'Price',
       free: 'Free',
       discount: '-{n}%',
+      steamUsFallback: 'Found via US store ({cc} search returned nothing)',
       recommendations: '{n} recommendations',
       links: 'Links',
       linkIgdb: 'IGDB',
@@ -253,6 +254,7 @@
       price: 'Цена',
       free: 'Бесплатно',
       discount: '-{n}%',
+      steamUsFallback: 'Найдено через магазин US (в {cc} ничего не нашлось)',
       recommendations: '{n} рекомендаций',
       links: 'Ссылки',
       linkIgdb: 'IGDB',
@@ -328,6 +330,7 @@
       price: '价格',
       free: '免费',
       discount: '-{n}%',
+      steamUsFallback: '通过 US 商店找到（{cc} 搜索无结果）',
       recommendations: '{n} 条推荐',
       links: '链接',
       linkIgdb: 'IGDB',
@@ -404,6 +407,7 @@
       price: 'Precio',
       free: 'Gratis',
       discount: '-{n}%',
+      steamUsFallback: 'Encontrado en tienda US (la búsqueda en {cc} no dio resultados)',
       recommendations: '{n} recomendaciones',
       links: 'Enlaces',
       linkIgdb: 'IGDB',
@@ -480,6 +484,7 @@
       price: 'Preço',
       free: 'Grátis',
       discount: '-{n}%',
+      steamUsFallback: 'Encontrado na loja US (busca em {cc} sem resultados)',
       recommendations: '{n} recomendações',
       links: 'Links',
       linkIgdb: 'IGDB',
@@ -556,6 +561,7 @@
       price: 'Preis',
       free: 'Kostenlos',
       discount: '-{n}%',
+      steamUsFallback: 'Über US-Store gefunden (Suche in {cc} ohne Treffer)',
       recommendations: '{n} Empfehlungen',
       links: 'Links',
       linkIgdb: 'IGDB',
@@ -632,6 +638,7 @@
       price: 'Prix',
       free: 'Gratuit',
       discount: '-{n}%',
+      steamUsFallback: 'Trouvé via le magasin US (aucune réponse pour {cc})',
       recommendations: '{n} recommandations',
       links: 'Liens',
       linkIgdb: 'IGDB',
@@ -708,6 +715,7 @@
       price: '価格',
       free: '無料',
       discount: '-{n}%',
+      steamUsFallback: 'USストア経由で検出（{cc} の検索は結果なし）',
       recommendations: 'おすすめ {n}',
       links: 'リンク',
       linkIgdb: 'IGDB',
@@ -784,6 +792,7 @@
       price: '가격',
       free: '무료',
       discount: '-{n}%',
+      steamUsFallback: 'US 스토어로 찾음 ({cc} 검색 결과 없음)',
       recommendations: '추천 {n}',
       links: '링크',
       linkIgdb: 'IGDB',
@@ -860,6 +869,7 @@
       price: 'Cena',
       free: 'Za darmo',
       discount: '-{n}%',
+      steamUsFallback: 'Znaleziono przez sklep US (wyszukiwanie {cc} bez wyników)',
       recommendations: '{n} rekomendacji',
       links: 'Linki',
       linkIgdb: 'IGDB',
@@ -1222,6 +1232,11 @@
       [${ENRICH_ATTR}] .blp-discount {
         opacity: 0.75;
         margin-left: 0.15em;
+      }
+
+      [${ENRICH_ATTR}] .blp-steam-note {
+        opacity: 0.65;
+        font-size: 0.85em;
       }
 
       [${ENRICH_ATTR}="steam"] {
@@ -1781,7 +1796,8 @@
   }
 
   async function fetchSteamBundle(title, country) {
-    const cacheKey = `steam:${country}:${normalizeTitle(title)}`;
+    const requestedCountry = String(country || 'US').toUpperCase();
+    const cacheKey = `steam:${requestedCountry}:${normalizeTitle(title)}`;
     const debugOn = Boolean(settings.debugMode);
     if (!debugOn) {
       const cached = getCached(cacheKey);
@@ -1791,63 +1807,110 @@
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
     const task = (async () => {
-      const searchUrl =
-        `${STEAM_SEARCH_URL}?term=${encodeURIComponent(title)}` +
-        `&l=english&cc=${encodeURIComponent(country)}`;
-
-      const searchAs = async (anonymous) => {
-        const search = await gmRequest({ url: searchUrl, anonymous });
-        const items = Array.isArray(search?.items) ? search.items : [];
-        const hit = pickSteamSearchItem(items, title) || null;
-        return {
-          hit,
-          summary: {
-            anonymous,
-            total: search?.total ?? items.length,
-            items: items.slice(0, 8).map((i) => ({
-              id: i.id,
-              name: i.name,
-              type: i.type,
-            })),
-          },
-        };
-      };
-
       const debug = {
         title,
-        country,
+        country: requestedCountry,
         cacheKey,
         cacheSkipped: debugOn,
-        searchUrl,
         searches: [],
       };
 
-      let session;
-      try {
-        session = await searchAs(false);
-        debug.searches.push(session.summary);
-      } catch (err) {
-        debug.searches.push({ anonymous: false, error: String(err?.message || err) });
-        session = { hit: null, summary: null };
-      }
+      const buildSearchUrl = (cc) =>
+        `${STEAM_SEARCH_URL}?term=${encodeURIComponent(title)}` +
+        `&l=english&cc=${encodeURIComponent(cc)}`;
 
-      let hit = session.hit;
-      let anonymous = false;
-      let guest = null;
-      if (!hit) {
+      const searchAs = async (cc, anonymous) => {
+        const url = buildSearchUrl(cc);
         try {
-          guest = await searchAs(true);
-          debug.searches.push(guest.summary);
-          hit = guest.hit;
-          anonymous = true;
+          const search = await gmRequest({ url, anonymous });
+          const items = Array.isArray(search?.items) ? search.items : [];
+          return {
+            ok: true,
+            anonymous,
+            country: cc,
+            url,
+            total: search?.total ?? items.length,
+            items,
+            summary: {
+              anonymous,
+              country: cc,
+              total: search?.total ?? items.length,
+              items: items.slice(0, 8).map((i) => ({
+                id: i.id,
+                name: i.name,
+                type: i.type,
+              })),
+            },
+          };
         } catch (err) {
-          debug.searches.push({ anonymous: true, error: String(err?.message || err) });
+          return {
+            ok: false,
+            anonymous,
+            country: cc,
+            url,
+            items: [],
+            summary: {
+              anonymous,
+              country: cc,
+              error: String(err?.message || err),
+            },
+          };
         }
+      };
+
+      const mergeSearchResults = (sessionResult, guestResult) => {
+        const byId = new Map();
+        for (const item of [...(sessionResult.items || []), ...(guestResult.items || [])]) {
+          if (!item?.id) continue;
+          if (!byId.has(item.id)) byId.set(item.id, item);
+        }
+        const mergedItems = [...byId.values()];
+        const hit = pickSteamSearchItem(mergedItems, title) || null;
+        const sessionIds = new Set(
+          (sessionResult.items || []).map((i) => i?.id).filter(Boolean)
+        );
+        const anonymous = hit ? !sessionIds.has(hit.id) : Boolean(guestResult.ok && !sessionResult.ok);
+        return { hit, mergedItems, anonymous };
+      };
+
+      const runParallelSearch = async (cc) => {
+        const [sessionResult, guestResult] = await Promise.all([
+          searchAs(cc, false),
+          searchAs(cc, true),
+        ]);
+        debug.searches.push(sessionResult.summary, guestResult.summary);
+        return {
+          ...mergeSearchResults(sessionResult, guestResult),
+          sessionResult,
+          guestResult,
+          country: cc,
+        };
+      };
+
+      let searchCountry = requestedCountry;
+      let usedUsFallback = false;
+      let round = await runParallelSearch(searchCountry);
+
+      if (!round.hit && searchCountry !== 'US') {
+        usedUsFallback = true;
+        searchCountry = 'US';
+        debug.usFallback = {
+          from: requestedCountry,
+          to: 'US',
+          reason: `No matches for ${requestedCountry}; retrying US`,
+        };
+        round = await runParallelSearch('US');
       }
 
+      let { hit, anonymous } = round;
+      debug.searchCountry = searchCountry;
+      debug.usedUsFallback = usedUsFallback;
+      debug.anonymous = anonymous;
+
       if (!hit) {
-        debug.reason = 'No Steam search match (session + guest)';
-        debug.anonymous = anonymous;
+        debug.reason = usedUsFallback
+          ? `No Steam search match for ${requestedCountry} or US (session + guest, parallel)`
+          : 'No Steam search match (session + guest, parallel)';
         const miss = { found: false, _debug: debug };
         if (!debugOn) setCached(cacheKey, { found: false });
         return miss;
@@ -1855,8 +1918,9 @@
 
       const appId = hit.id;
       debug.picked = { id: hit.id, name: hit.name, type: hit.type };
-      debug.anonymous = anonymous;
 
+      // Price/details use the country that actually found the game.
+      const detailsCountry = searchCountry;
       let detailsRoot = null;
       let reviews = null;
       try {
@@ -1864,7 +1928,7 @@
           gmRequest({
             url:
               `${STEAM_DETAILS_URL}?appids=${appId}` +
-              `&cc=${encodeURIComponent(country)}&l=english`,
+              `&cc=${encodeURIComponent(detailsCountry)}&l=english`,
             anonymous,
           }),
           gmRequest({
@@ -1879,17 +1943,21 @@
         ]);
       } catch (err) {
         debug.reason = `Steam details/reviews failed: ${err?.message || err}`;
-        debug.anonymous = anonymous;
         const miss = { found: false, _debug: debug };
         if (!debugOn) setCached(cacheKey, { found: false });
         return miss;
       }
 
       const details = detailsRoot?.[appId]?.success ? detailsRoot[appId].data : null;
+      const sourceBits = [
+        anonymous ? 'guest items' : 'session items',
+        usedUsFallback ? `US fallback (requested ${requestedCountry})` : detailsCountry,
+      ];
       debug.reason = details
-        ? `Matched Steam app ${appId}${anonymous ? ' (guest search)' : ' (session search)'}`
+        ? `Matched Steam app ${appId} (${sourceBits.join(', ')})`
         : `Search hit app ${appId}, but appdetails success=false`;
       debug.detailsSuccess = Boolean(detailsRoot?.[appId]?.success);
+      debug.detailsCountry = detailsCountry;
       debug.reviews = reviews?.query_summary || null;
 
       const payload = {
@@ -1902,6 +1970,9 @@
         metacritic: details?.metacritic || (hit.metascore ? { score: Number(hit.metascore) } : null),
         recommendations: details?.recommendations?.total || null,
         reviews: reviews?.query_summary || null,
+        usedUsFallback,
+        requestedCountry,
+        searchCountry: detailsCountry,
         _debug: debug,
       };
       if (!debugOn) {
@@ -2363,7 +2434,18 @@
     }
 
     if (!parts.length) {
-      return `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.steam)}</a>`;
+      const link = `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.steam)}</a>`;
+      const note =
+        steam.usedUsFallback
+          ? `<span class="blp-steam-line"><span class="game-details-value blp-steam-note">${escapeHtml(fmt(t.steamUsFallback, { cc: steam.requestedCountry || '' }))}</span></span>`
+          : '';
+      return `${link}${note}`;
+    }
+
+    if (steam.usedUsFallback) {
+      parts.push({
+        html: `<span class="game-details-value blp-steam-note">${escapeHtml(fmt(t.steamUsFallback, { cc: steam.requestedCountry || '' }))}</span>`,
+      });
     }
 
     return parts.map((part) => `<span class="blp-steam-line">${part.html}</span>`).join('');
