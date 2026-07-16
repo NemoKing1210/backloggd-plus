@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.13
+// @version           0.7.14
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.13';
+  const SCRIPT_VERSION = '0.7.14';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3580,12 +3580,8 @@
         min-width: 0;
         min-height: 0;
         overflow: hidden;
-        cursor: default;
-        touch-action: none;
-      }
-
-      .blp-viewer__stage.is-zoomed {
         cursor: grab;
+        touch-action: none;
       }
 
       .blp-viewer__stage.is-dragging {
@@ -6268,9 +6264,8 @@
 
     function applyTransform() {
       if (!session) return;
-      const { frame, scale, tx, ty, stage } = session;
+      const { frame, scale, tx, ty } = session;
       frame.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-      stage.classList.toggle('is-zoomed', scale > 1.01);
       if (session.zoomOutBtn) session.zoomOutBtn.disabled = scale <= MIN_SCALE + 0.001;
       if (session.zoomInBtn) session.zoomInBtn.disabled = scale >= MAX_SCALE - 0.001;
       if (session.resetBtn) session.resetBtn.disabled = scale <= MIN_SCALE + 0.001 && Math.abs(tx) < 1 && Math.abs(ty) < 1;
@@ -6410,6 +6405,18 @@
       let pinchStartDist = 0;
       let pinchStartScale = 1;
 
+      const pointHitsImage = (clientX, clientY) => {
+        const img = session.img;
+        if (!img) return false;
+        const r = img.getBoundingClientRect();
+        return (
+          clientX >= r.left &&
+          clientX <= r.right &&
+          clientY >= r.top &&
+          clientY <= r.bottom
+        );
+      };
+
       const onWheel = (ev) => {
         ev.preventDefault();
         const factor = ev.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
@@ -6418,16 +6425,18 @@
 
       const onPointerDown = (ev) => {
         if (ev.button != null && ev.button !== 0) return;
-        stage.setPointerCapture?.(ev.pointerId);
         pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
         if (pointers.size === 2) {
           const pts = [...pointers.values()];
           pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
           pinchStartScale = session.scale;
           dragging = false;
+          stage.setPointerCapture?.(ev.pointerId);
           return;
         }
-        if (session.scale <= MIN_SCALE + 0.001) return;
+        // Pan at any zoom, but only when grabbing the image (not empty backdrop).
+        if (!pointHitsImage(ev.clientX, ev.clientY)) return;
+        stage.setPointerCapture?.(ev.pointerId);
         dragging = true;
         moved = false;
         lastX = ev.clientX;
@@ -6471,8 +6480,11 @@
 
       const onDblClick = (ev) => {
         ev.preventDefault();
-        if (session.scale > MIN_SCALE + 0.01) resetTransform();
-        else zoomAt(2.5, ev.clientX, ev.clientY);
+        if (session.scale > MIN_SCALE + 0.01 || Math.abs(session.tx) > 1 || Math.abs(session.ty) > 1) {
+          resetTransform();
+        } else {
+          zoomAt(2.5, ev.clientX, ev.clientY);
+        }
       };
 
       stage.addEventListener('wheel', onWheel, { passive: false });
@@ -6481,18 +6493,6 @@
       stage.addEventListener('pointerup', endPointer);
       stage.addEventListener('pointercancel', endPointer);
       stage.addEventListener('dblclick', onDblClick);
-
-      const pointHitsImage = (clientX, clientY) => {
-        const img = session.img;
-        if (!img) return false;
-        const r = img.getBoundingClientRect();
-        return (
-          clientX >= r.left &&
-          clientX <= r.right &&
-          clientY >= r.top &&
-          clientY <= r.bottom
-        );
-      };
 
       // Close when clicking backdrop / empty stage around the image (not the image itself).
       root.addEventListener('click', (ev) => {
