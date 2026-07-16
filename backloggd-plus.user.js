@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.10
+// @version           0.7.11
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.10';
+  const SCRIPT_VERSION = '0.7.11';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -268,6 +268,10 @@
       steamGalleryClose: 'Close',
       steamGalleryPrev: 'Previous',
       steamGalleryNext: 'Next',
+      viewerZoomIn: 'Zoom in',
+      viewerZoomOut: 'Zoom out',
+      viewerZoomReset: 'Reset zoom',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Show online players',
       showSteamPlayersHint: 'Current players from Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Show badges on list covers',
@@ -444,6 +448,10 @@
       steamGalleryClose: 'Закрыть',
       steamGalleryPrev: 'Назад',
       steamGalleryNext: 'Вперёд',
+      viewerZoomIn: 'Увеличить',
+      viewerZoomOut: 'Уменьшить',
+      viewerZoomReset: 'Сбросить масштаб',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Показывать онлайн игроков',
       showSteamPlayersHint: 'Текущие игроки через Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Бейджи на обложках в списках',
@@ -616,6 +624,10 @@
       steamGalleryClose: '关闭',
       steamGalleryPrev: '上一张',
       steamGalleryNext: '下一张',
+      viewerZoomIn: '放大',
+      viewerZoomOut: '缩小',
+      viewerZoomReset: '重置缩放',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: '显示在线玩家数',
       showSteamPlayersHint: '当前玩家来自 Steam GetNumberOfCurrentPlayers。',
       showCardBadges: '在列表封面显示徽章',
@@ -790,6 +802,10 @@
       steamGalleryClose: 'Cerrar',
       steamGalleryPrev: 'Anterior',
       steamGalleryNext: 'Siguiente',
+      viewerZoomIn: 'Acercar',
+      viewerZoomOut: 'Alejar',
+      viewerZoomReset: 'Restablecer zoom',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Mostrar jugadores en línea',
       showSteamPlayersHint: 'Jugadores actuales desde Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Mostrar insignias en portadas de listas',
@@ -967,6 +983,10 @@
       steamGalleryClose: 'Fechar',
       steamGalleryPrev: 'Anterior',
       steamGalleryNext: 'Próximo',
+      viewerZoomIn: 'Aumentar zoom',
+      viewerZoomOut: 'Diminuir zoom',
+      viewerZoomReset: 'Redefinir zoom',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Mostrar jogadores online',
       showSteamPlayersHint: 'Jogadores atuais via Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Mostrar badges nas capas das listas',
@@ -1144,6 +1164,10 @@
       steamGalleryClose: 'Schließen',
       steamGalleryPrev: 'Zurück',
       steamGalleryNext: 'Weiter',
+      viewerZoomIn: 'Vergrößern',
+      viewerZoomOut: 'Verkleinern',
+      viewerZoomReset: 'Zoom zurücksetzen',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Online-Spieler anzeigen',
       showSteamPlayersHint: 'Aktuelle Spieler über Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Badges auf Listen-Covers anzeigen',
@@ -1321,6 +1345,10 @@
       steamGalleryClose: 'Fermer',
       steamGalleryPrev: 'Précédente',
       steamGalleryNext: 'Suivante',
+      viewerZoomIn: 'Zoom avant',
+      viewerZoomOut: 'Zoom arrière',
+      viewerZoomReset: 'Réinitialiser le zoom',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Afficher les joueurs en ligne',
       showSteamPlayersHint: 'Joueurs actuels via Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Afficher les badges sur les jaquettes des listes',
@@ -1498,6 +1526,10 @@
       steamGalleryClose: '閉じる',
       steamGalleryPrev: '前へ',
       steamGalleryNext: '次へ',
+      viewerZoomIn: '拡大',
+      viewerZoomOut: '縮小',
+      viewerZoomReset: 'ズームをリセット',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'オンラインプレイヤー数を表示',
       showSteamPlayersHint: 'Steam GetNumberOfCurrentPlayers の現在のプレイヤー数。',
       showCardBadges: 'リストのカバーにバッジを表示',
@@ -1675,6 +1707,10 @@
       steamGalleryClose: '닫기',
       steamGalleryPrev: '이전',
       steamGalleryNext: '다음',
+      viewerZoomIn: '확대',
+      viewerZoomOut: '축소',
+      viewerZoomReset: '줌 초기화',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: '온라인 플레이어 수 표시',
       showSteamPlayersHint: 'Steam GetNumberOfCurrentPlayers의 현재 플레이어 수.',
       showCardBadges: '목록 커버에 배지 표시',
@@ -1852,6 +1888,10 @@
       steamGalleryClose: 'Zamknij',
       steamGalleryPrev: 'Poprzedni',
       steamGalleryNext: 'Następny',
+      viewerZoomIn: 'Powiększ',
+      viewerZoomOut: 'Pomniejsz',
+      viewerZoomReset: 'Resetuj zoom',
+      viewerOf: '{current} / {total}',
       showSteamPlayers: 'Pokaż graczy online',
       showSteamPlayersHint: 'Bieżąca liczba graczy z Steam GetNumberOfCurrentPlayers.',
       showCardBadges: 'Pokaż odznaki na okładkach list',
@@ -3413,71 +3453,221 @@
         opacity: 1;
       }
 
-      .blp-steam-gallery-lb {
+      .blp-viewer {
         position: fixed;
         inset: 0;
         z-index: 1000001;
         display: flex;
+        flex-direction: column;
+        background: rgba(6, 8, 12, 0.92);
+        backdrop-filter: blur(4px);
+        color: #e8eaed;
+        font: 13px/1.35 system-ui, sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .blp-viewer__chrome {
+        flex: 0 0 auto;
+        display: flex;
         align-items: center;
-        justify-content: center;
-        padding: 24px;
-        background: rgba(0, 0, 0, 0.82);
-        backdrop-filter: blur(2px);
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.65rem 0.85rem;
+        background: linear-gradient(180deg, rgba(0,0,0,0.55), transparent);
+        z-index: 2;
       }
 
-      .blp-steam-gallery-lb[hidden] {
-        display: none !important;
+      .blp-viewer__chrome-left,
+      .blp-viewer__chrome-right {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 0;
       }
 
-      .blp-steam-gallery-lb__img {
-        max-width: min(96vw, 1280px);
-        max-height: min(88vh, 820px);
-        width: auto;
-        height: auto;
-        object-fit: contain;
-        border-radius: 8px;
-        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
-        background: #0b0d12;
+      .blp-viewer__title {
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        color: rgba(232, 234, 237, 0.72);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 28vw;
       }
 
-      .blp-steam-gallery-lb__btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 44px;
-        height: 44px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
+      .blp-viewer__counter {
+        font-variant-numeric: tabular-nums;
+        color: rgba(232, 234, 237, 0.9);
+        padding: 0.2rem 0.55rem;
         border-radius: 999px;
-        background: rgba(21, 25, 33, 0.85);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .blp-viewer__tool {
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(21, 25, 33, 0.88);
         color: #fff;
-        font-size: 1.35rem;
+        font-size: 1.05rem;
         line-height: 1;
         cursor: pointer;
       }
 
-      .blp-steam-gallery-lb__btn:hover {
+      .blp-viewer__tool:hover,
+      .blp-viewer__tool:focus-visible {
         background: rgba(61, 184, 154, 0.35);
+        outline: none;
       }
 
-      .blp-steam-gallery-lb__btn--prev { left: 16px; }
-      .blp-steam-gallery-lb__btn--next { right: 16px; }
+      .blp-viewer__tool:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
 
-      .blp-steam-gallery-lb__close {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        width: 40px;
-        height: 40px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
+      .blp-viewer__body {
+        flex: 1 1 auto;
+        position: relative;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: stretch;
+        gap: 0.25rem;
+        padding: 0 0.35rem;
+      }
+
+      .blp-viewer__nav {
+        align-self: center;
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 999px;
-        background: rgba(21, 25, 33, 0.85);
+        background: rgba(21, 25, 33, 0.88);
         color: #fff;
-        font-size: 1.25rem;
+        font-size: 1.45rem;
+        line-height: 1;
         cursor: pointer;
+        z-index: 2;
       }
 
-      .blp-steam-gallery-lb__close:hover {
+      .blp-viewer__nav:hover,
+      .blp-viewer__nav:focus-visible {
         background: rgba(61, 184, 154, 0.35);
+        outline: none;
+      }
+
+      .blp-viewer__nav[hidden] {
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .blp-viewer__stage {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        cursor: default;
+        touch-action: none;
+      }
+
+      .blp-viewer__stage.is-zoomed {
+        cursor: grab;
+      }
+
+      .blp-viewer__stage.is-dragging {
+        cursor: grabbing;
+      }
+
+      .blp-viewer__frame {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-origin: center center;
+        will-change: transform;
+      }
+
+      .blp-viewer__img {
+        max-width: min(92vw, 1280px);
+        max-height: calc(100% - 8px);
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 6px;
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+        background: #0b0d12;
+        pointer-events: none;
+      }
+
+      .blp-viewer__film {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 0.45rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0.55rem 0.85rem 0.85rem;
+        scroll-snap-type: x proximity;
+        background: linear-gradient(0deg, rgba(0,0,0,0.62), rgba(0,0,0,0.28));
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        z-index: 2;
+      }
+
+      .blp-viewer__film::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .blp-viewer__film::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+      }
+
+      .blp-viewer__thumb {
+        flex: 0 0 auto;
+        width: 88px;
+        aspect-ratio: 16 / 9;
+        padding: 0;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #12151c;
+        cursor: pointer;
+        opacity: 0.55;
+        scroll-snap-align: center;
+        transition: opacity 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      }
+
+      .blp-viewer__thumb--cover {
+        aspect-ratio: 460 / 215;
+      }
+
+      .blp-viewer__thumb:hover,
+      .blp-viewer__thumb:focus-visible {
+        opacity: 0.9;
+        outline: none;
+      }
+
+      .blp-viewer__thumb.is-active {
+        opacity: 1;
+        border-color: var(--blp-accent);
+        transform: translateY(-2px);
+        box-shadow: 0 0 0 1px rgba(61, 184, 154, 0.35);
+      }
+
+      .blp-viewer__thumb.is-near {
+        opacity: 0.78;
+      }
+
+      .blp-viewer__thumb img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       [${ENRICH_ATTR}="players"] .blp-players-badge {
@@ -5970,76 +6160,440 @@
     };
   }
 
-  function closeSteamGalleryLightbox() {
-    document.querySelectorAll('.blp-steam-gallery-lb').forEach((el) => el.remove());
-    document.removeEventListener('keydown', onSteamGalleryKeydown, true);
+  /**
+   * Reusable fullscreen image viewer (zoom / pan / filmstrip).
+   * openBlpImageViewer({ items, index, title })
+   * closeBlpImageViewer()
+   * isBlpImageViewerOpen()
+   *
+   * Item: { src|full, thumb?, alt?, kind? }
+   */
+  const BlpImageViewer = (() => {
+    const MIN_SCALE = 1;
+    const MAX_SCALE = 5;
+    const ZOOM_STEP = 1.25;
+
+    let session = null;
+
+    function normalizeItems(raw) {
+      const out = [];
+      for (const item of raw || []) {
+        if (!item) continue;
+        if (typeof item === 'string') {
+          const src = item.trim();
+          if (src) out.push({ src, thumb: src, alt: '', kind: '' });
+          continue;
+        }
+        const src = String(item.src || item.full || item.url || '').trim();
+        const thumb = String(item.thumb || item.thumbnail || src).trim();
+        if (!src && !thumb) continue;
+        out.push({
+          src: src || thumb,
+          thumb: thumb || src,
+          alt: String(item.alt || ''),
+          kind: String(item.kind || ''),
+        });
+      }
+      return out;
+    }
+
+    function clamp(n, min, max) {
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function isOpen() {
+      return Boolean(session?.root?.isConnected);
+    }
+
+    function close() {
+      if (!session) return;
+      const { root, onKeyDown, onClose, prevOverflow } = session;
+      document.removeEventListener('keydown', onKeyDown, true);
+      root?.remove();
+      if (prevOverflow != null) document.documentElement.style.overflow = prevOverflow;
+      session = null;
+      if (typeof onClose === 'function') {
+        try {
+          onClose();
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    }
+
+    function applyTransform() {
+      if (!session) return;
+      const { frame, scale, tx, ty, stage } = session;
+      frame.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      stage.classList.toggle('is-zoomed', scale > 1.01);
+      if (session.zoomOutBtn) session.zoomOutBtn.disabled = scale <= MIN_SCALE + 0.001;
+      if (session.zoomInBtn) session.zoomInBtn.disabled = scale >= MAX_SCALE - 0.001;
+      if (session.resetBtn) session.resetBtn.disabled = scale <= MIN_SCALE + 0.001 && Math.abs(tx) < 1 && Math.abs(ty) < 1;
+    }
+
+    function resetTransform() {
+      if (!session) return;
+      session.scale = MIN_SCALE;
+      session.tx = 0;
+      session.ty = 0;
+      applyTransform();
+    }
+
+    function zoomAt(nextScale, clientX, clientY) {
+      if (!session) return;
+      const stage = session.stage;
+      const rect = stage.getBoundingClientRect();
+      const cx = clientX == null ? rect.left + rect.width / 2 : clientX;
+      const cy = clientY == null ? rect.top + rect.height / 2 : clientY;
+      const px = cx - rect.left - rect.width / 2;
+      const py = cy - rect.top - rect.height / 2;
+      const prev = session.scale;
+      const scale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
+      if (scale === prev) {
+        applyTransform();
+        return;
+      }
+      // Keep the point under the cursor stable while scaling.
+      session.tx = px - ((px - session.tx) * scale) / prev;
+      session.ty = py - ((py - session.ty) * scale) / prev;
+      session.scale = scale;
+      if (scale <= MIN_SCALE + 0.001) {
+        session.tx = 0;
+        session.ty = 0;
+        session.scale = MIN_SCALE;
+      }
+      applyTransform();
+    }
+
+    function zoomBy(factor, clientX, clientY) {
+      if (!session) return;
+      zoomAt(session.scale * factor, clientX, clientY);
+    }
+
+    function updateFilmHighlight() {
+      if (!session) return;
+      const { film, index, items } = session;
+      film.querySelectorAll('[data-blp-viewer-thumb]').forEach((btn) => {
+        const i = Number(btn.getAttribute('data-blp-viewer-thumb'));
+        btn.classList.toggle('is-active', i === index);
+        btn.classList.toggle('is-near', Math.abs(i - index) === 1);
+        btn.setAttribute('aria-current', i === index ? 'true' : 'false');
+      });
+      const active = film.querySelector(`[data-blp-viewer-thumb="${index}"]`);
+      active?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      if (session.counter) {
+        session.counter.textContent = fmt(t.viewerOf, {
+          current: index + 1,
+          total: items.length,
+        });
+      }
+      const multi = items.length > 1;
+      if (session.prevBtn) session.prevBtn.hidden = !multi;
+      if (session.nextBtn) session.nextBtn.hidden = !multi;
+    }
+
+    function show(index, { keepZoom = false } = {}) {
+      if (!session) return;
+      const { items, img } = session;
+      const next = ((index % items.length) + items.length) % items.length;
+      session.index = next;
+      const item = items[next];
+      if (!item || !img) return;
+      img.alt = item.alt || '';
+      if (img.getAttribute('src') !== item.src) img.src = item.src;
+      if (!keepZoom) resetTransform();
+      updateFilmHighlight();
+    }
+
+    function go(delta) {
+      if (!session) return;
+      show(session.index + delta);
+    }
+
+    function bindStageInteractions() {
+      const { stage, root } = session;
+      let dragging = false;
+      let moved = false;
+      let lastX = 0;
+      let lastY = 0;
+      let pointers = new Map();
+      let pinchStartDist = 0;
+      let pinchStartScale = 1;
+
+      const onWheel = (ev) => {
+        ev.preventDefault();
+        const factor = ev.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+        zoomBy(factor, ev.clientX, ev.clientY);
+      };
+
+      const onPointerDown = (ev) => {
+        if (ev.button != null && ev.button !== 0) return;
+        stage.setPointerCapture?.(ev.pointerId);
+        pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        if (pointers.size === 2) {
+          const pts = [...pointers.values()];
+          pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+          pinchStartScale = session.scale;
+          dragging = false;
+          return;
+        }
+        if (session.scale <= MIN_SCALE + 0.001) return;
+        dragging = true;
+        moved = false;
+        lastX = ev.clientX;
+        lastY = ev.clientY;
+        stage.classList.add('is-dragging');
+      };
+
+      const onPointerMove = (ev) => {
+        if (pointers.has(ev.pointerId)) {
+          pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        }
+        if (pointers.size === 2) {
+          const pts = [...pointers.values()];
+          const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+          const midX = (pts[0].x + pts[1].x) / 2;
+          const midY = (pts[0].y + pts[1].y) / 2;
+          zoomAt(pinchStartScale * (dist / pinchStartDist), midX, midY);
+          return;
+        }
+        if (!dragging) return;
+        const dx = ev.clientX - lastX;
+        const dy = ev.clientY - lastY;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) moved = true;
+        lastX = ev.clientX;
+        lastY = ev.clientY;
+        session.tx += dx;
+        session.ty += dy;
+        applyTransform();
+      };
+
+      const endPointer = (ev) => {
+        pointers.delete(ev.pointerId);
+        if (pointers.size < 2) {
+          pinchStartDist = 0;
+        }
+        if (!dragging) return;
+        dragging = false;
+        stage.classList.remove('is-dragging');
+        stage.releasePointerCapture?.(ev.pointerId);
+      };
+
+      const onDblClick = (ev) => {
+        ev.preventDefault();
+        if (session.scale > MIN_SCALE + 0.01) resetTransform();
+        else zoomAt(2.5, ev.clientX, ev.clientY);
+      };
+
+      stage.addEventListener('wheel', onWheel, { passive: false });
+      stage.addEventListener('pointerdown', onPointerDown);
+      stage.addEventListener('pointermove', onPointerMove);
+      stage.addEventListener('pointerup', endPointer);
+      stage.addEventListener('pointercancel', endPointer);
+      stage.addEventListener('dblclick', onDblClick);
+
+      // Backdrop click (chrome / empty body margins) closes; stage click without drag does nothing.
+      root.addEventListener('click', (ev) => {
+        if (ev.target.closest('[data-blp-viewer-close]')) {
+          close();
+          return;
+        }
+        if (moved) {
+          moved = false;
+          return;
+        }
+        if (ev.target === root || ev.target.classList.contains('blp-viewer__body')) {
+          close();
+        }
+      });
+    }
+
+    function open(options = {}) {
+      const items = normalizeItems(options.items);
+      if (!items.length) return null;
+      close();
+
+      let index = Number(options.index);
+      if (!Number.isFinite(index)) index = 0;
+      index = clamp(index | 0, 0, items.length - 1);
+
+      const title = options.title || t.steamGalleryTitle || '';
+      const root = document.createElement('div');
+      root.className = 'blp-viewer';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-modal', 'true');
+      root.setAttribute('aria-label', title || 'Image viewer');
+      root.innerHTML = `
+        <div class="blp-viewer__chrome">
+          <div class="blp-viewer__chrome-left">
+            <span class="blp-viewer__title">${escapeHtml(title)}</span>
+            <span class="blp-viewer__counter" data-blp-viewer-counter></span>
+          </div>
+          <div class="blp-viewer__chrome-right">
+            <button type="button" class="blp-viewer__tool" data-blp-viewer-zoom-out aria-label="${escapeAttr(t.viewerZoomOut)}">−</button>
+            <button type="button" class="blp-viewer__tool" data-blp-viewer-zoom-reset aria-label="${escapeAttr(t.viewerZoomReset)}">⟲</button>
+            <button type="button" class="blp-viewer__tool" data-blp-viewer-zoom-in aria-label="${escapeAttr(t.viewerZoomIn)}">+</button>
+            <button type="button" class="blp-viewer__tool" data-blp-viewer-close aria-label="${escapeAttr(t.steamGalleryClose)}">×</button>
+          </div>
+        </div>
+        <div class="blp-viewer__body">
+          <button type="button" class="blp-viewer__nav" data-blp-viewer-prev aria-label="${escapeAttr(t.steamGalleryPrev)}">‹</button>
+          <div class="blp-viewer__stage" data-blp-viewer-stage>
+            <div class="blp-viewer__frame" data-blp-viewer-frame>
+              <img class="blp-viewer__img" alt="" decoding="async" referrerpolicy="no-referrer" draggable="false" />
+            </div>
+          </div>
+          <button type="button" class="blp-viewer__nav" data-blp-viewer-next aria-label="${escapeAttr(t.steamGalleryNext)}">›</button>
+        </div>
+        <div class="blp-viewer__film" data-blp-viewer-film></div>
+      `;
+
+      const film = root.querySelector('[data-blp-viewer-film]');
+      film.innerHTML = items
+        .map((item, i) => {
+          const coverClass = item.kind === 'cover' ? ' blp-viewer__thumb--cover' : '';
+          return `
+            <button type="button" class="blp-viewer__thumb${coverClass}" data-blp-viewer-thumb="${i}" aria-label="${escapeAttr(t.steamGalleryOpen)}">
+              <img src="${escapeAttr(item.thumb || item.src)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" draggable="false" />
+            </button>
+          `;
+        })
+        .join('');
+
+      const onKeyDown = (ev) => {
+        if (!session) return;
+        if (ev.key === 'Escape') {
+          ev.preventDefault();
+          close();
+          return;
+        }
+        if (ev.key === 'ArrowLeft') {
+          ev.preventDefault();
+          go(-1);
+          return;
+        }
+        if (ev.key === 'ArrowRight') {
+          ev.preventDefault();
+          go(1);
+          return;
+        }
+        if (ev.key === 'Home') {
+          ev.preventDefault();
+          show(0);
+          return;
+        }
+        if (ev.key === 'End') {
+          ev.preventDefault();
+          show(items.length - 1);
+          return;
+        }
+        if (ev.key === '+' || ev.key === '=') {
+          ev.preventDefault();
+          zoomBy(ZOOM_STEP);
+          return;
+        }
+        if (ev.key === '-' || ev.key === '_') {
+          ev.preventDefault();
+          zoomBy(1 / ZOOM_STEP);
+          return;
+        }
+        if (ev.key === '0') {
+          ev.preventDefault();
+          resetTransform();
+        }
+      };
+
+      session = {
+        root,
+        items,
+        index,
+        scale: MIN_SCALE,
+        tx: 0,
+        ty: 0,
+        prevOverflow: document.documentElement.style.overflow,
+        img: root.querySelector('.blp-viewer__img'),
+        frame: root.querySelector('[data-blp-viewer-frame]'),
+        stage: root.querySelector('[data-blp-viewer-stage]'),
+        film,
+        counter: root.querySelector('[data-blp-viewer-counter]'),
+        prevBtn: root.querySelector('[data-blp-viewer-prev]'),
+        nextBtn: root.querySelector('[data-blp-viewer-next]'),
+        zoomInBtn: root.querySelector('[data-blp-viewer-zoom-in]'),
+        zoomOutBtn: root.querySelector('[data-blp-viewer-zoom-out]'),
+        resetBtn: root.querySelector('[data-blp-viewer-zoom-reset]'),
+        onKeyDown,
+        onClose: options.onClose,
+      };
+
+      document.documentElement.style.overflow = 'hidden';
+
+      session.prevBtn?.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        go(-1);
+      });
+      session.nextBtn?.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        go(1);
+      });
+      session.zoomInBtn?.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        zoomBy(ZOOM_STEP);
+      });
+      session.zoomOutBtn?.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        zoomBy(1 / ZOOM_STEP);
+      });
+      session.resetBtn?.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        resetTransform();
+      });
+      film.querySelectorAll('[data-blp-viewer-thumb]').forEach((btn) => {
+        btn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          show(Number(btn.getAttribute('data-blp-viewer-thumb')));
+        });
+      });
+
+      bindStageInteractions();
+      document.body.appendChild(root);
+      document.addEventListener('keydown', onKeyDown, true);
+      show(index);
+      return session;
+    }
+
+    return {
+      open,
+      close,
+      isOpen,
+      go,
+      show,
+      zoomBy,
+      resetTransform,
+    };
+  })();
+
+  function openBlpImageViewer(options) {
+    return BlpImageViewer.open(options);
   }
 
-  function onSteamGalleryKeydown(ev) {
-    const lb = document.querySelector('.blp-steam-gallery-lb');
-    if (!lb) return;
-    if (ev.key === 'Escape') {
-      ev.preventDefault();
-      closeSteamGalleryLightbox();
-      return;
-    }
-    if (ev.key === 'ArrowLeft') {
-      ev.preventDefault();
-      lb.querySelector('[data-blp-gallery-prev]')?.click();
-      return;
-    }
-    if (ev.key === 'ArrowRight') {
-      ev.preventDefault();
-      lb.querySelector('[data-blp-gallery-next]')?.click();
-    }
+  function closeBlpImageViewer() {
+    BlpImageViewer.close();
+  }
+
+  function isBlpImageViewerOpen() {
+    return BlpImageViewer.isOpen();
+  }
+
+  function closeSteamGalleryLightbox() {
+    closeBlpImageViewer();
   }
 
   function openSteamGalleryLightbox(shots, startIndex) {
-    closeSteamGalleryLightbox();
-    if (!shots?.length) return;
-    let index = Math.max(0, Math.min(startIndex | 0, shots.length - 1));
-
-    const lb = document.createElement('div');
-    lb.className = 'blp-steam-gallery-lb';
-    lb.setAttribute('role', 'dialog');
-    lb.setAttribute('aria-modal', 'true');
-    lb.setAttribute('aria-label', t.steamGalleryTitle);
-    lb.innerHTML = `
-      <button type="button" class="blp-steam-gallery-lb__close" data-blp-gallery-close aria-label="${escapeAttr(t.steamGalleryClose)}">×</button>
-      <button type="button" class="blp-steam-gallery-lb__btn blp-steam-gallery-lb__btn--prev" data-blp-gallery-prev aria-label="${escapeAttr(t.steamGalleryPrev)}">‹</button>
-      <img class="blp-steam-gallery-lb__img" alt="" decoding="async" referrerpolicy="no-referrer" />
-      <button type="button" class="blp-steam-gallery-lb__btn blp-steam-gallery-lb__btn--next" data-blp-gallery-next aria-label="${escapeAttr(t.steamGalleryNext)}">›</button>
-    `;
-    const img = lb.querySelector('img');
-    const prevBtn = lb.querySelector('[data-blp-gallery-prev]');
-    const nextBtn = lb.querySelector('[data-blp-gallery-next]');
-    if (shots.length < 2) {
-      prevBtn?.setAttribute('hidden', '');
-      nextBtn?.setAttribute('hidden', '');
-    }
-    const show = (i) => {
-      index = (i + shots.length) % shots.length;
-      const shot = shots[index];
-      if (img && shot) img.src = shot.full || shot.thumb;
-    };
-    show(index);
-
-    lb.addEventListener('click', (ev) => {
-      if (ev.target === lb || ev.target.closest('[data-blp-gallery-close]')) {
-        closeSteamGalleryLightbox();
-      }
+    openBlpImageViewer({
+      items: shots,
+      index: startIndex,
+      title: t.steamGalleryTitle,
     });
-    prevBtn?.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      show(index - 1);
-    });
-    nextBtn?.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      show(index + 1);
-    });
-
-    document.body.appendChild(lb);
-    document.addEventListener('keydown', onSteamGalleryKeydown, true);
   }
 
   function applySteamGallery(screenshots, appId, token = '', { final = false, coverUrl = '' } = {}) {
@@ -8244,7 +8798,7 @@
       el.classList?.contains('blp-debug-panel') ||
       el.classList?.contains('blp-steamdb-cover') ||
       el.classList?.contains('blp-steam-gallery') ||
-      el.classList?.contains('blp-steam-gallery-lb') ||
+      el.classList?.contains('blp-viewer') ||
       el.classList?.contains('blp-title-icon-wrap')
     ) {
       return true;
