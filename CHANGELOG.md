@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.13] - 2026-07-16
+
+### Changed
+
+- SteamDB cover image no longer forces a 2:3 aspect-ratio
+
+## [0.5.12] - 2026-07-16
+
+### Fixed
+
+- SteamDB icon/cover: use Steam GetItems `community_icon` + `header` (same CDN URLs as SteamDB) instead of search capsules / Cloudflare-blocked HTML scrape
+
+## [0.5.11] - 2026-07-16
+
+### Fixed
+
+- SteamDB scrape uses current page selectors: `.pagehead-title img`, `.js-open-screenshot-viewer img`, `#js-charts-button`
+
 ## [0.5.10] - 2026-07-16
 
 ### Fixed
