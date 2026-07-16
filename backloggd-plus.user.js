@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.2.2
+// @version           0.2.7
 // @description       Extends Backloggd with extra game info, richer UI, and quality-of-life features
 // @description:ru    Расширяет Backloggd: больше информации об играх, удобный UI и QoL-улучшения
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -57,12 +57,33 @@
   const STEAM_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
   const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews';
 
+  const LINK_KEYS = ['igdb', 'steam', 'steamdb', 'metacritic', 'opencritic', 'hltb', 'wikipedia'];
+  const LINK_DOMAINS = {
+    igdb: 'igdb.com',
+    steam: 'store.steampowered.com',
+    steamdb: 'steamdb.info',
+    metacritic: 'metacritic.com',
+    opencritic: 'opencritic.com',
+    hltb: 'howlongtobeat.com',
+    wikipedia: 'wikipedia.org',
+  };
+
   const DEFAULT_SETTINGS = {
     cacheHours: 12,
+    uiLocale: 'auto',
     steamCountry: 'US',
     showSteam: true,
     showMetacritic: true,
     showLinks: true,
+    links: {
+      igdb: true,
+      steam: true,
+      steamdb: true,
+      metacritic: true,
+      opencritic: true,
+      hltb: true,
+      wikipedia: true,
+    },
   };
 
   const SUPPORTED_LOCALES = ['en', 'ru', 'zh', 'es', 'pt', 'de', 'fr', 'ja', 'ko', 'pl'];
@@ -79,12 +100,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Source code, updates, and issue reports',
       sectionGame: 'Game page',
+      sectionGeneral: 'General',
       sectionCache: 'Cache',
+      uiLanguage: 'Interface language',
+      uiLanguageHint: 'Auto follows your browser language. Saved choice applies after reload.',
+      uiLanguageAuto: 'Auto (browser)',
       steamCountry: 'Steam store region',
       steamCountryHint: 'Affects price currency from the Steam Store API.',
       showSteam: 'Show Steam price & reviews',
       showMetacritic: 'Show Metacritic score',
-      showLinks: 'Show quick links',
+      showLinks: 'Show quick links row',
+      sectionLinks: 'Quick links',
+      sectionLinksHint: 'Choose which sites appear in the Links row on game pages.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Backloggd Plus settings',
       cacheHours: 'Cache duration (hours)',
       cacheHoursHint: 'How long to reuse Steam lookups. 0 disables cache.',
       clearCache: 'Clear cache',
@@ -106,6 +135,7 @@
       links: 'Links',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -122,12 +152,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Исходники, обновления и баг-репорты',
       sectionGame: 'Страница игры',
+      sectionGeneral: 'Общие',
       sectionCache: 'Кэш',
+      uiLanguage: 'Язык интерфейса',
+      uiLanguageHint: 'Авто — язык браузера. Выбор применится после перезагрузки.',
+      uiLanguageAuto: 'Авто (браузер)',
       steamCountry: 'Регион Steam Store',
       steamCountryHint: 'Влияет на валюту цены из Steam Store API.',
       showSteam: 'Показывать цену и отзывы Steam',
       showMetacritic: 'Показывать оценку Metacritic',
-      showLinks: 'Показывать быстрые ссылки',
+      showLinks: 'Показывать ряд ссылок',
+      sectionLinks: 'Быстрые ссылки',
+      sectionLinksHint: 'Какие сайты показывать в ряду Links на странице игры.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Настройки Backloggd Plus',
       cacheHours: 'Время кэша (часы)',
       cacheHoursHint: 'Как долго переиспользовать ответы Steam. 0 отключает кэш.',
       clearCache: 'Очистить кэш',
@@ -149,6 +187,7 @@
       links: 'Ссылки',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -165,12 +204,20 @@
       repoLink: 'GitHub',
       repoAbout: '源码、更新与问题反馈',
       sectionGame: '游戏页',
+      sectionGeneral: '通用',
       sectionCache: '缓存',
+      uiLanguage: '界面语言',
+      uiLanguageHint: '自动跟随浏览器语言。保存后刷新生效。',
+      uiLanguageAuto: '自动（浏览器）',
       steamCountry: 'Steam 商店地区',
       steamCountryHint: '影响 Steam Store API 返回的货币。',
       showSteam: '显示 Steam 价格与评价',
       showMetacritic: '显示 Metacritic 分数',
-      showLinks: '显示快捷链接',
+      showLinks: '显示快捷链接行',
+      sectionLinks: '快捷链接',
+      sectionLinksHint: '选择游戏页 Links 行中显示的站点。',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Backloggd Plus 设置',
       cacheHours: '缓存时长（小时）',
       cacheHoursHint: '复用 Steam 查询的时间。0 禁用缓存。',
       clearCache: '清除缓存',
@@ -192,6 +239,7 @@
       links: '链接',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -208,12 +256,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Código, actualizaciones e informes',
       sectionGame: 'Página del juego',
+      sectionGeneral: 'General',
       sectionCache: 'Caché',
+      uiLanguage: 'Idioma de la interfaz',
+      uiLanguageHint: 'Auto sigue el idioma del navegador. Se aplica al recargar.',
+      uiLanguageAuto: 'Auto (navegador)',
       steamCountry: 'Región de Steam Store',
       steamCountryHint: 'Afecta la moneda del precio de la API de Steam.',
       showSteam: 'Mostrar precio y reseñas de Steam',
       showMetacritic: 'Mostrar puntuación de Metacritic',
-      showLinks: 'Mostrar enlaces rápidos',
+      showLinks: 'Mostrar fila de enlaces',
+      sectionLinks: 'Enlaces rápidos',
+      sectionLinksHint: 'Elige qué sitios aparecen en la fila Links.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Ajustes de Backloggd Plus',
       cacheHours: 'Duración de caché (horas)',
       cacheHoursHint: 'Cuánto reutilizar búsquedas de Steam. 0 desactiva la caché.',
       clearCache: 'Vaciar caché',
@@ -235,6 +291,7 @@
       links: 'Enlaces',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -251,12 +308,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Código, atualizações e relatórios',
       sectionGame: 'Página do jogo',
+      sectionGeneral: 'Geral',
       sectionCache: 'Cache',
+      uiLanguage: 'Idioma da interface',
+      uiLanguageHint: 'Auto segue o idioma do navegador. Aplica ao recarregar.',
+      uiLanguageAuto: 'Auto (navegador)',
       steamCountry: 'Região da Steam Store',
       steamCountryHint: 'Afeta a moeda do preço da API da Steam.',
       showSteam: 'Mostrar preço e avaliações Steam',
       showMetacritic: 'Mostrar nota Metacritic',
-      showLinks: 'Mostrar links rápidos',
+      showLinks: 'Mostrar linha de links',
+      sectionLinks: 'Links rápidos',
+      sectionLinksHint: 'Escolha quais sites aparecem na linha Links.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Configurações do Backloggd Plus',
       cacheHours: 'Duração do cache (horas)',
       cacheHoursHint: 'Por quanto tempo reutilizar buscas Steam. 0 desativa o cache.',
       clearCache: 'Limpar cache',
@@ -278,6 +343,7 @@
       links: 'Links',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -294,12 +360,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Quellcode, Updates und Issue-Reports',
       sectionGame: 'Spieleseite',
+      sectionGeneral: 'Allgemein',
       sectionCache: 'Cache',
+      uiLanguage: 'Oberflächensprache',
+      uiLanguageHint: 'Auto folgt der Browsersprache. Gilt nach dem Neuladen.',
+      uiLanguageAuto: 'Auto (Browser)',
       steamCountry: 'Steam-Store-Region',
       steamCountryHint: 'Beeinflusst die Währung der Steam-Store-API.',
       showSteam: 'Steam-Preis & Bewertungen anzeigen',
       showMetacritic: 'Metacritic-Wertung anzeigen',
-      showLinks: 'Schnelllinks anzeigen',
+      showLinks: 'Link-Zeile anzeigen',
+      sectionLinks: 'Schnelllinks',
+      sectionLinksHint: 'Welche Seiten in der Links-Zeile erscheinen.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Backloggd Plus Einstellungen',
       cacheHours: 'Cache-Dauer (Stunden)',
       cacheHoursHint: 'Wie lange Steam-Abfragen wiederverwendet werden. 0 deaktiviert den Cache.',
       clearCache: 'Cache leeren',
@@ -321,6 +395,7 @@
       links: 'Links',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -337,12 +412,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Code source, mises à jour et signalements',
       sectionGame: 'Page jeu',
+      sectionGeneral: 'Général',
       sectionCache: 'Cache',
+      uiLanguage: 'Langue de l’interface',
+      uiLanguageHint: 'Auto suit la langue du navigateur. Appliqué après rechargement.',
+      uiLanguageAuto: 'Auto (navigateur)',
       steamCountry: 'Région Steam Store',
       steamCountryHint: 'Affecte la devise du prix via l’API Steam Store.',
       showSteam: 'Afficher prix et avis Steam',
       showMetacritic: 'Afficher le score Metacritic',
-      showLinks: 'Afficher les liens rapides',
+      showLinks: 'Afficher la rangée de liens',
+      sectionLinks: 'Liens rapides',
+      sectionLinksHint: 'Choisissez les sites affichés dans la rangée Links.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Réglages Backloggd Plus',
       cacheHours: 'Durée du cache (heures)',
       cacheHoursHint: 'Durée de réutilisation des requêtes Steam. 0 désactive le cache.',
       clearCache: 'Vider le cache',
@@ -364,6 +447,7 @@
       links: 'Liens',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -380,12 +464,20 @@
       repoLink: 'GitHub',
       repoAbout: 'ソースコード、更新、Issue報告',
       sectionGame: 'ゲームページ',
+      sectionGeneral: '一般',
       sectionCache: 'キャッシュ',
+      uiLanguage: '表示言語',
+      uiLanguageHint: '自動はブラウザ言語に従います。保存後の再読み込みで反映。',
+      uiLanguageAuto: '自動（ブラウザ）',
       steamCountry: 'Steamストア地域',
       steamCountryHint: 'Steam Store APIの価格通貨に影響します。',
       showSteam: 'Steamの価格とレビューを表示',
       showMetacritic: 'Metacriticスコアを表示',
-      showLinks: 'クイックリンクを表示',
+      showLinks: 'リンク行を表示',
+      sectionLinks: 'クイックリンク',
+      sectionLinksHint: 'Links行に表示するサイトを選択します。',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Backloggd Plus 設定',
       cacheHours: 'キャッシュ時間（時間）',
       cacheHoursHint: 'Steam照会の再利用時間。0で無効。',
       clearCache: 'キャッシュを消去',
@@ -407,6 +499,7 @@
       links: 'リンク',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -423,12 +516,20 @@
       repoLink: 'GitHub',
       repoAbout: '소스 코드, 업데이트, 이슈 보고',
       sectionGame: '게임 페이지',
+      sectionGeneral: '일반',
       sectionCache: '캐시',
+      uiLanguage: '인터페이스 언어',
+      uiLanguageHint: '자동은 브라우저 언어를 따릅니다. 저장 후 새로고침 시 적용.',
+      uiLanguageAuto: '자동 (브라우저)',
       steamCountry: 'Steam 스토어 지역',
       steamCountryHint: 'Steam Store API 가격 통화에 영향을 줍니다.',
       showSteam: 'Steam 가격 및 리뷰 표시',
       showMetacritic: 'Metacritic 점수 표시',
-      showLinks: '빠른 링크 표시',
+      showLinks: '링크 행 표시',
+      sectionLinks: '빠른 링크',
+      sectionLinksHint: 'Links 행에 표시할 사이트를 선택합니다.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Backloggd Plus 설정',
       cacheHours: '캐시 시간(시간)',
       cacheHoursHint: 'Steam 조회 재사용 시간. 0은 캐시 비활성.',
       clearCache: '캐시 비우기',
@@ -450,6 +551,7 @@
       links: '링크',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
@@ -466,12 +568,20 @@
       repoLink: 'GitHub',
       repoAbout: 'Kod źródłowy, aktualizacje i zgłoszenia',
       sectionGame: 'Strona gry',
+      sectionGeneral: 'Ogólne',
       sectionCache: 'Cache',
+      uiLanguage: 'Język interfejsu',
+      uiLanguageHint: 'Auto podąża za językiem przeglądarki. Działa po przeładowaniu.',
+      uiLanguageAuto: 'Auto (przeglądarka)',
       steamCountry: 'Region Steam Store',
       steamCountryHint: 'Wpływa na walutę ceny z API Steam Store.',
       showSteam: 'Pokaż cenę i opinie Steam',
       showMetacritic: 'Pokaż wynik Metacritic',
-      showLinks: 'Pokaż szybkie linki',
+      showLinks: 'Pokaż wiersz linków',
+      sectionLinks: 'Szybkie linki',
+      sectionLinksHint: 'Wybierz witryny widoczne w wierszu Links.',
+      navSettings: 'Plus',
+      navSettingsTitle: 'Ustawienia Backloggd Plus',
       cacheHours: 'Czas cache (godziny)',
       cacheHoursHint: 'Jak długo ponownie używać zapytań Steam. 0 wyłącza cache.',
       clearCache: 'Wyczyść cache',
@@ -493,11 +603,25 @@
       links: 'Linki',
       linkIgdb: 'IGDB',
       linkSteam: 'Steam',
+      linkSteamDb: 'SteamDB',
       linkMetacritic: 'Metacritic',
       linkOpencritic: 'OpenCritic',
       linkHltb: 'HLTB',
       linkWikipedia: 'Wikipedia',
     },
+  };
+
+  const LOCALE_NATIVE_NAMES = {
+    en: 'English',
+    ru: 'Русский',
+    zh: '中文',
+    es: 'Español',
+    pt: 'Português',
+    de: 'Deutsch',
+    fr: 'Français',
+    ja: '日本語',
+    ko: '한국어',
+    pl: 'Polski',
   };
 
   function detectLocale() {
@@ -506,8 +630,11 @@
     return SUPPORTED_LOCALES.includes(short) ? short : 'en';
   }
 
-  const locale = detectLocale();
-  const t = TRANSLATIONS[locale] || TRANSLATIONS.en;
+  function resolveLocale(pref) {
+    const value = pref || 'auto';
+    if (value !== 'auto' && SUPPORTED_LOCALES.includes(value)) return value;
+    return detectLocale();
+  }
 
   function fmt(template, vars) {
     return String(template).replace(/\{(\w+)\}/g, (_, k) =>
@@ -531,18 +658,54 @@
   function loadSettings() {
     try {
       const raw = GM_getValue(SETTINGS_KEY, null);
-      if (!raw || typeof raw !== 'object') return { ...DEFAULT_SETTINGS };
-      return { ...DEFAULT_SETTINGS, ...raw };
+      if (!raw || typeof raw !== 'object') {
+        return {
+          ...DEFAULT_SETTINGS,
+          links: { ...DEFAULT_SETTINGS.links },
+        };
+      }
+      return {
+        ...DEFAULT_SETTINGS,
+        ...raw,
+        links: { ...DEFAULT_SETTINGS.links, ...(raw.links || {}) },
+      };
     } catch (_) {
-      return { ...DEFAULT_SETTINGS };
+      return {
+        ...DEFAULT_SETTINGS,
+        links: { ...DEFAULT_SETTINGS.links },
+      };
     }
   }
 
   function saveSettings(next) {
-    GM_setValue(SETTINGS_KEY, { ...DEFAULT_SETTINGS, ...next });
+    const merged = {
+      ...DEFAULT_SETTINGS,
+      ...next,
+      links: { ...DEFAULT_SETTINGS.links, ...(next.links || {}) },
+    };
+    GM_setValue(SETTINGS_KEY, merged);
+  }
+
+  function isLinkEnabled(key) {
+    return Boolean(settings.showLinks && settings.links && settings.links[key] !== false);
+  }
+
+  function linkLabelKey(key) {
+    const map = {
+      igdb: 'linkIgdb',
+      steam: 'linkSteam',
+      steamdb: 'linkSteamDb',
+      metacritic: 'linkMetacritic',
+      opencritic: 'linkOpencritic',
+      hltb: 'linkHltb',
+      wikipedia: 'linkWikipedia',
+    };
+    return map[key] || key;
   }
 
   let settings = loadSettings();
+  let locale = resolveLocale(settings.uiLocale);
+  let t = TRANSLATIONS[locale] || TRANSLATIONS.en;
   let cacheStore = null;
   let cachePersistTimer = 0;
   const inflight = new Map();
@@ -641,19 +804,59 @@
         --blp-skel-shine: rgba(255, 255, 255, 0.18);
       }
 
-      [${ENRICH_ATTR}] .blp-ext-link {
+      [${ENRICH_ATTR}] .blp-ext-link,
+      .blp-settings .blp-toggle__label {
         display: inline-flex;
         align-items: center;
         gap: 0.35em;
         vertical-align: middle;
       }
 
-      [${ENRICH_ATTR}] .blp-favicon {
+      [${ENRICH_ATTR}] .blp-favicon,
+      .blp-settings .blp-favicon {
         width: 14px;
         height: 14px;
         border-radius: 2px;
         flex: 0 0 auto;
         object-fit: contain;
+      }
+
+      .blp-nav-settings-btn {
+        display: inline-flex;
+        align-items: center;
+        height: 33px;
+        padding: 1px 12px;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+
+      .blp-nav-settings-btn > a {
+        position: relative;
+        z-index: 1;
+        color: #fff !important;
+        text-decoration: none !important;
+        line-height: 1;
+      }
+
+      .blp-nav-settings-btn .btn-title {
+        font-size: 0.95rem !important;
+        font-weight: 500;
+        margin: 0;
+        color: #fff;
+        white-space: nowrap;
+      }
+
+      .blp-nav-settings-btn .btn-title i {
+        margin-right: 0.35em;
+      }
+
+      #blp-nav-settings {
+        display: inline-flex;
+        align-items: center;
+      }
+
+      #blp-nav-settings.nav-item {
+        margin-left: 0.5rem;
       }
 
       [${ENRICH_ATTR}] .blp-mc-score--high { color: var(--blp-mc-high) !important; font-weight: 600; }
@@ -1038,6 +1241,19 @@
         url: `https://store.steampowered.com/search/?term=${q}`,
       });
     }
+    if (steam?.appId) {
+      links.push({
+        key: 'steamdb',
+        label: t.linkSteamDb,
+        url: `https://steamdb.info/app/${steam.appId}/`,
+      });
+    } else if (q) {
+      links.push({
+        key: 'steamdb',
+        label: t.linkSteamDb,
+        url: `https://steamdb.info/search/?a=app&q=${q}`,
+      });
+    }
     if (steam?.metacritic?.url) {
       links.push({ key: 'metacritic', label: t.linkMetacritic, url: steam.metacritic.url });
     } else if (q) {
@@ -1064,7 +1280,7 @@
         url: `https://en.wikipedia.org/wiki/Special:Search?search=${q}`,
       });
     }
-    return links;
+    return links.filter((l) => isLinkEnabled(l.key));
   }
 
   function removeEnrichment() {
@@ -1079,7 +1295,7 @@
       <div class="col-3 col-md-2 my-auto">
         <p class="game-details-header">${escapeHtml(headerText)}</p>
       </div>
-      <div class="col ml-auto text-right text-md-left" data-blp-values></div>
+      <div class="col-auto col-md ml-auto my-auto text-right text-md-left" data-blp-values></div>
     `;
     return row;
   }
@@ -1090,7 +1306,13 @@
         .map(() => '<span class="blp-skeleton blp-skeleton--link"></span>')
         .join('');
     }
-    if (kind === 'reviews') return '<span class="blp-skeleton blp-skeleton--lg"></span>';
+    if (kind === 'steam') {
+      return `
+        <span class="blp-skeleton blp-skeleton--md"></span>
+        <span class="separator">•</span>
+        <span class="blp-skeleton blp-skeleton--lg"></span>
+      `;
+    }
     if (kind === 'metacritic') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
     return '<span class="blp-skeleton blp-skeleton--md"></span>';
   }
@@ -1103,8 +1325,7 @@
     const existing = document.querySelector(`[${ENRICH_ATTR}]`);
     if (existing) {
       return {
-        price: document.querySelector(`[${ENRICH_ATTR}="price"]`),
-        reviews: document.querySelector(`[${ENRICH_ATTR}="reviews"]`),
+        steam: document.querySelector(`[${ENRICH_ATTR}="steam"]`),
         metacritic: document.querySelector(`[${ENRICH_ATTR}="metacritic"]`),
         links: document.querySelector(`[${ENRICH_ATTR}="links"]`),
       };
@@ -1112,10 +1333,7 @@
 
     const rows = {};
     const plan = [];
-    if (settings.showSteam) {
-      plan.push(['price', t.price]);
-      plan.push(['reviews', t.reviews]);
-    }
+    if (settings.showSteam) plan.push(['steam', t.steam]);
     if (settings.showMetacritic) plan.push(['metacritic', t.metacritic]);
     if (settings.showLinks) plan.push(['links', t.links]);
 
@@ -1157,50 +1375,60 @@
     `;
   }
 
-  function renderEnrichment(rows, { steam, links, error }) {
-    if (rows.price) {
-      if (error) {
-        setRowValues(rows.price, `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>`);
-        showRow(rows.price);
-        if (rows.reviews) hideRow(rows.reviews);
-      } else if (!steam?.found) {
-        setRowValues(rows.price, `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`);
-        showRow(rows.price);
-        if (rows.reviews) hideRow(rows.reviews);
-      } else {
-        const priceText = formatPriceText(steam);
-        const discount =
-          steam.price?.discount_percent > 0
-            ? ` <span class="blp-discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
-            : '';
-        setRowValues(
-          rows.price,
-          `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">
-            <img class="blp-favicon" src="${escapeAttr(faviconForUrl(steam.storeUrl))}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-            ${escapeHtml(priceText || '—')}${discount}
-          </a>`
-        );
-        showRow(rows.price);
+  function renderSteamValues(steam) {
+    const parts = [];
+    const fav = faviconForUrl(steam.storeUrl);
+    const favImg = fav
+      ? `<img class="blp-favicon" src="${escapeAttr(fav)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+      : '';
 
-        if (rows.reviews) {
-          const reviewText = formatReviewPercent(steam.reviews);
-          const reviewClass = reviewScoreClass(steam.reviews);
-          if (reviewText) {
-            setRowValues(
-              rows.reviews,
-              `<a class="game-details-value ${reviewClass}" href="${escapeAttr(steam.storeUrl)}#app_reviews_hash" target="_blank" rel="noopener noreferrer">${escapeHtml(reviewText)}</a>`
-            );
-            showRow(rows.reviews);
-          } else if (steam.recommendations) {
-            setRowValues(
-              rows.reviews,
-              `<span class="game-details-value ${reviewClass}">${escapeHtml(fmt(t.recommendations, { n: steam.recommendations.toLocaleString() }))}</span>`
-            );
-            showRow(rows.reviews);
-          } else {
-            hideRow(rows.reviews);
-          }
-        }
+    const priceText = formatPriceText(steam);
+    const discount =
+      steam.price?.discount_percent > 0
+        ? ` <span class="blp-discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
+        : '';
+
+    if (priceText) {
+      parts.push({
+        html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${favImg}${escapeHtml(priceText)}${discount}</a>`,
+      });
+    }
+
+    const reviewText = formatReviewPercent(steam.reviews);
+    const reviewClass = reviewScoreClass(steam.reviews);
+    if (reviewText) {
+      parts.push({
+        html: `<a class="game-details-value ${reviewClass}" href="${escapeAttr(steam.storeUrl)}#app_reviews_hash" target="_blank" rel="noopener noreferrer">${escapeHtml(reviewText)}</a>`,
+      });
+    } else if (steam.recommendations) {
+      parts.push({
+        html: `<span class="game-details-value ${reviewClass}">${escapeHtml(fmt(t.recommendations, { n: steam.recommendations.toLocaleString() }))}</span>`,
+      });
+    }
+
+    if (!parts.length) {
+      return `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${favImg}${escapeHtml(t.steam)}</a>`;
+    }
+
+    return parts
+      .map((part, i) => {
+        const sep = i < parts.length - 1 ? '<span class="separator">•</span>' : '';
+        return `<span class="game-detail">${part.html}${sep}</span>`;
+      })
+      .join('');
+  }
+
+  function renderEnrichment(rows, { steam, links, error }) {
+    if (rows.steam) {
+      if (error) {
+        setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>`);
+        showRow(rows.steam);
+      } else if (!steam?.found) {
+        setRowValues(rows.steam, `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`);
+        showRow(rows.steam);
+      } else {
+        setRowValues(rows.steam, renderSteamValues(steam));
+        showRow(rows.steam);
       }
     }
 
@@ -1249,7 +1477,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showMetacritic}|${settings.showLinks}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showMetacritic}|${settings.showLinks}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     if (marker?.getAttribute('data-blp-token') === token && !marker.querySelector('.blp-skeleton')) {
       return;
@@ -1292,13 +1520,47 @@
   function openSettings() {
     if (document.querySelector('.blp-settings-backdrop')) return;
 
-    const draft = { ...settings };
+    const draft = {
+      ...settings,
+      links: { ...DEFAULT_SETTINGS.links, ...(settings.links || {}) },
+    };
+    const linkToggles = LINK_KEYS.map((key) => {
+      const on = draft.links[key] !== false;
+      const label = t[linkLabelKey(key)] || key;
+      const domain = LINK_DOMAINS[key] || key;
+      const icon = FAVICON_URL.replace('{domain}', encodeURIComponent(domain));
+      return `
+        <div class="blp-toggle">
+          <span class="blp-toggle__label">
+            <img class="blp-favicon" src="${escapeAttr(icon)}" alt="" width="14" height="14" />
+            ${escapeHtml(label)}
+          </span>
+          <button type="button" data-blp-link="${escapeAttr(key)}" class="${on ? 'is-on' : ''}">${on ? t.on : t.off}</button>
+        </div>
+      `;
+    }).join('');
+
     const backdrop = document.createElement('div');
     backdrop.className = 'blp-settings-backdrop';
     backdrop.innerHTML = `
       <div class="blp-settings" role="dialog" aria-modal="true" aria-label="${escapeAttr(t.panelTitle)}">
         <h2>${escapeHtml(t.panelTitle)}</h2>
         <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
+        <section>
+          <h3>${escapeHtml(t.sectionGeneral)}</h3>
+          <div class="blp-field">
+            <label for="blp-ui-locale">${escapeHtml(t.uiLanguage)}</label>
+            <select id="blp-ui-locale">
+              <option value="auto" ${(draft.uiLocale || 'auto') === 'auto' ? 'selected' : ''}>${escapeHtml(t.uiLanguageAuto)}</option>
+              ${SUPPORTED_LOCALES.map((code) => {
+                const selected = draft.uiLocale === code ? 'selected' : '';
+                const name = LOCALE_NATIVE_NAMES[code] || code;
+                return `<option value="${code}" ${selected}>${escapeHtml(name)}</option>`;
+              }).join('')}
+            </select>
+            <p class="blp-hint">${escapeHtml(t.uiLanguageHint)}</p>
+          </div>
+        </section>
         <section>
           <h3>${escapeHtml(t.sectionGame)}</h3>
           <div class="blp-field">
@@ -1325,6 +1587,11 @@
             <span>${escapeHtml(t.showLinks)}</span>
             <button type="button" data-blp-toggle="showLinks" class="${draft.showLinks ? 'is-on' : ''}">${draft.showLinks ? t.on : t.off}</button>
           </div>
+        </section>
+        <section>
+          <h3>${escapeHtml(t.sectionLinks)}</h3>
+          <p class="blp-hint" style="margin-bottom:10px">${escapeHtml(t.sectionLinksHint)}</p>
+          ${linkToggles}
         </section>
         <section>
           <h3>${escapeHtml(t.sectionCache)}</h3>
@@ -1365,6 +1632,15 @@
       });
     });
 
+    backdrop.querySelectorAll('[data-blp-link]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-blp-link');
+        draft.links[key] = !draft.links[key];
+        btn.classList.toggle('is-on', draft.links[key]);
+        btn.textContent = draft.links[key] ? t.on : t.off;
+      });
+    });
+
     backdrop.querySelector('[data-blp-clear]')?.addEventListener('click', () => {
       const count = clearCache();
       const msg = backdrop.querySelector('[data-blp-cache-msg]');
@@ -1379,6 +1655,9 @@
     backdrop.querySelector('[data-blp-save]')?.addEventListener('click', () => {
       const cc = backdrop.querySelector('#blp-steam-cc')?.value || 'US';
       const hours = Number(backdrop.querySelector('#blp-cache-hours')?.value);
+      const uiLocale = backdrop.querySelector('#blp-ui-locale')?.value || 'auto';
+      draft.uiLocale =
+        uiLocale === 'auto' || SUPPORTED_LOCALES.includes(uiLocale) ? uiLocale : 'auto';
       draft.steamCountry = String(cc).toUpperCase();
       draft.cacheHours = Number.isFinite(hours)
         ? Math.max(0, Math.min(CACHE_HOURS_MAX, hours))
@@ -1391,6 +1670,52 @@
     document.body.appendChild(backdrop);
   }
 
+  const NAV_BTN_ID = 'blp-nav-settings';
+
+  function ensureNavSettingsButton() {
+    if (document.getElementById(NAV_BTN_ID)) return;
+
+    const btn = document.createElement('div');
+    btn.id = NAV_BTN_ID;
+    btn.className = 'gradient-btn gradient-btn-small blp-nav-settings-btn text-center';
+    btn.innerHTML = `
+      <div class="gradient-bg gradient-blue" aria-hidden="true"></div>
+      <a href="#" role="button" title="${escapeAttr(t.navSettingsTitle)}">
+        <p class="btn-title"><i class="fa-solid fa-plus" aria-hidden="true"></i>${escapeHtml(t.navSettings)}</p>
+      </a>
+    `;
+    btn.querySelector('a')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openSettings();
+    });
+
+    // Same slot as native #add-a-game ("Log a Game")
+    const logGame = document.getElementById('add-a-game');
+    if (logGame?.parentElement) {
+      btn.style.marginLeft = '8px';
+      logGame.insertAdjacentElement('afterend', btn);
+      return;
+    }
+
+    const logSlot = document.querySelector(
+      '#navbarSupportedContent .col.my-auto, #primary-nav .col.my-auto'
+    );
+    if (logSlot) {
+      logSlot.appendChild(btn);
+      return;
+    }
+
+    const nav =
+      document.querySelector('#navbarSupportedContent > ul.navbar-nav') ||
+      document.querySelector('#primary-nav ul.navbar-nav.ml-auto');
+    if (!nav) return;
+
+    const li = document.createElement('li');
+    li.className = 'nav-item my-auto';
+    li.appendChild(btn);
+    nav.appendChild(li);
+  }
+
   function debounce(fn, wait) {
     let timer = 0;
     return function debounced(...args) {
@@ -1400,6 +1725,7 @@
   }
 
   function scanPage() {
+    ensureNavSettingsButton();
     enrichGamePage();
   }
 
@@ -1438,6 +1764,7 @@
 
     settings = loadSettings();
     injectStyles();
+    ensureNavSettingsButton();
     scanPage();
     observeDom(scanPage);
     bindSpaNavigation(scanPage);

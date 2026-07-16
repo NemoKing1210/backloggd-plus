@@ -30,10 +30,10 @@ backloggd-plus/
 
 1. Match `https://www.backloggd.com/*` and `https://backloggd.com/*` at `document-idle`.
 2. Single IIFE bootstraps styles, settings, DOM scan, `MutationObserver`, and Turbo/href SPA hooks.
-3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Price`, `Reviews`, `Metacritic`, `Links`); resolve title + IGDB link from DOM. Skeletons while Steam loads; link favicons via Google s2.
+3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = price + reviews, `Metacritic`, `Links`); resolve title + IGDB link from DOM. Skeletons while Steam loads; link favicons via Google s2.
 4. Steam enrichment: `storesearch` → pick best app → `appdetails` + `appreviews` via `GM_xmlhttpRequest` (`@connect store.steampowered.com`).
-5. Cache in `GM_getValue` / `GM_setValue` (`blp_cache_v1`); settings in `blp_settings`.
-6. UI strings in `TRANSLATIONS` / browser locale; settings modal via `GM_registerMenuCommand`.
+5. Cache in `GM_getValue` / `GM_setValue` (`blp_cache_v1`); settings in `blp_settings` (incl. per-link toggles).
+6. UI strings in `TRANSLATIONS` / browser locale; settings via navbar **Plus** button and `GM_registerMenuCommand`.
 
 Keep rate limits polite: cache TTLs, request dedupe (`inflight`), debounce on DOM rescans. Do not add IGDB/Twitch credentials unless the user asks for API-backed enrichment.
 
@@ -56,8 +56,9 @@ When shipping a user-visible change:
 
 ## Localization
 
-UI locales: `en`, `ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl`.
+UI locales: `en`, `ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl` (plus `auto` = browser).
 
+- Default `uiLocale` is `auto`; users can override in Settings → General.
 - Add every new user-facing string to **all** `TRANSLATIONS` locales.
 - Keep localized `@name` / `@description` metadata tags aligned when changing the product description.
 

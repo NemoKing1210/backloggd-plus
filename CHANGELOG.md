@@ -5,6 +5,37 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2026-07-16
+
+### Added
+
+- Settings: interface language (Auto / 10 locales)
+
+## [0.2.6] - 2026-07-16
+
+### Changed
+
+- Navbar Plus button uses the same `gradient-btn` / `gradient-blue` style as **Log a Game** (`#add-a-game`)
+
+## [0.2.5] - 2026-07-16
+
+### Added
+
+- Navbar **Plus** button (sliders icon) opens the settings panel
+- Settings: per-link toggles for IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia
+
+## [0.2.4] - 2026-07-16
+
+### Added
+
+- Quick links: SteamDB (`/app/{id}/` when resolved, otherwise search)
+
+## [0.2.3] - 2026-07-16
+
+### Changed
+
+- Price and Reviews merged into one native **Steam** row (`$59.99 • Very Positive (93%)`)
+
 ## [0.2.2] - 2026-07-16
 
 ### Added

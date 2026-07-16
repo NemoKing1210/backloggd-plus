@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.2-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.7-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.2.2`). Game pages show Steam / Metacritic / quick links; more surfaces coming.
+> **Status:** early (`0.2.7`). Game pages show Steam / Metacritic / quick links; more surfaces coming.
 
 ## Quick install
 
@@ -54,15 +54,17 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Game pages (`/games/{slug}/`):**
 
-- Native detail rows under Platforms — **Price**, **Reviews**, **Metacritic**, **Links** (same layout as Genres/Platforms)
+- Native detail rows under Platforms — **Steam** (price + reviews), **Metacritic**, **Links** (same layout as Genres/Platforms)
 - Skeleton placeholders while Steam data loads
-- Quick links with favicons (IGDB, Steam, Metacritic, OpenCritic, HLTB, Wikipedia)
+- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
 - Works without API keys (Steam Store public endpoints)
 
-**Settings** (userscript manager menu → *Backloggd Plus — Settings*):
+**Settings** (navbar **Plus** / userscript manager menu):
 
+- Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / Metacritic / links
+- Toggles for Steam / Metacritic / links row
+- Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, Wikipedia)
 - Cache duration + clear cache
 
 Also: local caching, Turbo/SPA re-scan, 10 UI locales.

@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.2.2
+// @version           0.2.7
 // @description       Extends Backloggd with extra game info, richer UI, and quality-of-life features
 // @description:ru    Расширяет Backloggd: больше информации об играх, удобный UI и QoL-улучшения
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
