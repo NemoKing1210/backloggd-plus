@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.16
+// @version           0.7.20
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.16';
+  const SCRIPT_VERSION = '0.7.20';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -354,6 +354,16 @@
       deckUnsupported: 'Unsupported',
       deckUnknown: 'Unknown',
       protonTier: 'ProtonDB {tier}',
+      unifiedRatingTitle: 'Plus rating',
+      unifiedRatingHint: 'Average of Steam, Metacritic, OpenCritic & Backloggd',
+      unifiedRatingOutOf: 'out of 5',
+      unifiedRatingSources: '{n} sources',
+      unifiedRatingLoading: 'Gathering scores…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
     },
     ru: {
       menuSettings: 'Backloggd Plus — Настройки',
@@ -534,6 +544,16 @@
       deckUnsupported: 'Unsupported',
       deckUnknown: 'Unknown',
       protonTier: 'ProtonDB {tier}',
+      unifiedRatingTitle: 'Рейтинг Plus',
+      unifiedRatingHint: 'Среднее Steam, Metacritic, OpenCritic и Backloggd',
+      unifiedRatingOutOf: 'из 5',
+      unifiedRatingSources: '{n} источников',
+      unifiedRatingLoading: 'Собираем оценки…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
     },
     zh: {
       menuSettings: 'Backloggd Plus — 设置',
@@ -707,6 +727,16 @@
       hltbComplete: 'Complete {n}小时',
       players: '玩家',
       playersOnline: '{n} 在玩',
+      unifiedRatingTitle: 'Plus 评分',
+      unifiedRatingHint: 'Steam、Metacritic、OpenCritic 与 Backloggd 的平均分',
+      unifiedRatingOutOf: '/ 5',
+      unifiedRatingSources: '{n} 个来源',
+      unifiedRatingLoading: '正在汇总评分…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     es: {
@@ -888,6 +918,16 @@
       hltbComplete: 'Complete {n}h',
       players: 'Jugadores',
       playersOnline: '{n} jugando',
+      unifiedRatingTitle: 'Nota Plus',
+      unifiedRatingHint: 'Media de Steam, Metacritic, OpenCritic y Backloggd',
+      unifiedRatingOutOf: 'de 5',
+      unifiedRatingSources: '{n} fuentes',
+      unifiedRatingLoading: 'Recopilando notas…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     pt: {
@@ -1069,6 +1109,16 @@
       hltbComplete: 'Complete {n}h',
       players: 'Jogadores',
       playersOnline: '{n} jogando',
+      unifiedRatingTitle: 'Nota Plus',
+      unifiedRatingHint: 'Média de Steam, Metacritic, OpenCritic e Backloggd',
+      unifiedRatingOutOf: 'de 5',
+      unifiedRatingSources: '{n} fontes',
+      unifiedRatingLoading: 'Coletando notas…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     de: {
@@ -1250,6 +1300,16 @@
       hltbComplete: 'Complete {n}h',
       players: 'Spieler',
       playersOnline: '{n} spielen',
+      unifiedRatingTitle: 'Plus-Wertung',
+      unifiedRatingHint: 'Durchschnitt aus Steam, Metacritic, OpenCritic & Backloggd',
+      unifiedRatingOutOf: 'von 5',
+      unifiedRatingSources: '{n} Quellen',
+      unifiedRatingLoading: 'Wertungen werden geladen…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     fr: {
@@ -1431,6 +1491,16 @@
       hltbComplete: 'Complete {n}h',
       players: 'Joueurs',
       playersOnline: '{n} en jeu',
+      unifiedRatingTitle: 'Note Plus',
+      unifiedRatingHint: 'Moyenne Steam, Metacritic, OpenCritic et Backloggd',
+      unifiedRatingOutOf: 'sur 5',
+      unifiedRatingSources: '{n} sources',
+      unifiedRatingLoading: 'Collecte des notes…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     ja: {
@@ -1612,6 +1682,16 @@
       hltbComplete: 'Complete {n}時間',
       players: 'プレイヤー',
       playersOnline: '{n} 人がプレイ中',
+      unifiedRatingTitle: 'Plusスコア',
+      unifiedRatingHint: 'Steam・Metacritic・OpenCritic・Backloggdの平均',
+      unifiedRatingOutOf: '/ 5',
+      unifiedRatingSources: '{n}件のソース',
+      unifiedRatingLoading: 'スコアを集計中…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     ko: {
@@ -1793,6 +1873,16 @@
       hltbComplete: 'Complete {n}시간',
       players: '플레이어',
       playersOnline: '{n}명 플레이 중',
+      unifiedRatingTitle: 'Plus 평점',
+      unifiedRatingHint: 'Steam, Metacritic, OpenCritic, Backloggd 평균',
+      unifiedRatingOutOf: '/ 5',
+      unifiedRatingSources: '출처 {n}개',
+      unifiedRatingLoading: '평점 집계 중…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
     pl: {
@@ -1974,6 +2064,16 @@
       hltbComplete: 'Complete {n}h',
       players: 'Gracze',
       playersOnline: '{n} gra',
+      unifiedRatingTitle: 'Ocena Plus',
+      unifiedRatingHint: 'Średnia Steam, Metacritic, OpenCritic i Backloggd',
+      unifiedRatingOutOf: 'z 5',
+      unifiedRatingSources: '{n} źródeł',
+      unifiedRatingLoading: 'Zbieranie ocen…',
+      unifiedRatingSteam: 'Steam',
+      unifiedRatingMetacritic: 'Metacritic',
+      unifiedRatingOpenCritic: 'OpenCritic',
+      unifiedRatingBackloggd: 'Backloggd',
+      unifiedRatingMissing: '—',
 
     },
   };
@@ -2626,6 +2726,7 @@
 
   function buildOpenCriticPayload(detail, searchItem, title, matchScore) {
     if (!detail || typeof detail !== 'object') return null;
+    const score = Number(detail.topCriticScore);
     const tier = typeof detail.tier === 'string' ? detail.tier : null;
     if (!tier) return null;
     const id = Number(detail.id || searchItem?.id);
@@ -2634,6 +2735,7 @@
       id,
       name: detail.name || searchItem?.name || title,
       tier,
+      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
       url: slug
         ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
         : Number.isFinite(id)
@@ -2705,11 +2807,14 @@
   function parseOpenCriticGameHtml(html, fallbackUrl) {
     const text = String(html || '');
     if (!text) return null;
+    let score = null;
     let tier = null;
     let name = null;
     let id = null;
     let slug = null;
 
+    const scoreJson = text.match(/"topCriticScore"\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
+    if (scoreJson) score = Number(scoreJson[1]);
     const tierJson = text.match(/"tier"\s*:\s*"(Mighty|Strong|Fair|Weak)"/i);
     if (tierJson) tier = tierJson[1];
     const nameJson = text.match(/"name"\s*:\s*"([^"\\]+)"/);
@@ -2719,6 +2824,10 @@
     const slugJson = text.match(/"slug"\s*:\s*"([a-z0-9-]+)"/i);
     if (slugJson) slug = slugJson[1];
 
+    if (score == null) {
+      const avg = text.match(/Top Critic Average[\s\S]{0,120}?(\d{2,3})/i);
+      if (avg) score = Number(avg[1]);
+    }
     if (!tier) {
       const tierText = text.match(/\b(Mighty|Strong|Fair|Weak)\b/);
       if (tierText) tier = tierText[1];
@@ -2738,6 +2847,7 @@
       id,
       name: name || slug || null,
       tier,
+      score: Number.isFinite(score) && score > 0 ? Math.round(score) : null,
       url:
         id && slug
           ? `${OPENCRITIC_SITE}/game/${id}/${encodeURIComponent(slug)}`
@@ -7933,6 +8043,7 @@
     // Same page/settings: keep the in-flight (or finished) mount. Remounting while
     // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
     if (marker?.getAttribute('data-blp-token') === token) {
+      ensureUnifiedRatingWidget(token);
       bindGameCoverViewer();
       return;
     }
@@ -7942,6 +8053,7 @@
     if (!rows) return;
 
     Object.values(rows).forEach((row) => row?.setAttribute('data-blp-token', token));
+    ensureUnifiedRatingWidget(token);
     bindGameCoverViewer();
 
     const runId = ++gamePageToken;
@@ -8019,6 +8131,7 @@
         }
       );
       paintLinks(state.steam);
+      updateUnifiedRatingWidget(state);
     };
 
     const paintOpenCritic = () => {
@@ -8027,6 +8140,7 @@
         { opencritic: rows.opencritic },
         { opencritic: state.opencritic, error: state.error, skipDebug: true }
       );
+      updateUnifiedRatingWidget(state);
     };
 
     const paintHltb = () => {
@@ -8090,6 +8204,7 @@
         proton: state.proton,
       });
       if (state.steamDb) applySteamDbUi(state.steamDb, token, { final: true });
+      updateUnifiedRatingWidget(state);
     };
 
     // Links that don't depend on Steam can appear immediately.
@@ -9240,6 +9355,357 @@
     injectSteamDbBackloggdButton();
   }
 
+  function injectUnifiedRatingStyles() {
+    GM_addStyle(`
+      .blp-unified-rating-row {
+        margin-top: 1rem;
+        margin-bottom: 0.15rem;
+      }
+
+      @media (min-width: 768px) {
+        .blp-unified-rating-row {
+          margin-top: 0.85rem;
+        }
+      }
+
+      .blp-unified-rating {
+        position: relative;
+        overflow: hidden;
+        padding: 0.85rem 1rem 0.9rem !important;
+        border: 1px solid rgba(61, 184, 154, 0.32) !important;
+        background:
+          radial-gradient(110% 120% at 100% 0%, rgba(61, 184, 154, 0.14), transparent 52%),
+          radial-gradient(90% 90% at 0% 100%, rgba(102, 192, 244, 0.08), transparent 48%),
+          var(--back-container, #1a1d24) !important;
+      }
+
+      .blp-unified-rating[data-grade="high"] {
+        border-color: rgba(190, 238, 17, 0.4) !important;
+      }
+      .blp-unified-rating[data-grade="mid"] {
+        border-color: rgba(61, 184, 154, 0.38) !important;
+      }
+      .blp-unified-rating[data-grade="low"] {
+        border-color: rgba(255, 102, 119, 0.32) !important;
+      }
+
+      .blp-unified-rating__layout {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0.85rem 1.25rem;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      @media (max-width: 575.98px) {
+        .blp-unified-rating__layout {
+          grid-template-columns: 1fr;
+          gap: 0.7rem;
+        }
+      }
+
+      .blp-unified-rating__score-block {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-width: 6.5rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+        aspect-ratio: 1 / 1;
+      }
+
+      .blp-unified-rating__label {
+        margin: 0;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--blp-muted, #9aa0a6);
+        white-space: nowrap;
+      }
+
+      .blp-unified-rating__num {
+        margin: 0.1rem 0 0;
+        font-size: clamp(2.4rem, 4.5vw, 3.1rem);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: #fff;
+      }
+
+      .blp-unified-rating[data-grade="high"] .blp-unified-rating__num {
+        color: #beee11;
+      }
+      .blp-unified-rating[data-grade="mid"] .blp-unified-rating__num {
+        color: #7ee0c5;
+      }
+      .blp-unified-rating[data-grade="low"] .blp-unified-rating__num {
+        color: #ff8a98;
+      }
+
+      .blp-unified-rating__denom {
+        margin-top: 0.15rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--blp-muted, #9aa0a6);
+      }
+
+      .blp-unified-rating__main {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0;
+        gap: 0.55rem;
+      }
+
+      .blp-unified-rating__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.25rem 0.75rem;
+      }
+
+      .blp-unified-rating__title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--blp-text, #e8eaed);
+      }
+
+      .blp-unified-rating__hint {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--blp-muted, #9aa0a6);
+      }
+
+      .blp-unified-rating__meter {
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .blp-unified-rating__meter-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #66c0f4 0%, #3db89a 52%, #beee11 100%);
+        transition: width 0.4s ease;
+      }
+
+      .blp-unified-rating__grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.45rem;
+        width: 100%;
+      }
+
+      @media (max-width: 575.98px) {
+        .blp-unified-rating__grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .blp-unified-rating__cell {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.12rem;
+        min-width: 0;
+        padding: 0.55rem 0.65rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.22);
+      }
+
+      .blp-unified-rating__cell.is-missing {
+        opacity: 0.5;
+      }
+
+      .blp-unified-rating__cell-label {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--blp-muted, #9aa0a6);
+      }
+
+      .blp-unified-rating__cell-value {
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1.15;
+        color: #fff;
+      }
+
+      .blp-unified-rating__cell-sub {
+        font-size: 0.72rem;
+        color: var(--blp-muted, #9aa0a6);
+      }
+    `);
+  }
+
+  function ensureUnifiedRatingWidget(token = '') {
+    document.querySelectorAll(`#game-rating [${ENRICH_ATTR}="unified-rating"]`).forEach((el) => el.remove());
+
+    const anchor = gameStatsMountAnchor();
+    if (!anchor) return null;
+
+    let row = document.querySelector(`.blp-unified-rating-row[${ENRICH_ATTR}="unified-rating"]`);
+    if (row) {
+      if (token) row.setAttribute('data-blp-token', token);
+      if (row.nextElementSibling !== anchor) {
+        anchor.insertAdjacentElement('beforebegin', row);
+      }
+      return row;
+    }
+
+    row = document.createElement('div');
+    row.className = 'row blp-unified-rating-row';
+    row.setAttribute(ENRICH_ATTR, 'unified-rating');
+    if (token) row.setAttribute('data-blp-token', token);
+    row.innerHTML = `
+      <div class="col">
+        <div class="backloggd-container center-container blp-unified-rating" data-grade="mid">
+          <div class="blp-unified-rating__layout">
+            <div class="blp-unified-rating__score-block">
+              <p class="blp-unified-rating__label">${escapeHtml(t.unifiedRatingTitle)}</p>
+              <p class="blp-unified-rating__num"><span class="blp-skeleton blp-skeleton--sm" style="display:inline-block;width:3rem;height:1.8rem;"></span></p>
+            </div>
+            <div class="blp-unified-rating__main">
+              <div class="blp-unified-rating__head">
+                <p class="blp-unified-rating__hint">${escapeHtml(t.unifiedRatingLoading)}</p>
+              </div>
+              <div class="blp-unified-rating__meter"><div class="blp-unified-rating__meter-fill" style="width:0%"></div></div>
+              <div class="blp-unified-rating__grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    anchor.insertAdjacentElement('beforebegin', row);
+    return row;
+  }
+
+  function sanitize0to100Score(n) {
+    const v = Number(n);
+    if (!Number.isFinite(v) || v < 0 || v > 100) return null;
+    return v;
+  }
+
+  function steamReviewsToPercent100(summary) {
+    if (!summary || !summary.total_reviews) return null;
+    const pct = (summary.total_positive / summary.total_reviews) * 100;
+    if (!Number.isFinite(pct)) return null;
+    return Math.round(pct);
+  }
+
+  function getBackloggdAvgRating5FromDom() {
+    const nodes = document.querySelectorAll('#game-rating h1, .game-rating h1');
+    for (const h1 of nodes) {
+      const raw = (h1?.textContent || '').trim().replace(',', '.');
+      const n = Number(raw);
+      if (Number.isFinite(n) && n > 0) return Math.max(0, Math.min(5, n));
+    }
+    return null;
+  }
+
+  function formatUnifiedScore5(n) {
+    return (Math.round(n * 10) / 10).toFixed(1);
+  }
+
+  function updateUnifiedRatingWidget(state) {
+    const row = document.querySelector(`.blp-unified-rating-row[${ENRICH_ATTR}="unified-rating"]`);
+    if (!row) return;
+    const tile = row.querySelector('.blp-unified-rating');
+    if (!tile) return;
+
+    const backloggd5 = getBackloggdAvgRating5FromDom();
+    const steamPct100 = state?.steam?.reviews ? steamReviewsToPercent100(state.steam.reviews) : null;
+    const metacritic100 =
+      state?.steam?.metacritic?.score != null ? sanitize0to100Score(state.steam.metacritic.score) : null;
+    const opencritic100 =
+      state?.opencritic?.score != null ? sanitize0to100Score(state.opencritic.score) : null;
+
+    const providers = [
+      {
+        key: 'steam',
+        label: t.unifiedRatingSteam,
+        display: steamPct100 != null ? `${steamPct100}%` : null,
+        score5: steamPct100 != null ? steamPct100 / 20 : null,
+      },
+      {
+        key: 'metacritic',
+        label: t.unifiedRatingMetacritic,
+        display: metacritic100 != null ? String(metacritic100) : null,
+        score5: metacritic100 != null ? metacritic100 / 20 : null,
+      },
+      {
+        key: 'opencritic',
+        label: t.unifiedRatingOpenCritic,
+        display: opencritic100 != null ? String(opencritic100) : null,
+        score5: opencritic100 != null ? opencritic100 / 20 : null,
+      },
+      {
+        key: 'backloggd',
+        label: t.unifiedRatingBackloggd,
+        display: backloggd5 != null ? formatUnifiedScore5(backloggd5) : null,
+        score5: backloggd5,
+      },
+    ];
+
+    const present = providers.filter((p) => p.score5 != null);
+    if (!present.length) {
+      const settled =
+        state?.steam != null &&
+        (state?.opencritic != null || settings.showOpenCritic === false);
+      if (settled) row.style.display = 'none';
+      return;
+    }
+    row.style.display = '';
+
+    const avg5 = present.reduce((s, p) => s + p.score5, 0) / present.length;
+    const avg5Rounded = Math.round(avg5 * 10) / 10;
+    const grade = avg5Rounded >= 4 ? 'high' : avg5Rounded >= 3 ? 'mid' : 'low';
+    tile.setAttribute('data-grade', grade);
+
+    const barWidth = Math.max(0, Math.min(100, (avg5Rounded / 5) * 100));
+    const cells = providers
+      .map((p) => {
+        const missing = p.score5 == null;
+        const value = missing ? t.unifiedRatingMissing : escapeHtml(p.display);
+        const sub = missing
+          ? ''
+          : `<span class="blp-unified-rating__cell-sub">${escapeHtml(formatUnifiedScore5(p.score5))} ★</span>`;
+        return `<div class="blp-unified-rating__cell${missing ? ' is-missing' : ''}">
+          <span class="blp-unified-rating__cell-label">${escapeHtml(p.label)}</span>
+          <span class="blp-unified-rating__cell-value">${value}</span>
+          ${sub}
+        </div>`;
+      })
+      .join('');
+
+    tile.innerHTML = `
+      <div class="blp-unified-rating__layout">
+        <div class="blp-unified-rating__score-block">
+          <p class="blp-unified-rating__label">${escapeHtml(t.unifiedRatingTitle)}</p>
+          <p class="blp-unified-rating__num">${escapeHtml(formatUnifiedScore5(avg5Rounded))}</p>
+          <span class="blp-unified-rating__denom">${escapeHtml(t.unifiedRatingOutOf)}</span>
+        </div>
+        <div class="blp-unified-rating__main">
+          <div class="blp-unified-rating__head">
+            <p class="blp-unified-rating__title">${escapeHtml(t.unifiedRatingHint)}</p>
+            <p class="blp-unified-rating__hint">${escapeHtml(fmt(t.unifiedRatingSources, { n: present.length }))}</p>
+          </div>
+          <div class="blp-unified-rating__meter"><div class="blp-unified-rating__meter-fill" style="width:${escapeHtml(String(barWidth))}%"></div></div>
+          <div class="blp-unified-rating__grid">${cells}</div>
+        </div>
+      </div>
+    `;
+  }
+
   function init() {
     if (document.documentElement.hasAttribute(ROOT_ATTR)) return;
     document.documentElement.setAttribute(ROOT_ATTR, '1');
@@ -9250,6 +9716,7 @@
     migrateCacheForScriptVersion();
 
     injectStyles();
+    injectUnifiedRatingStyles();
 
     if (typeof GM_registerMenuCommand === 'function') {
       GM_registerMenuCommand(t.menuSettings, openSettings);
