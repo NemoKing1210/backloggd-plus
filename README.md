@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.30-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.33-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.7.30`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.33`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -35,7 +35,7 @@ Paste the [install URL](#quick-install) above.
 
 ### Manual install
 
-1. Open [`backloggd-plus.user.js`](backloggd-plus.user.js) in this repository.
+1. Open the built [`backloggd-plus.user.js`](backloggd-plus.user.js) in this repository (or run `npm run build` after cloning).
 2. Copy the entire file contents.
 3. In your userscript manager, create a new script and paste the code.
 4. Save and enable the script.
@@ -46,9 +46,10 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **To release a new version:**
 
-1. Bump `@version` in `backloggd-plus.user.js` and `backloggd-plus.meta.js`.
-2. Add an entry to [`CHANGELOG.md`](CHANGELOG.md).
-3. Push to `main` (or create a GitHub Release).
+1. Bump `version` in [`package.json`](package.json).
+2. Run `npm run build` (regenerates root `backloggd-plus.user.js` / `.meta.js`).
+3. Add an entry to [`CHANGELOG.md`](CHANGELOG.md).
+4. Push to `main` (or create a GitHub Release).
 
 ## Features
 
@@ -116,8 +117,17 @@ SPA navigations on Backloggd use Turbo events, `MutationObserver`, and an href p
 
 ```text
 backloggd-plus/
-├── backloggd-plus.user.js   # Installable userscript (canonical distribution file)
-├── backloggd-plus.meta.js   # Metadata-only companion for faster update checks
+├── src/                     # ESM source (edit here)
+│   ├── main.js              # Bootstrap / init
+│   ├── api/                 # External data fetchers
+│   ├── features/            # UI features (enrichment, cards, …)
+│   ├── i18n/                # Translations
+│   ├── styles/              # CSS
+│   └── utils/               # Shared helpers
+├── package.json             # Version + npm scripts
+├── vite.config.js           # Vite + vite-plugin-monkey metadata
+├── backloggd-plus.user.js   # Built installable userscript (committed)
+├── backloggd-plus.meta.js   # Built metadata companion (committed)
 ├── README.md                # Documentation and install instructions
 ├── CHANGELOG.md             # Version history
 ├── LICENSE                  # MIT license
@@ -126,7 +136,8 @@ backloggd-plus/
 
 | File | Purpose |
 |------|---------|
-| `backloggd-plus.user.js` | Full script served at `@downloadURL` / `@updateURL` |
+| `src/` | Source of truth for script logic (modules) |
+| `backloggd-plus.user.js` | Full script served at `@downloadURL` / `@updateURL` (build output) |
 | `backloggd-plus.meta.js` | Lightweight metadata mirror; managers may fetch it instead of the full script when checking for updates |
 
 ## Script metadata
@@ -160,23 +171,27 @@ Localized `@name` and `@description` tags are provided for en, ru, zh-CN, es, pt
 
 ## Development
 
-### Local workflow (Violentmonkey)
+Requires [Node.js](https://nodejs.org/) (npm).
 
-1. Clone this repository.
-2. In Violentmonkey, install from the local `backloggd-plus.user.js` file.
-3. Enable **Track local file** before closing the install dialog.
-4. Edit the file in your IDE — changes apply after a page reload.
+```bash
+npm install
+npm run dev      # Vite serve — open/install the generated "dev:" userscript
+npm run build    # Production → dist/ + copy to repo root
+```
 
-### Local workflow (Tampermonkey)
+Edit files under [`src/`](src/) (entry: [`src/main.js`](src/main.js)). Userscript metadata (`@match`, `@connect`, localized names, …) lives in [`vite.config.js`](vite.config.js). Version is `package.json` → header `@version` and in-script `SCRIPT_VERSION`.
 
-Tampermonkey does not track local files natively. Options:
+After changes that should ship, run `npm run build` and commit the regenerated root `.user.js` / `.meta.js`.
 
-- Reinstall from URL after each change, or
-- Use a local HTTP server and temporarily point `@updateURL` / `@downloadURL` to `http://localhost:...` during development (do not commit local URLs).
+### Local workflow notes
+
+- **`npm run dev`:** vite-plugin-monkey serves an installable userscript (name prefixed with `dev:`). Install it once in Tampermonkey/Violentmonkey; HMR applies while the server runs.
+- **Built file:** after `npm run build`, you can also install the root `backloggd-plus.user.js` (Violentmonkey **Track local file** still works on that artifact).
+- Do not commit localhost `@updateURL` / `@downloadURL` values.
 
 ### Configuration
 
-Constants near the top of `backloggd-plus.user.js` can be adjusted as features land (cache keys, debounce intervals, API bases, etc.).
+Shared constants live in [`src/constants.js`](src/constants.js); feature toggles and UI strings are in settings / `src/i18n/`.
 
 ## Affiliation
 

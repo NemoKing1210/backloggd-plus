@@ -1,0 +1,108 @@
+import {
+  CARD_ATTR,
+  CARD_STATE_ATTR,
+  ENRICH_ATTR,
+  SCAN_DEBOUNCE_MS,
+  SIMILAR_ATTR,
+  STEAMDB_ATTR,
+} from '../constants.js';
+import { debounce } from '../utils/debounce.js';
+import { scheduleCardBadges } from './cards.js';
+import { enrichGamePage } from './enrichment.js';
+import { bindFixMatchClicks, ensureNavSettingsButton } from './settings-panel.js';
+
+export function scanPage() {
+  ensureNavSettingsButton();
+  bindFixMatchClicks();
+  enrichGamePage();
+  scheduleCardBadges();
+}
+
+export function isBlpManagedElement(el) {
+  if (!el || el.nodeType !== 1) return false;
+  if (
+    el.hasAttribute?.(ENRICH_ATTR) ||
+    el.hasAttribute?.(STEAMDB_ATTR) ||
+    el.hasAttribute?.(SIMILAR_ATTR) ||
+    el.hasAttribute?.(CARD_ATTR) ||
+    el.hasAttribute?.(CARD_STATE_ATTR) ||
+    el.hasAttribute?.('data-blp-debug') ||
+    el.hasAttribute?.('data-blp-token') ||
+    el.id === 'blp-nav-settings' ||
+    el.id === 'blp-steam-backloggd-btn' ||
+    el.id === 'blp-steamdb-backloggd-btn'
+  ) {
+    return true;
+  }
+  if (
+    el.classList?.contains('blp-card-badges') ||
+    el.classList?.contains('blp-settings-backdrop') ||
+    el.classList?.contains('blp-fix-match-backdrop') ||
+    el.classList?.contains('blp-debug-panel') ||
+    el.classList?.contains('blp-steamdb-cover') ||
+    el.classList?.contains('blp-steam-gallery') ||
+    el.classList?.contains('blp-similar') ||
+    el.classList?.contains('blp-viewer') ||
+    el.classList?.contains('blp-title-icon-wrap')
+  ) {
+    return true;
+  }
+  return Boolean(
+    el.closest?.(
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings`
+    )
+  );
+}
+
+export function shouldIgnoreDomMutations(mutations) {
+  for (const m of mutations) {
+    for (const node of m.addedNodes) {
+      if (node.nodeType !== 1) continue;
+      if (!isBlpManagedElement(node)) return false;
+    }
+  }
+  return true;
+}
+
+export function observeDom(onChange) {
+  const scheduled = debounce(onChange, SCAN_DEBOUNCE_MS);
+  const observer = new MutationObserver((mutations) => {
+    if (shouldIgnoreDomMutations(mutations)) return;
+    scheduled();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  return observer;
+}
+
+export function bindSpaNavigation(onNavigate) {
+  const run = debounce(onNavigate, 50);
+  ['turbo:load', 'turbo:render', 'turbo:frame-load', 'popstate'].forEach((evt) => {
+    document.addEventListener(evt, run, true);
+    window.addEventListener(evt, run, true);
+  });
+  let prev = location.href;
+  setInterval(() => {
+    if (location.href !== prev) {
+      prev = location.href;
+      run();
+    }
+  }, 500);
+}
+
+export function isSteamHost() {
+  const host = location.hostname;
+  return (
+    host === 'store.steampowered.com' ||
+    host.endsWith('.steampowered.com') ||
+    host === 'steamcommunity.com' ||
+    host.endsWith('.steamcommunity.com')
+  );
+}
+
+export function isBackloggdHost() {
+  return /(^|\.)backloggd\.com$/i.test(location.hostname);
+}
+
+export function isSteamDbHost() {
+  return /(^|\.)steamdb\.info$/i.test(location.hostname);
+}

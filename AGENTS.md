@@ -6,19 +6,39 @@ Instructions for AI coding agents working in this repository.
 
 Userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life features. Compatible with Tampermonkey, Violentmonkey, Greasemonkey, and similar managers.
 
-- **Canonical script:** `backloggd-plus.user.js` (also `@downloadURL` / `@updateURL`)
-- **Metadata companion:** `backloggd-plus.meta.js` (must stay in sync with the userscript header)
+Built with [Vite](https://vitejs.dev/) + [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey).
+
+- **Source:** `src/main.js`
+- **Canonical install artifacts (committed):** `backloggd-plus.user.js`, `backloggd-plus.meta.js` (also `@downloadURL` / `@updateURL`)
+- **Version source of truth:** `package.json` `version` (userscript header + `SCRIPT_VERSION`)
 - **Docs:** `README.md`, `CHANGELOG.md` (Keep a Changelog + SemVer)
 - **License:** MIT
 
-No build step, bundler, tests, or package manager. Edit the `.user.js` file directly.
+Edit source under `src/`, then run `npm run build` to refresh the root install files. Do not hand-edit the built `.user.js` / `.meta.js`.
 
 ## Repository layout
 
 ```text
 backloggd-plus/
-├── backloggd-plus.user.js   # Full installable userscript
-├── backloggd-plus.meta.js   # Metadata-only mirror for update checks
+├── src/
+│   ├── main.js              # Bootstrap / init
+│   ├── constants.js         # Keys, URLs, DEFAULT_SETTINGS
+│   ├── state.js             # Mutable settings / locale / cache handles
+│   ├── settings.js          # load/save settings, link helpers
+│   ├── cache.js             # GM lookup cache + overrides
+│   ├── gm.js                # GM_xmlhttpRequest wrapper
+│   ├── i18n/                # TRANSLATIONS + locale helpers
+│   ├── utils/               # html, title match, debounce, slug
+│   ├── styles/              # CSS (injected via vite-plugin-monkey)
+│   ├── api/                 # Steam, HLTB, OpenCritic, ProtonDB, GameStatus
+│   └── features/            # Enrichment, gallery, cards, settings UI, host pages
+├── scripts/
+│   └── copy-dist.mjs        # Copies dist → root after build
+├── dist/                    # Vite output (gitignored)
+├── backloggd-plus.user.js   # Built installable userscript
+├── backloggd-plus.meta.js   # Built metadata-only mirror for update checks
+├── package.json
+├── vite.config.js
 ├── README.md
 ├── CHANGELOG.md
 ├── LICENSE
@@ -29,7 +49,7 @@ backloggd-plus/
 ## Architecture (high level)
 
 1. Match Backloggd and Steam app pages at `document-idle`.
-2. On **Backloggd:** IIFE bootstraps styles, settings, DOM scan, `MutationObserver`, and Turbo/href SPA hooks.
+2. On **Backloggd:** bootstrap styles, settings, DOM scan, `MutationObserver`, and Turbo/href SPA hooks.
 3. **Game pages:** inject native detail rows after `#game-page-platforms` (`Steam` = owned · wishlist · price · sale end/recent low · reviews · categories · tags, `Metacritic`, `OpenCritic`, `HLTB`, `Deck/Proton`, `Players`, `GameStatus`, `Links`); SteamDB icon before `h1`, logo under **Change cover** (shimmer skeletons first, fade in when assets load); Steam screenshots gallery after `turbo-frame#game-stats` (store `appdetails` screenshots; reusable `openBlpImageViewer` lightbox with zoom/pan/filmstrip); similar games strip under screenshots (`IStoreQueryService/MoreLikeThis` + weighted tag Jaccard %; cards → Backloggd); resolve title + IGDB link from DOM. Skeletons while Steam/GS/scores load; rows paint progressively as each source returns; link favicons via Google s2. **Fix match** stores a per-slug Steam App ID override (`blp_steam_overrides`).
 4. **List/cover grids:** viewport-lazy badges on `.game-cover` (price / Steam review % / owned / wishlist / GameStatus) with request concurrency limits; skipped on the game page itself.
 5. On **Steam** app pages: inject a SteamDB-style Backloggd button into `.apphub_OtherSiteInfo` (slug from Steam URL or title).
@@ -45,21 +65,25 @@ Keep rate limits polite: cache TTLs, request dedupe (`inflight`), debounce on DO
 
 ## Conventions
 
-- Single IIFE with `'use strict'`; vanilla JS only (no frameworks).
-- Prefer existing patterns: constants at top, locale maps, DOM helpers, cache, feature hooks.
+- Vanilla JS ESM modules under `src/`; no frameworks. Import GM APIs from `$` (`vite-plugin-monkey/dist/client`).
+- Prefer existing patterns: put shared constants in `constants.js`, locale strings in `i18n/`, APIs in `api/`, UI hooks in `features/`. Mutable runtime state lives in `state.js` (`export let` live bindings). Keep locale maps, DOM helpers, and cache helpers close to their callers.
 - Match Backloggd’s look where possible when injecting UI.
-- Do not expand `@connect` or `@grant` beyond what is needed.
+- Do not expand `@connect` or `@grant` beyond what is needed (declare in `vite.config.js` `userscript`; grants also auto-detected from `$` imports).
+- Userscript metadata lives in `vite.config.js` — not hand-written in built files.
 - Do not commit localhost `@updateURL` / `@downloadURL` values.
-- Keep `backloggd-plus.meta.js` identical to the `==UserScript==` block in the `.user.js` file (same fields/order/values).
+- After changing source or metadata, run `npm run build` so root `.user.js` / `.meta.js` stay in sync.
+- Production builds minify JS/CSS (`vite.config.js` → terser); edit `src/` for readable code, not the committed bundle.
 
 ## Releases
 
 When shipping a user-visible change:
 
-1. Bump `@version` in **both** `backloggd-plus.user.js` and `backloggd-plus.meta.js`.
-2. Bump `SCRIPT_VERSION` in `backloggd-plus.user.js` to the **same** value (shown in Settings as `v…` next to the panel title). Changing `SCRIPT_VERSION` also clears the lookup cache on next run (`blp_cache_script_version`).
+1. Bump `version` in `package.json` (single source of truth for `@version` and `SCRIPT_VERSION`).
+2. Run `npm run build` to regenerate `backloggd-plus.user.js` and `backloggd-plus.meta.js`.
 3. Add a Keep a Changelog entry in `CHANGELOG.md`.
 4. Update README version badge / docs if they mention the version or new behavior.
+
+Changing `SCRIPT_VERSION` (via `package.json`) also clears the lookup cache on next run (`blp_cache_script_version`).
 
 ## Localization
 
@@ -67,15 +91,22 @@ UI locales: `en`, `ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl` (plus `au
 
 - Default `uiLocale` is `auto`; users can override in Settings → General.
 - Add every new user-facing string to **all** `TRANSLATIONS` locales.
-- Keep localized `@name` / `@description` metadata tags aligned when changing the product description.
+- Keep localized `@name` / `@description` in `vite.config.js` aligned when changing the product description.
 
 ## Do not
 
-- Add a build toolchain, TypeScript, or npm unless explicitly requested.
+- Hand-edit committed `backloggd-plus.user.js` / `backloggd-plus.meta.js` (always rebuild).
+- Add TypeScript or a frontend framework unless explicitly requested.
 - Imply affiliation with Backloggd in docs or UI copy.
 - Break Backloggd’s native navigation, forms, or list/infinite-scroll behavior.
 
 ## Local testing
 
-- **Violentmonkey:** install local file + enable Track local file; reload Backloggd after edits.
-- **Tampermonkey:** reinstall from file/URL, or temporary local server URLs (do not commit them).
+```bash
+npm install
+npm run dev      # Vite serve — install the generated server userscript (prefix "dev:")
+npm run build    # Production bundle → dist/ + copy to repo root
+```
+
+- **Violentmonkey / Tampermonkey:** install from the Vite open URL during `npm run dev`, or from the built root `backloggd-plus.user.js` after `npm run build`.
+- Do not commit temporary localhost `@updateURL` / `@downloadURL` values.

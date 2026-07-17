@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.33] - 2026-07-17
+
+### Changed
+
+- Production build minifies JS and CSS (terser) — smaller installable userscript (~30% vs unminified)
+
+## [0.7.32] - 2026-07-17
+
+### Changed
+
+- Source split into ESM modules under `src/` (`api/`, `features/`, `i18n/`, `styles/`, `utils/`) for easier maintenance
+
+## [0.7.31] - 2026-07-17
+
+### Changed
+
+- Development toolchain: Vite + vite-plugin-monkey (`src/` → built `backloggd-plus.user.js` / `.meta.js`)
+
 ## [0.7.30] - 2026-07-17
 
 ### Added
