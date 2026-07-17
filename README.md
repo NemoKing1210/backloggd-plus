@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.21-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.22-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.7.21`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.22`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -58,6 +58,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 - **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug)
 - SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
 - Steam header / community icon on game pages; screenshot gallery after game stats
+- Similar games under screenshots (Steam More Like This) with tag match %; cards link to Backloggd
 - Skeleton placeholders while Steam / GameStatus / score data loads
 - Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB)
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
@@ -82,7 +83,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / list cover badges / links / Steam & SteamDB Backloggd buttons
+- Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / list cover badges / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB)
 - Cache duration + clear cache

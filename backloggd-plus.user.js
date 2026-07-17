@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.21
+// @version           0.7.22
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.21';
+  const SCRIPT_VERSION = '0.7.22';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -66,6 +66,7 @@
   const ROOT_ATTR = 'data-blp-root';
   const ENRICH_ATTR = 'data-blp-enrich';
   const STEAMDB_ATTR = 'data-blp-steamdb';
+  const SIMILAR_ATTR = 'data-blp-similar';
   const CARD_ATTR = 'data-blp-card';
   const CARD_STATE_ATTR = 'data-blp-card-state';
   const FAVICON_URL = 'https://www.google.com/s2/favicons?domain={domain}&sz=32';
@@ -83,7 +84,10 @@
   const STEAM_USERDATA_URL = 'https://store.steampowered.com/dynamicstore/userdata/';
   const STEAM_POPULAR_TAGS_URL = 'https://store.steampowered.com/tagdata/populartags/english';
   const STEAM_STORE_ITEMS_URL = 'https://api.steampowered.com/IStoreBrowseService/GetItems/v1/';
+  const STEAM_MORE_LIKE_URL = 'https://api.steampowered.com/IStoreQueryService/MoreLikeThis/v1/';
   const STEAM_PLAYERS_URL = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/';
+  const SIMILAR_GAMES_FETCH = 12;
+  const SIMILAR_GAMES_SHOW = 10;
   const STEAM_DECK_REPORT_URL =
     'https://store.steampowered.com/saleaction/ajaxgetdeckappcompatibilityreport';
   const PROTONDB_SUMMARY_URL = 'https://www.protondb.com/api/v1/reports/summaries';
@@ -156,6 +160,7 @@
     showSteamDbIcon: true,
     showSteamDbCover: true,
     showSteamDbGallery: true,
+    showSimilarGames: true,
     showSteamPlayers: true,
     showCardBadges: true,
     debugMode: false,
@@ -268,6 +273,12 @@
       steamGalleryClose: 'Close',
       steamGalleryPrev: 'Previous',
       steamGalleryNext: 'Next',
+      showSimilarGames: 'Show similar games',
+      showSimilarGamesHint:
+        'Horizontal similar-games strip under screenshots (Steam More Like This + tag match %). Cards link to Backloggd.',
+      similarGamesTitle: 'Similar games',
+      similarGamesMatch: 'Match',
+      similarGamesOpenSteam: 'Open on Steam',
       viewerZoomIn: 'Zoom in',
       viewerZoomOut: 'Zoom out',
       viewerZoomReset: 'Reset zoom',
@@ -458,6 +469,12 @@
       steamGalleryClose: 'Закрыть',
       steamGalleryPrev: 'Назад',
       steamGalleryNext: 'Вперёд',
+      showSimilarGames: 'Похожие игры',
+      showSimilarGamesHint:
+        'Лента похожих игр под скриншотами (Steam More Like This + % совпадения тегов). Карточки ведут на Backloggd.',
+      similarGamesTitle: 'Похожие игры',
+      similarGamesMatch: 'Сходство',
+      similarGamesOpenSteam: 'Открыть в Steam',
       viewerZoomIn: 'Увеличить',
       viewerZoomOut: 'Уменьшить',
       viewerZoomReset: 'Сбросить масштаб',
@@ -644,6 +661,12 @@
       steamGalleryClose: '关闭',
       steamGalleryPrev: '上一张',
       steamGalleryNext: '下一张',
+      showSimilarGames: '显示相似游戏',
+      showSimilarGamesHint:
+        '在截图下方显示相似游戏条（Steam More Like This + 标签匹配百分比）。卡片链接到 Backloggd。',
+      similarGamesTitle: '相似游戏',
+      similarGamesMatch: '匹配',
+      similarGamesOpenSteam: '在 Steam 打开',
       viewerZoomIn: '放大',
       viewerZoomOut: '缩小',
       viewerZoomReset: '重置缩放',
@@ -832,6 +855,12 @@
       steamGalleryClose: 'Cerrar',
       steamGalleryPrev: 'Anterior',
       steamGalleryNext: 'Siguiente',
+      showSimilarGames: 'Mostrar juegos similares',
+      showSimilarGamesHint:
+        'Franja de juegos similares bajo las capturas (Steam More Like This + % de coincidencia de etiquetas). Las tarjetas enlazan a Backloggd.',
+      similarGamesTitle: 'Juegos similares',
+      similarGamesMatch: 'Afinidad',
+      similarGamesOpenSteam: 'Abrir en Steam',
       viewerZoomIn: 'Acercar',
       viewerZoomOut: 'Alejar',
       viewerZoomReset: 'Restablecer zoom',
@@ -1023,6 +1052,12 @@
       steamGalleryClose: 'Fechar',
       steamGalleryPrev: 'Anterior',
       steamGalleryNext: 'Próximo',
+      showSimilarGames: 'Mostrar jogos similares',
+      showSimilarGamesHint:
+        'Faixa de jogos similares abaixo dos screenshots (Steam More Like This + % de coincidência de tags). Os cards levam ao Backloggd.',
+      similarGamesTitle: 'Jogos similares',
+      similarGamesMatch: 'Afinidade',
+      similarGamesOpenSteam: 'Abrir na Steam',
       viewerZoomIn: 'Aumentar zoom',
       viewerZoomOut: 'Diminuir zoom',
       viewerZoomReset: 'Redefinir zoom',
@@ -1214,6 +1249,12 @@
       steamGalleryClose: 'Schließen',
       steamGalleryPrev: 'Zurück',
       steamGalleryNext: 'Weiter',
+      showSimilarGames: 'Ähnliche Spiele anzeigen',
+      showSimilarGamesHint:
+        'Leiste ähnlicher Spiele unter den Screenshots (Steam More Like This + Tag-Übereinstimmung %). Karten führen zu Backloggd.',
+      similarGamesTitle: 'Ähnliche Spiele',
+      similarGamesMatch: 'Ähnlichkeit',
+      similarGamesOpenSteam: 'Auf Steam öffnen',
       viewerZoomIn: 'Vergrößern',
       viewerZoomOut: 'Verkleinern',
       viewerZoomReset: 'Zoom zurücksetzen',
@@ -1405,6 +1446,12 @@
       steamGalleryClose: 'Fermer',
       steamGalleryPrev: 'Précédente',
       steamGalleryNext: 'Suivante',
+      showSimilarGames: 'Afficher les jeux similaires',
+      showSimilarGamesHint:
+        'Bandeau de jeux similaires sous les captures (Steam More Like This + % de correspondance des tags). Les cartes mènent à Backloggd.',
+      similarGamesTitle: 'Jeux similaires',
+      similarGamesMatch: 'Affinité',
+      similarGamesOpenSteam: 'Ouvrir sur Steam',
       viewerZoomIn: 'Zoom avant',
       viewerZoomOut: 'Zoom arrière',
       viewerZoomReset: 'Réinitialiser le zoom',
@@ -1596,6 +1643,12 @@
       steamGalleryClose: '閉じる',
       steamGalleryPrev: '前へ',
       steamGalleryNext: '次へ',
+      showSimilarGames: '類似ゲームを表示',
+      showSimilarGamesHint:
+        'スクリーンショット下の類似ゲーム帯（Steam More Like This + タグ一致率）。カードは Backloggd へ。',
+      similarGamesTitle: '類似ゲーム',
+      similarGamesMatch: '一致',
+      similarGamesOpenSteam: 'Steam で開く',
       viewerZoomIn: '拡大',
       viewerZoomOut: '縮小',
       viewerZoomReset: 'ズームをリセット',
@@ -1787,6 +1840,12 @@
       steamGalleryClose: '닫기',
       steamGalleryPrev: '이전',
       steamGalleryNext: '다음',
+      showSimilarGames: '유사 게임 표시',
+      showSimilarGamesHint:
+        '스크린샷 아래 유사 게임 스트립(Steam More Like This + 태그 일치 %). 카드는 Backloggd로 이동.',
+      similarGamesTitle: '유사 게임',
+      similarGamesMatch: '일치',
+      similarGamesOpenSteam: 'Steam에서 열기',
       viewerZoomIn: '확대',
       viewerZoomOut: '축소',
       viewerZoomReset: '줌 초기화',
@@ -1978,6 +2037,12 @@
       steamGalleryClose: 'Zamknij',
       steamGalleryPrev: 'Poprzedni',
       steamGalleryNext: 'Następny',
+      showSimilarGames: 'Pokaż podobne gry',
+      showSimilarGamesHint:
+        'Pasek podobnych gier pod screenshotami (Steam More Like This + % zgodności tagów). Karty prowadzą do Backloggd.',
+      similarGamesTitle: 'Podobne gry',
+      similarGamesMatch: 'Podobieństwo',
+      similarGamesOpenSteam: 'Otwórz w Steam',
       viewerZoomIn: 'Powiększ',
       viewerZoomOut: 'Pomniejsz',
       viewerZoomReset: 'Resetuj zoom',
@@ -2455,6 +2520,182 @@
   async function fetchSteamAppTags(appId, country) {
     const { tags } = await fetchSteamStoreItem(appId, country);
     return tags;
+  }
+
+  function steamAssetUrlFromFormat(assets, file) {
+    const name = String(file || '').trim();
+    if (!name) return '';
+    const format = String(assets?.asset_url_format || '').trim();
+    if (format) {
+      return `${STEAM_CDN_STORE_ASSETS}/${format.replace('${FILENAME}', name)}`;
+    }
+    return '';
+  }
+
+  function parseSimilarCoverUrl(appId, assets) {
+    if (!assets || typeof assets !== 'object') return '';
+    const id = Number(appId);
+    const candidates = [
+      assets.library_capsule_2x,
+      assets.library_capsule,
+      assets.header_2x,
+      assets.header,
+      assets.main_capsule_2x,
+      assets.main_capsule,
+    ];
+    for (const file of candidates) {
+      const url = steamAssetUrlFromFormat(assets, file);
+      if (url) return url;
+      const name = String(file || '').trim();
+      if (name && Number.isFinite(id) && id > 0) return steamCdnAsset(id, name);
+    }
+    return '';
+  }
+
+  function tagWeightMap(tags) {
+    const map = new Map();
+    if (!Array.isArray(tags)) return map;
+    for (const tag of tags) {
+      const id = Number(tag?.id ?? tag?.tagid);
+      if (!Number.isFinite(id) || id <= 0) continue;
+      const weight = Number(tag?.weight);
+      map.set(id, Number.isFinite(weight) && weight > 0 ? weight : 1);
+    }
+    return map;
+  }
+
+  /** Weighted Jaccard on Steam tag ids; returns match % and top shared tag ids. */
+  function scoreTagOverlap(sourceTags, otherTags) {
+    const a = tagWeightMap(sourceTags);
+    const b = tagWeightMap(otherTags);
+    if (!a.size || !b.size) return { matchPct: 0, sharedTagIds: [] };
+
+    let inter = 0;
+    let union = 0;
+    const shared = [];
+    const allIds = new Set([...a.keys(), ...b.keys()]);
+    for (const id of allIds) {
+      const wa = a.get(id) || 0;
+      const wb = b.get(id) || 0;
+      inter += Math.min(wa, wb);
+      union += Math.max(wa, wb);
+      if (wa > 0 && wb > 0) shared.push({ id, weight: Math.min(wa, wb) });
+    }
+    shared.sort((x, y) => y.weight - x.weight);
+    const matchPct = union > 0 ? Math.round((100 * inter) / union) : 0;
+    return {
+      matchPct,
+      sharedTagIds: shared.slice(0, 2).map((s) => s.id),
+    };
+  }
+
+  function normalizeSimilarStoreItem(item, sourceTags, tagMap, apiIndex) {
+    const appId = Number(item?.appid ?? item?.id);
+    if (!Number.isFinite(appId) || appId <= 0) return null;
+    const name = String(item?.name || '').trim();
+    if (!name) return null;
+    const rawTags = Array.isArray(item?.tags) ? item.tags : [];
+    const tags = rawTags
+      .slice()
+      .sort((x, y) => (y.weight || 0) - (x.weight || 0))
+      .map((tag) => ({
+        id: tag.tagid,
+        name: tagMap[tag.tagid] || null,
+        weight: tag.weight || 0,
+      }))
+      .filter((tag) => tag.id != null);
+    const { matchPct, sharedTagIds } = scoreTagOverlap(sourceTags, tags);
+    const sharedTags = sharedTagIds
+      .map((id) => tagMap[id] || tags.find((t) => t.id === id)?.name)
+      .filter(Boolean)
+      .slice(0, 2);
+    const coverUrl = parseSimilarCoverUrl(appId, item?.assets);
+    const slug = slugifyForBackloggd(name);
+    return {
+      appId,
+      name,
+      coverUrl,
+      matchPct,
+      sharedTags,
+      storeUrl: `https://store.steampowered.com/app/${appId}/`,
+      backloggdUrl: slug ? `https://www.backloggd.com/games/${encodeURIComponent(slug)}/` : '',
+      apiIndex,
+    };
+  }
+
+  async function fetchSteamSimilarGames(appId, sourceTags, country) {
+    const id = Number(appId);
+    if (!Number.isFinite(id) || id <= 0) return [];
+
+    const cc = String(country || settings.steamCountry || 'US').toUpperCase() || 'US';
+    const cacheKey = `steam:similar:${id}`;
+    const debugOn = Boolean(settings.debugMode);
+    const cached = !debugOn ? getCached(cacheKey) : null;
+    if (Array.isArray(cached) && cached.length) return cached;
+
+    const inflightKey = `similar:${id}:${cc}`;
+    if (inflight.has(inflightKey)) return inflight.get(inflightKey);
+
+    const task = (async () => {
+      try {
+        let tags = Array.isArray(sourceTags) ? sourceTags : [];
+        if (!tags.length) {
+          tags = await fetchSteamAppTags(id, cc).catch(() => []);
+        }
+        const input = JSON.stringify({
+          item_id: { appid: id },
+          count: SIMILAR_GAMES_FETCH,
+          context: {
+            language: 'english',
+            country_code: cc,
+            steam_realm: 1,
+          },
+          data_request: {
+            include_assets: true,
+            include_basic_info: true,
+            include_tag_count: STEAM_TAGS_MAX,
+          },
+          filters: {
+            type_filters: {
+              include_games: true,
+              include_dlc: false,
+              include_demos: false,
+              include_software: false,
+              include_video: false,
+              include_hardware: false,
+            },
+          },
+        });
+        const [root, tagMap] = await Promise.all([
+          gmRequest({
+            url: `${STEAM_MORE_LIKE_URL}?input_json=${encodeURIComponent(input)}`,
+          }),
+          fetchSteamPopularTagMap(),
+        ]);
+        const items = Array.isArray(root?.response?.store_items) ? root.response.store_items : [];
+        const games = items
+          .map((item, apiIndex) => normalizeSimilarStoreItem(item, tags, tagMap || {}, apiIndex))
+          .filter((g) => g && g.appId !== id)
+          .sort((a, b) => {
+            if (b.matchPct !== a.matchPct) return b.matchPct - a.matchPct;
+            return a.apiIndex - b.apiIndex;
+          })
+          .slice(0, SIMILAR_GAMES_SHOW)
+          .map(({ apiIndex, ...rest }) => rest);
+
+        if (games.length && !debugOn) setCached(cacheKey, games);
+        return games;
+      } catch (_) {
+        return [];
+      }
+    })();
+
+    inflight.set(inflightKey, task);
+    try {
+      return await task;
+    } finally {
+      inflight.delete(inflightKey);
+    }
   }
 
   async function fetchSteamStoreAssets(appId, country) {
@@ -3588,6 +3829,218 @@
 
       .blp-steam-gallery__item img.is-ready {
         opacity: 1;
+      }
+
+      .blp-similar {
+        margin-top: 1.15rem;
+        width: 100%;
+      }
+
+      .blp-similar__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .blp-similar__title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--blp-muted);
+      }
+
+      .blp-similar__link {
+        font-size: 0.78rem;
+        color: var(--back-interact-secondary, #839df9);
+        text-decoration: none;
+      }
+
+      .blp-similar__link:hover {
+        color: var(--back-text, #badefc);
+        text-decoration: underline;
+      }
+
+      .blp-similar__track {
+        display: flex;
+        gap: 0.65rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 0.4rem;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .blp-similar__track::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .blp-similar__track::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+      }
+
+      .blp-similar__skel {
+        flex: 0 0 auto;
+        width: 118px;
+        height: 210px;
+        border-radius: 8px;
+        background: linear-gradient(
+          90deg,
+          var(--blp-skel) 0%,
+          var(--blp-skel-shine) 45%,
+          var(--blp-skel) 90%
+        );
+        background-size: 200% 100%;
+        animation: blp-shimmer 1.1s ease-in-out infinite;
+      }
+
+      .blp-similar__card {
+        flex: 0 0 auto;
+        width: 118px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        color: inherit;
+        scroll-snap-align: start;
+        border-radius: 8px;
+        transition: transform 0.15s ease;
+      }
+
+      .blp-similar__card:hover,
+      .blp-similar__card:focus-within {
+        transform: translateY(-2px);
+      }
+
+      .blp-similar__card:focus-within .blp-similar__cover {
+        border-color: var(--back-interact-secondary, #839df9);
+      }
+
+      .blp-similar__cover {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 600 / 900;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: #12151c;
+      }
+
+      .blp-similar__hit {
+        display: block;
+        width: 100%;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .blp-similar__cover img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+
+      .blp-similar__cover img.is-ready {
+        opacity: 1;
+      }
+
+      .blp-similar__badge {
+        position: absolute;
+        top: 0.35rem;
+        left: 0.35rem;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.05rem;
+        padding: 0.2rem 0.35rem;
+        border-radius: 5px;
+        background: rgba(12, 14, 18, 0.82);
+        backdrop-filter: blur(4px);
+        line-height: 1.1;
+        pointer-events: none;
+      }
+
+      .blp-similar__pct {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--back-text, #badefc);
+      }
+
+      .blp-similar__match {
+        font-size: 0.58rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--blp-muted, #8a9bb8);
+      }
+
+      .blp-similar__steam {
+        position: absolute;
+        top: 0.3rem;
+        right: 0.3rem;
+        z-index: 2;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        background: rgba(12, 14, 18, 0.78);
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        text-decoration: none;
+      }
+
+      .blp-similar__card:hover .blp-similar__steam,
+      .blp-similar__card:focus-within .blp-similar__steam {
+        opacity: 1;
+      }
+
+      .blp-similar__steam img {
+        width: 14px;
+        height: 14px;
+        display: block;
+        opacity: 1;
+      }
+
+      .blp-similar__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        min-width: 0;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .blp-similar__meta:hover .blp-similar__name,
+      .blp-similar__meta:focus-visible .blp-similar__name {
+        color: var(--back-interact-secondary, #839df9);
+      }
+
+      .blp-similar__name {
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--back-text, #badefc);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .blp-similar__tags {
+        font-size: 0.62rem;
+        line-height: 1.2;
+        color: var(--blp-muted, #8a9bb8);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .blp-viewer {
@@ -6229,6 +6682,134 @@
     return document.querySelector('turbo-frame#game-stats');
   }
 
+  function similarMountAnchor() {
+    return (
+      document.querySelector(`[${STEAMDB_ATTR}="gallery"]`) ||
+      gameStatsMountAnchor()
+    );
+  }
+
+  function removeSimilarGamesUi() {
+    document.querySelectorAll(`[${SIMILAR_ATTR}]`).forEach((el) => el.remove());
+  }
+
+  function ensureSimilarMount(token = '') {
+    if (!settings.showSimilarGames) {
+      removeSimilarGamesUi();
+      return null;
+    }
+    let host = document.querySelector(`[${SIMILAR_ATTR}]`);
+    if (host) {
+      if (token) host.setAttribute('data-blp-token', token);
+      return host;
+    }
+    const anchor = similarMountAnchor();
+    if (!anchor) return null;
+    host = document.createElement('section');
+    host.setAttribute(SIMILAR_ATTR, '1');
+    host.className = 'blp-similar is-loading';
+    if (token) host.setAttribute('data-blp-token', token);
+    host.innerHTML = `
+      <div class="blp-similar__head">
+        <span class="blp-similar__title">${escapeHtml(t.similarGamesTitle)}</span>
+      </div>
+      <div class="blp-similar__track" data-blp-similar-track>
+        <span class="blp-similar__skel" aria-hidden="true"></span>
+        <span class="blp-similar__skel" aria-hidden="true"></span>
+        <span class="blp-similar__skel" aria-hidden="true"></span>
+        <span class="blp-similar__skel" aria-hidden="true"></span>
+        <span class="blp-similar__skel" aria-hidden="true"></span>
+      </div>
+    `;
+    anchor.insertAdjacentElement('afterend', host);
+    return host;
+  }
+
+  function applySimilarGames(games, appId, token = '', { final = false } = {}) {
+    if (!settings.showSimilarGames) {
+      removeSimilarGamesUi();
+      return;
+    }
+    if (!Array.isArray(games) || !games.length) {
+      if (final) removeSimilarGamesUi();
+      else ensureSimilarMount(token);
+      return;
+    }
+
+    const host = ensureSimilarMount(token);
+    if (!host) return;
+    const readyKey = `${appId || ''}|${games.map((g) => `${g.appId}:${g.matchPct}`).join(',')}`;
+    if (host.dataset.blpSimilarReady === '1' && host.dataset.blpSimilarKey === readyKey) {
+      if (token) host.setAttribute('data-blp-token', token);
+      return;
+    }
+    if (appId) host.setAttribute('data-blp-appid', String(appId));
+    if (token) host.setAttribute('data-blp-token', token);
+    host.dataset.blpSimilarReady = '1';
+    host.dataset.blpSimilarKey = readyKey;
+
+    const steamUrl = appId
+      ? `https://store.steampowered.com/app/${appId}/`
+      : 'https://store.steampowered.com/';
+    const favicon = (domain) =>
+      FAVICON_URL.replace('{domain}', encodeURIComponent(domain));
+
+    const htmlCards = games
+      .map((game) => {
+        const href = escapeAttr(game.backloggdUrl || game.storeUrl || '#');
+        const cover = escapeAttr(game.coverUrl || '');
+        const name = escapeHtml(game.name);
+        const pct = Math.max(0, Math.min(100, Number(game.matchPct) || 0));
+        const tags = Array.isArray(game.sharedTags) ? game.sharedTags.filter(Boolean) : [];
+        const tagsHtml = tags.length
+          ? `<span class="blp-similar__tags">${escapeHtml(tags.join(' · '))}</span>`
+          : '';
+        const steamHref = escapeAttr(game.storeUrl || '');
+        const steamBtn = steamHref
+          ? `<a class="blp-similar__steam" href="${steamHref}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(t.similarGamesOpenSteam)}">
+              <img src="${escapeAttr(favicon('store.steampowered.com'))}" alt="" width="14" height="14" loading="lazy" referrerpolicy="no-referrer" />
+            </a>`
+          : '';
+        return `
+          <div class="blp-similar__card">
+            <div class="blp-similar__cover">
+              <span class="blp-similar__badge">
+                <span class="blp-similar__pct">${pct}%</span>
+                <span class="blp-similar__match">${escapeHtml(t.similarGamesMatch)}</span>
+              </span>
+              ${steamBtn}
+              <a class="blp-similar__hit" href="${href}" title="${escapeAttr(game.name)}" aria-label="${escapeAttr(game.name)}">
+                ${cover ? `<img src="${cover}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : ''}
+              </a>
+            </div>
+            <a class="blp-similar__meta" href="${href}" title="${escapeAttr(game.name)}">
+              <span class="blp-similar__name">${name}</span>
+              ${tagsHtml}
+            </a>
+          </div>
+        `;
+      })
+      .join('');
+
+    host.classList.remove('is-loading');
+    host.innerHTML = `
+      <div class="blp-similar__head">
+        <span class="blp-similar__title">${escapeHtml(t.similarGamesTitle)}</span>
+        <a class="blp-similar__link" href="${escapeAttr(steamUrl)}" target="_blank" rel="noopener noreferrer">Steam</a>
+      </div>
+      <div class="blp-similar__track" data-blp-similar-track>${htmlCards}</div>
+    `;
+
+    host.querySelectorAll('.blp-similar__cover img').forEach((img) => {
+      const mark = () => img.classList.add('is-ready');
+      if (img.complete && img.naturalWidth) mark();
+      else {
+        img.addEventListener('load', mark, { once: true });
+        img.addEventListener('error', mark, { once: true });
+      }
+    });
+  }
+
   function ensureSteamGalleryMount(token = '') {
     if (!settings.showSteamDbGallery) {
       document.querySelectorAll(`[${STEAMDB_ATTR}="gallery"]`).forEach((el) => el.remove());
@@ -7439,6 +8020,7 @@
     document.querySelectorAll(`[${ENRICH_ATTR}]`).forEach((el) => el.remove());
     document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
     removeSteamDbUi();
+    removeSimilarGamesUi();
     unbindGameCoverViewer();
   }
 
@@ -7866,6 +8448,7 @@
         showSteamDbIcon: settings.showSteamDbIcon,
         showSteamDbCover: settings.showSteamDbCover,
         showSteamDbGallery: settings.showSteamDbGallery,
+        showSimilarGames: settings.showSimilarGames,
         showSteamPlayers: settings.showSteamPlayers,
         showCardBadges: settings.showCardBadges,
         showLinks: settings.showLinks,
@@ -8077,7 +8660,7 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSimilarGames}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     // Same page/settings: keep the in-flight (or finished) mount. Remounting while
     // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
@@ -8107,12 +8690,14 @@
     const needSteamDbMedia =
       settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamDbGallery;
     if (needSteamDbMedia) mountSteamDbSkeletons(token);
+    if (settings.showSimilarGames) ensureSimilarMount(token);
     const needSteam =
       settings.showSteam ||
       settings.showMetacritic ||
       settings.showDeckProton ||
       settings.showGameStatus ||
       needSteamDb ||
+      settings.showSimilarGames ||
       (settings.showLinks && (settings.links?.itad !== false || settings.links?.steamdb !== false));
     const needUserdata =
       settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
@@ -8347,6 +8932,21 @@
         );
       }
 
+      if (settings.showSimilarGames) {
+        ensureSimilarMount(token);
+        jobs.push(
+          fetchSteamSimilarGames(steam.appId, steam.tags, settings.steamCountry || 'US')
+            .then((games) => {
+              if (!stillHere()) return;
+              applySimilarGames(games, steam.appId, token, { final: true });
+            })
+            .catch(() => {
+              if (!stillHere()) return;
+              removeSimilarGamesUi();
+            })
+        );
+      }
+
       dependentsPromise = Promise.all(jobs);
     };
 
@@ -8419,6 +9019,7 @@
         state.steam = steamResult || { found: false };
         paintSteamBlock();
         if (needSteamDbMedia) removeSteamDbUi();
+        if (settings.showSimilarGames) removeSimilarGamesUi();
       }
 
       if (settings.showGameStatus && !dependentsStarted) {
@@ -8447,6 +9048,7 @@
         _debug: { reason: `Enrichment error: ${err?.message || err}` },
       };
       if (needSteamDbMedia && !state.steamDb) removeSteamDbUi();
+      if (settings.showSimilarGames) removeSimilarGamesUi();
       paintSteamBlock();
       paintOpenCritic();
       paintHltb();
@@ -8597,6 +9199,11 @@
             <button type="button" data-blp-toggle="showSteamDbGallery" class="${draft.showSteamDbGallery ? 'is-on' : ''}">${draft.showSteamDbGallery ? t.on : t.off}</button>
           </div>
           <p class="blp-hint">${escapeHtml(t.showSteamDbGalleryHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showSimilarGames)}</span>
+            <button type="button" data-blp-toggle="showSimilarGames" class="${draft.showSimilarGames ? 'is-on' : ''}">${draft.showSimilarGames ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showSimilarGamesHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showSteamPlayers)}</span>
             <button type="button" data-blp-toggle="showSteamPlayers" class="${draft.showSteamPlayers ? 'is-on' : ''}">${draft.showSteamPlayers ? t.on : t.off}</button>
@@ -9102,6 +9709,7 @@
     if (
       el.hasAttribute?.(ENRICH_ATTR) ||
       el.hasAttribute?.(STEAMDB_ATTR) ||
+      el.hasAttribute?.(SIMILAR_ATTR) ||
       el.hasAttribute?.(CARD_ATTR) ||
       el.hasAttribute?.(CARD_STATE_ATTR) ||
       el.hasAttribute?.('data-blp-debug') ||
@@ -9119,6 +9727,7 @@
       el.classList?.contains('blp-debug-panel') ||
       el.classList?.contains('blp-steamdb-cover') ||
       el.classList?.contains('blp-steam-gallery') ||
+      el.classList?.contains('blp-similar') ||
       el.classList?.contains('blp-viewer') ||
       el.classList?.contains('blp-title-icon-wrap')
     ) {
@@ -9126,7 +9735,7 @@
     }
     return Boolean(
       el.closest?.(
-        `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings`
+        `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings`
       )
     );
   }
