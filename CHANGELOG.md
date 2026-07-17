@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.27] - 2026-07-17
+
+### Fixed
+
+- Screenshots and Similar games strips scroll horizontally inside the column (no page-wide overflow); mouse wheel over the strip scrolls sideways
+
 ## [0.7.26] - 2026-07-17
 
 ### Changed

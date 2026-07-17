@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.26
+// @version           0.7.27
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.26';
+  const SCRIPT_VERSION = '0.7.27';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -3859,6 +3859,9 @@
       .blp-steam-gallery {
         margin-top: 1rem;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
       }
 
       .blp-steam-gallery__head {
@@ -3890,20 +3893,32 @@
 
       .blp-steam-gallery__track {
         display: flex;
+        flex-wrap: nowrap;
         gap: 0.5rem;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
         overflow-y: hidden;
         padding-bottom: 0.35rem;
         scroll-snap-type: x proximity;
+        overscroll-behavior-x: contain;
         -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
       }
 
       .blp-steam-gallery__track::-webkit-scrollbar {
         height: 6px;
       }
 
+      .blp-steam-gallery__track::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+      }
+
       .blp-steam-gallery__track::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.28);
         border-radius: 999px;
       }
 
@@ -3983,6 +3998,9 @@
       .blp-similar {
         margin-top: 1.15rem;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
       }
 
       .blp-similar__head {
@@ -4014,20 +4032,32 @@
 
       .blp-similar__track {
         display: flex;
+        flex-wrap: nowrap;
         gap: 0.65rem;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
         overflow-y: hidden;
         padding-bottom: 0.4rem;
         scroll-snap-type: x proximity;
+        overscroll-behavior-x: contain;
         -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
       }
 
       .blp-similar__track::-webkit-scrollbar {
         height: 6px;
       }
 
+      .blp-similar__track::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+      }
+
       .blp-similar__track::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.28);
         border-radius: 999px;
       }
 
@@ -6941,6 +6971,30 @@
     return document.querySelector('turbo-frame#game-stats');
   }
 
+  /** Keep horizontal strips scrollable inside the column (wheel + containment). */
+  function bindHorizontalTrack(track) {
+    if (!track || track.dataset.blpHScroll === '1') return;
+    track.dataset.blpHScroll = '1';
+    track.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.ctrlKey || e.metaKey) return;
+        if (track.scrollWidth <= track.clientWidth + 1) return;
+        const dy = e.deltaY;
+        const dx = e.deltaX;
+        // Prefer native horizontal trackpad gestures.
+        if (Math.abs(dx) > Math.abs(dy)) return;
+        if (!dy) return;
+        const maxScroll = track.scrollWidth - track.clientWidth;
+        const next = Math.max(0, Math.min(maxScroll, track.scrollLeft + dy));
+        if (next === track.scrollLeft) return;
+        e.preventDefault();
+        track.scrollLeft = next;
+      },
+      { passive: false }
+    );
+  }
+
   function similarMountAnchor() {
     return (
       document.querySelector(`[${STEAMDB_ATTR}="gallery"]`) ||
@@ -6981,6 +7035,7 @@
       </div>
     `;
     anchor.insertAdjacentElement('afterend', host);
+    bindHorizontalTrack(host.querySelector('[data-blp-similar-track]'));
     return host;
   }
 
@@ -7073,6 +7128,7 @@
         img.addEventListener('error', mark, { once: true });
       }
     });
+    bindHorizontalTrack(host.querySelector('[data-blp-similar-track]'));
   }
 
   function ensureSteamGalleryMount(token = '') {
@@ -7103,6 +7159,7 @@
       </div>
     `;
     anchor.insertAdjacentElement('afterend', host);
+    bindHorizontalTrack(host.querySelector('[data-blp-gallery-track]'));
     return host;
   }
 
@@ -7837,6 +7894,7 @@
       });
     });
 
+    bindHorizontalTrack(host.querySelector('[data-blp-gallery-track]'));
     bindSteamDbCoverGallery(items);
   }
 
