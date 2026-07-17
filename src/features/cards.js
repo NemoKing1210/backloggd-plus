@@ -1,11 +1,14 @@
 import { fetchGameStatus, getGsStatusLabel, getGsStatusType } from '../api/gamestatus.js';
-import { fetchSteamUserdata, resolveSteamForGame } from '../api/steam.js';
+import { fetchSteamByAppId, fetchSteamUserdata, resolveSteamForGame } from '../api/steam.js';
 import {
+  CARD_APPID_ATTR,
   CARD_ATTR,
   CARD_CONCURRENCY,
   CARD_ROOT_MARGIN,
   CARD_SKIP_ANCESTOR,
+  CARD_SLUG_ATTR,
   CARD_STATE_ATTR,
+  CARD_TITLE_ATTR,
   GAMESTATUS_SITE_BASE,
 } from '../constants.js';
 import { fmt } from '../i18n/index.js';
@@ -15,23 +18,36 @@ import {
   formatPriceText,
   formatReviewPercent,
   formatReviewPercentCompact,
-  getPageContext,
   mcScoreTier,
   reviewScoreClass,
 } from './enrichment.js';
+import { getPageContext } from './page.js';
 
 export function cardBadgeToken() {
   return [
     settings.steamCountry || 'US',
-    settings.showSteam ? 1 : 0,
-    settings.showSteamOwned ? 1 : 0,
-    settings.showSteamWishlist ? 1 : 0,
-    settings.showGameStatus ? 1 : 0,
     settings.showCardBadges ? 1 : 0,
+    settings.showCardBadgePrice !== false ? 1 : 0,
+    settings.showCardBadgeReview !== false ? 1 : 0,
+    settings.showCardBadgeOwned !== false ? 1 : 0,
+    settings.showCardBadgeWishlist !== false ? 1 : 0,
+    settings.showCardBadgeGameStatus !== false ? 1 : 0,
   ].join('|');
 }
 
+export function anyCardBadgeTypeEnabled() {
+  return (
+    settings.showCardBadgePrice !== false ||
+    settings.showCardBadgeReview !== false ||
+    settings.showCardBadgeOwned !== false ||
+    settings.showCardBadgeWishlist !== false ||
+    settings.showCardBadgeGameStatus !== false
+  );
+}
+
 export function parseCardSlug(cover) {
+  const fromAttr = cover.getAttribute?.(CARD_SLUG_ATTR);
+  if (fromAttr) return fromAttr.toLowerCase();
   const roots = [
     cover,
     cover.parentElement,
@@ -51,6 +67,8 @@ export function parseCardSlug(cover) {
 }
 
 export function parseCardTitle(cover, slug) {
+  const fromAttr = cover.getAttribute?.(CARD_TITLE_ATTR);
+  if (fromAttr) return fromAttr.trim();
   const img = cover.querySelector('img[alt]');
   if (img?.alt) return img.alt.trim();
   const nearby = cover
@@ -60,6 +78,12 @@ export function parseCardTitle(cover, slug) {
     return nearby.textContent.replace(/\s+\d{4}\s*$/, '').trim();
   }
   return slug ? slug.replace(/-/g, ' ') : '';
+}
+
+export function parseCardAppId(cover) {
+  const raw = cover.getAttribute?.(CARD_APPID_ATTR);
+  const id = Number(raw);
+  return Number.isFinite(id) && id > 0 ? id : null;
 }
 
 export function ensureCardBadgeMount(cover) {
@@ -78,41 +102,50 @@ export function ensureCardBadgeMount(cover) {
 
 export function renderCardBadgesHtml({ steam, owned, wishlist, gamestatus }) {
   const chips = [];
-  if (settings.showSteam !== false && steam?.found) {
-    const priceText = formatPriceText(steam);
-    if (priceText) {
-      const discount =
-        steam.price?.discount_percent > 0
-          ? ` <span class="blp-card-badge--discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
-          : '';
-      chips.push(
-        `<a class="blp-card-badge blp-card-badge--price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}</a>`
-      );
+  if (steam?.found) {
+    if (settings.showCardBadgePrice !== false) {
+      const priceText = formatPriceText(steam);
+      if (priceText) {
+        const discount =
+          steam.price?.discount_percent > 0
+            ? ` <span class="blp-card-badge--discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
+            : '';
+        chips.push(
+          `<a class="blp-card-badge blp-card-badge--price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}</a>`
+        );
+      }
     }
 
-    const reviewCompact = formatReviewPercentCompact(steam.reviews);
-    const reviewFull = formatReviewPercent(steam.reviews);
-    const reviewClass = reviewScoreClass(steam.reviews);
-    if (reviewCompact) {
-      chips.push(
-        `<a class="blp-card-badge blp-card-badge--review ${escapeAttr(reviewClass)}" href="${escapeAttr(steam.storeUrl)}#app_reviews_hash" target="_blank" rel="noopener noreferrer" title="${escapeAttr(reviewFull || reviewCompact)}">${escapeHtml(reviewCompact)}</a>`
-      );
-    } else if (steam.metacritic?.score != null) {
-      const mc = steam.metacritic.score;
-      const tier = mcScoreTier(mc);
-      chips.push(
-        `<a class="blp-card-badge blp-card-badge--mc${tier ? ` blp-card-badge--mc-${tier}` : ''}" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeAttr(t.metacritic)}">${escapeHtml(String(mc))}</a>`
-      );
+    if (settings.showCardBadgeReview !== false) {
+      const reviewCompact = formatReviewPercentCompact(steam.reviews);
+      const reviewFull = formatReviewPercent(steam.reviews);
+      const reviewClass = reviewScoreClass(steam.reviews);
+      if (reviewCompact) {
+        chips.push(
+          `<a class="blp-card-badge blp-card-badge--review ${escapeAttr(reviewClass)}" href="${escapeAttr(steam.storeUrl)}#app_reviews_hash" target="_blank" rel="noopener noreferrer" title="${escapeAttr(reviewFull || reviewCompact)}">${escapeHtml(reviewCompact)}</a>`
+        );
+      } else if (steam.metacritic?.score != null) {
+        const mc = steam.metacritic.score;
+        const tier = mcScoreTier(mc);
+        chips.push(
+          `<a class="blp-card-badge blp-card-badge--mc${tier ? ` blp-card-badge--mc-${tier}` : ''}" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeAttr(t.metacritic)}">${escapeHtml(String(mc))}</a>`
+        );
+      }
     }
   }
-  if (owned) {
+  if (owned && settings.showCardBadgeOwned !== false) {
     chips.push(`<span class="blp-card-badge blp-card-badge--owned">${escapeHtml(t.steamOwned)}</span>`);
-  } else if (wishlist) {
+  } else if (wishlist && settings.showCardBadgeWishlist !== false) {
     chips.push(
       `<span class="blp-card-badge blp-card-badge--wishlist">${escapeHtml(t.steamWishlist)}</span>`
     );
   }
-  if (settings.showGameStatus && gamestatus && !gamestatus.missing && gamestatus.data) {
+  if (
+    settings.showCardBadgeGameStatus !== false &&
+    gamestatus &&
+    !gamestatus.missing &&
+    gamestatus.data
+  ) {
     const type = getGsStatusType(gamestatus.data);
     const label = getGsStatusLabel(gamestatus.data, type);
     const gsSlug = gamestatus.data.slug || gamestatus.slug;
@@ -168,13 +201,28 @@ export function clearCardMarkers(cover) {
   cover.querySelector('.blp-card-badges')?.remove();
 }
 
+export function clearAllCardBadges() {
+  document.querySelectorAll('.blp-card-badges').forEach((el) => el.remove());
+  document.querySelectorAll(`[${CARD_ATTR}]`).forEach((el) => {
+    el.removeAttribute(CARD_ATTR);
+    el.removeAttribute(CARD_STATE_ATTR);
+  });
+}
+
 export async function enrichGameCard(cover) {
   const token = cardBadgeToken();
   if (cardIsSettled(cover, token)) return;
 
+  if (!anyCardBadgeTypeEnabled()) {
+    clearCardMarkers(cover);
+    markCardState(cover, token, 'empty');
+    return;
+  }
+
+  const knownAppId = parseCardAppId(cover);
   const slug = parseCardSlug(cover);
   const title = parseCardTitle(cover, slug);
-  if (!slug || !title) {
+  if (!knownAppId && (!slug || !title)) {
     clearCardMarkers(cover);
     markCardState(cover, token, 'empty');
     return;
@@ -187,24 +235,32 @@ export async function enrichGameCard(cover) {
   await enqueueCardJob(async () => {
     if (cover.getAttribute(CARD_ATTR) !== token) return;
 
-    const needUserdata = settings.showSteamOwned || settings.showSteamWishlist;
+    const needUserdata =
+      settings.showCardBadgeOwned !== false || settings.showCardBadgeWishlist !== false;
+    const needGameStatus = settings.showCardBadgeGameStatus !== false;
+    const country = settings.steamCountry || 'US';
+
     const [steam, userdata] = await Promise.all([
-      resolveSteamForGame({
-        title,
-        slug,
-        country: settings.steamCountry || 'US',
-        includeTags: false,
-      }).catch(() => ({ found: false })),
+      knownAppId
+        ? fetchSteamByAppId(knownAppId, country, { includeTags: false }).catch(() => ({
+            found: false,
+          }))
+        : resolveSteamForGame({
+            title,
+            slug,
+            country,
+            includeTags: false,
+          }).catch(() => ({ found: false })),
       needUserdata ? fetchSteamUserdata().catch(() => null) : Promise.resolve(null),
     ]);
 
     let gamestatus = null;
-    if (settings.showGameStatus && steam?.found && steam.appId != null) {
+    if (needGameStatus && steam?.found && steam.appId != null) {
       gamestatus = await fetchGameStatus({
         appId: steam.appId,
         storeUrl: steam.storeUrl,
         name: steam.name,
-        title,
+        title: title || steam.name,
         pageSlug: slug,
       }).catch(() => null);
     }
@@ -215,10 +271,10 @@ export async function enrichGameCard(cover) {
     let wishlist = false;
     if (userdata && steam?.found && steam.appId != null) {
       const id = Number(steam.appId);
-      owned = settings.showSteamOwned !== false && userdata.owned.has(id);
+      owned = settings.showCardBadgeOwned !== false && userdata.owned.has(id);
       wishlist =
         !owned &&
-        settings.showSteamWishlist !== false &&
+        settings.showCardBadgeWishlist !== false &&
         userdata.wishlist.has(id);
     }
 
@@ -235,20 +291,29 @@ export async function enrichGameCard(cover) {
   });
 }
 
-export function scheduleCardBadges(force = false) {
-  if (!settings.showCardBadges) {
-    document.querySelectorAll('.blp-card-badges').forEach((el) => el.remove());
-    document.querySelectorAll(`[${CARD_ATTR}]`).forEach((el) => {
-      el.removeAttribute(CARD_ATTR);
-      el.removeAttribute(CARD_STATE_ATTR);
+export function collectCardCovers() {
+  const ctx = getPageContext();
+  const covers = [];
+  if (ctx.isGamePage) {
+    document.querySelectorAll(`.blp-similar__cover[${CARD_APPID_ATTR}]`).forEach((cover) => {
+      covers.push(cover);
     });
+    return covers;
+  }
+  document.querySelectorAll('.game-cover').forEach((cover) => {
+    if (cover.closest(CARD_SKIP_ANCESTOR)) return;
+    covers.push(cover);
+  });
+  return covers;
+}
+
+export function scheduleCardBadges(force = false) {
+  if (!settings.showCardBadges || !anyCardBadgeTypeEnabled()) {
+    clearAllCardBadges();
     cardObserver?.disconnect();
     cardObserver = null;
     return;
   }
-
-  const ctx = getPageContext();
-  if (ctx.isGamePage) return;
 
   const token = cardBadgeToken();
   if (!cardObserver) {
@@ -265,8 +330,7 @@ export function scheduleCardBadges(force = false) {
     );
   }
 
-  document.querySelectorAll('.game-cover').forEach((cover) => {
-    if (cover.closest(CARD_SKIP_ANCESTOR)) return;
+  collectCardCovers().forEach((cover) => {
     if (!force && cardIsSettled(cover, token)) return;
     if (force) clearCardMarkers(cover);
     cardObserver.observe(cover);

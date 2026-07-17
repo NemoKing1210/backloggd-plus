@@ -1,7 +1,15 @@
 import { getCacheSource } from '../cache.js';
-import { FAVICON_URL, SIMILAR_ATTR, STEAMDB_ATTR } from '../constants.js';
+import {
+  CARD_APPID_ATTR,
+  CARD_SLUG_ATTR,
+  CARD_TITLE_ATTR,
+  FAVICON_URL,
+  SIMILAR_ATTR,
+  STEAMDB_ATTR,
+} from '../constants.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
+import { slugifyForBackloggd } from '../utils/slug.js';
 import { paintDebugCacheMark } from './debug-cache.js';
 import { bindHorizontalTrack, gameStatsMountAnchor } from './steamdb-ui.js';
 
@@ -100,9 +108,22 @@ export function applySimilarGames(games, appId, token = '', { final = false } = 
             <img src="${escapeAttr(favicon('store.steampowered.com'))}" alt="" width="14" height="14" loading="lazy" referrerpolicy="no-referrer" />
           </a>`
         : '';
+      const appId = Number(game.appId);
+      const appIdAttr =
+        Number.isFinite(appId) && appId > 0
+          ? ` ${CARD_APPID_ATTR}="${escapeAttr(String(appId))}"`
+          : '';
+      const slug =
+        (game.backloggdUrl && game.backloggdUrl.match(/\/games\/([^/?#]+)/i)?.[1]) ||
+        slugifyForBackloggd(game.name) ||
+        '';
+      const slugAttr = slug ? ` ${CARD_SLUG_ATTR}="${escapeAttr(slug)}"` : '';
+      const titleAttr = game.name
+        ? ` ${CARD_TITLE_ATTR}="${escapeAttr(game.name)}"`
+        : '';
       return `
         <div class="blp-similar__card">
-          <div class="blp-similar__cover">
+          <div class="blp-similar__cover"${appIdAttr}${slugAttr}${titleAttr}>
             <span class="blp-similar__badge">
               <span class="blp-similar__pct">${pct}%</span>
               <span class="blp-similar__match">${escapeHtml(t.similarGamesMatch)}</span>

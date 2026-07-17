@@ -12,6 +12,9 @@ export const STEAMDB_ATTR = 'data-blp-steamdb';
 export const SIMILAR_ATTR = 'data-blp-similar';
 export const CARD_ATTR = 'data-blp-card';
 export const CARD_STATE_ATTR = 'data-blp-card-state';
+export const CARD_APPID_ATTR = 'data-blp-card-appid';
+export const CARD_SLUG_ATTR = 'data-blp-card-slug';
+export const CARD_TITLE_ATTR = 'data-blp-card-title';
 export const FAVICON_URL = 'https://www.google.com/s2/favicons?domain={domain}&sz=32';
 export const SCAN_DEBOUNCE_MS = 400;
 export const CARD_CONCURRENCY = 3;
@@ -106,6 +109,11 @@ export const DEFAULT_SETTINGS = {
   showGameStats: true,
   showSteamPlayers: true,
   showCardBadges: true,
+  showCardBadgePrice: true,
+  showCardBadgeReview: true,
+  showCardBadgeOwned: true,
+  showCardBadgeWishlist: true,
+  showCardBadgeGameStatus: true,
   debugMode: false,
   links: {
     igdb: true,

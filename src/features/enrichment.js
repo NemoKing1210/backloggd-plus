@@ -719,6 +719,11 @@ export function renderUnifiedDebugPanel({
       showGameStats: settings.showGameStats,
       showSteamPlayers: settings.showSteamPlayers,
       showCardBadges: settings.showCardBadges,
+      showCardBadgePrice: settings.showCardBadgePrice,
+      showCardBadgeReview: settings.showCardBadgeReview,
+      showCardBadgeOwned: settings.showCardBadgeOwned,
+      showCardBadgeWishlist: settings.showCardBadgeWishlist,
+      showCardBadgeGameStatus: settings.showCardBadgeGameStatus,
       showLinks: settings.showLinks,
       links: settings.links,
       steamOverride: getSteamOverride(slug),
@@ -1226,6 +1231,7 @@ export async function enrichGamePage() {
           .then((games) => {
             if (!stillHere()) return;
             applySimilarGames(games, steam.appId, token, { final: true });
+            import('./cards.js').then((m) => m.scheduleCardBadges());
           })
           .catch(() => {
             if (!stillHere()) return;

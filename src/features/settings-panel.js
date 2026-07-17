@@ -194,6 +194,11 @@ export function openSettings() {
         <h3>${escapeHtml(t.sectionLists)}</h3>
         ${toggleHtml('showCardBadges', draft.showCardBadges)}
         ${hintHtml('showCardBadgesHint')}
+        ${toggleHtml('showCardBadgePrice', draft.showCardBadgePrice)}
+        ${toggleHtml('showCardBadgeReview', draft.showCardBadgeReview)}
+        ${toggleHtml('showCardBadgeOwned', draft.showCardBadgeOwned)}
+        ${toggleHtml('showCardBadgeWishlist', draft.showCardBadgeWishlist)}
+        ${toggleHtml('showCardBadgeGameStatus', draft.showCardBadgeGameStatus)}
       </section>
       </div>
       <div ${panelAttrs('links', activeTab)}>
