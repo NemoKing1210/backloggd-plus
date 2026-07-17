@@ -17,6 +17,22 @@ export const LOCALE_NATIVE_NAMES = {
   pl: 'Polski',
 };
 
+/** Representative country flags for the language picker (emoji). */
+export const LOCALE_FLAGS = {
+  en: '🇺🇸',
+  ru: '🇷🇺',
+  zh: '🇨🇳',
+  es: '🇪🇸',
+  pt: '🇧🇷',
+  de: '🇩🇪',
+  fr: '🇫🇷',
+  ja: '🇯🇵',
+  ko: '🇰🇷',
+  pl: '🇵🇱',
+};
+
+export const LOCALE_FLAG_AUTO = '🌐';
+
 export function detectLocale() {
   const raw = String(navigator.language || 'en').toLowerCase();
   const short = raw.slice(0, 2);

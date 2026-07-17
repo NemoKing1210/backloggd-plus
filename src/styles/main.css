@@ -67,6 +67,16 @@ turbo-frame#game-stats[data-blp-hide-game-stats="1"] {
 #blp-nav-settings {
   white-space: nowrap;
   vertical-align: middle;
+  background-color: var(--blp-accent) !important;
+  border-color: transparent !important;
+  color: #0b1210 !important;
+  font-weight: 600;
+}
+
+#blp-nav-settings:hover,
+#blp-nav-settings:focus-visible {
+  filter: brightness(1.06);
+  color: #0b1210 !important;
 }
 
 #add-a-game + #blp-nav-settings {
@@ -1572,7 +1582,7 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-settings {
-  width: min(440px, 100%);
+  width: min(520px, 100%);
   max-height: min(90vh, 720px);
   display: flex;
   flex-direction: column;
@@ -1587,9 +1597,82 @@ img.blp-cover-zoomable:focus-visible {
 
 .blp-settings__head {
   flex: 0 0 auto;
-  padding: 18px 18px 12px;
-  border-bottom: 1px solid var(--blp-border);
+  padding: 18px 18px 10px;
   background: #151921;
+}
+
+.blp-settings__tabs {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 0 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scroll-padding-inline: 14px;
+  border-bottom: 1px solid var(--blp-border);
+  background: #12161e;
+  /* Dark thin scrollbar (Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) #0c0f14;
+}
+
+.blp-settings__tabs::-webkit-scrollbar {
+  height: 5px;
+}
+
+.blp-settings__tabs::-webkit-scrollbar-track {
+  background: #0c0f14;
+  border-radius: 999px;
+  margin-inline: 10px;
+}
+
+.blp-settings__tabs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.blp-settings__tabs::-webkit-scrollbar-thumb:hover {
+  background: rgba(61, 184, 154, 0.55);
+}
+
+.blp-settings__tab {
+  flex: 0 0 auto;
+  appearance: none;
+  position: relative;
+  margin: 0;
+  padding: 11px 12px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--blp-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1.2;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.blp-settings__tab:hover {
+  color: var(--blp-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.blp-settings__tab.is-active {
+  color: var(--blp-accent);
+  border-bottom-color: var(--blp-accent);
+  background: rgba(61, 184, 154, 0.08);
+}
+
+.blp-settings__tab:focus-visible {
+  outline: 2px solid rgba(61, 184, 154, 0.55);
+  outline-offset: -2px;
 }
 
 .blp-settings__body {
@@ -1597,6 +1680,10 @@ img.blp-cover-zoomable:focus-visible {
   min-height: 0;
   overflow: auto;
   padding: 14px 18px;
+}
+
+.blp-settings__panel[hidden] {
+  display: none;
 }
 
 .blp-settings__foot {
@@ -1618,12 +1705,6 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-settings section {
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--blp-border);
-}
-
-.blp-settings__body > section:last-child {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
@@ -1706,8 +1787,9 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-toggle button.is-on {
-  border-color: rgba(61, 184, 154, 0.6);
-  color: var(--blp-accent);
+  background: var(--blp-accent);
+  border-color: transparent;
+  color: #0b1210;
 }
 
 .blp-actions {

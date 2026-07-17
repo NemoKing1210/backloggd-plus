@@ -15,12 +15,72 @@ import {
   REPO_URL,
   SCRIPT_VERSION,
 } from '../constants.js';
-import { LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
+import { LOCALE_FLAG_AUTO, LOCALE_FLAGS, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
 import { linkLabelKey, saveSettings } from '../settings.js';
 import { reloadRuntimeSettings, settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { scheduleCardBadges } from './cards.js';
 import { enrichGamePage, getPageContext, removeEnrichment } from './enrichment.js';
+
+const SETTINGS_TABS = [
+  { id: 'general', labelKey: 'sectionGeneral' },
+  { id: 'game', labelKey: 'sectionGame' },
+  { id: 'lists', labelKey: 'sectionLists' },
+  { id: 'links', labelKey: 'sectionLinks' },
+  { id: 'cache', labelKey: 'sectionCache' },
+  { id: 'debug', labelKey: 'sectionDebug' },
+];
+
+function toggleHtml(key, on) {
+  return `
+    <div class="blp-toggle">
+      <span>${escapeHtml(t[key])}</span>
+      <button type="button" data-blp-toggle="${escapeAttr(key)}" class="${on ? 'is-on' : ''}">${on ? t.on : t.off}</button>
+    </div>
+  `;
+}
+
+function hintHtml(key) {
+  return `<p class="blp-hint">${escapeHtml(t[key])}</p>`;
+}
+
+function buildTabsHtml(activeId) {
+  return SETTINGS_TABS.map(({ id, labelKey }) => {
+    const active = id === activeId;
+    return `
+      <button
+        type="button"
+        class="blp-settings__tab${active ? ' is-active' : ''}"
+        role="tab"
+        id="blp-tab-${escapeAttr(id)}"
+        data-blp-tab="${escapeAttr(id)}"
+        aria-selected="${active ? 'true' : 'false'}"
+        aria-controls="blp-panel-${escapeAttr(id)}"
+        tabindex="${active ? '0' : '-1'}"
+      >${escapeHtml(t[labelKey])}</button>
+    `;
+  }).join('');
+}
+
+function panelAttrs(id, activeId) {
+  const active = id === activeId;
+  return `class="blp-settings__panel${active ? ' is-active' : ''}" id="blp-panel-${escapeAttr(id)}" role="tabpanel" aria-labelledby="blp-tab-${escapeAttr(id)}"${active ? '' : ' hidden'}`;
+}
+
+function activateSettingsTab(root, tabId) {
+  if (!SETTINGS_TABS.some((tab) => tab.id === tabId)) return;
+  root.querySelectorAll('[data-blp-tab]').forEach((btn) => {
+    const on = btn.getAttribute('data-blp-tab') === tabId;
+    btn.classList.toggle('is-active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    btn.tabIndex = on ? 0 : -1;
+  });
+  root.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
+    const on = panel.id === `blp-panel-${tabId}`;
+    panel.classList.toggle('is-active', on);
+    panel.hidden = !on;
+  });
+}
 
 export function openSettings() {
   if (document.querySelector('.blp-settings-backdrop')) return;
@@ -45,6 +105,7 @@ export function openSettings() {
     `;
   }).join('');
 
+  const activeTab = 'general';
   const backdrop = document.createElement('div');
   backdrop.className = 'blp-settings-backdrop';
   backdrop.innerHTML = `
@@ -53,22 +114,29 @@ export function openSettings() {
         <h2>${escapeHtml(t.panelTitle)} <span class="blp-settings__ver">v${escapeHtml(SCRIPT_VERSION)}</span></h2>
         <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
       </div>
+      <div class="blp-settings__tabs" role="tablist" aria-label="${escapeAttr(t.panelTitle)}">
+        ${buildTabsHtml(activeTab)}
+      </div>
       <div class="blp-settings__body">
+      <div ${panelAttrs('general', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionGeneral)}</h3>
         <div class="blp-field">
           <label for="blp-ui-locale">${escapeHtml(t.uiLanguage)}</label>
           <select id="blp-ui-locale">
-            <option value="auto" ${(draft.uiLocale || 'auto') === 'auto' ? 'selected' : ''}>${escapeHtml(t.uiLanguageAuto)}</option>
+            <option value="auto" ${(draft.uiLocale || 'auto') === 'auto' ? 'selected' : ''}>${LOCALE_FLAG_AUTO} ${escapeHtml(t.uiLanguageAuto)}</option>
             ${SUPPORTED_LOCALES.map((code) => {
               const selected = draft.uiLocale === code ? 'selected' : '';
               const name = LOCALE_NATIVE_NAMES[code] || code;
-              return `<option value="${code}" ${selected}>${escapeHtml(name)}</option>`;
+              const flag = LOCALE_FLAGS[code] || '';
+              return `<option value="${code}" ${selected}>${flag} ${escapeHtml(name)}</option>`;
             }).join('')}
           </select>
           <p class="blp-hint">${escapeHtml(t.uiLanguageHint)}</p>
         </div>
       </section>
+      </div>
+      <div ${panelAttrs('game', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionGame)}</h3>
         <div class="blp-field">
@@ -83,112 +151,58 @@ export function openSettings() {
           </select>
           <p class="blp-hint">${escapeHtml(t.steamCountryHint)}</p>
         </div>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteam)}</span>
-          <button type="button" data-blp-toggle="showSteam" class="${draft.showSteam ? 'is-on' : ''}">${draft.showSteam ? t.on : t.off}</button>
-        </div>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamOwned)}</span>
-          <button type="button" data-blp-toggle="showSteamOwned" class="${draft.showSteamOwned ? 'is-on' : ''}">${draft.showSteamOwned ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamOwnedHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamWishlist)}</span>
-          <button type="button" data-blp-toggle="showSteamWishlist" class="${draft.showSteamWishlist ? 'is-on' : ''}">${draft.showSteamWishlist ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamWishlistHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamTags)}</span>
-          <button type="button" data-blp-toggle="showSteamTags" class="${draft.showSteamTags ? 'is-on' : ''}">${draft.showSteamTags ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamTagsHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamCategories)}</span>
-          <button type="button" data-blp-toggle="showSteamCategories" class="${draft.showSteamCategories ? 'is-on' : ''}">${draft.showSteamCategories ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamCategoriesHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showMetacritic)}</span>
-          <button type="button" data-blp-toggle="showMetacritic" class="${draft.showMetacritic ? 'is-on' : ''}">${draft.showMetacritic ? t.on : t.off}</button>
-        </div>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showOpenCritic)}</span>
-          <button type="button" data-blp-toggle="showOpenCritic" class="${draft.showOpenCritic ? 'is-on' : ''}">${draft.showOpenCritic ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showOpenCriticHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showHltb)}</span>
-          <button type="button" data-blp-toggle="showHltb" class="${draft.showHltb ? 'is-on' : ''}">${draft.showHltb ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showHltbHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showDeckProton)}</span>
-          <button type="button" data-blp-toggle="showDeckProton" class="${draft.showDeckProton ? 'is-on' : ''}">${draft.showDeckProton ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showDeckProtonHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showGameStatus)}</span>
-          <button type="button" data-blp-toggle="showGameStatus" class="${draft.showGameStatus ? 'is-on' : ''}">${draft.showGameStatus ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showGameStatusHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showLinks)}</span>
-          <button type="button" data-blp-toggle="showLinks" class="${draft.showLinks ? 'is-on' : ''}">${draft.showLinks ? t.on : t.off}</button>
-        </div>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamPageLink)}</span>
-          <button type="button" data-blp-toggle="showSteamPageLink" class="${draft.showSteamPageLink ? 'is-on' : ''}">${draft.showSteamPageLink ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamPageLinkHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamDbPageLink)}</span>
-          <button type="button" data-blp-toggle="showSteamDbPageLink" class="${draft.showSteamDbPageLink ? 'is-on' : ''}">${draft.showSteamDbPageLink ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamDbPageLinkHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamDbIcon)}</span>
-          <button type="button" data-blp-toggle="showSteamDbIcon" class="${draft.showSteamDbIcon ? 'is-on' : ''}">${draft.showSteamDbIcon ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamDbIconHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamDbCover)}</span>
-          <button type="button" data-blp-toggle="showSteamDbCover" class="${draft.showSteamDbCover ? 'is-on' : ''}">${draft.showSteamDbCover ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamDbCoverHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamDbGallery)}</span>
-          <button type="button" data-blp-toggle="showSteamDbGallery" class="${draft.showSteamDbGallery ? 'is-on' : ''}">${draft.showSteamDbGallery ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamDbGalleryHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSimilarGames)}</span>
-          <button type="button" data-blp-toggle="showSimilarGames" class="${draft.showSimilarGames ? 'is-on' : ''}">${draft.showSimilarGames ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSimilarGamesHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showGameStats)}</span>
-          <button type="button" data-blp-toggle="showGameStats" class="${draft.showGameStats ? 'is-on' : ''}">${draft.showGameStats ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showGameStatsHint)}</p>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showSteamPlayers)}</span>
-          <button type="button" data-blp-toggle="showSteamPlayers" class="${draft.showSteamPlayers ? 'is-on' : ''}">${draft.showSteamPlayers ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showSteamPlayersHint)}</p>
+        ${toggleHtml('showSteam', draft.showSteam)}
+        ${toggleHtml('showSteamOwned', draft.showSteamOwned)}
+        ${hintHtml('showSteamOwnedHint')}
+        ${toggleHtml('showSteamWishlist', draft.showSteamWishlist)}
+        ${hintHtml('showSteamWishlistHint')}
+        ${toggleHtml('showSteamTags', draft.showSteamTags)}
+        ${hintHtml('showSteamTagsHint')}
+        ${toggleHtml('showSteamCategories', draft.showSteamCategories)}
+        ${hintHtml('showSteamCategoriesHint')}
+        ${toggleHtml('showMetacritic', draft.showMetacritic)}
+        ${toggleHtml('showOpenCritic', draft.showOpenCritic)}
+        ${hintHtml('showOpenCriticHint')}
+        ${toggleHtml('showHltb', draft.showHltb)}
+        ${hintHtml('showHltbHint')}
+        ${toggleHtml('showDeckProton', draft.showDeckProton)}
+        ${hintHtml('showDeckProtonHint')}
+        ${toggleHtml('showGameStatus', draft.showGameStatus)}
+        ${hintHtml('showGameStatusHint')}
+        ${toggleHtml('showLinks', draft.showLinks)}
+        ${toggleHtml('showSteamPageLink', draft.showSteamPageLink)}
+        ${hintHtml('showSteamPageLinkHint')}
+        ${toggleHtml('showSteamDbPageLink', draft.showSteamDbPageLink)}
+        ${hintHtml('showSteamDbPageLinkHint')}
+        ${toggleHtml('showSteamDbIcon', draft.showSteamDbIcon)}
+        ${hintHtml('showSteamDbIconHint')}
+        ${toggleHtml('showSteamDbCover', draft.showSteamDbCover)}
+        ${hintHtml('showSteamDbCoverHint')}
+        ${toggleHtml('showSteamDbGallery', draft.showSteamDbGallery)}
+        ${hintHtml('showSteamDbGalleryHint')}
+        ${toggleHtml('showSimilarGames', draft.showSimilarGames)}
+        ${hintHtml('showSimilarGamesHint')}
+        ${toggleHtml('showGameStats', draft.showGameStats)}
+        ${hintHtml('showGameStatsHint')}
+        ${toggleHtml('showSteamPlayers', draft.showSteamPlayers)}
+        ${hintHtml('showSteamPlayersHint')}
       </section>
+      </div>
+      <div ${panelAttrs('lists', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionLists)}</h3>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.showCardBadges)}</span>
-          <button type="button" data-blp-toggle="showCardBadges" class="${draft.showCardBadges ? 'is-on' : ''}">${draft.showCardBadges ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.showCardBadgesHint)}</p>
+        ${toggleHtml('showCardBadges', draft.showCardBadges)}
+        ${hintHtml('showCardBadgesHint')}
       </section>
+      </div>
+      <div ${panelAttrs('links', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionLinks)}</h3>
         <p class="blp-hint" style="margin-bottom:10px">${escapeHtml(t.sectionLinksHint)}</p>
         ${linkToggles}
       </section>
+      </div>
+      <div ${panelAttrs('cache', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionCache)}</h3>
         ${buildCacheMeterHtml()}
@@ -201,14 +215,14 @@ export function openSettings() {
         <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
         <div class="blp-cache-msg" data-blp-cache-msg hidden></div>
       </section>
+      </div>
+      <div ${panelAttrs('debug', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionDebug)}</h3>
-        <div class="blp-toggle">
-          <span>${escapeHtml(t.debugMode)}</span>
-          <button type="button" data-blp-toggle="debugMode" class="${draft.debugMode ? 'is-on' : ''}">${draft.debugMode ? t.on : t.off}</button>
-        </div>
-        <p class="blp-hint">${escapeHtml(t.debugModeHint)}</p>
+        ${toggleHtml('debugMode', draft.debugMode)}
+        ${hintHtml('debugModeHint')}
       </section>
+      </div>
       </div>
       <div class="blp-settings__foot">
         <div class="blp-actions">
@@ -223,13 +237,44 @@ export function openSettings() {
     </div>
   `;
 
-  const close = () => backdrop.remove();
+  const prevOverflow = document.documentElement.style.overflow;
+  document.documentElement.style.overflow = 'hidden';
+
+  const close = () => {
+    backdrop.remove();
+    document.documentElement.style.overflow = prevOverflow;
+  };
+  const dialog = backdrop.querySelector('.blp-settings');
 
   backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) close();
   });
 
   backdrop.querySelector('[data-blp-cancel]')?.addEventListener('click', close);
+
+  dialog?.querySelector('.blp-settings__tabs')?.addEventListener('click', (e) => {
+    const btn = e.target?.closest?.('[data-blp-tab]');
+    if (!btn || !dialog.contains(btn)) return;
+    activateSettingsTab(dialog, btn.getAttribute('data-blp-tab'));
+  });
+
+  dialog?.querySelector('.blp-settings__tabs')?.addEventListener('keydown', (e) => {
+    const tabs = [...dialog.querySelectorAll('[data-blp-tab]')];
+    const current = e.target?.closest?.('[data-blp-tab]');
+    if (!current || !tabs.length) return;
+    const idx = tabs.indexOf(current);
+    if (idx < 0) return;
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = tabs.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    const tabId = tabs[next].getAttribute('data-blp-tab');
+    activateSettingsTab(dialog, tabId);
+    tabs[next].focus();
+  });
 
   backdrop.querySelectorAll('[data-blp-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {

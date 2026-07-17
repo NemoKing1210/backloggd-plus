@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.34-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.38-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -15,7 +15,7 @@ Also listed on [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-
 
 > **Note:** Catalog pages on Greasy Fork / ScriptCat may lag behind this repository — I don’t always manage to push every release there right away. Sorry about that. For the newest build, prefer the [GitHub raw install URL](#quick-install) (or clone and `npm run build`). The script’s `@updateURL` / `@downloadURL` also point at GitHub `main`.
 
-> **Status:** early (`0.7.34`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.38`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -92,6 +92,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
+- Tabbed panel: General · Game page · Lists · Links · Cache · Debug
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / list cover badges / links / Steam & SteamDB Backloggd buttons
