@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.29
+// @version           0.7.30
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.29';
+  const SCRIPT_VERSION = '0.7.30';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -160,6 +160,7 @@
     showSteamDbCover: true,
     showSteamDbGallery: true,
     showSimilarGames: true,
+    showGameStats: true,
     showSteamPlayers: true,
     showCardBadges: true,
     debugMode: false,
@@ -282,6 +283,9 @@
       similarGamesTitle: 'Similar games',
       similarGamesMatch: 'Match',
       similarGamesOpenSteam: 'Open on Steam',
+      showGameStats: 'Show game stats block',
+      showGameStatsHint:
+        'Native Backloggd Plays / Playing / Backlogs / Wishlists / Ratings strip (#game-stats).',
       viewerZoomIn: 'Zoom in',
       viewerZoomOut: 'Zoom out',
       viewerZoomReset: 'Reset zoom',
@@ -483,6 +487,9 @@
       similarGamesTitle: 'Похожие игры',
       similarGamesMatch: 'Сходство',
       similarGamesOpenSteam: 'Открыть в Steam',
+      showGameStats: 'Блок статистики игры',
+      showGameStatsHint:
+        'Нативный блок Backloggd: Plays, Playing, Backlogs, Wishlists и Ratings (#game-stats).',
       viewerZoomIn: 'Увеличить',
       viewerZoomOut: 'Уменьшить',
       viewerZoomReset: 'Сбросить масштаб',
@@ -680,6 +687,8 @@
       similarGamesTitle: '相似游戏',
       similarGamesMatch: '匹配',
       similarGamesOpenSteam: '在 Steam 打开',
+      showGameStats: '显示游戏统计块',
+      showGameStatsHint: 'Backloggd 原生 Plays / Playing / Backlogs / Wishlists / Ratings 区块（#game-stats）。',
       viewerZoomIn: '放大',
       viewerZoomOut: '缩小',
       viewerZoomReset: '重置缩放',
@@ -879,6 +888,9 @@
       similarGamesTitle: 'Juegos similares',
       similarGamesMatch: 'Afinidad',
       similarGamesOpenSteam: 'Abrir en Steam',
+      showGameStats: 'Mostrar bloque de estadísticas',
+      showGameStatsHint:
+        'Bloque nativo de Backloggd: Plays, Playing, Backlogs, Wishlists y Ratings (#game-stats).',
       viewerZoomIn: 'Acercar',
       viewerZoomOut: 'Alejar',
       viewerZoomReset: 'Restablecer zoom',
@@ -1081,6 +1093,9 @@
       similarGamesTitle: 'Jogos similares',
       similarGamesMatch: 'Afinidade',
       similarGamesOpenSteam: 'Abrir na Steam',
+      showGameStats: 'Mostrar bloco de estatísticas',
+      showGameStatsHint:
+        'Bloco nativo do Backloggd: Plays, Playing, Backlogs, Wishlists e Ratings (#game-stats).',
       viewerZoomIn: 'Aumentar zoom',
       viewerZoomOut: 'Diminuir zoom',
       viewerZoomReset: 'Redefinir zoom',
@@ -1283,6 +1298,9 @@
       similarGamesTitle: 'Ähnliche Spiele',
       similarGamesMatch: 'Ähnlichkeit',
       similarGamesOpenSteam: 'Auf Steam öffnen',
+      showGameStats: 'Spielstatistiken-Block anzeigen',
+      showGameStatsHint:
+        'Nativer Backloggd-Block: Plays, Playing, Backlogs, Wishlists und Ratings (#game-stats).',
       viewerZoomIn: 'Vergrößern',
       viewerZoomOut: 'Verkleinern',
       viewerZoomReset: 'Zoom zurücksetzen',
@@ -1485,6 +1503,9 @@
       similarGamesTitle: 'Jeux similaires',
       similarGamesMatch: 'Affinité',
       similarGamesOpenSteam: 'Ouvrir sur Steam',
+      showGameStats: 'Afficher le bloc de stats',
+      showGameStatsHint:
+        'Bloc natif Backloggd : Plays, Playing, Backlogs, Wishlists et Ratings (#game-stats).',
       viewerZoomIn: 'Zoom avant',
       viewerZoomOut: 'Zoom arrière',
       viewerZoomReset: 'Réinitialiser le zoom',
@@ -1687,6 +1708,9 @@
       similarGamesTitle: '類似ゲーム',
       similarGamesMatch: '一致',
       similarGamesOpenSteam: 'Steam で開く',
+      showGameStats: 'ゲーム統計ブロックを表示',
+      showGameStatsHint:
+        'Backloggd 本体の Plays / Playing / Backlogs / Wishlists / Ratings ブロック（#game-stats）。',
       viewerZoomIn: '拡大',
       viewerZoomOut: '縮小',
       viewerZoomReset: 'ズームをリセット',
@@ -1889,6 +1913,9 @@
       similarGamesTitle: '유사 게임',
       similarGamesMatch: '일치',
       similarGamesOpenSteam: 'Steam에서 열기',
+      showGameStats: '게임 통계 블록 표시',
+      showGameStatsHint:
+        'Backloggd 기본 Plays / Playing / Backlogs / Wishlists / Ratings 블록(#game-stats).',
       viewerZoomIn: '확대',
       viewerZoomOut: '축소',
       viewerZoomReset: '줌 초기화',
@@ -2091,6 +2118,9 @@
       similarGamesTitle: 'Podobne gry',
       similarGamesMatch: 'Podobieństwo',
       similarGamesOpenSteam: 'Otwórz w Steam',
+      showGameStats: 'Pokaż blok statystyk gry',
+      showGameStatsHint:
+        'Natywny blok Backloggd: Plays, Playing, Backlogs, Wishlists i Ratings (#game-stats).',
       viewerZoomIn: 'Powiększ',
       viewerZoomOut: 'Pomniejsz',
       viewerZoomReset: 'Resetuj zoom',
@@ -3655,6 +3685,10 @@
 
   function injectStyles() {
     GM_addStyle(`
+      turbo-frame#game-stats[data-blp-hide-game-stats="1"] {
+        display: none !important;
+      }
+
       :root {
         --blp-accent: #3db89a;
         --blp-text: #e8eaed;
@@ -6973,6 +7007,22 @@
     return document.querySelector('turbo-frame#game-stats');
   }
 
+  function applyGameStatsVisibility() {
+    const el = gameStatsMountAnchor();
+    if (!el) return;
+    if (settings.showGameStats === false) {
+      el.setAttribute('data-blp-hide-game-stats', '1');
+    } else {
+      el.removeAttribute('data-blp-hide-game-stats');
+    }
+  }
+
+  function clearGameStatsVisibility() {
+    document.querySelectorAll('[data-blp-hide-game-stats]').forEach((el) => {
+      el.removeAttribute('data-blp-hide-game-stats');
+    });
+  }
+
   /** Keep horizontal strips scrollable inside the column (wheel + containment). */
   function bindHorizontalTrack(track) {
     if (!track || track.dataset.blpHScroll === '1') return;
@@ -8342,6 +8392,7 @@
     removeSteamDbUi();
     removeSimilarGamesUi();
     unbindGameCoverViewer();
+    clearGameStatsVisibility();
   }
 
   function makeDetailRow(key, headerText) {
@@ -8797,6 +8848,7 @@
         showSteamDbCover: settings.showSteamDbCover,
         showSteamDbGallery: settings.showSteamDbGallery,
         showSimilarGames: settings.showSimilarGames,
+        showGameStats: settings.showGameStats,
         showSteamPlayers: settings.showSteamPlayers,
         showCardBadges: settings.showCardBadges,
         showLinks: settings.showLinks,
@@ -9025,12 +9077,13 @@
     const title = getGameTitle();
     if (!title) return;
 
-    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSimilarGames}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+    const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSimilarGames}|${settings.showGameStats}|${settings.showSteamPlayers}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
     const marker = document.querySelector(`[${ENRICH_ATTR}]`);
     // Same page/settings: keep the in-flight (or finished) mount. Remounting while
     // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
     if (marker?.getAttribute('data-blp-token') === token) {
       ensureUnifiedRatingWidget(token);
+      applyGameStatsVisibility();
       bindGameCoverViewer();
       return;
     }
@@ -9041,6 +9094,7 @@
 
     Object.values(rows).forEach((row) => row?.setAttribute('data-blp-token', token));
     ensureUnifiedRatingWidget(token);
+    applyGameStatsVisibility();
     bindGameCoverViewer();
 
     const runId = ++gamePageToken;
@@ -9569,6 +9623,11 @@
             <button type="button" data-blp-toggle="showSimilarGames" class="${draft.showSimilarGames ? 'is-on' : ''}">${draft.showSimilarGames ? t.on : t.off}</button>
           </div>
           <p class="blp-hint">${escapeHtml(t.showSimilarGamesHint)}</p>
+          <div class="blp-toggle">
+            <span>${escapeHtml(t.showGameStats)}</span>
+            <button type="button" data-blp-toggle="showGameStats" class="${draft.showGameStats ? 'is-on' : ''}">${draft.showGameStats ? t.on : t.off}</button>
+          </div>
+          <p class="blp-hint">${escapeHtml(t.showGameStatsHint)}</p>
           <div class="blp-toggle">
             <span>${escapeHtml(t.showSteamPlayers)}</span>
             <button type="button" data-blp-toggle="showSteamPlayers" class="${draft.showSteamPlayers ? 'is-on' : ''}">${draft.showSteamPlayers ? t.on : t.off}</button>
