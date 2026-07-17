@@ -17,7 +17,7 @@ Built with [Vite](https://vitejs.dev/) + [vite-plugin-monkey](https://github.com
 - **Source:** `src/main.js`
 - **Canonical install artifacts (committed):** `backloggd-plus.user.js`, `backloggd-plus.meta.js` (also `@downloadURL` / `@updateURL`)
 - **Version source of truth:** `package.json` `version` (userscript header + `SCRIPT_VERSION`)
-- **Docs:** `README.md`, `CHANGELOG.md` (Keep a Changelog + SemVer)
+- **Docs:** `README.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`
 - **License:** MIT
 
 Edit source under `src/`, then run `npm run build` to refresh the root install files. Do not hand-edit the built `.user.js` / `.meta.js`.
@@ -42,6 +42,7 @@ backloggd-plus/
 │   ├── copy-dist.mjs        # Copies dist → root after build
 │   ├── verify-artifacts.mjs # CI: dist ↔ root + git freshness
 │   └── lib/artifacts.mjs    # Shared artifact filenames
+├── docs/screenshots/        # README preview images
 ├── .github/
 │   ├── workflows/ci.yml     # Build + verify committed artifacts
 │   └── dependabot.yml

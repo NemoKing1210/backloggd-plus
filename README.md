@@ -17,6 +17,26 @@ Also listed on [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-
 
 > **Status:** early (`0.7.41`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
+  <br />
+  <em>Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/game-page-stats.png" alt="Game page — Plus rating, screenshots gallery, and similar games" width="900" />
+  <br />
+  <em>Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
+  <br />
+  <em>Settings — Game page toggles</em>
+</p>
+
 ## Quick install
 
 1. Install a userscript manager ([Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), or [ScriptCat](https://scriptcat.org/) recommended).
@@ -136,6 +156,7 @@ backloggd-plus/
 │   ├── i18n/                # Translations
 │   ├── styles/              # CSS
 │   └── utils/               # Shared helpers
+├── docs/screenshots/        # README preview images
 ├── package.json             # Version + npm scripts
 ├── vite.config.js           # Vite + vite-plugin-monkey metadata
 ├── backloggd-plus.user.js   # Built installable userscript (committed)
