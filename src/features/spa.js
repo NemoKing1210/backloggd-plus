@@ -43,13 +43,16 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-steam-gallery') ||
     el.classList?.contains('blp-similar') ||
     el.classList?.contains('blp-viewer') ||
-    el.classList?.contains('blp-title-icon-wrap')
+    el.classList?.contains('blp-title-icon-wrap') ||
+    el.classList?.contains('blp-toast-host') ||
+    el.classList?.contains('blp-toast') ||
+    el.id === 'blp-toast-host'
   ) {
     return true;
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host`
     )
   );
 }

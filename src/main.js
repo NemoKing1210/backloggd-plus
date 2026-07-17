@@ -4,7 +4,7 @@ import {
 import './styles/main.css';
 import './styles/unified-rating.css';
 import { migrateCacheForScriptVersion } from './cache.js';
-import { ROOT_ATTR } from './constants.js';
+import { ROOT_ATTR, SCRIPT_VERSION } from './constants.js';
 import { ensureNavSettingsButton, openSettings } from './features/settings-panel.js';
 import {
   bindSpaNavigation,
@@ -16,6 +16,8 @@ import {
 } from './features/spa.js';
 import { scanSteamPage } from './features/steam-page.js';
 import { scanSteamDbPage } from './features/steamdb-page.js';
+import { flushQueuedToasts, showToast } from './features/toast.js';
+import { fmt } from './i18n/index.js';
 import { reloadRuntimeSettings, t } from './state.js';
 
 function init() {
@@ -23,7 +25,14 @@ function init() {
   document.documentElement.setAttribute(ROOT_ATTR, '1');
 
   reloadRuntimeSettings();
-  migrateCacheForScriptVersion();
+  const migrate = migrateCacheForScriptVersion();
+  flushQueuedToasts();
+  if (migrate === 'upgrade') {
+    showToast(fmt(t.toastCacheClearedOnUpdate, { version: SCRIPT_VERSION }), {
+      type: 'info',
+      duration: 5200,
+    });
+  }
 
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand(t.menuSettings, openSettings);

@@ -21,6 +21,7 @@ import { reloadRuntimeSettings, settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { scheduleCardBadges } from './cards.js';
 import { enrichGamePage, getPageContext, removeEnrichment } from './enrichment.js';
+import { queueToast, showToast } from './toast.js';
 
 const SETTINGS_TABS = [
   { id: 'general', labelKey: 'sectionGeneral' },
@@ -213,7 +214,6 @@ export function openSettings() {
         </div>
         <button type="button" class="blp-btn" data-blp-clear>${escapeHtml(t.clearCache)}</button>
         <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
-        <div class="blp-cache-msg" data-blp-cache-msg hidden></div>
       </section>
       </div>
       <div ${panelAttrs('debug', activeTab)}>
@@ -296,14 +296,10 @@ export function openSettings() {
 
   backdrop.querySelector('[data-blp-clear]')?.addEventListener('click', () => {
     const count = clearCache();
-    const msg = backdrop.querySelector('[data-blp-cache-msg]');
-    if (msg) {
-      msg.hidden = false;
-      msg.textContent = count
-        ? fmt(t.cacheCleared, { count })
-        : t.cacheEmpty;
-    }
     paintCacheMeter(backdrop);
+    showToast(count ? fmt(t.cacheCleared, { count }) : t.cacheEmpty, {
+      type: count ? 'success' : 'info',
+    });
   });
 
   backdrop.querySelector('[data-blp-save]')?.addEventListener('click', () => {
@@ -318,6 +314,7 @@ export function openSettings() {
       : DEFAULT_SETTINGS.cacheHours;
     saveSettings(draft);
     reloadRuntimeSettings();
+    queueToast(t.toastSettingsSaved, { type: 'success' });
     location.reload();
   });
 
@@ -404,6 +401,7 @@ export function openFixMatchDialog(slug, currentAppId) {
     removeEnrichment();
     enrichGamePage();
     scheduleCardBadges(true);
+    showToast(t.toastSteamMatchCleared, { type: 'info' });
   });
   backdrop.querySelector('[data-blp-fix-save]')?.addEventListener('click', () => {
     const raw = String(input()?.value || '').trim();
@@ -414,6 +412,7 @@ export function openFixMatchDialog(slug, currentAppId) {
         box.hidden = false;
         box.textContent = t.steamFixMatchInvalid;
       }
+      showToast(t.steamFixMatchInvalid, { type: 'error' });
       return;
     }
     setSteamOverride(slug, id);
@@ -421,6 +420,7 @@ export function openFixMatchDialog(slug, currentAppId) {
     removeEnrichment();
     enrichGamePage();
     scheduleCardBadges(true);
+    showToast(fmt(t.toastSteamMatchSaved, { id }), { type: 'success' });
   });
 
   document.body.appendChild(backdrop);

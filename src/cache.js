@@ -427,7 +427,7 @@ export function migrateCacheForScriptVersion() {
         /* ignore */
       }
     }
-    return false;
+    return null;
   }
   clearCache();
   try {
@@ -435,5 +435,6 @@ export function migrateCacheForScriptVersion() {
   } catch (_) {
     /* ignore */
   }
-  return true;
+  // First run has no stored version — don't treat as an upgrade toast.
+  return stored == null ? 'install' : 'upgrade';
 }

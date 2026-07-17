@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.39] - 2026-07-17
+
+### Added
+
+- Toast notifications for settings save, cache clear, Fix match, and script-version cache reset
+
 ## [0.7.38] - 2026-07-17
 
 ### Added
