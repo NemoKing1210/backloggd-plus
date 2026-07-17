@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.27
+// @version           0.7.28
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.27';
+  const SCRIPT_VERSION = '0.7.28';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -5823,6 +5823,8 @@
     const base = String(name || '')
       .toLowerCase()
       .replace(/[™®©]/g, '')
+      // S.T.A.L.K.E.R. → stalker (keep decimals like 1.5)
+      .replace(/(?<=[a-z])\.(?=[a-z])/g, '')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
     if (!base) return '';
@@ -10176,6 +10178,8 @@
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/&/g, ' and ')
+      // S.T.A.L.K.E.R. → stalker (not s-t-a-l-k-e-r); keep decimals like 1.5
+      .replace(/(?<=[a-z])\.(?=[a-z])/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -10189,6 +10193,7 @@
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[''`´]/g, '')
       .replace(/&/g, ' and ')
+      .replace(/(?<=[a-z])\.(?=[a-z])/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
