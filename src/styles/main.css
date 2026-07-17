@@ -1008,11 +1008,76 @@ img.blp-cover-zoomable:focus-visible {
   border: 1px solid rgba(195, 92, 44, 0.55);
 }
 
-[data-blp-enrich] .blp-discount-ends {
-  opacity: 0.7;
-  margin-left: 0.25em;
-  font-size: 0.9em;
+[data-blp-enrich] .blp-price {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35em 0.45em;
+  text-decoration: none !important;
+}
+
+[data-blp-enrich] .blp-price--sale {
+  gap: 0.4em 0.5em;
+}
+
+[data-blp-enrich] .blp-price__stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.05em;
+  line-height: 1.15;
+}
+
+@media (min-width: 768px) {
+  [data-blp-enrich] .blp-price__stack {
+    align-items: flex-start;
+  }
+}
+
+[data-blp-enrich] .blp-price__was {
+  font-size: 0.78em;
   font-weight: 500;
+  color: var(--blp-muted, #9aa0a6);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  opacity: 0.85;
+}
+
+[data-blp-enrich] .blp-price__now {
+  font-weight: 700;
+  color: #beee11;
+  letter-spacing: 0.01em;
+}
+
+[data-blp-enrich] .blp-discount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6em;
+  padding: 0.18em 0.42em;
+  border-radius: 3px;
+  font-size: 0.92em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: #1b2838 !important;
+  background: #beee11;
+  box-shadow: 0 0 0 1px rgba(190, 238, 17, 0.35);
+}
+
+[data-blp-enrich] .blp-discount-ends {
+  display: inline-block;
+  padding: 0.12em 0.4em;
+  border-radius: 3px;
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #c6ef5e;
+  background: rgba(61, 79, 26, 0.55);
+  border: 1px solid rgba(190, 238, 17, 0.28);
+  opacity: 1;
+  margin-left: 0;
 }
 
 [data-blp-enrich] .blp-review--overwhelming,
@@ -1024,11 +1089,6 @@ img.blp-cover-zoomable:focus-visible {
 [data-blp-enrich] .blp-review--negative,
 [data-blp-enrich] .blp-review--very-negative,
 [data-blp-enrich] .blp-review--overwhelmingly-negative { color: var(--blp-rev-negative) !important; font-weight: 600; }
-
-[data-blp-enrich] .blp-discount {
-  opacity: 0.75;
-  margin-left: 0.15em;
-}
 
 [data-blp-enrich] .blp-steam-note {
   opacity: 0.65;
@@ -1307,8 +1367,16 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-card-badge--discount {
-  color: #beee11 !important;
-  border-color: rgba(190, 238, 17, 0.35);
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.15em;
+  padding: 0.05em 0.32em;
+  border-radius: 2px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #1b2838 !important;
+  background: #beee11;
+  border: none;
 }
 
 .blp-card-badge--review {

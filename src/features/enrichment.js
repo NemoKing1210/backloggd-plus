@@ -199,6 +199,44 @@ export function formatPriceText(steam) {
   return priceText || null;
 }
 
+export function formatOriginalPriceText(steam) {
+  if (!steam?.price || !(steam.price.discount_percent > 0)) return null;
+  let text = steam.price.initial_formatted || '';
+  if (!text && Number.isFinite(steam.price.initial)) {
+    text = (steam.price.initial / 100).toFixed(2);
+    if (steam.price.currency) text = `${text} ${steam.price.currency}`;
+  }
+  if (!text) return null;
+  const finalText = formatPriceText(steam);
+  if (finalText && text === finalText) return null;
+  return text;
+}
+
+export function renderSteamPriceHtml(steam) {
+  const priceText = formatPriceText(steam);
+  if (!priceText) return '';
+
+  const onSale = steam.price?.discount_percent > 0;
+  if (!onSale) {
+    return `<a class="game-details-value blp-ext-link blp-price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}</a>`;
+  }
+
+  const original = formatOriginalPriceText(steam);
+  const endsLabel = formatDiscountEndDate(steam.discountEndDate);
+  const wasHtml = original
+    ? `<span class="blp-price__was">${escapeHtml(original)}</span>`
+    : '';
+  const endsHtml = endsLabel
+    ? `<span class="blp-discount-ends">${escapeHtml(fmt(t.discountEnds, { date: endsLabel }))}</span>`
+    : '';
+
+  return `<a class="game-details-value blp-ext-link blp-price blp-price--sale" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">
+    <span class="blp-discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>
+    <span class="blp-price__stack">${wasHtml}<span class="blp-price__now">${escapeHtml(priceText)}</span></span>
+    ${endsHtml}
+  </a>`;
+}
+
 export function formatDiscountEndDate(unixSeconds) {
   const sec = Number(unixSeconds);
   if (!Number.isFinite(sec) || sec <= 0) return null;
@@ -443,21 +481,9 @@ export function renderSteamValues(steam, { owned = false, wishlist = false, slug
     parts.push({ html: renderLibraryBadge('wishlist') });
   }
 
-  const priceText = formatPriceText(steam);
-  const discount =
-    steam.price?.discount_percent > 0
-      ? ` <span class="blp-discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
-      : '';
-  const endsLabel = formatDiscountEndDate(steam.discountEndDate);
-  const discountEnds =
-    steam.price?.discount_percent > 0 && endsLabel
-      ? ` <span class="blp-discount-ends">${escapeHtml(fmt(t.discountEnds, { date: endsLabel }))}</span>`
-      : '';
-
-  if (priceText) {
-    parts.push({
-      html: `<a class="game-details-value blp-ext-link" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}${discountEnds}</a>`,
-    });
+  const priceHtml = renderSteamPriceHtml(steam);
+  if (priceHtml) {
+    parts.push({ html: priceHtml });
   }
 
   const reviewText = formatReviewPercent(steam.reviews);
