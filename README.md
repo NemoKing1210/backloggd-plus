@@ -2,27 +2,35 @@
 
 [![CI](https://github.com/NemoKing1210/backloggd-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/backloggd-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
+[![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
+[![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.7.34-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
-Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
+Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), [ScriptCat](https://scriptcat.org/), and other managers that support the `// ==UserScript==` metadata block.
+
+Also listed on [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-plus) and [ScriptCat](https://scriptcat.org/ru/script-show-page/7077).
+
+> **Note:** Catalog pages on Greasy Fork / ScriptCat may lag behind this repository — I don’t always manage to push every release there right away. Sorry about that. For the newest build, prefer the [GitHub raw install URL](#quick-install) (or clone and `npm run build`). The script’s `@updateURL` / `@downloadURL` also point at GitHub `main`.
 
 > **Status:** early (`0.7.34`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
-1. Install a userscript manager (Tampermonkey or Violentmonkey recommended).
-2. Click the install link below — your manager should open an installation prompt.
+1. Install a userscript manager ([Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), or [ScriptCat](https://scriptcat.org/) recommended).
+2. Install from GitHub (raw URL below), [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-plus), or [ScriptCat](https://scriptcat.org/ru/script-show-page/7077).
 
-**Install URL:**
+**Install URL (GitHub — newest):**
 
 ```
 https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js
 ```
 
-[![Install](https://img.shields.io/badge/⬇_Install-Backloggd_Plus-1a1d24?style=for-the-badge&labelColor=7c5cff)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
+[![Install](https://img.shields.io/badge/⬇_Install-GitHub_raw-1a1d24?style=for-the-badge&labelColor=7c5cff)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
+[![Install on Greasy Fork](https://img.shields.io/badge/⬇_Install-Greasy_Fork-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
+[![Install on ScriptCat](https://img.shields.io/badge/⬇_Install-ScriptCat-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 
 ### Install from URL (dashboard)
 
@@ -31,8 +39,9 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 | Tampermonkey | Dashboard → **Utilities** → **Install from URL** |
 | Violentmonkey | Dashboard → **+** → **Install from URL** |
 | Greasemonkey | Add-on menu → **New User Script** → paste the raw URL |
+| ScriptCat | [Script page](https://scriptcat.org/ru/script-show-page/7077) → **Установить скрипт**, or install the [extension](https://scriptcat.org/) and use the GitHub raw URL |
 
-Paste the [install URL](#quick-install) above.
+Paste the [GitHub install URL](#quick-install) above when installing from a manager dashboard. Catalog installs: [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-plus) · [ScriptCat](https://scriptcat.org/ru/script-show-page/7077).
 
 ### Manual install
 
@@ -187,7 +196,7 @@ After changes that should ship, run `npm run build` and commit the regenerated r
 
 ### Local workflow notes
 
-- **`npm run dev`:** vite-plugin-monkey serves an installable userscript (name prefixed with `dev:`). Install it once in Tampermonkey/Violentmonkey; HMR applies while the server runs.
+- **`npm run dev`:** vite-plugin-monkey serves an installable userscript (name prefixed with `dev:`). Install it once in Tampermonkey, Violentmonkey, or ScriptCat; HMR applies while the server runs.
 - **Built file:** after `npm run build`, you can also install the root `backloggd-plus.user.js` (Violentmonkey **Track local file** still works on that artifact).
 - Do not commit localhost `@updateURL` / `@downloadURL` values.
 

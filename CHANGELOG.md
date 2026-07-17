@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI: build userscript, verify committed artifacts match `dist/`, upload build artifacts
 - `npm run ci` / `npm run verify:artifacts`; Dependabot for npm and Actions
 
+### Documentation
+
+- Greasy Fork / ScriptCat listing links; note that catalog versions may lag behind the repo (prefer GitHub raw)
+
 ## [0.7.33] - 2026-07-17
 
 ### Changed

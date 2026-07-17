@@ -4,7 +4,13 @@ Instructions for AI coding agents working in this repository.
 
 ## Project
 
-Userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life features. Compatible with Tampermonkey, Violentmonkey, Greasemonkey, and similar managers.
+Userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life features. Compatible with Tampermonkey, Violentmonkey, Greasemonkey, [ScriptCat](https://scriptcat.org/), and similar managers.
+
+Listed on:
+- Greasy Fork: https://greasyfork.org/ru/scripts/587296-backloggd-plus
+- ScriptCat: https://scriptcat.org/ru/script-show-page/7077
+
+Catalog mirrors may lag behind `main`; GitHub raw / `@updateURL` is the source of truth for the newest version.
 
 Built with [Vite](https://vitejs.dev/) + [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey).
 
@@ -114,6 +120,6 @@ npm run build    # Production bundle → dist/ + copy to repo root
 npm run ci       # build + verify committed artifacts match (same as GitHub Actions)
 ```
 
-- **Violentmonkey / Tampermonkey:** install from the Vite open URL during `npm run dev`, or from the built root `backloggd-plus.user.js` after `npm run build`.
+- **Violentmonkey / Tampermonkey / ScriptCat:** install from the Vite open URL during `npm run dev`, or from the built root `backloggd-plus.user.js` after `npm run build`.
 - Do not commit temporary localhost `@updateURL` / `@downloadURL` values.
 - CI (`.github/workflows/ci.yml`) runs `npm ci` → `npm run ci` on pushes/PRs to `main` (`CI=true` enables the git freshness check). If it fails, rebuild and commit the root `.user.js` / `.meta.js`. Locally, `npm run ci` checks `dist` ↔ root; pass `--git` to `verify:artifacts` (or set `CI=true`) to also require a clean working tree vs HEAD.
