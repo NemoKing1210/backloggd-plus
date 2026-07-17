@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.22
+// @version           0.7.24
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.22';
+  const SCRIPT_VERSION = '0.7.24';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -197,7 +197,11 @@
       sectionDebug: 'Debug',
       debugMode: 'Debug mode',
       debugModeHint:
-        'Show one debug panel on the game page with sources (what each URL is for) and a full response dump.',
+        'Show one debug panel on the game page with sources and a full response dump. Enrichment rows get a hatch + Cache/Network badge.',
+      debugCacheHit: 'Cache',
+      debugCacheMiss: 'Network',
+      debugCacheMixed: 'Mixed',
+      debugCacheNa: 'Derived',
       debugReason: 'Reason',
       debugResponse: 'Response',
       debugPanelTitle: 'Debug',
@@ -308,7 +312,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus settings',
       cacheHours: 'Cache duration (hours)',
-      cacheHoursHint: 'How long to reuse Steam / GameStatus lookups. 0 disables cache.',
+      cacheHoursHint:
+        'How long to reuse Steam, GameStatus, scores, media, and similar-game lookups. 0 disables that cache. Players, Steam library/wishlist, and the tag map keep their own short TTLs.',
       clearCache: 'Clear cache',
       cacheCleared: 'Cache cleared ({count})',
       cacheEmpty: 'Cache is empty',
@@ -393,7 +398,11 @@
       sectionDebug: 'Отладка',
       debugMode: 'Режим отладки',
       debugModeHint:
-        'Одна панель отладки на странице игры: источники (за что отвечает каждая ссылка) и полный дамп ответов.',
+        'Одна панель отладки на странице игры: источники и полный дамп. Ряды обогащения — штриховка и бейдж Кэш/Сеть.',
+      debugCacheHit: 'Кэш',
+      debugCacheMiss: 'Сеть',
+      debugCacheMixed: 'Смешанно',
+      debugCacheNa: 'Локально',
       debugReason: 'Причина',
       debugResponse: 'Ответ',
       debugPanelTitle: 'Отладка',
@@ -504,7 +513,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Настройки Backloggd Plus',
       cacheHours: 'Время кэша (часы)',
-      cacheHoursHint: 'Как долго переиспользовать ответы Steam / GameStatus. 0 отключает кэш.',
+      cacheHoursHint:
+        'Как долго переиспользовать ответы Steam, GameStatus, оценок, медиа и похожих игр. 0 отключает этот кэш. Игроки, библиотека/вишлист Steam и карта тегов сохраняют свои короткие TTL.',
       clearCache: 'Очистить кэш',
       cacheCleared: 'Кэш очищен ({count})',
       cacheEmpty: 'Кэш пуст',
@@ -589,7 +599,11 @@
       sectionDebug: '调试',
       debugMode: '调试模式',
       debugModeHint:
-        '在游戏页显示单个调试面板，含来源用途说明和完整响应转储。',
+        '在游戏页显示调试面板与完整响应。各增强行带斜线底纹和缓存/网络徽章。',
+      debugCacheHit: '缓存',
+      debugCacheMiss: '网络',
+      debugCacheMixed: '混合',
+      debugCacheNa: '派生',
       debugReason: '原因',
       debugResponse: '响应',
       debugPanelTitle: '调试',
@@ -694,7 +708,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus 设置',
       cacheHours: '缓存时长（小时）',
-      cacheHoursHint: '复用 Steam / GameStatus 查询的时间。0 禁用缓存。',
+      cacheHoursHint:
+        '复用 Steam、GameStatus、评分、媒体与相似游戏查询的时间。0 禁用该缓存。玩家数、Steam 库/愿望单与标签表仍使用各自的短 TTL。',
       clearCache: '清除缓存',
       cacheCleared: '已清除缓存（{count}）',
       cacheEmpty: '缓存为空',
@@ -779,7 +794,11 @@
       sectionDebug: 'Depuración',
       debugMode: 'Modo depuración',
       debugModeHint:
-        'Una sola panel de depuración en la página del juego con fuentes (para qué sirve cada URL) y volcado completo.',
+        'Panel de depuración con fuentes y volcado. Filas enriquecidas: tramado + insignia Caché/Red.',
+      debugCacheHit: 'Caché',
+      debugCacheMiss: 'Red',
+      debugCacheMixed: 'Mixto',
+      debugCacheNa: 'Derivado',
       debugReason: 'Motivo',
       debugResponse: 'Respuesta',
       debugPanelTitle: 'Depuración',
@@ -890,7 +909,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Ajustes de Backloggd Plus',
       cacheHours: 'Duración de caché (horas)',
-      cacheHoursHint: 'Cuánto reutilizar búsquedas de Steam / GameStatus. 0 desactiva la caché.',
+      cacheHoursHint:
+        'Cuánto reutilizar búsquedas de Steam, GameStatus, puntuaciones, medios y juegos similares. 0 desactiva esa caché. Jugadores, biblioteca/wishlist de Steam y el mapa de etiquetas conservan sus TTL cortos.',
       clearCache: 'Vaciar caché',
       cacheCleared: 'Caché vaciada ({count})',
       cacheEmpty: 'La caché está vacía',
@@ -976,7 +996,11 @@
       sectionDebug: 'Depuração',
       debugMode: 'Modo debug',
       debugModeHint:
-        'Um único painel de debug na página do jogo com fontes (para que serve cada URL) e dump completo.',
+        'Painel de debug com fontes e dump. Linhas de enriquecimento: hachura + badge Cache/Rede.',
+      debugCacheHit: 'Cache',
+      debugCacheMiss: 'Rede',
+      debugCacheMixed: 'Misto',
+      debugCacheNa: 'Derivado',
       debugReason: 'Motivo',
       debugResponse: 'Resposta',
       debugPanelTitle: 'Debug',
@@ -1087,7 +1111,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Configurações do Backloggd Plus',
       cacheHours: 'Duração do cache (horas)',
-      cacheHoursHint: 'Por quanto tempo reutilizar buscas Steam / GameStatus. 0 desativa o cache.',
+      cacheHoursHint:
+        'Por quanto tempo reutilizar buscas Steam, GameStatus, notas, mídia e jogos semelhantes. 0 desativa esse cache. Jogadores, biblioteca/wishlist Steam e o mapa de tags mantêm seus TTLs curtos.',
       clearCache: 'Limpar cache',
       cacheCleared: 'Cache limpo ({count})',
       cacheEmpty: 'Cache vazio',
@@ -1173,7 +1198,11 @@
       sectionDebug: 'Debug',
       debugMode: 'Debug-Modus',
       debugModeHint:
-        'Ein Debug-Panel auf der Spieleseite mit Quellen (wofür jede URL dient) und vollständigem Dump.',
+        'Debug-Panel mit Quellen und Dump. Anreicherungszeilen: Schraffur + Cache/Netz-Badge.',
+      debugCacheHit: 'Cache',
+      debugCacheMiss: 'Netz',
+      debugCacheMixed: 'Gemischt',
+      debugCacheNa: 'Abgeleitet',
       debugReason: 'Grund',
       debugResponse: 'Antwort',
       debugPanelTitle: 'Debug',
@@ -1284,7 +1313,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus Einstellungen',
       cacheHours: 'Cache-Dauer (Stunden)',
-      cacheHoursHint: 'Wie lange Steam-/GameStatus-Abfragen wiederverwendet werden. 0 deaktiviert den Cache.',
+      cacheHoursHint:
+        'Wie lange Steam-, GameStatus-, Score-, Medien- und Similar-Game-Abfragen wiederverwendet werden. 0 deaktiviert diesen Cache. Spielerzahl, Steam-Bibliothek/Wunschliste und die Tag-Map behalten eigene kurze TTLs.',
       clearCache: 'Cache leeren',
       cacheCleared: 'Cache geleert ({count})',
       cacheEmpty: 'Cache ist leer',
@@ -1370,7 +1400,11 @@
       sectionDebug: 'Débogage',
       debugMode: 'Mode debug',
       debugModeHint:
-        'Un seul panneau debug sur la page jeu avec sources (rôle de chaque URL) et dump complet.',
+        'Panneau debug avec sources et dump. Lignes d’enrichissement : hachures + badge Cache/Réseau.',
+      debugCacheHit: 'Cache',
+      debugCacheMiss: 'Réseau',
+      debugCacheMixed: 'Mixte',
+      debugCacheNa: 'Dérivé',
       debugReason: 'Raison',
       debugResponse: 'Réponse',
       debugPanelTitle: 'Debug',
@@ -1481,7 +1515,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Réglages Backloggd Plus',
       cacheHours: 'Durée du cache (heures)',
-      cacheHoursHint: 'Durée de réutilisation des requêtes Steam / GameStatus. 0 désactive le cache.',
+      cacheHoursHint:
+        'Durée de réutilisation des requêtes Steam, GameStatus, scores, médias et jeux similaires. 0 désactive ce cache. Joueurs, bibliothèque/wishlist Steam et la carte de tags gardent leurs TTL courts.',
       clearCache: 'Vider le cache',
       cacheCleared: 'Cache vidé ({count})',
       cacheEmpty: 'Le cache est vide',
@@ -1567,7 +1602,11 @@
       sectionDebug: 'デバッグ',
       debugMode: 'デバッグモード',
       debugModeHint:
-        'ゲームページにデバッグパネルを1つ表示。各URLの用途と完全なダンプ。',
+        'デバッグパネルと応答ダンプ。各行に斜線ハッチとキャッシュ/ネットワークバッジ。',
+      debugCacheHit: 'キャッシュ',
+      debugCacheMiss: 'ネットワーク',
+      debugCacheMixed: '混在',
+      debugCacheNa: '派生',
       debugReason: '理由',
       debugResponse: 'レスポンス',
       debugPanelTitle: 'デバッグ',
@@ -1678,7 +1717,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus 設定',
       cacheHours: 'キャッシュ時間（時間）',
-      cacheHoursHint: 'Steam / GameStatus照会の再利用時間。0で無効。',
+      cacheHoursHint:
+        'Steam・GameStatus・スコア・メディア・類似ゲーム照会の再利用時間。0でそのキャッシュを無効。プレイヤー数・Steamライブラリ/ウィッシュリスト・タグマップは独自の短いTTLを維持。',
       clearCache: 'キャッシュを消去',
       cacheCleared: 'キャッシュを消去しました（{count}）',
       cacheEmpty: 'キャッシュは空です',
@@ -1764,7 +1804,11 @@
       sectionDebug: '디버그',
       debugMode: '디버그 모드',
       debugModeHint:
-        '게임 페이지에 디버그 패널 하나: 각 URL 용도와 전체 덤프.',
+        '디버그 패널과 응답 덤프. 각 보강 행에 빗금 + 캐시/네트워크 배지.',
+      debugCacheHit: '캐시',
+      debugCacheMiss: '네트워크',
+      debugCacheMixed: '혼합',
+      debugCacheNa: '파생',
       debugReason: '이유',
       debugResponse: '응답',
       debugPanelTitle: '디버그',
@@ -1875,7 +1919,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Backloggd Plus 설정',
       cacheHours: '캐시 시간(시간)',
-      cacheHoursHint: 'Steam / GameStatus 조회 재사용 시간. 0은 캐시 비활성.',
+      cacheHoursHint:
+        'Steam, GameStatus, 점수, 미디어, 유사 게임 조회 재사용 시간. 0은 해당 캐시 비활성. 플레이어 수, Steam 라이브러리/위시리스트, 태그 맵은 자체 짧은 TTL을 유지.',
       clearCache: '캐시 비우기',
       cacheCleared: '캐시 비움 ({count})',
       cacheEmpty: '캐시가 비어 있음',
@@ -1961,7 +2006,11 @@
       sectionDebug: 'Debug',
       debugMode: 'Tryb debug',
       debugModeHint:
-        'Jeden panel debug na stronie gry: źródła (do czego służy każdy URL) i pełny dump.',
+        'Panel debug ze źródłami i dumpem. Wiersze wzbogacenia: kreskowanie + badge Cache/Sieć.',
+      debugCacheHit: 'Cache',
+      debugCacheMiss: 'Sieć',
+      debugCacheMixed: 'Mieszane',
+      debugCacheNa: 'Pochodne',
       debugReason: 'Powód',
       debugResponse: 'Odpowiedź',
       debugPanelTitle: 'Debug',
@@ -2072,7 +2121,8 @@
       navSettings: 'Plus',
       navSettingsTitle: 'Ustawienia Backloggd Plus',
       cacheHours: 'Czas cache (godziny)',
-      cacheHoursHint: 'Jak długo ponownie używać zapytań Steam / GameStatus. 0 wyłącza cache.',
+      cacheHoursHint:
+        'Jak długo ponownie używać zapytań Steam, GameStatus, ocen, mediów i podobnych gier. 0 wyłącza ten cache. Gracze, biblioteka/wishlist Steam i mapa tagów zachowują własne krótkie TTL.',
       clearCache: 'Wyczyść cache',
       cacheCleared: 'Cache wyczyszczony ({count})',
       cacheEmpty: 'Cache jest pusty',
@@ -2245,6 +2295,7 @@
   const inflight = new Map();
   /** In-memory Steam resolve misses for this page session (do not persist to GM cache). */
   const steamResolveMissMemory = new Set();
+  const CACHE_PINNED_KEYS = new Set([USERDATA_CACHE_KEY, TAG_MAP_CACHE_KEY]);
 
   function readCacheStore() {
     if (cacheStore) return cacheStore;
@@ -2261,6 +2312,8 @@
     clearTimeout(cachePersistTimer);
     cachePersistTimer = setTimeout(() => {
       try {
+        pruneExpiredCache();
+        evictCacheToBudget();
         GM_setValue(CACHE_KEY, readCacheStore());
       } catch (_) {
         /* ignore */
@@ -2274,19 +2327,13 @@
     return Math.min(hours, CACHE_HOURS_MAX) * 3600 * 1000;
   }
 
-  function getCached(key) {
-    const ttl = cacheTtlMs();
-    if (!ttl) return null;
-    const entry = readCacheStore()[key];
-    if (!entry || !entry.ts) return null;
-    if (Date.now() - entry.ts > ttl) return null;
-    return entry.data;
-  }
-
-  function setCached(key, data) {
-    if (!cacheTtlMs()) return;
-    readCacheStore()[key] = { ts: Date.now(), data };
-    persistCacheSoon();
+  /** System keys keep their own TTL even when cacheHours is 0. */
+  function isSystemCacheKey(key) {
+    return (
+      key === TAG_MAP_CACHE_KEY ||
+      key === USERDATA_CACHE_KEY ||
+      String(key || '').startsWith('steam:players:')
+    );
   }
 
   function userdataCacheTtlMs(empty) {
@@ -2295,19 +2342,120 @@
     return ttl > 0 ? ttl : USERDATA_FALLBACK_TTL_MS;
   }
 
+  function isSteamGameResolveKey(key) {
+    return key.startsWith('steam:id:') || /^steam:[A-Z]{2}:/.test(key);
+  }
+
+  /** Single source of truth for entry TTL (lookup default vs per-key / per-entry). */
+  function cacheEntryTtlMs(key, entry) {
+    if (Number(entry?.ttlMs) > 0) return Number(entry.ttlMs);
+    if (key === TAG_MAP_CACHE_KEY) return TAG_MAP_TTL_MS;
+    if (String(key || '').startsWith('steam:players:')) return PLAYERS_CACHE_TTL_MS;
+    if (key === USERDATA_CACHE_KEY) {
+      const data = entry?.data;
+      const empty =
+        !data ||
+        ((!Array.isArray(data.appIds) || data.appIds.length === 0) &&
+          (!Array.isArray(data.wishlistAppIds) || data.wishlistAppIds.length === 0));
+      return userdataCacheTtlMs(empty);
+    }
+    return cacheTtlMs();
+  }
+
+  function isCacheEntryExpired(key, entry) {
+    if (!entry?.ts) return true;
+    const ttl = cacheEntryTtlMs(key, entry);
+    if (!ttl) return true;
+    return Date.now() - entry.ts > ttl;
+  }
+
+  function touchCacheEntry(entry) {
+    if (entry && typeof entry === 'object') entry.at = Date.now();
+  }
+
+  function getCached(key) {
+    if (!isSystemCacheKey(key) && !cacheTtlMs()) return null;
+    const entry = readCacheStore()[key];
+    if (!entry?.ts) return null;
+    if (isCacheEntryExpired(key, entry)) return null;
+    touchCacheEntry(entry);
+    return entry.data;
+  }
+
+  function setCached(key, data, opts) {
+    const optTtl = Number(opts?.ttlMs);
+    const hasOptTtl = Number.isFinite(optTtl) && optTtl > 0;
+    if (!isSystemCacheKey(key) && !hasOptTtl && !cacheTtlMs()) return;
+
+    const now = Date.now();
+    const entry = { ts: now, at: now, data };
+    if (hasOptTtl) {
+      entry.ttlMs = optTtl;
+    } else if (String(key || '').startsWith('steam:players:')) {
+      entry.ttlMs = PLAYERS_CACHE_TTL_MS;
+    } else if (key === TAG_MAP_CACHE_KEY) {
+      entry.ttlMs = TAG_MAP_TTL_MS;
+    }
+    readCacheStore()[key] = entry;
+    persistCacheSoon();
+  }
+
+  /** Ephemeral runtime flag: hit | miss | mixed | na (never persisted). */
+  function asCacheHit(data) {
+    if (data == null || typeof data !== 'object') return data;
+    if (Array.isArray(data)) return Object.assign(data.slice(), { _cache: 'hit' });
+    return { ...data, _cache: 'hit' };
+  }
+
+  function asCacheMiss(data) {
+    if (data == null || typeof data !== 'object') return data;
+    if (Array.isArray(data)) return Object.assign(data.slice(), { _cache: 'miss' });
+    return { ...data, _cache: 'miss' };
+  }
+
+  function asCacheMixed(data) {
+    if (data == null || typeof data !== 'object') return data;
+    return { ...data, _cache: 'mixed' };
+  }
+
+  function getCacheSource(data) {
+    const v = data?._cache;
+    return v === 'hit' || v === 'miss' || v === 'mixed' || v === 'na' ? v : null;
+  }
+
+  function mergeCacheSources(...parts) {
+    const vals = parts
+      .map((p) => (typeof p === 'string' ? p : getCacheSource(p)))
+      .filter((v) => v && v !== 'na');
+    if (!vals.length) return 'na';
+    const hit = vals.some((v) => v === 'hit' || v === 'mixed');
+    const miss = vals.some((v) => v === 'miss' || v === 'mixed');
+    if (hit && miss) return 'mixed';
+    if (vals.includes('mixed')) return 'mixed';
+    if (hit) return 'hit';
+    return 'miss';
+  }
+
+  function stripEphemeralMeta(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+    const { _debug, _cache, ...rest } = obj;
+    return rest;
+  }
+
   function getUserdataCached() {
     const entry = readCacheStore()[USERDATA_CACHE_KEY];
     if (!entry?.ts || !entry.data) return null;
     if (!Array.isArray(entry.data.appIds) || !Array.isArray(entry.data.wishlistAppIds)) {
       return null;
     }
-    const empty = entry.data.appIds.length === 0 && entry.data.wishlistAppIds.length === 0;
-    if (Date.now() - entry.ts > userdataCacheTtlMs(empty)) return null;
+    if (isCacheEntryExpired(USERDATA_CACHE_KEY, entry)) return null;
+    touchCacheEntry(entry);
     return entry.data;
   }
 
   function setUserdataCached(data) {
-    readCacheStore()[USERDATA_CACHE_KEY] = { ts: Date.now(), data };
+    const now = Date.now();
+    readCacheStore()[USERDATA_CACHE_KEY] = { ts: now, at: now, data };
     persistCacheSoon();
   }
 
@@ -2354,20 +2502,8 @@
     setSteamOverride(slug, null);
   }
 
-  function getLongCached(key, ttlMs) {
-    const entry = readCacheStore()[key];
-    if (!entry?.ts || entry.data == null) return null;
-    if (Date.now() - entry.ts > ttlMs) return null;
-    return entry.data;
-  }
-
-  function setLongCached(key, data) {
-    readCacheStore()[key] = { ts: Date.now(), data };
-    persistCacheSoon();
-  }
-
   async function fetchSteamPopularTagMap() {
-    const cached = getLongCached(TAG_MAP_CACHE_KEY, TAG_MAP_TTL_MS);
+    const cached = getCached(TAG_MAP_CACHE_KEY);
     if (cached && typeof cached === 'object') return cached;
 
     if (inflight.has(TAG_MAP_CACHE_KEY)) return inflight.get(TAG_MAP_CACHE_KEY);
@@ -2380,7 +2516,7 @@
           if (item?.tagid != null && item.name) map[item.tagid] = item.name;
         }
       }
-      setLongCached(TAG_MAP_CACHE_KEY, map);
+      setCached(TAG_MAP_CACHE_KEY, map, { ttlMs: TAG_MAP_TTL_MS });
       return map;
     })();
 
@@ -2439,13 +2575,12 @@
     const tagsKey = `steam:tags:${id}`;
     const assetsKey = `steam:assets:${id}`;
     const extrasKey = `steam:extras:${id}:${cc}`;
-    const debugOn = Boolean(settings.debugMode);
 
-    const cachedTags = !debugOn ? getCached(tagsKey) : null;
-    const cachedAssets = !debugOn ? getCached(assetsKey) : null;
-    const cachedExtras = !debugOn ? getCached(extrasKey) : null;
+    const cachedTags = getCached(tagsKey);
+    const cachedAssets = getCached(assetsKey);
+    const cachedExtras = getCached(extrasKey);
     if (cachedTags && cachedAssets && cachedExtras) {
-      return { tags: cachedTags, assets: cachedAssets, extras: cachedExtras };
+      return { tags: cachedTags, assets: cachedAssets, extras: cachedExtras, _cache: 'hit' };
     }
 
     if (inflight.has(inflightKey)) return inflight.get(inflightKey);
@@ -2490,21 +2625,22 @@
           deckCompat: parseSteamDeckCompat(item),
           ...purchase,
         };
-        if (!debugOn) {
-          setCached(tagsKey, tags);
-          if (assets) setCached(assetsKey, assets);
-          setCached(extrasKey, extras);
-        }
+        setCached(tagsKey, tags);
+        if (assets) setCached(assetsKey, assets);
+        setCached(extrasKey, extras);
+        const partialHit = Boolean(cachedTags || cachedAssets || cachedExtras);
         return {
           tags: tags.length ? tags : cachedTags || [],
           assets: assets || cachedAssets || null,
           extras: extras || cachedExtras || null,
+          _cache: partialHit ? 'mixed' : 'miss',
         };
       } catch (_) {
         return {
           tags: cachedTags || [],
           assets: cachedAssets || null,
           extras: cachedExtras || null,
+          _cache: cachedTags || cachedAssets || cachedExtras ? 'hit' : 'miss',
         };
       }
     })();
@@ -2629,9 +2765,8 @@
 
     const cc = String(country || settings.steamCountry || 'US').toUpperCase() || 'US';
     const cacheKey = `steam:similar:${id}`;
-    const debugOn = Boolean(settings.debugMode);
-    const cached = !debugOn ? getCached(cacheKey) : null;
-    if (Array.isArray(cached) && cached.length) return cached;
+    const cached = getCached(cacheKey);
+    if (Array.isArray(cached) && cached.length) return asCacheHit(cached);
 
     const inflightKey = `similar:${id}:${cc}`;
     if (inflight.has(inflightKey)) return inflight.get(inflightKey);
@@ -2683,10 +2818,10 @@
           .slice(0, SIMILAR_GAMES_SHOW)
           .map(({ apiIndex, ...rest }) => rest);
 
-        if (games.length && !debugOn) setCached(cacheKey, games);
-        return games;
+        if (games.length) setCached(cacheKey, games);
+        return asCacheMiss(games);
       } catch (_) {
-        return [];
+        return asCacheMiss([]);
       }
     })();
 
@@ -2806,11 +2941,8 @@
     const q = String(title || '').trim();
     if (!q) return null;
     const cacheKey = `hltb:${normalizeTitle(q)}`;
-    const debugOn = Boolean(settings.debugMode);
-    if (!debugOn) {
-      const cached = getCached(cacheKey);
-      if (cached) return cached;
-    }
+    const cached = getCached(cacheKey);
+    if (cached) return asCacheHit(cached);
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
     const task = (async () => {
@@ -2864,8 +2996,8 @@
         matchScore: picked.score,
       };
       if (!payload.main && !payload.extra && !payload.complete) return null;
-      if (!debugOn) setCached(cacheKey, payload);
-      return payload;
+      setCached(cacheKey, payload);
+      return asCacheMiss(payload);
     })().catch(() => null);
 
     inflight.set(cacheKey, task);
@@ -2880,24 +3012,23 @@
     const q = String(title || '').trim();
     if (!q) return null;
     const cacheKey = `opencritic:${normalizeTitle(q)}`;
-    const debugOn = Boolean(settings.debugMode);
-    if (!debugOn) {
-      const cached = getCached(cacheKey);
-      // Bust legacy HTML caches that kept tier but dropped the numeric score.
-      if (cached && (cached.score != null || cached.missing || cached.scoreParseV2)) return cached;
+    const cached = getCached(cacheKey);
+    // Bust legacy HTML caches that kept tier but dropped the numeric score.
+    if (cached && (cached.score != null || cached.missing || cached.scoreParseV2)) {
+      return asCacheHit(cached);
     }
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
     const task = (async () => {
       const fromApi = await fetchOpenCriticViaApi(q).catch(() => null);
       if (fromApi) {
-        if (!debugOn) setCached(cacheKey, fromApi);
-        return fromApi;
+        setCached(cacheKey, fromApi);
+        return asCacheMiss(fromApi);
       }
       const fromHtml = await fetchOpenCriticViaHtml(q).catch(() => null);
       if (fromHtml) {
-        if (!debugOn) setCached(cacheKey, fromHtml);
-        return fromHtml;
+        setCached(cacheKey, fromHtml);
+        return asCacheMiss(fromHtml);
       }
       return null;
     })().catch(() => null);
@@ -3162,11 +3293,8 @@
     const id = Number(appId);
     if (!Number.isFinite(id) || id <= 0) return null;
     const cacheKey = `protondb:${id}`;
-    const debugOn = Boolean(settings.debugMode);
-    if (!debugOn) {
-      const cached = getCached(cacheKey);
-      if (cached) return cached;
-    }
+    const cached = getCached(cacheKey);
+    if (cached) return asCacheHit(cached);
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
     const task = (async () => {
@@ -3187,8 +3315,8 @@
         total: data.total != null ? Number(data.total) : null,
         url: `https://www.protondb.com/app/${id}`,
       };
-      if (!debugOn) setCached(cacheKey, payload);
-      return payload;
+      setCached(cacheKey, payload);
+      return asCacheMiss(payload);
     })().catch(() => null);
 
     inflight.set(cacheKey, task);
@@ -3266,31 +3394,6 @@
     return data.owned;
   }
 
-  function isSteamGameResolveKey(key) {
-    return key.startsWith('steam:id:') || /^steam:[A-Z]{2}:/.test(key);
-  }
-
-  function cacheEntryTtlMs(key, entry) {
-    if (Number(entry?.ttlMs) > 0) return Number(entry.ttlMs);
-    if (key === TAG_MAP_CACHE_KEY) return TAG_MAP_TTL_MS;
-    if (key === USERDATA_CACHE_KEY) {
-      const data = entry?.data;
-      const empty =
-        !data ||
-        ((!Array.isArray(data.appIds) || data.appIds.length === 0) &&
-          (!Array.isArray(data.wishlistAppIds) || data.wishlistAppIds.length === 0));
-      return userdataCacheTtlMs(empty);
-    }
-    return cacheTtlMs();
-  }
-
-  function isCacheEntryExpired(key, entry) {
-    if (!entry?.ts) return true;
-    const ttl = cacheEntryTtlMs(key, entry);
-    if (!ttl) return true;
-    return Date.now() - entry.ts > ttl;
-  }
-
   function isCacheEntryPartial(key, entry) {
     if (isCacheEntryExpired(key, entry)) return true;
     if (!isSteamGameResolveKey(key)) return false;
@@ -3311,6 +3414,47 @@
     } catch (_) {
       return 0;
     }
+  }
+
+  function pruneExpiredCache() {
+    const store = readCacheStore();
+    let removed = 0;
+    for (const key of Object.keys(store)) {
+      if (isCacheEntryExpired(key, store[key])) {
+        delete store[key];
+        removed += 1;
+      }
+    }
+    return removed;
+  }
+
+  /** Drop least-recently-used entries until under the soft budget. Pins userdata + tag map. */
+  function evictCacheToBudget() {
+    const store = readCacheStore();
+    let usedBytes = 0;
+    const candidates = [];
+    for (const key of Object.keys(store)) {
+      const entry = store[key];
+      const bytes = cacheEntryByteSize(key, entry);
+      usedBytes += bytes;
+      if (CACHE_PINNED_KEYS.has(key)) continue;
+      candidates.push({
+        key,
+        bytes,
+        at: Number(entry?.at || entry?.ts) || 0,
+      });
+    }
+    if (usedBytes <= CACHE_SOFT_LIMIT_BYTES) return 0;
+
+    candidates.sort((a, b) => a.at - b.at);
+    let removed = 0;
+    for (const item of candidates) {
+      if (usedBytes <= CACHE_SOFT_LIMIT_BYTES) break;
+      delete store[item.key];
+      usedBytes -= item.bytes;
+      removed += 1;
+    }
+    return removed;
   }
 
   function formatCacheBytes(n) {
@@ -3419,6 +3563,8 @@
 
   function clearCache() {
     const count = getCacheEntryCount();
+    clearTimeout(cachePersistTimer);
+    cachePersistTimer = 0;
     cacheStore = {};
     try {
       GM_setValue(CACHE_KEY, {});
@@ -3436,7 +3582,18 @@
     } catch (_) {
       stored = null;
     }
-    if (stored === SCRIPT_VERSION) return false;
+    if (stored === SCRIPT_VERSION) {
+      const pruned = pruneExpiredCache();
+      const evicted = evictCacheToBudget();
+      if (pruned > 0 || evicted > 0) {
+        try {
+          GM_setValue(CACHE_KEY, readCacheStore());
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      return false;
+    }
     clearCache();
     try {
       GM_setValue(CACHE_VERSION_KEY, SCRIPT_VERSION);
@@ -5331,6 +5488,92 @@
         box-sizing: border-box;
       }
 
+      .blp-debug-cache {
+        position: relative;
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      }
+
+      .blp-debug-cache--hit {
+        background-image: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 5px,
+          rgba(72, 199, 142, 0.14) 5px,
+          rgba(72, 199, 142, 0.14) 10px
+        );
+      }
+
+      .blp-debug-cache--miss {
+        background-image: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 5px,
+          rgba(255, 160, 40, 0.16) 5px,
+          rgba(255, 160, 40, 0.16) 10px
+        );
+      }
+
+      .blp-debug-cache--mixed {
+        background-image: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 5px,
+          rgba(120, 170, 255, 0.16) 5px,
+          rgba(120, 170, 255, 0.16) 10px
+        );
+      }
+
+      .blp-debug-cache--na {
+        background-image: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 5px,
+          rgba(255, 255, 255, 0.06) 5px,
+          rgba(255, 255, 255, 0.06) 10px
+        );
+      }
+
+      .blp-cache-badge {
+        display: inline-block;
+        margin-left: 0.45em;
+        padding: 0.08em 0.42em;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-radius: 3px;
+        vertical-align: middle;
+        line-height: 1.3;
+        white-space: nowrap;
+      }
+
+      .blp-cache-badge--hit {
+        color: #1a3d2c;
+        background: #48c78e;
+      }
+
+      .blp-cache-badge--miss {
+        color: #3d2208;
+        background: #ffb321;
+      }
+
+      .blp-cache-badge--mixed {
+        color: #12233f;
+        background: #7aabff;
+      }
+
+      .blp-cache-badge--na {
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .blp-similar.blp-debug-cache {
+        padding: 0.35rem 0.45rem 0.55rem;
+        margin-left: -0.45rem;
+        margin-right: -0.45rem;
+      }
+
       .blp-debug-panel__title {
         margin: 0 0 0.55rem;
         font-size: 0.85rem;
@@ -5859,12 +6102,11 @@
     const id = Number(appId);
     const detailsCountry = String(country || 'US').toUpperCase();
     const reqCountry = String(requestedCountry || detailsCountry).toUpperCase();
-    const debugOn = Boolean(settings.debugMode);
     const debug = debugBase || {
       appId: id,
       country: reqCountry,
       cacheKey,
-      cacheSkipped: debugOn,
+      cacheSkipped: false,
       manualOverride,
     };
 
@@ -5995,15 +6237,15 @@
     // Persist Steam resolves. Lite (list cards) may write tagsLoaded=false, but must not
     // overwrite a still-valid full entry (tagsLoaded=true) — that caused missing tags after
     // visiting a list before the game page.
-    if (!debugOn && cacheKey && payload.found) {
+    if (cacheKey && payload.found) {
       persistSteamResolveCache(cacheKey, payload, includeTags);
     }
-    return payload;
+    return asCacheMiss(payload);
   }
 
   function persistSteamResolveCache(cacheKey, payload, includeTags) {
     if (!cacheKey || !payload?.found || !cacheTtlMs()) return;
-    const { _debug, ...store } = payload;
+    const store = stripEphemeralMeta(payload);
     if (includeTags) {
       store.tagsLoaded = true;
       setCached(cacheKey, store);
@@ -6043,31 +6285,29 @@
       ...cached,
       manualOverride: Boolean(manualOverride || cached.manualOverride),
     };
+    let mixed = false;
     if (cachedSteamNeedsTagBackfill(result, includeTags)) {
       result = await backfillSteamTags(result, country);
-      const { _debug, ...store } = result;
-      setCached(cacheKey, store);
+      setCached(cacheKey, stripEphemeralMeta(result));
+      mixed = true;
     }
-    return result;
+    return mixed ? asCacheMixed(result) : asCacheHit(result);
   }
 
   async function fetchSteamByAppId(appId, country, { onPartial, includeTags = true, manualOverride = false } = {}) {
     const id = Number(appId);
     if (!Number.isFinite(id) || id <= 0) {
-      return { found: false, _debug: { reason: 'Invalid Steam App ID' } };
+      return { found: false, _debug: { reason: 'Invalid Steam App ID' }, _cache: 'na' };
     }
     const requestedCountry = String(country || 'US').toUpperCase();
     const cacheKey = `steam:id:${requestedCountry}:${id}`;
     const inflightKey = includeTags ? cacheKey : `${cacheKey}:lite`;
-    const debugOn = Boolean(settings.debugMode);
-    if (!debugOn) {
-      const cached = await readSteamCacheOrBackfill(cacheKey, {
-        includeTags,
-        country: requestedCountry,
-        manualOverride,
-      });
-      if (cached) return cached;
-    }
+    const cached = await readSteamCacheOrBackfill(cacheKey, {
+      includeTags,
+      country: requestedCountry,
+      manualOverride,
+    });
+    if (cached) return cached;
     if (inflight.has(inflightKey)) return inflight.get(inflightKey);
 
     const task = hydrateSteamApp({
@@ -6083,7 +6323,7 @@
         appId: id,
         country: requestedCountry,
         cacheKey,
-        cacheSkipped: debugOn,
+        cacheSkipped: false,
         manualOverride: Boolean(manualOverride),
         searches: [],
       },
@@ -6134,15 +6374,12 @@
     const requestedCountry = String(country || 'US').toUpperCase();
     const cacheKey = `steam:${requestedCountry}:${normalizeTitle(title)}`;
     const inflightKey = includeTags ? cacheKey : `${cacheKey}:lite`;
-    const debugOn = Boolean(settings.debugMode);
-    if (!debugOn) {
-      const cached = await readSteamCacheOrBackfill(cacheKey, {
-        includeTags,
-        country: requestedCountry,
-        manualOverride: false,
-      });
-      if (cached) return cached;
-    }
+    const cached = await readSteamCacheOrBackfill(cacheKey, {
+      includeTags,
+      country: requestedCountry,
+      manualOverride: false,
+    });
+    if (cached) return cached;
 
     if (inflight.has(inflightKey)) return inflight.get(inflightKey);
 
@@ -6151,7 +6388,7 @@
         title,
         country: requestedCountry,
         cacheKey,
-        cacheSkipped: debugOn,
+        cacheSkipped: false,
         searches: [],
       };
 
@@ -6298,9 +6535,7 @@
       });
       const players = Number(data?.response?.player_count);
       if (!Number.isFinite(players)) return null;
-      const store = readCacheStore();
-      store[cacheKey] = { ts: Date.now(), data: { players }, ttlMs: PLAYERS_CACHE_TTL_MS };
-      persistCacheSoon();
+      setCached(cacheKey, { players }, { ttlMs: PLAYERS_CACHE_TTL_MS });
       return players;
     } catch (_) {
       return null;
@@ -6325,9 +6560,14 @@
     const mediaKey = `steamdb:media:${id}`;
     const shotsKey = `steam:screenshots:${id}`;
     const debugOn = Boolean(settings.debugMode);
-    let media = !debugOn ? getCached(mediaKey) : null;
-    let screenshots = needGallery && !debugOn ? getCached(shotsKey) : null;
-    if (screenshots && !Array.isArray(screenshots)) screenshots = null;
+    let media = getCached(mediaKey);
+    let mediaFromCache = Boolean(media);
+    let screenshots = needGallery ? getCached(shotsKey) : null;
+    let shotsFromCache = Array.isArray(screenshots);
+    if (screenshots && !Array.isArray(screenshots)) {
+      screenshots = null;
+      shotsFromCache = false;
+    }
     let latestPlayers = null;
     let latestPlayersSource = null;
     let playersApiUrl = null;
@@ -6347,6 +6587,16 @@
 
     const buildResult = () => {
       const { iconUrl, logoUrl, logoIsPortrait } = resolveMediaUrls();
+      const playersCache =
+        latestPlayersSource === 'cache' ? 'hit' : latestPlayers != null ? 'miss' : 'na';
+      const mediaCache = needMedia ? (mediaFromCache ? 'hit' : media ? 'miss' : 'na') : 'na';
+      const shotsCache = needGallery
+        ? shotsFromCache
+          ? 'hit'
+          : Array.isArray(screenshots)
+            ? 'miss'
+            : 'na'
+        : 'na';
       return {
         appId: id,
         iconUrl: needMedia && settings.showSteamDbIcon ? iconUrl : '',
@@ -6355,6 +6605,10 @@
         screenshots: needGallery ? (Array.isArray(screenshots) ? screenshots : null) : null,
         players: needPlayers ? latestPlayers : null,
         source: media?.source || 'steam',
+        _cache: mergeCacheSources(mediaCache, shotsCache, playersCache),
+        _cacheMedia: mediaCache,
+        _cacheShots: shotsCache,
+        _cachePlayers: playersCache,
         _debug: debugOn
           ? {
               reason: [
@@ -6405,14 +6659,11 @@
     }
 
     if (needPlayers) {
-      const entry = readCacheStore()[`steam:players:${id}`];
-      if (entry?.ts && typeof entry.data?.players === 'number') {
-        const ttl = entry.ttlMs || PLAYERS_CACHE_TTL_MS;
-        if (Date.now() - entry.ts <= ttl) {
-          latestPlayers = entry.data.players;
-          latestPlayersSource = 'cache';
-          emit(buildResult());
-        }
+      const cachedPlayers = getCached(`steam:players:${id}`);
+      if (cachedPlayers && typeof cachedPlayers.players === 'number') {
+        latestPlayers = cachedPlayers.players;
+        latestPlayersSource = 'cache';
+        emit(buildResult());
       }
     }
 
@@ -6424,6 +6675,7 @@
       needGallery && !Array.isArray(screenshots)
         ? fetchSteamScreenshots(id).then((shots) => {
             screenshots = Array.isArray(shots) ? shots : [];
+            shotsFromCache = getCacheSource(shots) === 'hit';
             emit(buildResult());
             return screenshots;
           })
@@ -6449,7 +6701,7 @@
         logoUrl: storeAssets.logoUrl || media?.logoUrl || '',
         source: 'steam-assets',
       };
-      if (!debugOn) setCached(mediaKey, media);
+      if (!mediaFromCache) setCached(mediaKey, media);
       emit(buildResult());
     }
 
@@ -6482,13 +6734,10 @@
 
   async function fetchSteamScreenshots(appId) {
     const id = Number(appId);
-    if (!Number.isFinite(id) || id <= 0) return [];
+    if (!Number.isFinite(id) || id <= 0) return asCacheMiss([]);
     const cacheKey = `steam:screenshots:${id}`;
-    const debugOn = Boolean(settings.debugMode);
-    if (!debugOn) {
-      const cached = getCached(cacheKey);
-      if (Array.isArray(cached)) return cached;
-    }
+    const cached = getCached(cacheKey);
+    if (Array.isArray(cached)) return asCacheHit(cached);
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
     const task = (async () => {
@@ -6498,10 +6747,10 @@
           `&filters=screenshots&l=english`;
         const root = await gmRequest({ url, anonymous: true });
         const shots = parseSteamScreenshots(root?.[id]?.success ? root[id].data : null);
-        if (shots.length && !debugOn) setCached(cacheKey, shots);
-        return shots;
+        if (shots.length) setCached(cacheKey, shots);
+        return asCacheMiss(shots);
       } catch (_) {
-        return [];
+        return asCacheMiss([]);
       }
     })();
 
@@ -6741,12 +6990,18 @@
     const readyKey = `${appId || ''}|${games.map((g) => `${g.appId}:${g.matchPct}`).join(',')}`;
     if (host.dataset.blpSimilarReady === '1' && host.dataset.blpSimilarKey === readyKey) {
       if (token) host.setAttribute('data-blp-token', token);
+      paintDebugCacheMark(host, getCacheSource(games) || 'miss', {
+        titleSelector: '.blp-similar__title',
+      });
       return;
     }
     if (appId) host.setAttribute('data-blp-appid', String(appId));
     if (token) host.setAttribute('data-blp-token', token);
     host.dataset.blpSimilarReady = '1';
     host.dataset.blpSimilarKey = readyKey;
+    paintDebugCacheMark(host, getCacheSource(games) || 'miss', {
+      titleSelector: '.blp-similar__title',
+    });
 
     const steamUrl = appId
       ? `https://store.steampowered.com/app/${appId}/`
@@ -7757,21 +8012,19 @@
   }
 
   async function fetchGameStatus({ appId, storeUrl, name, title, pageSlug }) {
-    const debugOn = Boolean(settings.debugMode);
     if (!appId) {
       return {
         missing: true,
         data: null,
         slug: null,
         _debug: { reason: 'No Steam appId — GameStatus skipped', appId: null },
+        _cache: 'na',
       };
     }
 
     const cacheKey = `gs:${appId}`;
-    if (!debugOn) {
-      const cached = getCached(cacheKey);
-      if (cached) return cached;
-    }
+    const cached = getCached(cacheKey);
+    if (cached) return asCacheHit(cached);
 
     if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
@@ -7781,7 +8034,7 @@
       const debug = {
         appId,
         cacheKey,
-        cacheSkipped: debugOn,
+        cacheSkipped: false,
         candidates: slugs,
         tried,
         attempts: [],
@@ -7806,11 +8059,8 @@
               slug: result.data.slug || slug,
               _debug: debug,
             };
-            if (!debugOn) {
-              const { _debug, ...store } = entry;
-              setCached(cacheKey, store);
-            }
-            return entry;
+            setCached(cacheKey, stripEphemeralMeta(entry));
+            return asCacheMiss(entry);
           }
         } catch (err) {
           debug.attempts.push({
@@ -7826,7 +8076,7 @@
         ? 'No GameStatus match for tried slugs'
         : 'No valid GameStatus slug candidates';
       const miss = { missing: true, data: null, slug: tried[0] || null, _debug: debug };
-      return miss;
+      return asCacheMiss(miss);
     })();
 
     inflight.set(cacheKey, task);
@@ -8126,6 +8376,33 @@
 
   function showRow(row) {
     if (row) row.hidden = false;
+  }
+
+  function cacheSourceLabel(source) {
+    if (source === 'hit') return t.debugCacheHit;
+    if (source === 'miss') return t.debugCacheMiss;
+    if (source === 'mixed') return t.debugCacheMixed;
+    return t.debugCacheNa;
+  }
+
+  /** Debug-only: hatch a section and show Cache / Network / Mixed badge. */
+  function paintDebugCacheMark(el, source, { titleSelector = '.game-details-header' } = {}) {
+    if (!el) return;
+    const variants = ['hit', 'miss', 'mixed', 'na'];
+    el.classList.remove('blp-debug-cache', ...variants.map((v) => `blp-debug-cache--${v}`));
+    const titleEl = el.querySelector(titleSelector);
+    titleEl?.querySelector('.blp-cache-badge')?.remove();
+
+    if (!settings.debugMode) return;
+
+    const src = variants.includes(source) ? source : 'na';
+    el.classList.add('blp-debug-cache', `blp-debug-cache--${src}`);
+    if (!titleEl) return;
+    const badge = document.createElement('span');
+    badge.className = `blp-cache-badge blp-cache-badge--${src}`;
+    badge.textContent = cacheSourceLabel(src);
+    badge.title = cacheSourceLabel(src);
+    titleEl.appendChild(badge);
   }
 
   function renderExtLink(link, { last = false } = {}) {
@@ -8530,6 +8807,7 @@
           `<span class="game-details-value blp-empty">${escapeHtml(t.loadError)}</span>${renderSteamMatchControl(steam, slug)}`
         );
         showRow(rows.steam);
+        paintDebugCacheMark(rows.steam, getCacheSource(steam) || 'miss');
       } else if (!steam?.found) {
         const missHtml = debugOn
           ? `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`
@@ -8541,12 +8819,14 @@
             `${missHtml}${missHtml && matchHtml ? '' : ''}${matchHtml ? `<span class="blp-steam-line">${matchHtml}</span>` : ''}`
           );
           showRow(rows.steam);
+          paintDebugCacheMark(rows.steam, getCacheSource(steam) || 'miss');
         } else {
           hideRow(rows.steam);
         }
       } else {
         setRowValues(rows.steam, renderSteamValues(steam, { owned, wishlist, slug }));
         showRow(rows.steam);
+        paintDebugCacheMark(rows.steam, getCacheSource(steam) || 'miss');
       }
     }
 
@@ -8555,6 +8835,7 @@
       if (score != null && !error) {
         setRowValues(rows.metacritic, renderMetacriticBadge(score, metacriticGameUrl(title, slug)));
         showRow(rows.metacritic);
+        paintDebugCacheMark(rows.metacritic, getCacheSource(steam) || 'miss');
       } else {
         hideRow(rows.metacritic);
       }
@@ -8569,6 +8850,7 @@
         if (html && !error) {
           setRowValues(rows.opencritic, html);
           showRow(rows.opencritic);
+          paintDebugCacheMark(rows.opencritic, getCacheSource(opencritic) || 'miss');
         } else {
           hideRow(rows.opencritic);
         }
@@ -8583,6 +8865,7 @@
         if (html && !error) {
           setRowValues(rows.hltb, html);
           showRow(rows.hltb);
+          paintDebugCacheMark(rows.hltb, getCacheSource(hltb) || 'miss');
         } else {
           hideRow(rows.hltb);
         }
@@ -8594,9 +8877,11 @@
       if (html && !error) {
         setRowValues(rows.deckproton, html);
         showRow(rows.deckproton);
+        paintDebugCacheMark(rows.deckproton, mergeCacheSources(steam, proton));
       } else if (debugOn && steam?.found) {
         setRowValues(rows.deckproton, `<span class="game-details-value blp-empty">—</span>`);
         showRow(rows.deckproton);
+        paintDebugCacheMark(rows.deckproton, mergeCacheSources(steam, proton));
       } else {
         hideRow(rows.deckproton);
       }
@@ -8614,9 +8899,15 @@
           `<a class="blp-players-badge blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"><span class="blp-players-badge__dot" aria-hidden="true"></span>${escapeHtml(label)}</a>`
         );
         showRow(rows.players);
+        paintDebugCacheMark(
+          rows.players,
+          steamDb?._cachePlayers ||
+            (steamDb?.playersSource === 'cache' ? 'hit' : 'miss')
+        );
       } else if (debugOn) {
         setRowValues(rows.players, `<span class="game-details-value blp-empty">—</span>`);
         showRow(rows.players);
+        paintDebugCacheMark(rows.players, 'na');
       } else {
         hideRow(rows.players);
       }
@@ -8626,6 +8917,7 @@
       if (gamestatus && !gamestatus.missing && gamestatus.data) {
         setRowValues(rows.gamestatus, renderGameStatusValues(gamestatus));
         showRow(rows.gamestatus);
+        paintDebugCacheMark(rows.gamestatus, getCacheSource(gamestatus) || 'miss');
       } else {
         hideRow(rows.gamestatus);
       }
@@ -8638,6 +8930,7 @@
           .join('');
         setRowValues(rows.links, html);
         showRow(rows.links);
+        paintDebugCacheMark(rows.links, 'na');
       } else {
         hideRow(rows.links);
       }

@@ -5,6 +5,31 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.24] - 2026-07-17
+
+### Added
+
+- Debug mode: each enrichment section (and Similar games) gets hatch styling plus a Cache / Network / Mixed badge
+
+### Changed
+
+- Debug mode no longer skips the lookup cache, so cache-source badges reflect real hits
+
+## [0.7.23] - 2026-07-17
+
+### Fixed
+
+- Player count cache now respects its 10-minute TTL (no longer reused for the full cache duration)
+
+### Changed
+
+- Unified lookup cache TTL handling (per-entry `ttlMs`, system keys for players / userdata / tag map)
+- Cache persist prunes expired entries and LRU-evicts toward the soft 5 MB budget
+
+### Added
+
+- Settings cache hint documents all lookup sources and that `0` only disables the long lookup cache
+
 ## [0.7.22] - 2026-07-17
 
 ### Added

@@ -2,13 +2,13 @@
 
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.22-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.24-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
 Compatible with [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), [Greasemonkey](https://www.greasespot.net/), ScriptCat, and other managers that support the `// ==UserScript==` metadata block.
 
-> **Status:** early (`0.7.22`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.24`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Quick install
 
@@ -86,7 +86,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / list cover badges / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB)
-- Cache duration + clear cache
+- Cache duration + clear cache (expired prune + LRU soft limit; players / library keep short TTLs)
 
 ## Supported pages
 
