@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.24
+// @version           0.7.26
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.24';
+  const SCRIPT_VERSION = '0.7.26';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -105,7 +105,6 @@
   const STEAM_CDN_COMMUNITY_ICONS = 'https://shared.fastly.steamstatic.com/community_assets/images/apps';
   const STEAMDB_APP_URL = 'https://steamdb.info/app';
   const STEAM_TAGS_MAX = 12;
-  const PLAYERS_CACHE_TTL_MS = 10 * 60 * 1000;
   const GAMESTATUS_API_BASE = 'https://gamestatus.info/back/api/gameinfo/game';
   const GAMESTATUS_SITE_BASE = 'https://gamestatus.info';
   const GAMESTATUS_MAX_SLUG_ATTEMPTS = 2;
@@ -313,7 +312,7 @@
       navSettingsTitle: 'Backloggd Plus settings',
       cacheHours: 'Cache duration (hours)',
       cacheHoursHint:
-        'How long to reuse Steam, GameStatus, scores, media, and similar-game lookups. 0 disables that cache. Players, Steam library/wishlist, and the tag map keep their own short TTLs.',
+        'How long to reuse Steam, GameStatus, scores, media, and similar-game lookups. 0 disables that cache. Steam library/wishlist and the tag map keep their own short TTLs. Online players are never cached.',
       clearCache: 'Clear cache',
       cacheCleared: 'Cache cleared ({count})',
       cacheEmpty: 'Cache is empty',
@@ -514,7 +513,7 @@
       navSettingsTitle: 'Настройки Backloggd Plus',
       cacheHours: 'Время кэша (часы)',
       cacheHoursHint:
-        'Как долго переиспользовать ответы Steam, GameStatus, оценок, медиа и похожих игр. 0 отключает этот кэш. Игроки, библиотека/вишлист Steam и карта тегов сохраняют свои короткие TTL.',
+        'Как долго переиспользовать ответы Steam, GameStatus, оценок, медиа и похожих игр. 0 отключает этот кэш. Библиотека/вишлист Steam и карта тегов сохраняют свои короткие TTL. Онлайн-игроки не кешируются.',
       clearCache: 'Очистить кэш',
       cacheCleared: 'Кэш очищен ({count})',
       cacheEmpty: 'Кэш пуст',
@@ -709,7 +708,7 @@
       navSettingsTitle: 'Backloggd Plus 设置',
       cacheHours: '缓存时长（小时）',
       cacheHoursHint:
-        '复用 Steam、GameStatus、评分、媒体与相似游戏查询的时间。0 禁用该缓存。玩家数、Steam 库/愿望单与标签表仍使用各自的短 TTL。',
+        '复用 Steam、GameStatus、评分、媒体与相似游戏查询的时间。0 禁用该缓存。Steam 库/愿望单与标签表仍使用各自的短 TTL。在线玩家数不缓存。',
       clearCache: '清除缓存',
       cacheCleared: '已清除缓存（{count}）',
       cacheEmpty: '缓存为空',
@@ -910,7 +909,7 @@
       navSettingsTitle: 'Ajustes de Backloggd Plus',
       cacheHours: 'Duración de caché (horas)',
       cacheHoursHint:
-        'Cuánto reutilizar búsquedas de Steam, GameStatus, puntuaciones, medios y juegos similares. 0 desactiva esa caché. Jugadores, biblioteca/wishlist de Steam y el mapa de etiquetas conservan sus TTL cortos.',
+        'Cuánto reutilizar búsquedas de Steam, GameStatus, puntuaciones, medios y juegos similares. 0 desactiva esa caché. La biblioteca/wishlist de Steam y el mapa de etiquetas conservan sus TTL cortos. Los jugadores online no se cachean.',
       clearCache: 'Vaciar caché',
       cacheCleared: 'Caché vaciada ({count})',
       cacheEmpty: 'La caché está vacía',
@@ -1112,7 +1111,7 @@
       navSettingsTitle: 'Configurações do Backloggd Plus',
       cacheHours: 'Duração do cache (horas)',
       cacheHoursHint:
-        'Por quanto tempo reutilizar buscas Steam, GameStatus, notas, mídia e jogos semelhantes. 0 desativa esse cache. Jogadores, biblioteca/wishlist Steam e o mapa de tags mantêm seus TTLs curtos.',
+        'Por quanto tempo reutilizar buscas Steam, GameStatus, notas, mídia e jogos semelhantes. 0 desativa esse cache. Biblioteca/wishlist Steam e o mapa de tags mantêm seus TTLs curtos. Jogadores online nunca são cacheados.',
       clearCache: 'Limpar cache',
       cacheCleared: 'Cache limpo ({count})',
       cacheEmpty: 'Cache vazio',
@@ -1314,7 +1313,7 @@
       navSettingsTitle: 'Backloggd Plus Einstellungen',
       cacheHours: 'Cache-Dauer (Stunden)',
       cacheHoursHint:
-        'Wie lange Steam-, GameStatus-, Score-, Medien- und Similar-Game-Abfragen wiederverwendet werden. 0 deaktiviert diesen Cache. Spielerzahl, Steam-Bibliothek/Wunschliste und die Tag-Map behalten eigene kurze TTLs.',
+        'Wie lange Steam-, GameStatus-, Score-, Medien- und Similar-Game-Abfragen wiederverwendet werden. 0 deaktiviert diesen Cache. Steam-Bibliothek/Wunschliste und die Tag-Map behalten eigene kurze TTLs. Online-Spieler werden nicht gecacht.',
       clearCache: 'Cache leeren',
       cacheCleared: 'Cache geleert ({count})',
       cacheEmpty: 'Cache ist leer',
@@ -1516,7 +1515,7 @@
       navSettingsTitle: 'Réglages Backloggd Plus',
       cacheHours: 'Durée du cache (heures)',
       cacheHoursHint:
-        'Durée de réutilisation des requêtes Steam, GameStatus, scores, médias et jeux similaires. 0 désactive ce cache. Joueurs, bibliothèque/wishlist Steam et la carte de tags gardent leurs TTL courts.',
+        'Durée de réutilisation des requêtes Steam, GameStatus, scores, médias et jeux similaires. 0 désactive ce cache. Bibliothèque/wishlist Steam et la carte de tags gardent leurs TTL courts. Les joueurs en ligne ne sont jamais mis en cache.',
       clearCache: 'Vider le cache',
       cacheCleared: 'Cache vidé ({count})',
       cacheEmpty: 'Le cache est vide',
@@ -1718,7 +1717,7 @@
       navSettingsTitle: 'Backloggd Plus 設定',
       cacheHours: 'キャッシュ時間（時間）',
       cacheHoursHint:
-        'Steam・GameStatus・スコア・メディア・類似ゲーム照会の再利用時間。0でそのキャッシュを無効。プレイヤー数・Steamライブラリ/ウィッシュリスト・タグマップは独自の短いTTLを維持。',
+        'Steam・GameStatus・スコア・メディア・類似ゲーム照会の再利用時間。0でそのキャッシュを無効。Steamライブラリ/ウィッシュリスト・タグマップは独自の短いTTLを維持。オンラインプレイヤー数はキャッシュしない。',
       clearCache: 'キャッシュを消去',
       cacheCleared: 'キャッシュを消去しました（{count}）',
       cacheEmpty: 'キャッシュは空です',
@@ -1920,7 +1919,7 @@
       navSettingsTitle: 'Backloggd Plus 설정',
       cacheHours: '캐시 시간(시간)',
       cacheHoursHint:
-        'Steam, GameStatus, 점수, 미디어, 유사 게임 조회 재사용 시간. 0은 해당 캐시 비활성. 플레이어 수, Steam 라이브러리/위시리스트, 태그 맵은 자체 짧은 TTL을 유지.',
+        'Steam, GameStatus, 점수, 미디어, 유사 게임 조회 재사용 시간. 0은 해당 캐시 비활성. Steam 라이브러리/위시리스트, 태그 맵은 자체 짧은 TTL을 유지. 온라인 플레이어 수는 캐시하지 않음.',
       clearCache: '캐시 비우기',
       cacheCleared: '캐시 비움 ({count})',
       cacheEmpty: '캐시가 비어 있음',
@@ -2122,7 +2121,7 @@
       navSettingsTitle: 'Ustawienia Backloggd Plus',
       cacheHours: 'Czas cache (godziny)',
       cacheHoursHint:
-        'Jak długo ponownie używać zapytań Steam, GameStatus, ocen, mediów i podobnych gier. 0 wyłącza ten cache. Gracze, biblioteka/wishlist Steam i mapa tagów zachowują własne krótkie TTL.',
+        'Jak długo ponownie używać zapytań Steam, GameStatus, ocen, mediów i podobnych gier. 0 wyłącza ten cache. Biblioteka/wishlist Steam i mapa tagów zachowują własne krótkie TTL. Gracze online nigdy nie są cache’owani.',
       clearCache: 'Wyczyść cache',
       cacheCleared: 'Cache wyczyszczony ({count})',
       cacheEmpty: 'Cache jest pusty',
@@ -2329,11 +2328,7 @@
 
   /** System keys keep their own TTL even when cacheHours is 0. */
   function isSystemCacheKey(key) {
-    return (
-      key === TAG_MAP_CACHE_KEY ||
-      key === USERDATA_CACHE_KEY ||
-      String(key || '').startsWith('steam:players:')
-    );
+    return key === TAG_MAP_CACHE_KEY || key === USERDATA_CACHE_KEY;
   }
 
   function userdataCacheTtlMs(empty) {
@@ -2350,7 +2345,6 @@
   function cacheEntryTtlMs(key, entry) {
     if (Number(entry?.ttlMs) > 0) return Number(entry.ttlMs);
     if (key === TAG_MAP_CACHE_KEY) return TAG_MAP_TTL_MS;
-    if (String(key || '').startsWith('steam:players:')) return PLAYERS_CACHE_TTL_MS;
     if (key === USERDATA_CACHE_KEY) {
       const data = entry?.data;
       const empty =
@@ -2391,8 +2385,6 @@
     const entry = { ts: now, at: now, data };
     if (hasOptTtl) {
       entry.ttlMs = optTtl;
-    } else if (String(key || '').startsWith('steam:players:')) {
-      entry.ttlMs = PLAYERS_CACHE_TTL_MS;
     } else if (key === TAG_MAP_CACHE_KEY) {
       entry.ttlMs = TAG_MAP_TTL_MS;
     }
@@ -5488,6 +5480,41 @@
         box-sizing: border-box;
       }
 
+      .blp-debug-panel__summary {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+      }
+
+      .blp-debug-panel__summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .blp-debug-panel__summary::before {
+        content: '';
+        width: 0.4rem;
+        height: 0.4rem;
+        border-right: 2px solid #ffb321;
+        border-bottom: 2px solid #ffb321;
+        transform: rotate(-45deg);
+        transition: transform 0.15s ease;
+        flex: 0 0 auto;
+        margin-top: -0.1rem;
+      }
+
+      .blp-debug-panel[open] > .blp-debug-panel__summary::before {
+        transform: rotate(45deg);
+        margin-top: 0;
+      }
+
+      .blp-debug-panel__body {
+        margin-top: 0.55rem;
+      }
+
       .blp-debug-cache {
         position: relative;
         border-radius: 4px;
@@ -5575,7 +5602,7 @@
       }
 
       .blp-debug-panel__title {
-        margin: 0 0 0.55rem;
+        margin: 0;
         font-size: 0.85rem;
         font-weight: 700;
         letter-spacing: 0.03em;
@@ -6525,18 +6552,13 @@
   }
 
   async function fetchSteamPlayers(appId) {
-    const cacheKey = `steam:players:${appId}`;
-    const cached = getCached(cacheKey);
-    if (cached && typeof cached.players === 'number') return cached.players;
     try {
       const data = await gmRequest({
         url: `${STEAM_PLAYERS_URL}?appid=${encodeURIComponent(appId)}`,
         anonymous: true,
       });
       const players = Number(data?.response?.player_count);
-      if (!Number.isFinite(players)) return null;
-      setCached(cacheKey, { players }, { ttlMs: PLAYERS_CACHE_TTL_MS });
-      return players;
+      return Number.isFinite(players) ? players : null;
     } catch (_) {
       return null;
     }
@@ -6587,8 +6609,7 @@
 
     const buildResult = () => {
       const { iconUrl, logoUrl, logoIsPortrait } = resolveMediaUrls();
-      const playersCache =
-        latestPlayersSource === 'cache' ? 'hit' : latestPlayers != null ? 'miss' : 'na';
+      const playersCache = latestPlayers != null ? 'miss' : 'na';
       const mediaCache = needMedia ? (mediaFromCache ? 'hit' : media ? 'miss' : 'na') : 'na';
       const shotsCache = needGallery
         ? shotsFromCache
@@ -6605,7 +6626,7 @@
         screenshots: needGallery ? (Array.isArray(screenshots) ? screenshots : null) : null,
         players: needPlayers ? latestPlayers : null,
         source: media?.source || 'steam',
-        _cache: mergeCacheSources(mediaCache, shotsCache, playersCache),
+        _cache: mergeCacheSources(mediaCache, shotsCache),
         _cacheMedia: mediaCache,
         _cacheShots: shotsCache,
         _cachePlayers: playersCache,
@@ -6625,12 +6646,10 @@
                     : 'Screenshots pending'
                   : null,
                 latestPlayersSource === 'steam-api'
-                  ? 'Players from GetNumberOfCurrentPlayers'
-                  : latestPlayersSource === 'cache'
-                    ? 'Players from cache'
-                    : needPlayers
-                      ? 'Players pending'
-                      : null,
+                  ? 'Players from GetNumberOfCurrentPlayers (live, not cached)'
+                  : needPlayers
+                    ? 'Players pending'
+                    : null,
               ]
                 .filter(Boolean)
                 .join(' · '),
@@ -6656,15 +6675,6 @@
       emit(buildResult());
     } else if (needMedia || needGallery) {
       emit(buildResult());
-    }
-
-    if (needPlayers) {
-      const cachedPlayers = getCached(`steam:players:${id}`);
-      if (cachedPlayers && typeof cachedPlayers.players === 'number') {
-        latestPlayers = cachedPlayers.players;
-        latestPlayersSource = 'cache';
-        emit(buildResult());
-      }
     }
 
     const assetsPromise = needMedia
@@ -8683,6 +8693,7 @@
     title = '',
     slug = '',
   }) {
+    const wasOpen = Boolean(document.querySelector('[data-blp-debug][open]'));
     document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
     if (!settings.debugMode) return;
 
@@ -8773,20 +8784,25 @@
       fullJson = String(fullDump);
     }
 
-    const panel = document.createElement('div');
+    const panel = document.createElement('details');
     panel.className = 'blp-debug-panel';
     panel.setAttribute('data-blp-debug', '1');
+    if (wasOpen) panel.open = true;
     panel.innerHTML = `
-      <h3 class="blp-debug-panel__title">${escapeHtml(t.debugPanelTitle)} · v${escapeHtml(SCRIPT_VERSION)}</h3>
-      <div class="blp-debug-panel__meta">${escapeHtml(t.debugOwned)}: ${owned ? t.on : t.off}</div>
-      <div class="blp-debug-panel__section">
-        <span class="blp-debug-panel__label">${escapeHtml(t.debugSources)}</span>
-        <div class="blp-debug-panel__sources">${sourcesHtml}</div>
-      </div>
-      ${sections.join('')}
-      <div class="blp-debug-panel__section">
-        <span class="blp-debug-panel__label">${escapeHtml(t.debugDump)}</span>
-        <pre class="blp-debug-panel__pre">${escapeHtml(fullJson)}</pre>
+      <summary class="blp-debug-panel__summary">
+        <h3 class="blp-debug-panel__title">${escapeHtml(t.debugPanelTitle)} · v${escapeHtml(SCRIPT_VERSION)}</h3>
+      </summary>
+      <div class="blp-debug-panel__body">
+        <div class="blp-debug-panel__meta">${escapeHtml(t.debugOwned)}: ${owned ? t.on : t.off}</div>
+        <div class="blp-debug-panel__section">
+          <span class="blp-debug-panel__label">${escapeHtml(t.debugSources)}</span>
+          <div class="blp-debug-panel__sources">${sourcesHtml}</div>
+        </div>
+        ${sections.join('')}
+        <div class="blp-debug-panel__section">
+          <span class="blp-debug-panel__label">${escapeHtml(t.debugDump)}</span>
+          <pre class="blp-debug-panel__pre">${escapeHtml(fullJson)}</pre>
+        </div>
       </div>
     `;
 
@@ -8899,11 +8915,7 @@
           `<a class="blp-players-badge blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"><span class="blp-players-badge__dot" aria-hidden="true"></span>${escapeHtml(label)}</a>`
         );
         showRow(rows.players);
-        paintDebugCacheMark(
-          rows.players,
-          steamDb?._cachePlayers ||
-            (steamDb?.playersSource === 'cache' ? 'hit' : 'miss')
-        );
+        paintDebugCacheMark(rows.players, 'miss');
       } else if (debugOn) {
         setRowValues(rows.players, `<span class="game-details-value blp-empty">—</span>`);
         showRow(rows.players);

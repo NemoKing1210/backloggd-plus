@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.26] - 2026-07-17
+
+### Changed
+
+- Debug panel is collapsible and starts collapsed (keeps open state across in-page refreshes)
+
+## [0.7.25] - 2026-07-17
+
+### Changed
+
+- Online player count is never cached — always fetched live from GetNumberOfCurrentPlayers
+
 ## [0.7.24] - 2026-07-17
 
 ### Added
