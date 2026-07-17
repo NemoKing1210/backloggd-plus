@@ -10,7 +10,7 @@
 // @name:ko           Backloggd Plus
 // @name:pl           Backloggd Plus
 // @namespace         https://github.com/NemoKing1210/backloggd-plus
-// @version           0.7.28
+// @version           0.7.29
 // @description       Extends Backloggd and adds a Backloggd button on Steam game pages
 // @description:ru    Расширяет Backloggd и добавляет кнопку Backloggd на страницах игр Steam
 // @description:zh-CN 扩展 Backloggd：更多游戏信息、更丰富的界面与使用体验
@@ -58,7 +58,7 @@
 
   const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
   /** Keep in sync with `@version` in the userscript header (and `.meta.js`). */
-  const SCRIPT_VERSION = '0.7.28';
+  const SCRIPT_VERSION = '0.7.29';
   const SETTINGS_KEY = 'blp_settings';
   const CACHE_KEY = 'blp_cache_v1';
   const CACHE_VERSION_KEY = 'blp_cache_script_version';
@@ -10451,6 +10451,18 @@
         line-height: 1;
         letter-spacing: -0.04em;
         color: #fff;
+        transition: color 0.35s ease;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .blp-unified-rating__num.is-pulse {
+        animation: blp-unified-num-pulse 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      @keyframes blp-unified-num-pulse {
+        0% { transform: scale(1); filter: brightness(1); }
+        35% { transform: scale(1.07); filter: brightness(1.15); }
+        100% { transform: scale(1); filter: brightness(1); }
       }
 
       .blp-unified-rating[data-grade="high"] .blp-unified-rating__num {
@@ -10511,7 +10523,11 @@
         width: 0%;
         border-radius: 999px;
         background: linear-gradient(90deg, #66c0f4 0%, #3db89a 52%, #beee11 100%);
-        transition: width 0.4s ease;
+        transform-origin: left center;
+        transition:
+          width 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 0.3s ease;
+        will-change: width;
       }
 
       .blp-unified-rating__grid {
@@ -10537,10 +10553,34 @@
         border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(0, 0, 0, 0.22);
+        transition:
+          opacity 0.3s ease,
+          border-color 0.3s ease,
+          transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
       .blp-unified-rating__cell.is-missing {
         opacity: 0.5;
+      }
+
+      .blp-unified-rating__cell.is-loading {
+        opacity: 0.85;
+      }
+
+      .blp-unified-rating__cell.is-reveal {
+        animation: blp-unified-cell-reveal 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      @keyframes blp-unified-cell-reveal {
+        from {
+          opacity: 0.45;
+          transform: translateY(3px);
+          border-color: rgba(61, 184, 154, 0.35);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
 
       .blp-unified-rating__cell-label {
@@ -10556,28 +10596,45 @@
         font-weight: 800;
         line-height: 1.15;
         color: #fff;
+        font-variant-numeric: tabular-nums;
       }
 
       .blp-unified-rating__cell-sub {
         font-size: 0.72rem;
         color: var(--blp-muted, #9aa0a6);
+        min-height: 0.85rem;
       }
 
-      .blp-unified-rating.is-loading .blp-unified-rating__num {
+      .blp-unified-rating .blp-skeleton {
+        display: inline-block;
+        border-radius: 4px;
+        vertical-align: middle;
+        background: linear-gradient(
+          90deg,
+          var(--blp-skel, rgba(255, 255, 255, 0.08)) 0%,
+          var(--blp-skel-shine, rgba(255, 255, 255, 0.16)) 45%,
+          var(--blp-skel, rgba(255, 255, 255, 0.08)) 90%
+        );
+        background-size: 200% 100%;
+        animation: blp-shimmer 1.1s ease-in-out infinite;
+      }
+
+      .blp-unified-rating.is-loading .blp-unified-rating__num,
+      .blp-unified-rating__num.is-skel {
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 2.8rem;
       }
 
-      .blp-unified-rating.is-loading .blp-unified-rating__skel-num {
+      .blp-unified-rating__skel-num {
         display: block;
         width: 3.4rem;
         height: 2.5rem;
         border-radius: 8px;
       }
 
-      .blp-unified-rating.is-loading .blp-unified-rating__skel-denom {
+      .blp-unified-rating__skel-denom {
         display: block;
         width: 3.6rem;
         height: 0.7rem;
@@ -10585,7 +10642,7 @@
         border-radius: 4px;
       }
 
-      .blp-unified-rating.is-loading .blp-unified-rating__skel-value {
+      .blp-unified-rating__skel-value {
         display: block;
         width: 2.5rem;
         height: 1.1rem;
@@ -10593,7 +10650,7 @@
         border-radius: 4px;
       }
 
-      .blp-unified-rating.is-loading .blp-unified-rating__skel-sub {
+      .blp-unified-rating__skel-sub {
         display: block;
         width: 2rem;
         height: 0.65rem;
@@ -10604,12 +10661,27 @@
       .blp-unified-rating__meter--loading .blp-unified-rating__meter-fill {
         width: 36%;
         opacity: 0.55;
+        transition: none;
         animation: blp-unified-meter-indeterminate 1.35s ease-in-out infinite;
       }
 
       @keyframes blp-unified-meter-indeterminate {
         0% { transform: translateX(-120%); }
         100% { transform: translateX(320%); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .blp-unified-rating__num.is-pulse,
+        .blp-unified-rating__cell.is-reveal,
+        .blp-unified-rating__meter--loading .blp-unified-rating__meter-fill,
+        .blp-unified-rating .blp-skeleton {
+          animation: none !important;
+        }
+        .blp-unified-rating__meter-fill,
+        .blp-unified-rating__num,
+        .blp-unified-rating__cell {
+          transition: none !important;
+        }
       }
     `);
   }
@@ -10630,13 +10702,13 @@
     }
 
     const skeletonCells = [
-      t.unifiedRatingSteam,
-      t.unifiedRatingMetacritic,
-      t.unifiedRatingOpenCritic,
-      t.unifiedRatingBackloggd,
+      ['steam', t.unifiedRatingSteam],
+      ['metacritic', t.unifiedRatingMetacritic],
+      ['opencritic', t.unifiedRatingOpenCritic],
+      ['backloggd', t.unifiedRatingBackloggd],
     ]
       .map(
-        (label) => `<div class="blp-unified-rating__cell">
+        ([key, label]) => `<div class="blp-unified-rating__cell is-loading" data-blp-provider="${key}" data-blp-status="loading">
           <span class="blp-unified-rating__cell-label">${escapeHtml(label)}</span>
           <span class="blp-skeleton blp-unified-rating__skel-value"></span>
           <span class="blp-skeleton blp-unified-rating__skel-sub"></span>
@@ -10654,7 +10726,7 @@
           <div class="blp-unified-rating__layout">
             <div class="blp-unified-rating__score-block">
               <p class="blp-unified-rating__label">${escapeHtml(t.unifiedRatingTitle)}</p>
-              <p class="blp-unified-rating__num"><span class="blp-skeleton blp-unified-rating__skel-num"></span></p>
+              <p class="blp-unified-rating__num is-skel"><span class="blp-skeleton blp-unified-rating__skel-num"></span></p>
               <span class="blp-unified-rating__denom"><span class="blp-skeleton blp-unified-rating__skel-denom"></span></span>
             </div>
             <div class="blp-unified-rating__main">
@@ -10702,11 +10774,133 @@
     return (Math.round(n * 10) / 10).toFixed(1);
   }
 
+  function prefersReducedMotion() {
+    try {
+      return Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  let unifiedRatingNumAnim = 0;
+
+  function animateUnifiedRatingNum(el, nextValue) {
+    if (!el) return;
+    const next = Number(nextValue);
+    if (!Number.isFinite(next)) return;
+
+    const reduce = prefersReducedMotion();
+    const prevRaw = el.dataset.blpNum;
+    const prev = prevRaw != null && prevRaw !== '' ? Number(prevRaw) : NaN;
+    el.dataset.blpNum = String(next);
+    el.classList.remove('is-skel');
+
+    const finish = (v) => {
+      el.textContent = formatUnifiedScore5(v);
+      if (reduce) return;
+      el.classList.remove('is-pulse');
+      // Restart pulse animation
+      void el.offsetWidth;
+      el.classList.add('is-pulse');
+    };
+
+    if (reduce || !Number.isFinite(prev) || Math.abs(prev - next) < 0.05) {
+      finish(next);
+      return;
+    }
+
+    const animId = ++unifiedRatingNumAnim;
+    const start = performance.now();
+    const dur = 480;
+    const from = prev;
+
+    const frame = (now) => {
+      if (animId !== unifiedRatingNumAnim) return;
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const v = from + (next - from) * eased;
+      el.textContent = formatUnifiedScore5(v);
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        finish(next);
+      }
+    };
+    requestAnimationFrame(frame);
+  }
+
+  function setUnifiedRatingMeter(meter, fill, barWidth, { indeterminate }) {
+    if (!meter || !fill) return;
+    if (indeterminate) {
+      meter.classList.add('blp-unified-rating__meter--loading');
+      fill.style.width = '36%';
+      return;
+    }
+
+    const wasLoading = meter.classList.contains('blp-unified-rating__meter--loading');
+    meter.classList.remove('blp-unified-rating__meter--loading');
+    const target = `${Math.max(0, Math.min(100, barWidth))}%`;
+
+    if (wasLoading || !fill.style.width || fill.style.width === '0%' || fill.style.width === '36%') {
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+      void fill.offsetWidth;
+      fill.style.removeProperty('transition');
+    }
+    fill.style.width = target;
+  }
+
+  function paintUnifiedRatingCell(cell, provider) {
+    if (!cell) return;
+    const prevStatus = cell.dataset.blpStatus || '';
+    const status = provider.status;
+    cell.classList.toggle('is-loading', status === 'loading');
+    cell.classList.toggle('is-missing', status === 'missing');
+
+    if (status === 'loading') {
+      if (prevStatus !== 'loading') {
+        cell.dataset.blpStatus = status;
+        cell.innerHTML = `
+          <span class="blp-unified-rating__cell-label">${escapeHtml(provider.label)}</span>
+          <span class="blp-skeleton blp-unified-rating__skel-value"></span>
+          <span class="blp-skeleton blp-unified-rating__skel-sub"></span>
+        `;
+      }
+      return;
+    }
+
+    const displayKey = `${status}|${provider.display || ''}|${provider.score5 ?? ''}`;
+    if (prevStatus === status && cell.dataset.blpDisplay === displayKey) return;
+    cell.dataset.blpStatus = status;
+    cell.dataset.blpDisplay = displayKey;
+
+    const value = status === 'missing' ? t.unifiedRatingMissing : escapeHtml(provider.display);
+    const sub =
+      status === 'missing'
+        ? ''
+        : `<span class="blp-unified-rating__cell-sub">${escapeHtml(formatUnifiedScore5(provider.score5))} ★</span>`;
+    cell.innerHTML = `
+      <span class="blp-unified-rating__cell-label">${escapeHtml(provider.label)}</span>
+      <span class="blp-unified-rating__cell-value">${value}</span>
+      ${sub}
+    `;
+
+    if (status === 'ready' && prevStatus === 'loading' && !prefersReducedMotion()) {
+      cell.classList.remove('is-reveal');
+      void cell.offsetWidth;
+      cell.classList.add('is-reveal');
+    }
+  }
+
   function updateUnifiedRatingWidget(state) {
     const row = document.querySelector(`.blp-unified-rating-row[${ENRICH_ATTR}="unified-rating"]`);
     if (!row) return;
     const tile = row.querySelector('.blp-unified-rating');
     if (!tile) return;
+
+    const steamSettled = state?.steam != null;
+    const ocEnabled = settings.showOpenCritic !== false;
+    const ocSettled = !ocEnabled || state?.opencritic != null;
 
     const backloggd5 = getBackloggdAvgRating5FromDom();
     const steamPct100 = state?.steam?.reviews ? steamReviewsToPercent100(state.steam.reviews) : null;
@@ -10721,78 +10915,92 @@
         label: t.unifiedRatingSteam,
         display: steamPct100 != null ? `${steamPct100}%` : null,
         score5: steamPct100 != null ? steamPct100 / 20 : null,
+        status: !steamSettled ? 'loading' : steamPct100 != null ? 'ready' : 'missing',
       },
       {
         key: 'metacritic',
         label: t.unifiedRatingMetacritic,
         display: metacritic100 != null ? String(metacritic100) : null,
         score5: metacritic100 != null ? metacritic100 / 20 : null,
+        status: !steamSettled ? 'loading' : metacritic100 != null ? 'ready' : 'missing',
       },
       {
         key: 'opencritic',
         label: t.unifiedRatingOpenCritic,
         display: opencritic100 != null ? String(opencritic100) : null,
         score5: opencritic100 != null ? opencritic100 / 20 : null,
+        status: !ocSettled ? 'loading' : opencritic100 != null ? 'ready' : 'missing',
       },
       {
         key: 'backloggd',
         label: t.unifiedRatingBackloggd,
         display: backloggd5 != null ? formatUnifiedScore5(backloggd5) : null,
         score5: backloggd5,
+        status: backloggd5 != null ? 'ready' : 'missing',
       },
     ];
 
-    const present = providers.filter((p) => p.score5 != null);
+    const present = providers.filter((p) => p.status === 'ready');
     const externalPresent = present.filter((p) => p.key !== 'backloggd');
+    const anyLoading = providers.some((p) => p.status === 'loading');
+
     // Hide when there are no scores outside Backloggd (solo Backloggd ≠ Plus rating).
     if (!externalPresent.length) {
-      const settled =
-        state?.steam != null &&
-        (state?.opencritic != null || settings.showOpenCritic === false);
-      if (settled) row.style.display = 'none';
-      return;
+      if (steamSettled && ocSettled) {
+        row.style.display = 'none';
+        return;
+      }
+      // Still waiting on sources — keep the loading tile visible.
+      row.style.display = '';
+    } else {
+      row.style.display = '';
     }
-    row.style.display = '';
 
-    const avg5 = present.reduce((s, p) => s + p.score5, 0) / present.length;
-    const avg5Rounded = Math.round(avg5 * 10) / 10;
-    const grade = avg5Rounded >= 4 ? 'high' : avg5Rounded >= 3 ? 'mid' : 'low';
-    tile.classList.remove('is-loading');
+    const hasAvg = present.length > 0 && externalPresent.length > 0;
+    const avg5 = hasAvg ? present.reduce((s, p) => s + p.score5, 0) / present.length : null;
+    const avg5Rounded = avg5 != null ? Math.round(avg5 * 10) / 10 : null;
+    const grade =
+      avg5Rounded == null ? 'mid' : avg5Rounded >= 4 ? 'high' : avg5Rounded >= 3 ? 'mid' : 'low';
+    const barWidth = avg5Rounded != null ? Math.max(0, Math.min(100, (avg5Rounded / 5) * 100)) : 0;
+
+    tile.classList.toggle('is-loading', anyLoading && !hasAvg);
     tile.setAttribute('data-grade', grade);
 
-    const barWidth = Math.max(0, Math.min(100, (avg5Rounded / 5) * 100));
-    const cells = providers
-      .map((p) => {
-        const missing = p.score5 == null;
-        const value = missing ? t.unifiedRatingMissing : escapeHtml(p.display);
-        const sub = missing
-          ? ''
-          : `<span class="blp-unified-rating__cell-sub">${escapeHtml(formatUnifiedScore5(p.score5))} ★</span>`;
-        return `<div class="blp-unified-rating__cell${missing ? ' is-missing' : ''}">
-          <span class="blp-unified-rating__cell-label">${escapeHtml(p.label)}</span>
-          <span class="blp-unified-rating__cell-value">${value}</span>
-          ${sub}
-        </div>`;
-      })
-      .join('');
+    const numEl = tile.querySelector('.blp-unified-rating__num');
+    const denomEl = tile.querySelector('.blp-unified-rating__denom');
+    const hintEl = tile.querySelector('.blp-unified-rating__hint');
+    const meter = tile.querySelector('.blp-unified-rating__meter');
+    const fill = tile.querySelector('.blp-unified-rating__meter-fill');
 
-    tile.innerHTML = `
-      <div class="blp-unified-rating__layout">
-        <div class="blp-unified-rating__score-block">
-          <p class="blp-unified-rating__label">${escapeHtml(t.unifiedRatingTitle)}</p>
-          <p class="blp-unified-rating__num">${escapeHtml(formatUnifiedScore5(avg5Rounded))}</p>
-          <span class="blp-unified-rating__denom">${escapeHtml(t.unifiedRatingOutOf)}</span>
-        </div>
-        <div class="blp-unified-rating__main">
-          <div class="blp-unified-rating__head">
-            <p class="blp-unified-rating__title">${escapeHtml(t.unifiedRatingHint)}</p>
-            <p class="blp-unified-rating__hint">${escapeHtml(fmt(t.unifiedRatingSources, { n: present.length }))}</p>
-          </div>
-          <div class="blp-unified-rating__meter"><div class="blp-unified-rating__meter-fill" style="width:${escapeHtml(String(barWidth))}%"></div></div>
-          <div class="blp-unified-rating__grid">${cells}</div>
-        </div>
-      </div>
-    `;
+    if (hasAvg && avg5Rounded != null) {
+      animateUnifiedRatingNum(numEl, avg5Rounded);
+      if (denomEl) denomEl.textContent = t.unifiedRatingOutOf;
+      if (hintEl) {
+        hintEl.textContent = anyLoading
+          ? t.unifiedRatingLoading
+          : fmt(t.unifiedRatingSources, { n: present.length });
+      }
+      setUnifiedRatingMeter(meter, fill, barWidth, { indeterminate: false });
+    } else {
+      if (numEl) {
+        numEl.classList.add('is-skel');
+        numEl.classList.remove('is-pulse');
+        delete numEl.dataset.blpNum;
+        numEl.innerHTML = '<span class="blp-skeleton blp-unified-rating__skel-num"></span>';
+      }
+      if (denomEl) {
+        denomEl.innerHTML = '<span class="blp-skeleton blp-unified-rating__skel-denom"></span>';
+      }
+      if (hintEl) hintEl.textContent = t.unifiedRatingLoading;
+      setUnifiedRatingMeter(meter, fill, 0, { indeterminate: true });
+    }
+
+    for (const provider of providers) {
+      const cell =
+        tile.querySelector(`.blp-unified-rating__cell[data-blp-provider="${provider.key}"]`) ||
+        null;
+      paintUnifiedRatingCell(cell, provider);
+    }
   }
 
   function init() {

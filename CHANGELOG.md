@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.29] - 2026-07-17
+
+### Changed
+
+- Plus rating: per-source cell skeletons while scores load; score number and meter animate as averages update
+
 ## [0.7.28] - 2026-07-17
 
 ### Fixed
