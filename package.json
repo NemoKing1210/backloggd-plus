@@ -1,6 +1,6 @@
 {
   "name": "backloggd-plus",
-  "version": "0.7.33",
+  "version": "0.7.34",
   "private": true,
   "type": "module",
   "description": "Userscript that extends Backloggd with extra game information, richer UI, and QoL features",
@@ -14,9 +14,14 @@
     "type": "git",
     "url": "https://github.com/NemoKing1210/backloggd-plus.git"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/copy-dist.mjs",
+    "verify:artifacts": "node scripts/verify-artifacts.mjs",
+    "ci": "npm run build && npm run verify:artifacts",
     "preview": "vite preview"
   },
   "devDependencies": {

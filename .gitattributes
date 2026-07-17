@@ -1,2 +1,13 @@
-*.user.js linguist-language=JavaScript
-*.meta.js linguist-language=JavaScript
+# Normalize text files to LF so Linux CI and local builds stay byte-identical.
+* text=auto eol=lf
+
+*.user.js text eol=lf linguist-language=JavaScript
+*.meta.js text eol=lf linguist-language=JavaScript
+
+*.js text eol=lf
+*.mjs text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

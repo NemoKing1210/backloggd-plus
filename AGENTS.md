@@ -33,7 +33,12 @@ backloggd-plus/
 │   ├── api/                 # Steam, HLTB, OpenCritic, ProtonDB, GameStatus
 │   └── features/            # Enrichment, gallery, cards, settings UI, host pages
 ├── scripts/
-│   └── copy-dist.mjs        # Copies dist → root after build
+│   ├── copy-dist.mjs        # Copies dist → root after build
+│   ├── verify-artifacts.mjs # CI: dist ↔ root + git freshness
+│   └── lib/artifacts.mjs    # Shared artifact filenames
+├── .github/
+│   ├── workflows/ci.yml     # Build + verify committed artifacts
+│   └── dependabot.yml
 ├── dist/                    # Vite output (gitignored)
 ├── backloggd-plus.user.js   # Built installable userscript
 ├── backloggd-plus.meta.js   # Built metadata-only mirror for update checks
@@ -106,7 +111,9 @@ UI locales: `en`, `ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl` (plus `au
 npm install
 npm run dev      # Vite serve — install the generated server userscript (prefix "dev:")
 npm run build    # Production bundle → dist/ + copy to repo root
+npm run ci       # build + verify committed artifacts match (same as GitHub Actions)
 ```
 
 - **Violentmonkey / Tampermonkey:** install from the Vite open URL during `npm run dev`, or from the built root `backloggd-plus.user.js` after `npm run build`.
 - Do not commit temporary localhost `@updateURL` / `@downloadURL` values.
+- CI (`.github/workflows/ci.yml`) runs `npm ci` → `npm run ci` on pushes/PRs to `main` (`CI=true` enables the git freshness check). If it fails, rebuild and commit the root `.user.js` / `.meta.js`. Locally, `npm run ci` checks `dist` ↔ root; pass `--git` to `verify:artifacts` (or set `CI=true`) to also require a clean working tree vs HEAD.
