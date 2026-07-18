@@ -140,6 +140,7 @@ export const DEFAULT_SETTINGS = {
   showCardBadgeWishlist: true,
   showCardBadgeGameStatus: true,
   showExport: false,
+  showGameId: false,
   debugMode: false,
   links: {
     igdb: true,

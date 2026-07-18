@@ -207,6 +207,8 @@ export function openSettings() {
         ${hintHtml('showSteamDbDetailsHint')}
         ${toggleHtml('showExport', draft.showExport)}
         ${hintHtml('showExportHint')}
+        ${toggleHtml('showGameId', draft.showGameId)}
+        ${hintHtml('showGameIdHint')}
       </section>
       </div>
       <div ${panelAttrs('lists', activeTab)}>
@@ -328,6 +330,7 @@ export function openSettings() {
     paintCacheMeter(backdrop);
     showToast(count ? fmt(t.cacheCleared, { count }) : t.cacheEmpty, {
       type: count ? 'success' : 'info',
+      title: count ? t.toastCacheClearedTitle : t.cacheEmptyTitle,
     });
   });
 
@@ -346,7 +349,10 @@ export function openSettings() {
       : DEFAULT_SETTINGS.cacheHours;
     saveSettings(draft);
     reloadRuntimeSettings();
-    queueToast(t.toastSettingsSaved, { type: 'success' });
+    queueToast(t.toastSettingsSaved, {
+      type: 'success',
+      title: t.toastSettingsSavedTitle,
+    });
     location.reload();
   });
 
@@ -433,7 +439,10 @@ export function openFixMatchDialog(slug, currentAppId) {
     removeEnrichment();
     enrichGamePage();
     scheduleCardBadges(true);
-    showToast(t.toastSteamMatchCleared, { type: 'info' });
+    showToast(t.toastSteamMatchCleared, {
+      type: 'info',
+      title: t.toastSteamMatchClearedTitle,
+    });
   });
   backdrop.querySelector('[data-blp-fix-save]')?.addEventListener('click', () => {
     const raw = String(input()?.value || '').trim();
@@ -444,7 +453,10 @@ export function openFixMatchDialog(slug, currentAppId) {
         box.hidden = false;
         box.textContent = t.steamFixMatchInvalid;
       }
-      showToast(t.steamFixMatchInvalid, { type: 'error' });
+      showToast(t.steamFixMatchInvalid, {
+        type: 'error',
+        title: t.steamFixMatchInvalidTitle,
+      });
       return;
     }
     setSteamOverride(slug, id);
@@ -452,7 +464,10 @@ export function openFixMatchDialog(slug, currentAppId) {
     removeEnrichment();
     enrichGamePage();
     scheduleCardBadges(true);
-    showToast(fmt(t.toastSteamMatchSaved, { id }), { type: 'success' });
+    showToast(fmt(t.toastSteamMatchSaved, { id }), {
+      type: 'success',
+      title: t.toastSteamMatchSavedTitle,
+    });
   });
 
   document.body.appendChild(backdrop);

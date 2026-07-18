@@ -50,6 +50,7 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-similar') ||
     el.classList?.contains('blp-viewer') ||
     el.classList?.contains('blp-title-icon-wrap') ||
+    el.classList?.contains('blp-game-id') ||
     el.classList?.contains('blp-toast-host') ||
     el.classList?.contains('blp-toast') ||
     el.id === 'blp-toast-host'

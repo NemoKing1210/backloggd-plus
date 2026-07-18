@@ -30,6 +30,7 @@ function init() {
   if (migrate === 'upgrade') {
     showToast(fmt(t.toastCacheClearedOnUpdate, { version: SCRIPT_VERSION }), {
       type: 'info',
+      title: t.toastCacheClearedOnUpdateTitle,
       duration: 5200,
     });
   }
