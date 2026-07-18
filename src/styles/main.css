@@ -2,6 +2,11 @@ turbo-frame#game-stats[data-blp-hide-game-stats="1"] {
   display: none !important;
 }
 
+html[data-blp-hide-homepage-fuse="1"] .min-fuse-height[data-fuse*="homepage"],
+html[data-blp-hide-homepage-fuse="1"] .row:has(.min-fuse-height[data-fuse*="homepage"]) {
+  display: none !important;
+}
+
 :root {
   --blp-accent: #3db89a;
   --blp-text: #e8eaed;
@@ -2137,8 +2142,8 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-settings {
-  width: min(520px, 100%);
-  max-height: min(90vh, 720px);
+  width: min(1040px, 100%);
+  max-height: min(90vh, 1440px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2779,7 +2784,7 @@ img.blp-cover-zoomable:focus-visible {
   position: fixed;
   z-index: 1000010;
   right: 16px;
-  bottom: 16px;
+  top: 16px;
   display: flex;
   flex-direction: column-reverse;
   align-items: flex-end;
@@ -2817,7 +2822,7 @@ img.blp-cover-zoomable:focus-visible {
   font: 13px/1.4 system-ui, sans-serif;
   cursor: pointer;
   opacity: 0;
-  transform: translateY(10px) scale(0.98);
+  transform: translateY(-10px) scale(0.98);
   transition:
     opacity 0.22s ease,
     transform 0.22s ease;
@@ -2830,7 +2835,7 @@ img.blp-cover-zoomable:focus-visible {
 
 .blp-toast.is-leaving {
   opacity: 0;
-  transform: translateY(8px) scale(0.98);
+  transform: translateY(-8px) scale(0.98);
 }
 
 .blp-toast__icon {
@@ -2949,7 +2954,7 @@ img.blp-cover-zoomable:focus-visible {
   .blp-toast-host {
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    top: 12px;
     align-items: stretch;
     max-width: none;
   }

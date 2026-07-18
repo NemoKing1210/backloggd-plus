@@ -9,6 +9,7 @@ import {
 import { debounce } from '../utils/debounce.js';
 import { scheduleCardBadges } from './cards.js';
 import { enrichGamePage } from './enrichment.js';
+import { applyHomepageFuseVisibility } from './homepage.js';
 import { bindFixMatchClicks, ensureNavSettingsButton } from './settings-panel.js';
 import { bindLogEditorExportObserver, ensureLogEditorExportMount } from './export-game.js';
 
@@ -17,6 +18,7 @@ export function scanPage() {
   bindFixMatchClicks();
   bindLogEditorExportObserver();
   ensureLogEditorExportMount();
+  applyHomepageFuseVisibility();
   enrichGamePage();
   scheduleCardBadges();
 }

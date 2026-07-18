@@ -25,6 +25,7 @@ import { queueToast, showToast } from './toast.js';
 
 const SETTINGS_TABS = [
   { id: 'general', labelKey: 'sectionGeneral' },
+  { id: 'ui', labelKey: 'sectionUi' },
   { id: 'game', labelKey: 'sectionGame' },
   { id: 'lists', labelKey: 'sectionLists' },
   { id: 'links', labelKey: 'sectionLinks' },
@@ -135,6 +136,13 @@ export function openSettings() {
           </select>
           <p class="blp-hint">${escapeHtml(t.uiLanguageHint)}</p>
         </div>
+      </section>
+      </div>
+      <div ${panelAttrs('ui', activeTab)}>
+      <section>
+        <h3>${escapeHtml(t.sectionUi)}</h3>
+        ${toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true)}
+        ${hintHtml('hideHomepageFuseHint')}
       </section>
       </div>
       <div ${panelAttrs('game', activeTab)}>

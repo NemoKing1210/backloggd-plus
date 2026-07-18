@@ -118,6 +118,7 @@ export const DEFAULT_SETTINGS = {
   showCardBadgeGameStatus: true,
   showExport: false,
   showGameId: false,
+  hideHomepageFuse: false,
   debugMode: false,
   links: {
     igdb: true,

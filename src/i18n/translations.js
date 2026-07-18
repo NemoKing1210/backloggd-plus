@@ -12,8 +12,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Game page',
     sectionLists: 'Lists & cards',
     sectionGeneral: 'General',
+    sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    hideHomepageFuse: 'Hide Fuse ad slots',
+    hideHomepageFuseHint:
+      'Hides empty Fuse / incontent ad rows on the homepage (e.g. data-fuse="…_homepage").',
     debugMode: 'Debug mode',
     debugModeHint:
       'Show one debug panel on the game page with sources and a full response dump. Enrichment rows get a hatch + Cache/Network badge.',
@@ -300,8 +304,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Страница игры',
     sectionLists: 'Списки и карточки',
     sectionGeneral: 'Общие',
+    sectionUi: 'UI',
     sectionCache: 'Кэш',
     sectionDebug: 'Отладка',
+    hideHomepageFuse: 'Скрывать рекламные блоки Fuse',
+    hideHomepageFuseHint:
+      'Убирает пустые ряды Fuse / incontent на главной (например data-fuse="…_homepage").',
     debugMode: 'Режим отладки',
     debugModeHint:
       'Одна панель отладки на странице игры: источники и полный дамп. Ряды обогащения — штриховка и бейдж Кэш/Сеть.',
@@ -588,8 +596,11 @@ export const TRANSLATIONS = {
     sectionGame: '游戏页',
     sectionLists: '列表与卡片',
     sectionGeneral: '通用',
+    sectionUi: 'UI',
     sectionCache: '缓存',
     sectionDebug: '调试',
+    hideHomepageFuse: '隐藏 Fuse 广告位',
+    hideHomepageFuseHint: '隐藏首页空的 Fuse / incontent 广告行（如 data-fuse="…_homepage"）。',
     debugMode: '调试模式',
     debugModeHint:
       '在游戏页显示调试面板与完整响应。各增强行带斜线底纹和缓存/网络徽章。',
@@ -868,8 +879,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Página del juego',
     sectionLists: 'Listas y tarjetas',
     sectionGeneral: 'General',
+    sectionUi: 'UI',
     sectionCache: 'Caché',
     sectionDebug: 'Depuración',
+    hideHomepageFuse: 'Ocultar espacios publicitarios Fuse',
+    hideHomepageFuseHint:
+      'Oculta filas vacías de Fuse / incontent en la página de inicio (p. ej. data-fuse="…_homepage").',
     debugMode: 'Modo depuración',
     debugModeHint:
       'Panel de depuración con fuentes y volcado. Filas enriquecidas: tramado + insignia Caché/Red.',
@@ -1157,8 +1172,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Página do jogo',
     sectionLists: 'Listas e cartões',
     sectionGeneral: 'Geral',
+    sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Depuração',
+    hideHomepageFuse: 'Ocultar espaços de anúncio Fuse',
+    hideHomepageFuseHint:
+      'Oculta linhas vazias Fuse / incontent na página inicial (ex.: data-fuse="…_homepage").',
     debugMode: 'Modo debug',
     debugModeHint:
       'Painel de debug com fontes e dump. Linhas de enriquecimento: hachura + badge Cache/Rede.',
@@ -1446,8 +1465,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Spieleseite',
     sectionLists: 'Listen & Karten',
     sectionGeneral: 'Allgemein',
+    sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    hideHomepageFuse: 'Fuse-Werbeplätze ausblenden',
+    hideHomepageFuseHint:
+      'Blendet leere Fuse-/incontent-Werbezeilen auf der Startseite aus (z. B. data-fuse="…_homepage").',
     debugMode: 'Debug-Modus',
     debugModeHint:
       'Debug-Panel mit Quellen und Dump. Anreicherungszeilen: Schraffur + Cache/Netz-Badge.',
@@ -1735,8 +1758,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Page jeu',
     sectionLists: 'Listes et cartes',
     sectionGeneral: 'Général',
+    sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Débogage',
+    hideHomepageFuse: 'Masquer les emplacements pub Fuse',
+    hideHomepageFuseHint:
+      'Masque les rangées Fuse / incontent vides sur la page d’accueil (ex. data-fuse="…_homepage").',
     debugMode: 'Mode debug',
     debugModeHint:
       'Panneau debug avec sources et dump. Lignes d’enrichissement : hachures + badge Cache/Réseau.',
@@ -2024,8 +2051,12 @@ export const TRANSLATIONS = {
     sectionGame: 'ゲームページ',
     sectionLists: 'リストとカード',
     sectionGeneral: '一般',
+    sectionUi: 'UI',
     sectionCache: 'キャッシュ',
     sectionDebug: 'デバッグ',
+    hideHomepageFuse: 'Fuse広告枠を非表示',
+    hideHomepageFuseHint:
+      'ホームページの空の Fuse / incontent 広告行を非表示にします（例: data-fuse="…_homepage"）。',
     debugMode: 'デバッグモード',
     debugModeHint:
       'デバッグパネルと応答ダンプ。各行に斜線ハッチとキャッシュ/ネットワークバッジ。',
@@ -2313,8 +2344,12 @@ export const TRANSLATIONS = {
     sectionGame: '게임 페이지',
     sectionLists: '목록 및 카드',
     sectionGeneral: '일반',
+    sectionUi: 'UI',
     sectionCache: '캐시',
     sectionDebug: '디버그',
+    hideHomepageFuse: 'Fuse 광고 슬롯 숨기기',
+    hideHomepageFuseHint:
+      '홈페이지의 빈 Fuse / incontent 광고 행을 숨깁니다(예: data-fuse="…_homepage").',
     debugMode: '디버그 모드',
     debugModeHint:
       '디버그 패널과 응답 덤프. 각 보강 행에 빗금 + 캐시/네트워크 배지.',
@@ -2602,8 +2637,12 @@ export const TRANSLATIONS = {
     sectionGame: 'Strona gry',
     sectionLists: 'Listy i karty',
     sectionGeneral: 'Ogólne',
+    sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    hideHomepageFuse: 'Ukryj sloty reklamowe Fuse',
+    hideHomepageFuseHint:
+      'Ukrywa puste wiersze Fuse / incontent na stronie głównej (np. data-fuse="…_homepage").',
     debugMode: 'Tryb debug',
     debugModeHint:
       'Panel debug ze źródłami i dumpem. Wiersze wzbogacenia: kreskowanie + badge Cache/Sieć.',
