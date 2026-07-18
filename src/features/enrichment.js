@@ -37,6 +37,7 @@ import {
   removeSteamDbUi,
 } from './steamdb-ui.js';
 import { syncExportButton, removeExportUi } from './export-game.js';
+import { removeGameIdUi, syncGameIdUi } from './game-id.js';
 import { ensureUnifiedRatingWidget, updateUnifiedRatingWidget } from './unified-rating.js';
 import { getIgdbUrl, getPageContext, getGameTitle } from './page.js';
 import { cacheSourceLabel, paintDebugCacheMark } from './debug-cache.js';
@@ -431,6 +432,7 @@ export function removeEnrichment() {
   document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
   removeSteamDbUi();
   removeExportUi({ includeLogEditor: false });
+  removeGameIdUi();
   removeSimilarGamesUi();
   unbindGameCoverViewer();
   clearGameStatsVisibility();
@@ -1119,9 +1121,12 @@ export async function enrichGamePage() {
   }
 
   const title = getGameTitle();
-  if (!title) return;
+  if (!title) {
+    syncGameIdUi();
+    return;
+  }
 
-  const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSteamDbDetails}|${settings.showSimilarGames}|${settings.showGameStats}|${settings.showSteamPlayers}|${settings.showExport}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+  const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSteamDbDetails}|${settings.showSimilarGames}|${settings.showGameStats}|${settings.showSteamPlayers}|${settings.showExport}|${settings.showGameId}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
   const marker = document.querySelector(`[${ENRICH_ATTR}]`);
   // Same page/settings: keep the in-flight (or finished) mount. Remounting while
   // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
@@ -1130,10 +1135,12 @@ export async function enrichGamePage() {
     applyGameStatsVisibility();
     bindGameCoverViewer();
     syncExportButton(token);
+    syncGameIdUi();
     return;
   }
 
   removeEnrichment();
+  syncGameIdUi();
   const rows = ensureEnrichmentRows();
   if (!rows) return;
 

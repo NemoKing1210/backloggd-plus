@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.65] - 2026-07-18
+
+### Fixed
+
+- Game ID no longer injects into the Avg Rating `h1` (only title section headings)
+
+## [0.7.64] - 2026-07-18
+
+### Changed
+
+- Toasts: title + body, type icon, dismiss button, and timed progress bar
+
+## [0.7.63] - 2026-07-18
+
+### Added
+
+- Optional Backloggd game ID after the title (Settings → Game; click copies the numeric ID)
+
 ## [0.7.62] - 2026-07-18
 
 ### Changed
