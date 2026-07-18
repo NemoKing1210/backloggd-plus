@@ -203,7 +203,10 @@ export function openSettings() {
       <div ${panelAttrs('ui', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionUi)}</h3>
-        ${listHtml(toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint'))}
+        ${listHtml(
+          toggleHtml('enhanceHeader', draft.enhanceHeader === true, 'enhanceHeaderHint'),
+          toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint')
+        )}
       </section>
       </div>
       <div ${panelAttrs('game', activeTab)}>

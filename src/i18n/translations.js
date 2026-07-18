@@ -15,6 +15,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    enhanceHeader: 'Floating header',
+    enhanceHeaderHint:
+      'Sticky glass navbar that floats over the page and tightens slightly while scrolling.',
     hideHomepageFuse: 'Hide Fuse ad slots',
     hideHomepageFuseHint:
       'Hides empty Fuse / incontent ad rows on the homepage (e.g. data-fuse="…_homepage").',
@@ -307,6 +310,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Кэш',
     sectionDebug: 'Отладка',
+    enhanceHeader: 'Плавающий хедер',
+    enhanceHeaderHint:
+      'Липкая стеклянная панель навигации поверх страницы; при прокрутке чуть уплотняется.',
     hideHomepageFuse: 'Скрывать рекламные блоки Fuse',
     hideHomepageFuseHint:
       'Убирает пустые ряды Fuse / incontent на главной (например data-fuse="…_homepage").',
@@ -599,6 +605,8 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: '缓存',
     sectionDebug: '调试',
+    enhanceHeader: '浮动顶栏',
+    enhanceHeaderHint: '粘性毛玻璃导航栏，随页面滚动略微收紧。',
     hideHomepageFuse: '隐藏 Fuse 广告位',
     hideHomepageFuseHint: '隐藏首页空的 Fuse / incontent 广告行（如 data-fuse="…_homepage"）。',
     debugMode: '调试模式',
@@ -882,6 +890,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Caché',
     sectionDebug: 'Depuración',
+    enhanceHeader: 'Cabecera flotante',
+    enhanceHeaderHint:
+      'Barra de navegación de cristal adhesiva sobre la página; se compacta un poco al desplazarse.',
     hideHomepageFuse: 'Ocultar espacios publicitarios Fuse',
     hideHomepageFuseHint:
       'Oculta filas vacías de Fuse / incontent en la página de inicio (p. ej. data-fuse="…_homepage").',
@@ -1175,6 +1186,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Depuração',
+    enhanceHeader: 'Cabeçalho flutuante',
+    enhanceHeaderHint:
+      'Barra de navegação em vidro adesiva sobre a página; fica um pouco mais compacta ao rolar.',
     hideHomepageFuse: 'Ocultar espaços de anúncio Fuse',
     hideHomepageFuseHint:
       'Oculta linhas vazias Fuse / incontent na página inicial (ex.: data-fuse="…_homepage").',
@@ -1468,6 +1482,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    enhanceHeader: 'Schwebender Header',
+    enhanceHeaderHint:
+      'Klebende Glas-Navigation über der Seite; wird beim Scrollen etwas kompakter.',
     hideHomepageFuse: 'Fuse-Werbeplätze ausblenden',
     hideHomepageFuseHint:
       'Blendet leere Fuse-/incontent-Werbezeilen auf der Startseite aus (z. B. data-fuse="…_homepage").',
@@ -1761,6 +1778,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Débogage',
+    enhanceHeader: 'En-tête flottant',
+    enhanceHeaderHint:
+      'Barre de navigation en verre collante au-dessus de la page ; se compacte un peu au défilement.',
     hideHomepageFuse: 'Masquer les emplacements pub Fuse',
     hideHomepageFuseHint:
       'Masque les rangées Fuse / incontent vides sur la page d’accueil (ex. data-fuse="…_homepage").',
@@ -2054,6 +2074,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'キャッシュ',
     sectionDebug: 'デバッグ',
+    enhanceHeader: 'フローティングヘッダー',
+    enhanceHeaderHint:
+      'ページ上に浮かぶガラス風の固定ナビ。スクロールすると少しコンパクトになります。',
     hideHomepageFuse: 'Fuse広告枠を非表示',
     hideHomepageFuseHint:
       'ホームページの空の Fuse / incontent 広告行を非表示にします（例: data-fuse="…_homepage"）。',
@@ -2347,6 +2370,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: '캐시',
     sectionDebug: '디버그',
+    enhanceHeader: '플로팅 헤더',
+    enhanceHeaderHint:
+      '페이지 위에 떠 있는 글래스 스타일 고정 내비. 스크롤 시 조금 더 컴팩트해집니다.',
     hideHomepageFuse: 'Fuse 광고 슬롯 숨기기',
     hideHomepageFuseHint:
       '홈페이지의 빈 Fuse / incontent 광고 행을 숨깁니다(예: data-fuse="…_homepage").',
@@ -2640,6 +2666,9 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    enhanceHeader: 'Pływający nagłówek',
+    enhanceHeaderHint:
+      'Przyklejony szklany pasek nawigacji nad stroną; przy przewijaniu lekko się zagęszcza.',
     hideHomepageFuse: 'Ukryj sloty reklamowe Fuse',
     hideHomepageFuseHint:
       'Ukrywa puste wiersze Fuse / incontent na stronie głównej (np. data-fuse="…_homepage").',

@@ -119,6 +119,7 @@ export const DEFAULT_SETTINGS = {
   showExport: false,
   showGameId: false,
   hideHomepageFuse: false,
+  enhanceHeader: false,
   debugMode: false,
   links: {
     igdb: true,
