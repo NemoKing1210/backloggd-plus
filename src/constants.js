@@ -49,7 +49,8 @@ export const GOGDB_SITE = 'https://www.gogdb.org';
 export const STEAM_CDN_APPS = 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps';
 export const STEAM_CDN_STORE_ASSETS = 'https://shared.fastly.steamstatic.com/store_item_assets';
 export const STEAM_CDN_COMMUNITY_ICONS = 'https://shared.fastly.steamstatic.com/community_assets/images/apps';
-export const STEAMDB_APP_URL = 'https://steamdb.info/app';
+export const STEAMDB_SITE = 'https://steamdb.info';
+export const STEAMDB_APP_URL = `${STEAMDB_SITE}/app`;
 export const STEAM_TAGS_MAX = 12;
 export const GAMESTATUS_API_BASE = 'https://gamestatus.info/back/api/gameinfo/game';
 export const GAMESTATUS_SITE_BASE = 'https://gamestatus.info';
@@ -108,6 +109,7 @@ export const DEFAULT_SETTINGS = {
   showSimilarGames: true,
   showGameStats: true,
   showSteamPlayers: true,
+  showSteamDbDetails: true,
   showCardBadges: true,
   showCardBadgePrice: true,
   showCardBadgeReview: true,

@@ -187,6 +187,8 @@ export function openSettings() {
         ${hintHtml('showGameStatsHint')}
         ${toggleHtml('showSteamPlayers', draft.showSteamPlayers)}
         ${hintHtml('showSteamPlayersHint')}
+        ${toggleHtml('showSteamDbDetails', draft.showSteamDbDetails)}
+        ${hintHtml('showSteamDbDetailsHint')}
         ${toggleHtml('showExport', draft.showExport)}
         ${hintHtml('showExportHint')}
       </section>

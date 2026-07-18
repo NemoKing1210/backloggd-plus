@@ -5,6 +5,49 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.62] - 2026-07-18
+
+### Changed
+
+- Export preview: hide empty fields (CSV / Markdown list and JSON)
+
+## [0.7.61] - 2026-07-18
+
+### Added
+
+- Export: fill **Franchise** from the SteamDB detail row when available
+
+## [0.7.60] - 2026-07-18
+
+### Removed
+
+- SteamDB row hint about visiting SteamDB to load Technologies / Last Record Update
+
+## [0.7.59] - 2026-07-18
+
+### Fixed
+
+- Technologies / Last Record Update: harvest from live SteamDB app pages into cache (remote SteamDB HTML is Cloudflare-blocked from Backloggd)
+
+## [0.7.58] - 2026-07-18
+
+### Changed
+
+- SteamDB detail row: labeled fact list (Franchise / Supported Systems / Technologies / Last Record Update) with OS & tech chips
+
+## [0.7.57] - 2026-07-18
+
+### Changed
+
+- Franchise, Supported Systems, Technologies, and Last Record Update combined into one **SteamDB** detail row (same multi-line layout as Steam)
+
+## [0.7.56] - 2026-07-18
+
+### Added
+
+- Game page rows: **Franchise**, **Supported Systems** (Steam GetItems), **Technologies**, **Last Record Update** (best-effort SteamDB HTML when Cloudflare allows)
+- Settings → Game: **Show SteamDB details** toggle
+
 ## [0.7.55] - 2026-07-18
 
 ### Changed

@@ -1,3 +1,4 @@
+import { harvestSteamDbAppMetaFromPage } from '../api/steamdb.js';
 import { settings, t } from '../state.js';
 import { slugifyForBackloggd } from '../utils/slug.js';
 import { BACKLOGGD_SITE } from './steam-page.js';
@@ -85,4 +86,7 @@ export function injectSteamDbBackloggdButton() {
 
 export function scanSteamDbPage() {
   injectSteamDbBackloggdButton();
+  // Live DOM is past Cloudflare — cache Technologies / Last Record Update for Backloggd.
+  const appId = getSteamDbAppId();
+  if (appId) harvestSteamDbAppMetaFromPage(appId);
 }

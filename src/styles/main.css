@@ -1486,6 +1486,122 @@ img.blp-cover-zoomable:focus-visible {
   line-height: 1.35;
 }
 
+[data-blp-enrich="steamdb"] .blp-sdb-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 36rem;
+  padding: 0.15rem 0 0.15rem 0.7rem;
+  border-left: 2px solid rgba(102, 192, 244, 0.42);
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-fact {
+  display: grid;
+  grid-template-columns: minmax(6.75rem, 9.25rem) minmax(0, 1fr);
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+  align-items: start;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-fact__label {
+  color: var(--blp-muted);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  padding-top: 0.12em;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-fact__value {
+  min-width: 0;
+  line-height: 1.45;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-value-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-link {
+  color: #66c0f4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-link:hover,
+[data-blp-enrich="steamdb"] .blp-sdb-link:focus-visible {
+  color: #8ed0f8;
+  text-decoration: underline;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-link--muted {
+  color: var(--blp-text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92em;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-link--muted:hover,
+[data-blp-enrich="steamdb"] .blp-sdb-link--muted:focus-visible {
+  color: #66c0f4;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-os,
+[data-blp-enrich="steamdb"] .blp-sdb-tech {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12em 0.48em;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-os {
+  color: #c6d4df !important;
+  background: #1b2838;
+  border: 1px solid rgba(198, 212, 223, 0.22);
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-os:hover,
+[data-blp-enrich="steamdb"] .blp-sdb-os:focus-visible {
+  border-color: rgba(102, 192, 244, 0.55);
+  color: #fff !important;
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-tech {
+  color: #d7e6f0 !important;
+  background: linear-gradient(180deg, #2a475e 0%, #1b2838 100%);
+  border: 1px solid rgba(102, 192, 244, 0.28);
+}
+
+[data-blp-enrich="steamdb"] .blp-sdb-tech:hover,
+[data-blp-enrich="steamdb"] .blp-sdb-tech:focus-visible {
+  border-color: rgba(102, 192, 244, 0.65);
+  color: #fff !important;
+}
+
+@media (max-width: 575.98px) {
+  [data-blp-enrich="steamdb"] .blp-sdb-facts {
+    padding-left: 0.55rem;
+    max-width: none;
+  }
+
+  [data-blp-enrich="steamdb"] .blp-sdb-fact {
+    grid-template-columns: 1fr;
+    gap: 0.12rem;
+  }
+
+  [data-blp-enrich="steamdb"] .blp-sdb-fact__label {
+    padding-top: 0;
+  }
+}
+
 [data-blp-enrich] .blp-owned-badge {
   display: inline-flex;
   align-items: center;

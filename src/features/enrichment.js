@@ -142,6 +142,112 @@ export function renderDeckProtonValues({ steam, proton }) {
   }
   return parts.length ? `<span class="blp-deck-proton-chips">${parts.join('')}</span>` : '';
 }
+
+export function resolveFranchise(steam, steamDb) {
+  return steam?.franchise || steamDb?.franchise || null;
+}
+
+export function resolveSystems(steam, steamDb) {
+  return steam?.systems || steamDb?.systems || null;
+}
+
+export function renderFranchiseValues(franchise) {
+  if (!franchise?.name) return '';
+  const href = franchise.url || '#';
+  return `<a class="blp-sdb-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(franchise.name)}</a>`;
+}
+
+export function renderSystemsValues(systems, { appId = null } = {}) {
+  if (!systems) return '';
+  const parts = [];
+  const list = Array.isArray(systems.list) ? systems.list.filter(Boolean) : [];
+  const href = appId ? `${STEAMDB_APP_URL}/${appId}/` : `${STEAMDB_APP_URL}/`;
+  for (const os of list) {
+    parts.push(
+      `<a class="blp-sdb-os" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(os)}</a>`
+    );
+  }
+  const deck = deckCompatLabel(systems.deckCompat);
+  if (deck) {
+    parts.push(
+      `<a class="blp-deck-badge ${deck.cls} blp-ext-link" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer" title="Steam Deck">${escapeHtml(fmt(t.steamDeckStatus, { status: deck.label }))}</a>`
+    );
+  }
+  return parts.length ? `<span class="blp-sdb-value-row">${parts.join('')}</span>` : '';
+}
+
+export function renderTechnologiesValues(technologies) {
+  const list = Array.isArray(technologies) ? technologies.filter((x) => x?.name) : [];
+  if (!list.length) return '';
+  return `<span class="blp-sdb-value-row">${list
+    .map((tech) => {
+      const href = tech.url || '#';
+      return `<a class="blp-sdb-tech" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(tech.name)}</a>`;
+    })
+    .join('')}</span>`;
+}
+
+export function formatLastRecordUpdate(update) {
+  if (!update) return '';
+  const iso = update.iso;
+  if (iso) {
+    const ms = Date.parse(iso);
+    if (Number.isFinite(ms)) {
+      try {
+        return new Date(ms).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZoneName: 'short',
+        });
+      } catch (_) {
+        /* fall through */
+      }
+    }
+  }
+  return String(update.label || '').trim();
+}
+
+export function renderLastRecordUpdateValues(update, { appId = null } = {}) {
+  const label = formatLastRecordUpdate(update);
+  if (!label) return '';
+  const href = appId ? `${STEAMDB_APP_URL}/${appId}/` : `${STEAMDB_APP_URL}/`;
+  return `<a class="blp-sdb-link blp-sdb-link--muted" href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+}
+
+function steamDbFact(label, valueHtml, key = '') {
+  if (!valueHtml) return '';
+  const keyAttr = key ? ` data-blp-sdb="${escapeAttr(key)}"` : '';
+  return `<div class="blp-sdb-fact"${keyAttr}>
+    <span class="blp-sdb-fact__label">${escapeHtml(label)}</span>
+    <span class="blp-sdb-fact__value">${valueHtml}</span>
+  </div>`;
+}
+
+/** Franchise / Systems / Technologies / Last Record Update with SteamDB-style labels. */
+export function renderSteamDbValues(steam, steamDb) {
+  const appId = steam?.appId || steamDb?.appId || null;
+  const facts = [
+    steamDbFact(t.franchise, renderFranchiseValues(resolveFranchise(steam, steamDb)), 'franchise'),
+    steamDbFact(
+      t.supportedSystems,
+      renderSystemsValues(resolveSystems(steam, steamDb), { appId }),
+      'systems'
+    ),
+    steamDbFact(t.technologies, renderTechnologiesValues(steamDb?.technologies), 'technologies'),
+    steamDbFact(
+      t.lastRecordUpdate,
+      renderLastRecordUpdateValues(steamDb?.lastRecordUpdate, { appId }),
+      'lastRecordUpdate'
+    ),
+  ].filter(Boolean);
+
+  if (!facts.length) return '';
+  return `<div class="blp-sdb-facts">${facts.join('')}</div>`;
+}
+
 export function reviewScoreClass(summary) {
   const score = Number(summary?.review_score);
   if (!Number.isFinite(score) || score <= 0) {
@@ -372,6 +478,14 @@ export function skeletonHtml(kind) {
     `;
   }
   if (kind === 'players') return '<span class="blp-skeleton blp-skeleton--sm"></span>';
+  if (kind === 'steamdb') {
+    return `
+      <span class="blp-skeleton blp-skeleton--md"></span>
+      <span class="blp-skeleton blp-skeleton--md"></span>
+      <span class="blp-skeleton blp-skeleton--sm"></span>
+      <span class="blp-skeleton blp-skeleton--md"></span>
+    `;
+  }
   if (kind === 'gamestatus') {
     return `
       <span class="blp-skeleton blp-skeleton--md"></span>
@@ -390,6 +504,7 @@ export function ensureEnrichmentRows() {
   if (existing) {
     return {
       steam: document.querySelector(`[${ENRICH_ATTR}="steam"]`),
+      steamdb: document.querySelector(`[${ENRICH_ATTR}="steamdb"]`),
       metacritic: document.querySelector(`[${ENRICH_ATTR}="metacritic"]`),
       opencritic: document.querySelector(`[${ENRICH_ATTR}="opencritic"]`),
       hltb: document.querySelector(`[${ENRICH_ATTR}="hltb"]`),
@@ -403,6 +518,7 @@ export function ensureEnrichmentRows() {
   const rows = {};
   const plan = [];
   if (settings.showSteam) plan.push(['steam', t.steam]);
+  if (settings.showSteamDbDetails !== false) plan.push(['steamdb', t.linkSteamDb]);
   if (settings.showMetacritic) plan.push(['metacritic', t.metacritic]);
   if (settings.showOpenCritic) plan.push(['opencritic', t.openCritic]);
   if (settings.showHltb) plan.push(['hltb', t.hltb]);
@@ -743,6 +859,7 @@ export function renderUnifiedDebugPanel({
       showSteamDbIcon: settings.showSteamDbIcon,
       showSteamDbCover: settings.showSteamDbCover,
       showSteamDbGallery: settings.showSteamDbGallery,
+      showSteamDbDetails: settings.showSteamDbDetails,
       showSimilarGames: settings.showSimilarGames,
       showGameStats: settings.showGameStats,
       showSteamPlayers: settings.showSteamPlayers,
@@ -856,6 +973,32 @@ export function renderEnrichment(rows, { steam, links, error, owned = false, wis
       setRowValues(rows.steam, renderSteamValues(steam, { owned, wishlist, slug }));
       showRow(rows.steam);
       paintDebugCacheMark(rows.steam, getCacheSource(steam) || 'miss');
+    }
+  }
+
+  if (rows.steamdb) {
+    const html = renderSteamDbValues(steam, steamDb);
+    if (html && !error) {
+      setRowValues(rows.steamdb, html);
+      showRow(rows.steamdb);
+      paintDebugCacheMark(
+        rows.steamdb,
+        mergeCacheSources(
+          steam?.franchise || steam?.systems ? steam : null,
+          steamDb?._cacheMeta || steamDb
+        )
+      );
+    } else if (steam == null && steamDb == null) {
+      showRow(rows.steamdb);
+    } else if (debugOn && steam?.found) {
+      setRowValues(
+        rows.steamdb,
+        `<span class="game-details-value blp-empty">${escapeHtml(steamDb?.metaBlocked ? t.steamDbBlocked : '—')}</span>`
+      );
+      showRow(rows.steamdb);
+      paintDebugCacheMark(rows.steamdb, steamDb?._cacheMeta || 'na');
+    } else {
+      hideRow(rows.steamdb);
     }
   }
 
@@ -978,7 +1121,7 @@ export async function enrichGamePage() {
   const title = getGameTitle();
   if (!title) return;
 
-  const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSimilarGames}|${settings.showGameStats}|${settings.showSteamPlayers}|${settings.showExport}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
+  const token = `${ctx.slug}|${title}|${settings.steamCountry}|${settings.showSteam}|${settings.showSteamOwned}|${settings.showSteamWishlist}|${settings.showSteamTags}|${settings.showSteamCategories}|${settings.showMetacritic}|${settings.showOpenCritic}|${settings.showHltb}|${settings.showDeckProton}|${settings.showGameStatus}|${settings.showLinks}|${settings.showSteamDbIcon}|${settings.showSteamDbCover}|${settings.showSteamDbGallery}|${settings.showSteamDbDetails}|${settings.showSimilarGames}|${settings.showGameStats}|${settings.showSteamPlayers}|${settings.showExport}|${getSteamOverride(ctx.slug) || ''}|${settings.debugMode}|${JSON.stringify(settings.links)}`;
   const marker = document.querySelector(`[${ENRICH_ATTR}]`);
   // Same page/settings: keep the in-flight (or finished) mount. Remounting while
   // skeletons remain caused OpenCritic/HLTB/etc. to flicker on every MutationObserver pass.
@@ -1007,7 +1150,8 @@ export async function enrichGamePage() {
     settings.showSteamDbIcon ||
     settings.showSteamDbCover ||
     settings.showSteamDbGallery ||
-    settings.showSteamPlayers;
+    settings.showSteamPlayers ||
+    settings.showSteamDbDetails !== false;
   const needSteamDbMedia =
     settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamDbGallery;
   if (needSteamDbMedia) mountSteamDbSkeletons(token);
@@ -1020,6 +1164,7 @@ export async function enrichGamePage() {
     settings.showGameStatus ||
     needSteamDb ||
     settings.showSimilarGames ||
+    settings.showSteamDbDetails !== false ||
     (settings.showLinks && (settings.links?.itad !== false || settings.links?.steamdb !== false));
   const needUserdata =
     settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
@@ -1064,9 +1209,15 @@ export async function enrichGamePage() {
     if (!stillHere() || state.steam == null) return;
     syncLibrary();
     renderEnrichment(
-      { steam: rows.steam, metacritic: rows.metacritic, deckproton: rows.deckproton },
+      {
+        steam: rows.steam,
+        steamdb: rows.steamdb,
+        metacritic: rows.metacritic,
+        deckproton: rows.deckproton,
+      },
       {
         steam: state.steam,
+        steamDb: state.steamDb,
         proton: state.proton,
         error: state.error,
         owned: state.owned,
@@ -1078,6 +1229,22 @@ export async function enrichGamePage() {
     );
     paintLinks(state.steam);
     updateUnifiedRatingWidget(state);
+  };
+
+  const paintSteamDbDetails = () => {
+    if (!stillHere()) return;
+    renderEnrichment(
+      {
+        steamdb: rows.steamdb,
+        players: rows.players,
+      },
+      {
+        steam: state.steam,
+        steamDb: state.steamDb,
+        error: state.error,
+        skipDebug: true,
+      }
+    );
   };
 
   const paintOpenCritic = () => {
@@ -1189,6 +1356,7 @@ export async function enrichGamePage() {
             applySteamDbUi(partial, token);
             // Keep players skeleton until a count arrives (final paint clears misses).
             if (partial?.players != null) paintPlayers();
+            paintSteamDbDetails();
           },
         })
           .then((full) => {
@@ -1196,6 +1364,7 @@ export async function enrichGamePage() {
             state.steamDb = full;
             applySteamDbUi(full, token, { final: true });
             paintPlayers();
+            paintSteamDbDetails();
           })
           .catch((err) => {
             if (!stillHere()) return;
@@ -1204,12 +1373,15 @@ export async function enrichGamePage() {
               iconUrl: '',
               logoUrl: '',
               players: null,
+              technologies: [],
+              lastRecordUpdate: null,
               _debug: settings.debugMode
                 ? { reason: `SteamDB error: ${err?.message || err}` }
                 : undefined,
             };
             removeSteamDbUi();
             paintPlayers();
+            paintSteamDbDetails();
           })
       );
     }
@@ -1380,6 +1552,7 @@ export async function enrichGamePage() {
     paintDeckProton();
     paintGameStatus();
     paintPlayers();
+    paintSteamDbDetails();
   }
 
   if (!stillHere()) return;

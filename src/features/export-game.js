@@ -452,6 +452,15 @@ export function getSteamTagsFromDom() {
   return [...new Set(tags)].join(', ');
 }
 
+export function getFranchiseFromDom() {
+  const el = document.querySelector(
+    '[data-blp-enrich="steamdb"] [data-blp-sdb="franchise"] .blp-sdb-fact__value'
+  );
+  return String(el?.textContent || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function getSteamSourceUrl() {
   const appId =
     document.querySelector(`[${STEAMDB_ATTR}="cover"]`)?.getAttribute('data-blp-appid') ||
@@ -492,7 +501,7 @@ export function collectGameExportRecord() {
     'Time to Complete': time,
     Developer: getGameDevelopers(),
     'Release date': getGameReleaseDate(),
-    Franchise: '',
+    Franchise: getFranchiseFromDom(),
     'Is DLC': getIsDlc(),
     Tags: getSteamTagsFromDom(),
     Advantages: '',
@@ -689,15 +698,21 @@ function formatOption(name, id, label, hint, { enabled = true, checked = false }
 }
 
 function previewStatusText(statusKey, statusStyle) {
-  return formatExportStatus(statusKey, statusStyle) || '—';
+  return formatExportStatus(statusKey, statusStyle) || '';
+}
+
+function isPreviewValueEmpty(value) {
+  if (value == null) return true;
+  const s = String(value).trim();
+  return !s || s === '—' || s === t.exportNoRating;
 }
 
 function previewFieldRow(label, value, attrs = '') {
-  const display = value == null || value === '' ? '—' : value;
+  if (isPreviewValueEmpty(value)) return '';
   return `
     <div class="blp-export-preview__row" ${attrs}>
       <span class="blp-export-preview__key">${escapeHtml(label)}</span>
-      <span class="blp-export-preview__val">${escapeHtml(display)}</span>
+      <span class="blp-export-preview__val">${escapeHtml(value)}</span>
     </div>
   `;
 }
@@ -707,8 +722,8 @@ function buildExportPreviewValues(record, ratingStyle = 'text', statusStyle = 'n
   for (const col of EXPORT_COLUMNS) values[col] = record[col] ?? '';
   values.Rating =
     record._ratingScore10 == null
-      ? t.exportNoRating
-      : formatExportRating(record._ratingScore10, ratingStyle) || t.exportNoRating;
+      ? ''
+      : formatExportRating(record._ratingScore10, ratingStyle) || '';
   values.Status = previewStatusText(record._statusKey, statusStyle);
   return values;
 }
@@ -717,10 +732,13 @@ function buildExportPreviewValues(record, ratingStyle = 'text', statusStyle = 'n
 function buildExportPreviewHtml(record, ratingStyle = 'text', statusStyle = 'notion', format = 'csv') {
   if (format === 'json') {
     const row = buildExportRow(record, { ratingStyle, statusStyle });
+    const filtered = Object.fromEntries(
+      Object.entries(row).filter(([, v]) => !isPreviewValueEmpty(v))
+    );
     return `
       <div class="blp-export-preview" data-blp-export-preview data-format="json">
         <p class="blp-export-section-label">${escapeHtml(t.exportPreviewTitle)}</p>
-        <pre class="blp-export-preview__json">${escapeHtml(JSON.stringify(row, null, 2))}</pre>
+        <pre class="blp-export-preview__json">${escapeHtml(JSON.stringify(filtered, null, 2))}</pre>
       </div>
     `;
   }

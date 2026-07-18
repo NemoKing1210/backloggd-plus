@@ -38,6 +38,7 @@ import { gmRequest } from '../gm.js';
 import { inflight, settings, steamResolveMissMemory } from '../state.js';
 import { slugifyForBackloggd } from '../utils/slug.js';
 import { normalizeTitle, pickSteamSearchItem } from '../utils/title.js';
+import { fetchSteamDbAppMeta } from './steamdb.js';
 
 export async function fetchSteamPopularTagMap() {
   const cached = getCached(TAG_MAP_CACHE_KEY);
@@ -105,6 +106,43 @@ export function parseSteamDeckCompat(item) {
   return Number.isFinite(cat) ? cat : null;
 }
 
+export function franchiseUrlFromName(name) {
+  const n = String(name || '').trim();
+  if (!n) return '';
+  return `https://steamdb.info/franchise/${encodeURIComponent(n).replace(/%20/g, '+')}/`;
+}
+
+export function parseSteamFranchise(item) {
+  const list = item?.basic_info?.franchises;
+  if (!Array.isArray(list) || !list.length) return null;
+  const name = String(list[0]?.name || '').trim();
+  if (!name) return null;
+  return { name, url: franchiseUrlFromName(name) };
+}
+
+export function parseSteamSystems(item) {
+  const p = item?.platforms;
+  if (!p || typeof p !== 'object') return null;
+  const list = [];
+  if (p.windows) list.push('Windows');
+  if (p.mac) list.push('macOS');
+  if (p.steamos_linux || p.linux) list.push('Linux');
+  const deckCompat = parseSteamDeckCompat(item);
+  if (!list.length && deckCompat == null) return null;
+  return { list, deckCompat };
+}
+
+export function parseSteamSystemsFromDetails(details) {
+  const p = details?.platforms;
+  if (!p || typeof p !== 'object') return null;
+  const list = [];
+  if (p.windows) list.push('Windows');
+  if (p.mac) list.push('macOS');
+  if (p.linux) list.push('Linux');
+  if (!list.length) return null;
+  return { list, deckCompat: null };
+}
+
 export async function fetchSteamStoreItem(appId, country) {
   const id = Number(appId);
   const cc = String(country || 'US').toUpperCase();
@@ -135,6 +173,7 @@ export async function fetchSteamStoreItem(appId, country) {
           include_tag_count: STEAM_TAGS_MAX,
           include_assets: true,
           include_platforms: true,
+          include_basic_info: true,
           include_all_purchase_options: true,
         },
       });
@@ -160,6 +199,8 @@ export async function fetchSteamStoreItem(appId, country) {
       const purchase = parseSteamPurchaseExtras(item);
       const extras = {
         deckCompat: parseSteamDeckCompat(item),
+        franchise: parseSteamFranchise(item),
+        systems: parseSteamSystems(item),
         ...purchase,
       };
       setCached(tagsKey, tags);
@@ -490,6 +531,7 @@ export async function hydrateSteamApp({
         include_tag_count: STEAM_TAGS_MAX,
         include_assets: true,
         include_platforms: true,
+        include_basic_info: true,
         include_all_purchase_options: true,
       },
     });
@@ -540,6 +582,9 @@ export async function hydrateSteamApp({
     debug.tags = tags;
     debug.categories = normalizeSteamCategories(details);
     debug.extras = extras;
+    const franchise = extras?.franchise || null;
+    const systems =
+      extras?.systems || parseSteamSystemsFromDetails(details) || null;
     return {
       found: Boolean(details) || Boolean(hit),
       appId: id,
@@ -554,6 +599,8 @@ export async function hydrateSteamApp({
       tags,
       categories: normalizeSteamCategories(details),
       deckCompat: extras?.deckCompat ?? null,
+      franchise,
+      systems,
       discountEndDate: extras?.discountEndDate ?? null,
       tinyImage: hit?.tiny_image || hit?.small_capsule || null,
       headerImage: details?.header_image || null,
@@ -894,10 +941,11 @@ export async function fetchSteamPlayers(appId) {
 }
 
 /**
- * Icon / cover / screenshots / players via Steam APIs only.
+ * Icon / cover / screenshots / players via Steam APIs; optional SteamDB HTML meta.
  * SteamDB has no public JSON API (internal /api/* is extension-only + Cloudflare).
  * Media: GetItems community_icon + header. Screenshots: appdetails.
  * Players: GetNumberOfCurrentPlayers.
+ * Details (technologies / last record update): best-effort HTML scrape when CF allows.
  */
 export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
   const id = Number(appId);
@@ -906,7 +954,8 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
   const needMedia = settings.showSteamDbIcon || settings.showSteamDbCover;
   const needGallery = settings.showSteamDbGallery;
   const needPlayers = settings.showSteamPlayers;
-  if (!needMedia && !needGallery && !needPlayers) return null;
+  const needMeta = settings.showSteamDbDetails !== false;
+  if (!needMedia && !needGallery && !needPlayers && !needMeta) return null;
 
   const mediaKey = `steamdb:media:${id}`;
   const shotsKey = `steam:screenshots:${id}`;
@@ -922,6 +971,8 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
   let latestPlayers = null;
   let latestPlayersSource = null;
   let playersApiUrl = null;
+  let pageMeta = null;
+  let pageMetaFromCache = false;
   const cc = country || settings.steamCountry || 'US';
 
   const emit = (payload) => {
@@ -947,6 +998,14 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
           ? 'miss'
           : 'na'
       : 'na';
+    const metaCache = needMeta
+      ? pageMetaFromCache
+        ? 'hit'
+        : pageMeta
+          ? 'miss'
+          : 'na'
+      : 'na';
+    const technologies = Array.isArray(pageMeta?.technologies) ? pageMeta.technologies : [];
     return {
       appId: id,
       iconUrl: needMedia && settings.showSteamDbIcon ? iconUrl : '',
@@ -954,11 +1013,17 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
       logoIsPortrait: Boolean(logoIsPortrait),
       screenshots: needGallery ? (Array.isArray(screenshots) ? screenshots : null) : null,
       players: needPlayers ? latestPlayers : null,
-      source: media?.source || 'steam',
-      _cache: mergeCacheSources(mediaCache, shotsCache),
+      franchise: needMeta ? pageMeta?.franchise || null : null,
+      systems: needMeta ? pageMeta?.systems || null : null,
+      technologies: needMeta ? technologies : [],
+      lastRecordUpdate: needMeta ? pageMeta?.lastRecordUpdate || null : null,
+      metaBlocked: Boolean(pageMeta?.blocked),
+      source: media?.source || pageMeta?.source || 'steam',
+      _cache: mergeCacheSources(mediaCache, shotsCache, metaCache),
       _cacheMedia: mediaCache,
       _cacheShots: shotsCache,
       _cachePlayers: playersCache,
+      _cacheMeta: metaCache,
       _debug: debugOn
         ? {
             reason: [
@@ -979,15 +1044,26 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
                 : needPlayers
                   ? 'Players pending'
                   : null,
+              needMeta
+                ? pageMeta?.blocked
+                  ? 'SteamDB HTML blocked (Cloudflare)'
+                  : pageMeta?.source === 'steamdb'
+                    ? 'SteamDB app table parsed'
+                    : pageMeta?.error
+                      ? `SteamDB meta error: ${pageMeta.error}`
+                      : 'SteamDB meta pending'
+                : null,
             ]
               .filter(Boolean)
               .join(' · '),
             chartsUrl: `${STEAMDB_APP_URL}/${id}/charts/`,
+            pageUrl: `${STEAMDB_APP_URL}/${id}/`,
             playersApiUrl,
             playersSource: latestPlayersSource,
             media,
             screenshots,
             players: latestPlayers,
+            pageMeta,
             iconUrl,
             logoUrl,
           }
@@ -1002,7 +1078,7 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
       source: 'steam-cdn-early',
     };
     emit(buildResult());
-  } else if (needMedia || needGallery) {
+  } else if (needMedia || needGallery || needMeta) {
     emit(buildResult());
   }
 
@@ -1033,7 +1109,21 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
         })()
       : Promise.resolve();
 
-  const [storeAssets] = await Promise.all([assetsPromise, shotsPromise, playersPromise]);
+  const metaPromise = needMeta
+    ? fetchSteamDbAppMeta(id).then((meta) => {
+        pageMeta = meta && typeof meta === 'object' ? stripEphemeralMeta(meta) || meta : null;
+        pageMetaFromCache = getCacheSource(meta) === 'hit';
+        emit(buildResult());
+        return pageMeta;
+      })
+    : Promise.resolve(null);
+
+  const [storeAssets] = await Promise.all([
+    assetsPromise,
+    shotsPromise,
+    playersPromise,
+    metaPromise,
+  ]);
   if (storeAssets && (storeAssets.iconUrl || storeAssets.logoUrl)) {
     media = {
       iconUrl: storeAssets.iconUrl || media?.iconUrl || '',

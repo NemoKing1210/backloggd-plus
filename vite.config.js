@@ -71,6 +71,7 @@ export default defineConfig({
         connect: [
           'store.steampowered.com',
           'api.steampowered.com',
+          'steamdb.info',
           'gamestatus.info',
           'howlongtobeat.com',
           'api.opencritic.com',
