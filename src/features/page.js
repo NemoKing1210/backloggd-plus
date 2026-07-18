@@ -12,7 +12,10 @@ export function getPageContext() {
 
 export function getGameTitle() {
   const h1 = document.querySelector('#game-profile h1, #center-content h1, main h1');
-  return (h1?.textContent || '').trim();
+  if (!h1) return '';
+  const clone = h1.cloneNode(true);
+  clone.querySelectorAll('[data-blp-game-id], .blp-title-icon-wrap').forEach((n) => n.remove());
+  return (clone.textContent || '').trim();
 }
 
 export function getIgdbUrl(slug) {

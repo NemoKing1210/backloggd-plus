@@ -902,7 +902,10 @@ export function openExportDialog() {
     try {
       const payload = buildExportPayload(format, record, opts);
       if (!payload) {
-        showToast(t.exportFormatUnavailable, { type: 'error' });
+        showToast(t.exportFormatUnavailable, {
+          type: 'error',
+          title: t.exportFormatUnavailableTitle,
+        });
         return;
       }
       downloadBlob(
@@ -912,10 +915,14 @@ export function openExportDialog() {
       );
       showToast(fmt(t.toastExportDone, { name: record.Name || payload.ext.toUpperCase() }), {
         type: 'success',
+        title: t.toastExportDoneTitle,
       });
       close();
     } catch (_) {
-      showToast(t.toastExportFailed, { type: 'error' });
+      showToast(t.toastExportFailed, {
+        type: 'error',
+        title: t.toastExportFailedTitle,
+      });
     }
   });
 
@@ -925,13 +932,22 @@ export function openExportDialog() {
     try {
       const payload = buildExportPayload(format, record, opts);
       if (!payload) {
-        showToast(t.exportFormatUnavailable, { type: 'error' });
+        showToast(t.exportFormatUnavailable, {
+          type: 'error',
+          title: t.exportFormatUnavailableTitle,
+        });
         return;
       }
       await copyTextToClipboard(payload.copyText);
-      showToast(t.toastExportCopied, { type: 'success' });
+      showToast(t.toastExportCopied, {
+        type: 'success',
+        title: t.toastExportCopiedTitle,
+      });
     } catch (_) {
-      showToast(t.toastExportCopyFailed, { type: 'error' });
+      showToast(t.toastExportCopyFailed, {
+        type: 'error',
+        title: t.toastExportCopyFailedTitle,
+      });
     }
   });
 
