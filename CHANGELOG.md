@@ -5,6 +5,61 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.49] - 2026-07-18
+
+### Added
+
+- Export dialog: Copy button next to Download (CSV to clipboard)
+
+## [0.7.48] - 2026-07-18
+
+### Changed
+
+- Export preview: ~2× wider on desktop; lists every CSV column in export order (including `Date start` / `Date end`)
+
+## [0.7.47] - 2026-07-18
+
+### Changed
+
+- Export dialog: richer preview panel — top on small screens, right side on large screens
+
+## [0.7.46] - 2026-07-18
+
+### Removed
+
+- `ID` column from Notion CSV export
+
+## [0.7.45] - 2026-07-18
+
+### Added
+
+- Export button in the full log editor footer (platform, dates, rating, time from the modal)
+- CSV fields `Date start`, `Date end`, and `Is DLC` (from `.game-parent-category`); Windows PC → PC
+
+## [0.7.44] - 2026-07-18
+
+### Fixed
+
+- Export button icon (inline SVG; `fa-download` is missing from Backloggd’s Font Awesome kit)
+- Export / Download primary buttons: teal accent instead of near-black fill
+
+## [0.7.43] - 2026-07-18
+
+### Changed
+
+- Export rating text map: Amazing is only a full 5★; 4★ / 4½★ export as Excellent
+
+### Added
+
+- Export modal option for rating as text labels or numeric stars out of 5
+
+## [0.7.42] - 2026-07-18
+
+### Added
+
+- Game page export button under the Steam header banner, with a format modal (CSV first)
+- Notion-compatible CSV export: page metadata, Steam tags/source, and your Backloggd rating mapped to text labels (Terrible → Amazing)
+
 ## [0.7.41] - 2026-07-17
 
 ### Changed

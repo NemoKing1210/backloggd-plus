@@ -9,6 +9,7 @@ import {
   openSteamGalleryLightbox,
   setSteamGalleryItems,
 } from './gallery.js';
+import { syncExportButton } from './export-game.js';
 
 export function removeSteamDbUi() {
   closeSteamGalleryLightbox();
@@ -172,6 +173,7 @@ export function ensureSteamDbCoverMount(token = '') {
 export function mountSteamDbSkeletons(token = '') {
   ensureSteamDbTitleIconMount(token);
   ensureSteamDbCoverMount(token);
+  syncExportButton(token);
   ensureSteamGalleryMount(token);
 }
 
@@ -391,6 +393,7 @@ export function applySteamDbUi(steamDb, token = '', { final = false } = {}) {
     logoIsPortrait: Boolean(steamDb.logoIsPortrait),
     token,
   });
+  syncExportButton(token);
   applySteamGallery(steamDb.screenshots, steamDb.appId, token, {
     final,
     coverUrl: steamDb.logoUrl || '',

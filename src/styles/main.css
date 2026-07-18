@@ -303,6 +303,309 @@ h1 .blp-title-icon-wrap .blp-title-icon.is-ready,
   outline-offset: 2px;
 }
 
+.blp-export-wrap {
+  margin-top: 0.55rem;
+  width: 100%;
+}
+
+#logging-sidebar-section .blp-export-btn,
+.blp-export-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(61, 184, 154, 0.4);
+  background: rgba(61, 184, 154, 0.16);
+  background-color: rgba(61, 184, 154, 0.16);
+  color: #e8f7f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+#logging-sidebar-section .blp-export-btn:hover,
+.blp-export-btn:hover {
+  border-color: rgba(61, 184, 154, 0.7);
+  background: rgba(61, 184, 154, 0.28);
+  background-color: rgba(61, 184, 154, 0.28);
+  color: #fff;
+}
+
+.blp-export-btn:focus-visible {
+  outline: 2px solid var(--back-interact-secondary, #839df9);
+  outline-offset: 2px;
+}
+
+.blp-export-btn__icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+  display: block;
+}
+
+#log-editor-footer .blp-export-log-wrap {
+  display: flex;
+  align-items: center;
+}
+
+#log-editor-footer .blp-export-log-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-color: rgba(61, 184, 154, 0.45);
+  color: #e8f7f2;
+}
+
+#log-editor-footer .blp-export-log-btn:hover {
+  border-color: rgba(61, 184, 154, 0.75);
+  color: #fff;
+}
+
+#log-editor-footer .blp-export-log-btn .blp-export-btn__icon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.blp-export-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.blp-export-dialog {
+  width: min(440px, 100%);
+  max-height: min(90vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #1a1d24;
+  border: 1px solid var(--blp-border);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  color: var(--blp-text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 720px) {
+  .blp-export-dialog {
+    width: min(980px, 100%);
+  }
+}
+
+.blp-export-dialog__head {
+  flex: 0 0 auto;
+}
+
+.blp-export-dialog h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.blp-export-dialog .blp-hint {
+  margin: 0 0 0.85rem;
+  color: var(--blp-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.blp-export-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.blp-export-main {
+  order: 2;
+  min-width: 0;
+}
+
+.blp-export-preview {
+  order: 1;
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.82rem;
+}
+
+@media (min-width: 720px) {
+  .blp-export-layout {
+    flex-direction: row;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .blp-export-main {
+    order: 1;
+    flex: 1 1 auto;
+    overflow: auto;
+    padding-right: 0.15rem;
+  }
+
+  .blp-export-preview {
+    order: 2;
+    flex: 0 0 min(520px, 52%);
+    max-width: 560px;
+    overflow: auto;
+  }
+}
+
+.blp-export-preview .blp-export-section-label {
+  margin-bottom: 0.5rem;
+}
+
+.blp-export-preview__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.blp-export-preview__row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 42%) 1fr;
+  gap: 0.3rem 0.55rem;
+  align-items: start;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.blp-export-preview__key {
+  color: var(--blp-muted);
+  font-weight: 600;
+}
+
+.blp-export-preview__val {
+  color: var(--blp-text);
+  word-break: break-word;
+}
+
+.blp-export-section-label {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blp-muted);
+}
+
+.blp-export-formats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.blp-export-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.blp-export-option:has(input:checked) {
+  border-color: rgba(61, 184, 154, 0.5);
+  background: rgba(61, 184, 154, 0.1);
+}
+
+.blp-export-option.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.blp-export-option input {
+  margin-top: 0.15rem;
+  accent-color: #3db89a;
+}
+
+.blp-export-option__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.blp-export-option__label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--blp-text);
+}
+
+.blp-export-option__label em {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.72rem;
+  color: var(--blp-muted);
+  margin-left: 0.25rem;
+}
+
+.blp-export-option__hint {
+  font-size: 0.72rem;
+  color: var(--blp-muted);
+  line-height: 1.35;
+}
+
+.blp-export-dialog .blp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.blp-export-backdrop .blp-btn {
+  appearance: none;
+  border: 1px solid var(--blp-border);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--blp-text);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.blp-export-backdrop .blp-btn:hover {
+  border-color: rgba(61, 184, 154, 0.45);
+  color: #fff;
+}
+
+.blp-export-backdrop .blp-btn.blp-primary,
+.blp-export-dialog .blp-actions .blp-btn.blp-primary {
+  background: var(--blp-accent, #3db89a);
+  border-color: transparent;
+  color: #0b1210;
+  font-weight: 600;
+}
+
+.blp-export-backdrop .blp-btn.blp-primary:hover,
+.blp-export-dialog .blp-actions .blp-btn.blp-primary:hover {
+  background: #48c9a8;
+  color: #0b1210;
+  border-color: transparent;
+}
+
 #interaction-sidebar .col-cover img.blp-cover-zoomable,
 img.blp-cover-zoomable {
   cursor: zoom-in;
@@ -1908,6 +2211,24 @@ img.blp-cover-zoomable:focus-visible {
   border-color: transparent;
   color: #0b1210;
   font-weight: 600;
+}
+
+/* Keep export Download visible even if generic .blp-btn wins later in the sheet */
+.blp-export-backdrop .blp-btn.blp-primary,
+.blp-export-dialog .blp-actions button.blp-btn.blp-primary {
+  background: var(--blp-accent, #3db89a);
+  background-color: var(--blp-accent, #3db89a);
+  border-color: transparent;
+  color: #0b1210;
+  font-weight: 600;
+}
+
+.blp-export-backdrop .blp-btn.blp-primary:hover,
+.blp-export-dialog .blp-actions button.blp-btn.blp-primary:hover {
+  background: #48c9a8;
+  background-color: #48c9a8;
+  color: #0b1210;
+  border-color: transparent;
 }
 
 .blp-settings__ver {

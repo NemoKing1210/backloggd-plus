@@ -36,6 +36,7 @@ import {
   mountSteamDbSkeletons,
   removeSteamDbUi,
 } from './steamdb-ui.js';
+import { syncExportButton, removeExportUi } from './export-game.js';
 import { ensureUnifiedRatingWidget, updateUnifiedRatingWidget } from './unified-rating.js';
 import { getIgdbUrl, getPageContext, getGameTitle } from './page.js';
 import { cacheSourceLabel, paintDebugCacheMark } from './debug-cache.js';
@@ -323,6 +324,7 @@ export function removeEnrichment() {
   document.querySelectorAll(`[${ENRICH_ATTR}]`).forEach((el) => el.remove());
   document.querySelectorAll('[data-blp-debug]').forEach((el) => el.remove());
   removeSteamDbUi();
+  removeExportUi({ includeLogEditor: false });
   removeSimilarGamesUi();
   unbindGameCoverViewer();
   clearGameStatsVisibility();
@@ -984,6 +986,7 @@ export async function enrichGamePage() {
     ensureUnifiedRatingWidget(token);
     applyGameStatsVisibility();
     bindGameCoverViewer();
+    syncExportButton(token);
     return;
   }
 
@@ -1008,6 +1011,7 @@ export async function enrichGamePage() {
   const needSteamDbMedia =
     settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamDbGallery;
   if (needSteamDbMedia) mountSteamDbSkeletons(token);
+  else syncExportButton(token);
   if (settings.showSimilarGames) ensureSimilarMount(token);
   const needSteam =
     settings.showSteam ||
@@ -1338,6 +1342,7 @@ export async function enrichGamePage() {
       state.steam = steamResult || { found: false };
       paintSteamBlock();
       if (needSteamDbMedia) removeSteamDbUi();
+      syncExportButton(token);
       if (settings.showSimilarGames) removeSimilarGamesUi();
     }
 
@@ -1367,6 +1372,7 @@ export async function enrichGamePage() {
       _debug: { reason: `Enrichment error: ${err?.message || err}` },
     };
     if (needSteamDbMedia && !state.steamDb) removeSteamDbUi();
+    syncExportButton(token);
     if (settings.showSimilarGames) removeSimilarGamesUi();
     paintSteamBlock();
     paintOpenCritic();

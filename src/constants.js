@@ -20,7 +20,7 @@ export const SCAN_DEBOUNCE_MS = 400;
 export const CARD_CONCURRENCY = 3;
 export const CARD_ROOT_MARGIN = '240px 0px';
 export const CARD_SKIP_ANCESTOR =
-  '#game-profile, #game-body, #logging-sidebar-section, .blp-settings-backdrop, .blp-fix-match-backdrop';
+  '#game-profile, #game-body, #logging-sidebar-section, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop';
 export const CACHE_HOURS_MAX = 168;
 /** Soft advisory budget for the settings meter (GM storage has no fixed quota). */
 export const CACHE_SOFT_LIMIT_BYTES = 5 * 1024 * 1024;

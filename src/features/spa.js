@@ -10,10 +10,13 @@ import { debounce } from '../utils/debounce.js';
 import { scheduleCardBadges } from './cards.js';
 import { enrichGamePage } from './enrichment.js';
 import { bindFixMatchClicks, ensureNavSettingsButton } from './settings-panel.js';
+import { bindLogEditorExportObserver, ensureLogEditorExportMount } from './export-game.js';
 
 export function scanPage() {
   ensureNavSettingsButton();
   bindFixMatchClicks();
+  bindLogEditorExportObserver();
+  ensureLogEditorExportMount();
   enrichGamePage();
   scheduleCardBadges();
 }
@@ -38,6 +41,9 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-card-badges') ||
     el.classList?.contains('blp-settings-backdrop') ||
     el.classList?.contains('blp-fix-match-backdrop') ||
+    el.classList?.contains('blp-export-backdrop') ||
+    el.classList?.contains('blp-export-wrap') ||
+    el.classList?.contains('blp-export-log-wrap') ||
     el.classList?.contains('blp-debug-panel') ||
     el.classList?.contains('blp-steamdb-cover') ||
     el.classList?.contains('blp-steam-gallery') ||
@@ -52,7 +58,7 @@ export function isBlpManagedElement(el) {
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host`
     )
   );
 }
