@@ -86,10 +86,33 @@ export const LINK_DOMAINS = {
   gogdb: 'gogdb.org',
 };
 
+/** Steam Store `cc` codes in Settings (ISO 3166-1 alpha-2). */
+export const STEAM_COUNTRY_CODES = [
+  'US',
+  'GB',
+  'DE',
+  'FR',
+  'RU',
+  'KZ',
+  'BR',
+  'JP',
+  'KR',
+  'CN',
+  'AU',
+  'CA',
+  'PL',
+  'ES',
+  'IT',
+  'TR',
+  'UA',
+];
+
 export const DEFAULT_SETTINGS = {
   cacheHours: 12,
   uiLocale: 'auto',
   steamCountry: 'US',
+  showPriceConvert: false,
+  convertCurrency: 'RUB',
   showSteam: true,
   showMetacritic: true,
   showOpenCritic: true,

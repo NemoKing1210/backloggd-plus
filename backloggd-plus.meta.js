@@ -47,6 +47,8 @@
 // @connect            html.duckduckgo.com
 // @connect            www.protondb.com
 // @connect            protondb.com
+// @connect            cdn.jsdelivr.net
+// @connect            latest.currency-api.pages.dev
 // @grant              GM_addStyle
 // @grant              GM_getValue
 // @grant              GM_registerMenuCommand

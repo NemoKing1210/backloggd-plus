@@ -79,6 +79,8 @@ export default defineConfig({
           'html.duckduckgo.com',
           'www.protondb.com',
           'protondb.com',
+          'cdn.jsdelivr.net',
+          'latest.currency-api.pages.dev',
         ],
         'run-at': 'document-idle',
         noframes: true,
