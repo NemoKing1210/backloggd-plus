@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Settings → UI tab with option to hide Fuse / incontent homepage ad slots (off by default)
 
+### Changed
+
+- Settings panel: grouped lists, switch toggles, sliding tab indicator, and open/close animations
+- Toasts appear at the top-right
+- Settings dialog is larger (≈2× width / max height)
+
 ## [0.7.65] - 2026-07-18
 
 ### Fixed

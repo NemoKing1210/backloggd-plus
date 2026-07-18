@@ -33,21 +33,49 @@ const SETTINGS_TABS = [
   { id: 'debug', labelKey: 'sectionDebug' },
 ];
 
-function toggleHtml(key, on) {
+function switchHtml(attrs, on) {
+  return `
+    <button
+      type="button"
+      role="switch"
+      aria-checked="${on ? 'true' : 'false'}"
+      class="blp-switch${on ? ' is-on' : ''}"
+      ${attrs}
+    ><span class="blp-switch__thumb" aria-hidden="true"></span></button>
+  `;
+}
+
+function toggleHtml(key, on, hintKey) {
+  const hint = hintKey
+    ? `<span class="blp-toggle__hint">${escapeHtml(t[hintKey])}</span>`
+    : '';
   return `
     <div class="blp-toggle">
-      <span>${escapeHtml(t[key])}</span>
-      <button type="button" data-blp-toggle="${escapeAttr(key)}" class="${on ? 'is-on' : ''}">${on ? t.on : t.off}</button>
+      <span class="blp-toggle__text">
+        <span class="blp-toggle__label">${escapeHtml(t[key])}</span>
+        ${hint}
+      </span>
+      ${switchHtml(`data-blp-toggle="${escapeAttr(key)}"`, on)}
     </div>
   `;
 }
 
-function hintHtml(key) {
-  return `<p class="blp-hint">${escapeHtml(t[key])}</p>`;
+function listHtml(...rows) {
+  return `<div class="blp-settings-list">${rows.filter(Boolean).join('')}</div>`;
+}
+
+function fieldHtml(id, label, controlHtml, hint) {
+  return `
+    <div class="blp-field">
+      <label for="${escapeAttr(id)}">${escapeHtml(label)}</label>
+      ${controlHtml}
+      ${hint ? `<p class="blp-hint">${escapeHtml(hint)}</p>` : ''}
+    </div>
+  `;
 }
 
 function buildTabsHtml(activeId) {
-  return SETTINGS_TABS.map(({ id, labelKey }) => {
+  const tabs = SETTINGS_TABS.map(({ id, labelKey }) => {
     const active = id === activeId;
     return `
       <button
@@ -62,11 +90,26 @@ function buildTabsHtml(activeId) {
       >${escapeHtml(t[labelKey])}</button>
     `;
   }).join('');
+  return `<span class="blp-settings__tab-ink" aria-hidden="true"></span>${tabs}`;
 }
 
 function panelAttrs(id, activeId) {
   const active = id === activeId;
   return `class="blp-settings__panel${active ? ' is-active' : ''}" id="blp-panel-${escapeAttr(id)}" role="tabpanel" aria-labelledby="blp-tab-${escapeAttr(id)}"${active ? '' : ' hidden'}`;
+}
+
+function syncTabInk(root) {
+  const tabs = root.querySelector('.blp-settings__tabs');
+  const ink = root.querySelector('.blp-settings__tab-ink');
+  const active = root.querySelector('.blp-settings__tab.is-active');
+  if (!tabs || !ink || !active) return;
+  ink.style.width = `${active.offsetWidth}px`;
+  ink.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+
+function setSwitchOn(btn, on) {
+  btn.classList.toggle('is-on', on);
+  btn.setAttribute('aria-checked', on ? 'true' : 'false');
 }
 
 function activateSettingsTab(root, tabId) {
@@ -81,6 +124,12 @@ function activateSettingsTab(root, tabId) {
     const on = panel.id === `blp-panel-${tabId}`;
     panel.classList.toggle('is-active', on);
     panel.hidden = !on;
+  });
+  syncTabInk(root);
+  root.querySelector('.blp-settings__tabs')?.querySelector('.blp-settings__tab.is-active')?.scrollIntoView({
+    inline: 'nearest',
+    block: 'nearest',
+    behavior: 'smooth',
   });
 }
 
@@ -98,14 +147,39 @@ export function openSettings() {
     const icon = FAVICON_URL.replace('{domain}', encodeURIComponent(domain));
     return `
       <div class="blp-toggle">
-        <span class="blp-toggle__label">
-          <img class="blp-favicon" src="${escapeAttr(icon)}" alt="" width="14" height="14" />
-          ${escapeHtml(label)}
+        <span class="blp-toggle__text">
+          <span class="blp-toggle__label">
+            <img class="blp-favicon" src="${escapeAttr(icon)}" alt="" width="14" height="14" />
+            ${escapeHtml(label)}
+          </span>
         </span>
-        <button type="button" data-blp-link="${escapeAttr(key)}" class="${on ? 'is-on' : ''}">${on ? t.on : t.off}</button>
+        ${switchHtml(`data-blp-link="${escapeAttr(key)}"`, on)}
       </div>
     `;
-  }).join('');
+  });
+
+  const localeSelect = `
+    <select id="blp-ui-locale">
+      <option value="auto" ${(draft.uiLocale || 'auto') === 'auto' ? 'selected' : ''}>${LOCALE_FLAG_AUTO} ${escapeHtml(t.uiLanguageAuto)}</option>
+      ${SUPPORTED_LOCALES.map((code) => {
+        const selected = draft.uiLocale === code ? 'selected' : '';
+        const name = LOCALE_NATIVE_NAMES[code] || code;
+        const flag = LOCALE_FLAGS[code] || '';
+        return `<option value="${code}" ${selected}>${flag} ${escapeHtml(name)}</option>`;
+      }).join('')}
+    </select>
+  `;
+
+  const steamCcSelect = `
+    <select id="blp-steam-cc">
+      ${['US', 'GB', 'DE', 'FR', 'RU', 'BR', 'JP', 'KR', 'CN', 'AU', 'CA', 'PL', 'ES', 'IT', 'TR', 'UA']
+        .map(
+          (cc) =>
+            `<option value="${cc}" ${draft.steamCountry === cc ? 'selected' : ''}>${cc}</option>`
+        )
+        .join('')}
+    </select>
+  `;
 
   const activeTab = 'general';
   const backdrop = document.createElement('div');
@@ -123,134 +197,98 @@ export function openSettings() {
       <div ${panelAttrs('general', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionGeneral)}</h3>
-        <div class="blp-field">
-          <label for="blp-ui-locale">${escapeHtml(t.uiLanguage)}</label>
-          <select id="blp-ui-locale">
-            <option value="auto" ${(draft.uiLocale || 'auto') === 'auto' ? 'selected' : ''}>${LOCALE_FLAG_AUTO} ${escapeHtml(t.uiLanguageAuto)}</option>
-            ${SUPPORTED_LOCALES.map((code) => {
-              const selected = draft.uiLocale === code ? 'selected' : '';
-              const name = LOCALE_NATIVE_NAMES[code] || code;
-              const flag = LOCALE_FLAGS[code] || '';
-              return `<option value="${code}" ${selected}>${flag} ${escapeHtml(name)}</option>`;
-            }).join('')}
-          </select>
-          <p class="blp-hint">${escapeHtml(t.uiLanguageHint)}</p>
-        </div>
+        ${listHtml(fieldHtml('blp-ui-locale', t.uiLanguage, localeSelect, t.uiLanguageHint))}
       </section>
       </div>
       <div ${panelAttrs('ui', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionUi)}</h3>
-        ${toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true)}
-        ${hintHtml('hideHomepageFuseHint')}
+        ${listHtml(toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint'))}
       </section>
       </div>
       <div ${panelAttrs('game', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionGame)}</h3>
-        <div class="blp-field">
-          <label for="blp-steam-cc">${escapeHtml(t.steamCountry)}</label>
-          <select id="blp-steam-cc">
-            ${['US', 'GB', 'DE', 'FR', 'RU', 'BR', 'JP', 'KR', 'CN', 'AU', 'CA', 'PL', 'ES', 'IT', 'TR', 'UA']
-              .map(
-                (cc) =>
-                  `<option value="${cc}" ${draft.steamCountry === cc ? 'selected' : ''}>${cc}</option>`
-              )
-              .join('')}
-          </select>
-          <p class="blp-hint">${escapeHtml(t.steamCountryHint)}</p>
-        </div>
-        ${toggleHtml('showSteam', draft.showSteam)}
-        ${toggleHtml('showSteamOwned', draft.showSteamOwned)}
-        ${hintHtml('showSteamOwnedHint')}
-        ${toggleHtml('showSteamWishlist', draft.showSteamWishlist)}
-        ${hintHtml('showSteamWishlistHint')}
-        ${toggleHtml('showSteamTags', draft.showSteamTags)}
-        ${hintHtml('showSteamTagsHint')}
-        ${toggleHtml('showSteamCategories', draft.showSteamCategories)}
-        ${hintHtml('showSteamCategoriesHint')}
-        ${toggleHtml('showMetacritic', draft.showMetacritic)}
-        ${toggleHtml('showOpenCritic', draft.showOpenCritic)}
-        ${hintHtml('showOpenCriticHint')}
-        ${toggleHtml('showHltb', draft.showHltb)}
-        ${hintHtml('showHltbHint')}
-        ${toggleHtml('showDeckProton', draft.showDeckProton)}
-        ${hintHtml('showDeckProtonHint')}
-        ${toggleHtml('showGameStatus', draft.showGameStatus)}
-        ${hintHtml('showGameStatusHint')}
-        ${toggleHtml('showLinks', draft.showLinks)}
-        ${toggleHtml('showSteamPageLink', draft.showSteamPageLink)}
-        ${hintHtml('showSteamPageLinkHint')}
-        ${toggleHtml('showSteamDbPageLink', draft.showSteamDbPageLink)}
-        ${hintHtml('showSteamDbPageLinkHint')}
-        ${toggleHtml('showSteamDbIcon', draft.showSteamDbIcon)}
-        ${hintHtml('showSteamDbIconHint')}
-        ${toggleHtml('showSteamDbCover', draft.showSteamDbCover)}
-        ${hintHtml('showSteamDbCoverHint')}
-        ${toggleHtml('showSteamDbGallery', draft.showSteamDbGallery)}
-        ${hintHtml('showSteamDbGalleryHint')}
-        ${toggleHtml('showSimilarGames', draft.showSimilarGames)}
-        ${hintHtml('showSimilarGamesHint')}
-        ${toggleHtml('showGameStats', draft.showGameStats)}
-        ${hintHtml('showGameStatsHint')}
-        ${toggleHtml('showSteamPlayers', draft.showSteamPlayers)}
-        ${hintHtml('showSteamPlayersHint')}
-        ${toggleHtml('showSteamDbDetails', draft.showSteamDbDetails)}
-        ${hintHtml('showSteamDbDetailsHint')}
-        ${toggleHtml('showExport', draft.showExport)}
-        ${hintHtml('showExportHint')}
-        ${toggleHtml('showGameId', draft.showGameId)}
-        ${hintHtml('showGameIdHint')}
+        ${listHtml(fieldHtml('blp-steam-cc', t.steamCountry, steamCcSelect, t.steamCountryHint))}
+        ${listHtml(
+          toggleHtml('showSteam', draft.showSteam),
+          toggleHtml('showSteamOwned', draft.showSteamOwned, 'showSteamOwnedHint'),
+          toggleHtml('showSteamWishlist', draft.showSteamWishlist, 'showSteamWishlistHint'),
+          toggleHtml('showSteamTags', draft.showSteamTags, 'showSteamTagsHint'),
+          toggleHtml('showSteamCategories', draft.showSteamCategories, 'showSteamCategoriesHint'),
+          toggleHtml('showMetacritic', draft.showMetacritic),
+          toggleHtml('showOpenCritic', draft.showOpenCritic, 'showOpenCriticHint'),
+          toggleHtml('showHltb', draft.showHltb, 'showHltbHint'),
+          toggleHtml('showDeckProton', draft.showDeckProton, 'showDeckProtonHint'),
+          toggleHtml('showGameStatus', draft.showGameStatus, 'showGameStatusHint'),
+          toggleHtml('showLinks', draft.showLinks),
+          toggleHtml('showSteamPageLink', draft.showSteamPageLink, 'showSteamPageLinkHint'),
+          toggleHtml('showSteamDbPageLink', draft.showSteamDbPageLink, 'showSteamDbPageLinkHint'),
+          toggleHtml('showSteamDbIcon', draft.showSteamDbIcon, 'showSteamDbIconHint'),
+          toggleHtml('showSteamDbCover', draft.showSteamDbCover, 'showSteamDbCoverHint'),
+          toggleHtml('showSteamDbGallery', draft.showSteamDbGallery, 'showSteamDbGalleryHint'),
+          toggleHtml('showSimilarGames', draft.showSimilarGames, 'showSimilarGamesHint'),
+          toggleHtml('showGameStats', draft.showGameStats, 'showGameStatsHint'),
+          toggleHtml('showSteamPlayers', draft.showSteamPlayers, 'showSteamPlayersHint'),
+          toggleHtml('showSteamDbDetails', draft.showSteamDbDetails, 'showSteamDbDetailsHint'),
+          toggleHtml('showExport', draft.showExport, 'showExportHint'),
+          toggleHtml('showGameId', draft.showGameId, 'showGameIdHint')
+        )}
       </section>
       </div>
       <div ${panelAttrs('lists', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionLists)}</h3>
-        ${toggleHtml('showCardBadges', draft.showCardBadges)}
-        ${hintHtml('showCardBadgesHint')}
-        ${toggleHtml('showCardBadgePrice', draft.showCardBadgePrice)}
-        ${toggleHtml('showCardBadgeReview', draft.showCardBadgeReview)}
-        ${toggleHtml('showCardBadgeOwned', draft.showCardBadgeOwned)}
-        ${toggleHtml('showCardBadgeWishlist', draft.showCardBadgeWishlist)}
-        ${toggleHtml('showCardBadgeGameStatus', draft.showCardBadgeGameStatus)}
+        ${listHtml(
+          toggleHtml('showCardBadges', draft.showCardBadges, 'showCardBadgesHint'),
+          toggleHtml('showCardBadgePrice', draft.showCardBadgePrice),
+          toggleHtml('showCardBadgeReview', draft.showCardBadgeReview),
+          toggleHtml('showCardBadgeOwned', draft.showCardBadgeOwned),
+          toggleHtml('showCardBadgeWishlist', draft.showCardBadgeWishlist),
+          toggleHtml('showCardBadgeGameStatus', draft.showCardBadgeGameStatus)
+        )}
       </section>
       </div>
       <div ${panelAttrs('links', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionLinks)}</h3>
-        <p class="blp-hint" style="margin-bottom:10px">${escapeHtml(t.sectionLinksHint)}</p>
-        ${linkToggles}
+        <p class="blp-settings__intro">${escapeHtml(t.sectionLinksHint)}</p>
+        ${listHtml(...linkToggles)}
       </section>
       </div>
       <div ${panelAttrs('cache', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionCache)}</h3>
-        ${buildCacheMeterHtml()}
-        <div class="blp-field">
-          <label for="blp-cache-hours">${escapeHtml(t.cacheHours)}</label>
-          <input id="blp-cache-hours" type="number" min="0" max="${CACHE_HOURS_MAX}" value="${Number(draft.cacheHours) || 0}" />
-          <p class="blp-hint">${escapeHtml(t.cacheHoursHint)}</p>
+        <div class="blp-settings-list blp-settings-list--stack">
+          ${buildCacheMeterHtml()}
+          ${fieldHtml(
+            'blp-cache-hours',
+            t.cacheHours,
+            `<input id="blp-cache-hours" type="number" min="0" max="${CACHE_HOURS_MAX}" value="${Number(draft.cacheHours) || 0}" />`,
+            t.cacheHoursHint
+          )}
+          <div class="blp-settings-list__actions">
+            <button type="button" class="blp-btn" data-blp-clear>${escapeHtml(t.clearCache)}</button>
+            <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
+          </div>
         </div>
-        <button type="button" class="blp-btn" data-blp-clear>${escapeHtml(t.clearCache)}</button>
-        <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
       </section>
       </div>
       <div ${panelAttrs('debug', activeTab)}>
       <section>
         <h3>${escapeHtml(t.sectionDebug)}</h3>
-        ${toggleHtml('debugMode', draft.debugMode)}
-        ${hintHtml('debugModeHint')}
+        ${listHtml(toggleHtml('debugMode', draft.debugMode, 'debugModeHint'))}
       </section>
       </div>
       </div>
       <div class="blp-settings__foot">
+        <div class="blp-settings__footer">
+          <a href="${escapeAttr(REPO_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.repoLink)}</a>
+          <span>${escapeHtml(t.repoAbout)}</span>
+        </div>
         <div class="blp-actions">
           <button type="button" data-blp-cancel>${escapeHtml(t.cancel)}</button>
           <button type="button" class="blp-primary" data-blp-save>${escapeHtml(t.saveReload)}</button>
-        </div>
-        <div class="blp-settings__footer">
-          <a href="${escapeAttr(REPO_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.repoLink)}</a>
-          — ${escapeHtml(t.repoAbout)}
         </div>
       </div>
     </div>
@@ -260,10 +298,32 @@ export function openSettings() {
   document.documentElement.style.overflow = 'hidden';
 
   const close = () => {
-    backdrop.remove();
-    document.documentElement.style.overflow = prevOverflow;
+    if (backdrop.dataset.blpClosing === '1') return;
+    backdrop.dataset.blpClosing = '1';
+    backdrop.classList.remove('is-open');
+    document.removeEventListener('keydown', onKeydown, true);
+    window.removeEventListener('resize', onResize);
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      backdrop.remove();
+      document.documentElement.style.overflow = prevOverflow;
+    };
+    backdrop.addEventListener('transitionend', done, { once: true });
+    setTimeout(done, 240);
   };
   const dialog = backdrop.querySelector('.blp-settings');
+
+  const onKeydown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+    }
+  };
+
+  const onResize = () => syncTabInk(dialog);
+  window.addEventListener('resize', onResize);
 
   backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) close();
@@ -295,21 +355,36 @@ export function openSettings() {
     tabs[next].focus();
   });
 
+  dialog?.querySelector('.blp-settings__tabs')?.addEventListener(
+    'scroll',
+    () => syncTabInk(dialog),
+    { passive: true }
+  );
+
   backdrop.querySelectorAll('[data-blp-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const key = btn.getAttribute('data-blp-toggle');
       draft[key] = !draft[key];
-      btn.classList.toggle('is-on', draft[key]);
-      btn.textContent = draft[key] ? t.on : t.off;
+      setSwitchOn(btn, draft[key]);
     });
   });
 
   backdrop.querySelectorAll('[data-blp-link]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const key = btn.getAttribute('data-blp-link');
       draft.links[key] = !draft.links[key];
-      btn.classList.toggle('is-on', draft.links[key]);
-      btn.textContent = draft.links[key] ? t.on : t.off;
+      setSwitchOn(btn, draft.links[key]);
+    });
+  });
+
+  backdrop.querySelectorAll('.blp-toggle').forEach((row) => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.blp-switch, a, select, input, button')) return;
+      row.querySelector('.blp-switch')?.click();
     });
   });
 
@@ -342,6 +417,11 @@ export function openSettings() {
   });
 
   document.body.appendChild(backdrop);
+  document.addEventListener('keydown', onKeydown, true);
+  requestAnimationFrame(() => {
+    backdrop.classList.add('is-open');
+    syncTabInk(dialog);
+  });
 }
 
 export const NAV_BTN_ID = 'blp-nav-settings';
