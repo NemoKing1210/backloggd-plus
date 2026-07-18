@@ -187,6 +187,8 @@ export function openSettings() {
         ${hintHtml('showGameStatsHint')}
         ${toggleHtml('showSteamPlayers', draft.showSteamPlayers)}
         ${hintHtml('showSteamPlayersHint')}
+        ${toggleHtml('showExport', draft.showExport)}
+        ${hintHtml('showExportHint')}
       </section>
       </div>
       <div ${panelAttrs('lists', activeTab)}>

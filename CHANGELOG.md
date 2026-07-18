@@ -5,6 +5,28 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.55] - 2026-07-18
+
+### Changed
+
+- Export rating text map: 2½★ Normal, 3★ Good, 3½★ Great, 4★/4½★ Excellent, 5★ Amazing
+
+## [0.7.54] - 2026-07-18
+
+### Added
+
+- Settings → Game: **Show export button** (off by default)
+
+### Changed
+
+- Export dialog: JSON format preview renders as pretty-printed JSON
+
+## [0.7.53] - 2026-07-18
+
+### Added
+
+- Export formats: Markdown (Notion-style title + property lines) and JSON (same fields as CSV)
+
 ## [0.7.52] - 2026-07-18
 
 ### Changed

@@ -445,6 +445,17 @@ h1 .blp-title-icon-wrap .blp-title-icon.is-ready,
   word-break: break-word;
 }
 
+.blp-export-preview__json {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--blp-text);
+}
+
 .blp-export-section-label {
   margin: 0 0 0.4rem;
   font-size: 0.72rem;

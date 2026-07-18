@@ -114,6 +114,7 @@ export const DEFAULT_SETTINGS = {
   showCardBadgeOwned: true,
   showCardBadgeWishlist: true,
   showCardBadgeGameStatus: true,
+  showExport: false,
   debugMode: false,
   links: {
     igdb: true,

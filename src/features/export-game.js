@@ -1,6 +1,6 @@
 import { STEAMDB_ATTR } from '../constants.js';
 import { fmt } from '../i18n/index.js';
-import { t } from '../state.js';
+import { settings, t } from '../state.js';
 import { debounce } from '../utils/debounce.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { getGameTitle, getPageContext } from './page.js';
@@ -13,6 +13,10 @@ function loggingSidebarMount() {
     document.querySelector('#logging-sidebar-section .col-md-5') ||
     document.querySelector('#logging-sidebar-section .col')
   );
+}
+
+function isExportEnabled() {
+  return settings.showExport === true;
 }
 
 /** Backloggd half-star scale (1–10) → Notion-style labels (ascending). */
@@ -55,14 +59,35 @@ const EXPORT_ATTR = 'data-blp-export';
 const EXPORT_BACKDROP = 'blp-export-backdrop';
 /**
  * Map Backloggd rating (1 = ½★ … 10 = 5★) to a text label.
- * Amazing is reserved for a full 5★; 4★ / 4½★ stay on Excellent.
+ * Mid ladder: 2½★ Normal · 3★ Good · 3½★ Great · 4★/4½★ Excellent · 5★ Amazing.
  */
 export function ratingScoreToLabel(score10) {
   const n = Math.round(Number(score10));
   if (!Number.isFinite(n) || n < 1) return '';
-  if (n >= 10) return 'Amazing';
-  if (n >= 8) return 'Excellent';
-  return RATING_LABELS[n - 1] || '';
+  switch (Math.min(10, Math.max(1, n))) {
+    case 1:
+      return 'Terrible'; // ½★
+    case 2:
+      return 'Bad'; // 1★
+    case 3:
+      return 'Mediocre'; // 1½★
+    case 4:
+      return 'Mediocre'; // 2★
+    case 5:
+      return 'Normal'; // 2½★
+    case 6:
+      return 'Good'; // 3★
+    case 7:
+      return 'Great'; // 3½★
+    case 8:
+      return 'Excellent'; // 4★
+    case 9:
+      return 'Excellent'; // 4½★
+    case 10:
+      return 'Amazing'; // 5★
+    default:
+      return '';
+  }
 }
 
 /** Backloggd internal 1–10 → stars out of 5 (½ steps), e.g. 9 → "4.5". */
@@ -479,12 +504,64 @@ export function collectGameExportRecord() {
   };
 }
 
-export function buildNotionCsv(record, { ratingStyle = 'text', statusStyle = 'notion' } = {}) {
+export function buildExportRow(record, { ratingStyle = 'text', statusStyle = 'notion' } = {}) {
   const row = {};
   for (const col of EXPORT_COLUMNS) row[col] = record[col] ?? '';
   row.Rating = formatExportRating(record._ratingScore10, ratingStyle);
   row.Status = formatExportStatus(record._statusKey, statusStyle);
-  return rowsToCsv([row]);
+  return row;
+}
+
+export function buildNotionCsv(record, opts = {}) {
+  return rowsToCsv([buildExportRow(record, opts)]);
+}
+
+/** Notion-style page markdown: `# Title` + `Property: value` lines (same columns as CSV). */
+export function buildNotionMarkdown(record, opts = {}) {
+  const row = buildExportRow(record, opts);
+  const lines = [`# ${row.Name || 'Untitled'}`, ''];
+  for (const col of EXPORT_COLUMNS) {
+    if (col === 'Name') continue;
+    lines.push(`${col}: ${row[col] ?? ''}`);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+export function buildNotionJson(record, opts = {}) {
+  return `${JSON.stringify(buildExportRow(record, opts), null, 2)}\n`;
+}
+
+const EXPORT_FORMATS = {
+  csv: {
+    ext: 'csv',
+    mime: 'text/csv;charset=utf-8',
+    bom: true,
+    build: buildNotionCsv,
+  },
+  markdown: {
+    ext: 'md',
+    mime: 'text/markdown;charset=utf-8',
+    bom: false,
+    build: buildNotionMarkdown,
+  },
+  json: {
+    ext: 'json',
+    mime: 'application/json;charset=utf-8',
+    bom: false,
+    build: buildNotionJson,
+  },
+};
+
+export function buildExportPayload(format, record, opts = {}) {
+  const spec = EXPORT_FORMATS[format];
+  if (!spec) return null;
+  const body = spec.build(record, opts);
+  return {
+    ext: spec.ext,
+    mime: spec.mime,
+    text: spec.bom ? `\uFEFF${body}` : body,
+    copyText: body,
+  };
 }
 
 export function removeExportUi({ includeLogEditor = true } = {}) {
@@ -506,7 +583,7 @@ function bindExportOpen(btn) {
 }
 
 export function ensureExportButtonMount(token = '') {
-  if (!getPageContext().isGamePage) {
+  if (!isExportEnabled() || !getPageContext().isGamePage) {
     document.querySelectorAll(`[${EXPORT_ATTR}="btn"]`).forEach((el) => el.remove());
     return null;
   }
@@ -543,6 +620,11 @@ export function ensureExportButtonMount(token = '') {
 
 /** Export control in the full/quick log editor footer (dates, platform, rating). */
 export function ensureLogEditorExportMount() {
+  if (!isExportEnabled()) {
+    document.querySelectorAll(`[${EXPORT_ATTR}="log-btn"]`).forEach((el) => el.remove());
+    return null;
+  }
+
   const footer = document.querySelector('#log-editor-footer');
   if (!footer) return null;
 
@@ -575,6 +657,10 @@ let logEditorExportObserver = null;
 export function bindLogEditorExportObserver() {
   if (logEditorExportObserver) return logEditorExportObserver;
   const sync = debounce(() => {
+    if (!isExportEnabled()) {
+      document.querySelectorAll(`[${EXPORT_ATTR}="log-btn"]`).forEach((el) => el.remove());
+      return;
+    }
     if (document.querySelector('#log-editor-footer')) ensureLogEditorExportMount();
   }, 200);
   logEditorExportObserver = new MutationObserver(sync);
@@ -602,11 +688,6 @@ function formatOption(name, id, label, hint, { enabled = true, checked = false }
   `;
 }
 
-function previewRatingText(score10, ratingStyle) {
-  if (score10 == null) return t.exportNoRating;
-  return formatExportRating(score10, ratingStyle) || t.exportNoRating;
-}
-
 function previewStatusText(statusKey, statusStyle) {
   return formatExportStatus(statusKey, statusStyle) || '—';
 }
@@ -632,8 +713,17 @@ function buildExportPreviewValues(record, ratingStyle = 'text', statusStyle = 'n
   return values;
 }
 
-/** Preview mirrors CSV: same column names and order as EXPORT_COLUMNS. */
-function buildExportPreviewHtml(record, ratingStyle = 'text', statusStyle = 'notion') {
+/** Preview: field list for CSV/MD, raw JSON for the JSON format. */
+function buildExportPreviewHtml(record, ratingStyle = 'text', statusStyle = 'notion', format = 'csv') {
+  if (format === 'json') {
+    const row = buildExportRow(record, { ratingStyle, statusStyle });
+    return `
+      <div class="blp-export-preview" data-blp-export-preview data-format="json">
+        <p class="blp-export-section-label">${escapeHtml(t.exportPreviewTitle)}</p>
+        <pre class="blp-export-preview__json">${escapeHtml(JSON.stringify(row, null, 2))}</pre>
+      </div>
+    `;
+  }
   const values = buildExportPreviewValues(record, ratingStyle, statusStyle);
   const fields = EXPORT_COLUMNS.map((col) => {
     let attrs = '';
@@ -642,7 +732,7 @@ function buildExportPreviewHtml(record, ratingStyle = 'text', statusStyle = 'not
     return previewFieldRow(col, values[col], attrs);
   }).join('');
   return `
-    <div class="blp-export-preview" data-blp-export-preview>
+    <div class="blp-export-preview" data-blp-export-preview data-format="${escapeAttr(format)}">
       <p class="blp-export-section-label">${escapeHtml(t.exportPreviewTitle)}</p>
       <div class="blp-export-preview__fields">
         ${fields}
@@ -652,6 +742,7 @@ function buildExportPreviewHtml(record, ratingStyle = 'text', statusStyle = 'not
 }
 
 export function openExportDialog() {
+  if (!isExportEnabled()) return;
   if (document.querySelector(`.${EXPORT_BACKDROP}`)) return;
   if (!getPageContext().isGamePage && !getLogEditorRoot()) return;
 
@@ -680,10 +771,10 @@ export function openExportDialog() {
               'markdown',
               t.exportFormatMarkdown,
               t.exportFormatMarkdownHint,
-              { enabled: false }
+              { enabled: true }
             )}
             ${formatOption('blp-export-format', 'json', t.exportFormatJson, t.exportFormatJsonHint, {
-              enabled: false,
+              enabled: true,
             })}
           </div>
           <details class="blp-export-advanced">
@@ -733,7 +824,7 @@ export function openExportDialog() {
             )}</button>
           </div>
         </div>
-        ${buildExportPreviewHtml(record, 'text', 'notion')}
+        ${buildExportPreviewHtml(record, 'text', 'notion', 'csv')}
       </div>
     </div>
   `;
@@ -750,17 +841,21 @@ export function openExportDialog() {
     backdrop.querySelector('input[name="blp-export-rating"]:checked')?.value || 'text';
   const selectedStatusStyle = () =>
     backdrop.querySelector('input[name="blp-export-status"]:checked')?.value || 'notion';
+  const selectedFormat = () =>
+    backdrop.querySelector('input[name="blp-export-format"]:checked')?.value || 'csv';
 
-  const paintRatingPreview = () => {
-    const row = backdrop.querySelector('[data-blp-export-rating-row] .blp-export-preview__val');
-    if (!row) return;
-    row.textContent = previewRatingText(record._ratingScore10, selectedRatingStyle());
-  };
-
-  const paintStatusPreview = () => {
-    const row = backdrop.querySelector('[data-blp-export-status-row] .blp-export-preview__val');
-    if (!row) return;
-    row.textContent = previewStatusText(record._statusKey, selectedStatusStyle());
+  const paintPreview = () => {
+    const host = backdrop.querySelector('[data-blp-export-preview]');
+    if (!host) return;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = buildExportPreviewHtml(
+      record,
+      selectedRatingStyle(),
+      selectedStatusStyle(),
+      selectedFormat()
+    );
+    const next = wrap.firstElementChild;
+    if (next) host.replaceWith(next);
   };
 
   backdrop.addEventListener('click', (e) => {
@@ -773,46 +868,49 @@ export function openExportDialog() {
       close();
     }
   });
+  backdrop.querySelectorAll('input[name="blp-export-format"]').forEach((input) => {
+    input.addEventListener('change', paintPreview);
+  });
   backdrop.querySelectorAll('input[name="blp-export-rating"]').forEach((input) => {
-    input.addEventListener('change', paintRatingPreview);
+    input.addEventListener('change', paintPreview);
   });
   backdrop.querySelectorAll('input[name="blp-export-status"]').forEach((input) => {
-    input.addEventListener('change', paintStatusPreview);
+    input.addEventListener('change', paintPreview);
   });
 
   backdrop.querySelector('[data-blp-export-run]')?.addEventListener('click', () => {
-    const format =
-      backdrop.querySelector('input[name="blp-export-format"]:checked')?.value || 'csv';
-    const ratingStyle = selectedRatingStyle();
-    const statusStyle = selectedStatusStyle();
+    const format = selectedFormat();
+    const opts = { ratingStyle: selectedRatingStyle(), statusStyle: selectedStatusStyle() };
     try {
-      if (format === 'csv') {
-        const csv = buildNotionCsv(record, { ratingStyle, statusStyle });
-        downloadBlob(`${slugifyFilename(record.Name)}.csv`, `\uFEFF${csv}`);
-        showToast(fmt(t.toastExportDone, { name: record.Name || 'CSV' }), {
-          type: 'success',
-        });
-        close();
+      const payload = buildExportPayload(format, record, opts);
+      if (!payload) {
+        showToast(t.exportFormatUnavailable, { type: 'error' });
         return;
       }
-      showToast(t.exportFormatUnavailable, { type: 'error' });
+      downloadBlob(
+        `${slugifyFilename(record.Name)}.${payload.ext}`,
+        payload.text,
+        payload.mime
+      );
+      showToast(fmt(t.toastExportDone, { name: record.Name || payload.ext.toUpperCase() }), {
+        type: 'success',
+      });
+      close();
     } catch (_) {
       showToast(t.toastExportFailed, { type: 'error' });
     }
   });
 
   backdrop.querySelector('[data-blp-export-copy]')?.addEventListener('click', async () => {
-    const format =
-      backdrop.querySelector('input[name="blp-export-format"]:checked')?.value || 'csv';
-    const ratingStyle = selectedRatingStyle();
-    const statusStyle = selectedStatusStyle();
+    const format = selectedFormat();
+    const opts = { ratingStyle: selectedRatingStyle(), statusStyle: selectedStatusStyle() };
     try {
-      if (format !== 'csv') {
+      const payload = buildExportPayload(format, record, opts);
+      if (!payload) {
         showToast(t.exportFormatUnavailable, { type: 'error' });
         return;
       }
-      const csv = buildNotionCsv(record, { ratingStyle, statusStyle });
-      await copyTextToClipboard(csv);
+      await copyTextToClipboard(payload.copyText);
       showToast(t.toastExportCopied, { type: 'success' });
     } catch (_) {
       showToast(t.toastExportCopyFailed, { type: 'error' });
@@ -825,6 +923,10 @@ export function openExportDialog() {
 
 /** Keep export button after cover mounts / SPA rescans. */
 export function syncExportButton(token = '') {
+  if (!isExportEnabled()) {
+    removeExportUi();
+    return;
+  }
   if (!getPageContext().isGamePage) {
     document.querySelectorAll(`[${EXPORT_ATTR}="btn"]`).forEach((el) => el.remove());
     return;
