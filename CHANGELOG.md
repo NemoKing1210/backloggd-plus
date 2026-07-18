@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.52] - 2026-07-18
+
+### Changed
+
+- Export buttons match the Plus nav control (`btn btn-main` accent, no icon)
+
+## [0.7.51] - 2026-07-18
+
+### Changed
+
+- Export dialog: Rating / Status format options moved into a collapsed “Additional settings” section
+
+## [0.7.50] - 2026-07-18
+
+### Added
+
+- Export dialog: status format switch (Notion mapped statuses vs original Backloggd labels)
+
 ## [0.7.49] - 2026-07-18
 
 ### Added
