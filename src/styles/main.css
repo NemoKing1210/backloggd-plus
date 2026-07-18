@@ -18,40 +18,58 @@ html[data-blp-floating-header="1"] header:has(#primary-nav) {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
+  /* Let nav dropdowns paint outside the sticky header box. */
+  overflow: visible;
 }
 
 html[data-blp-floating-header="1"] #primary-nav.navbar {
   position: relative;
+  isolation: isolate;
   max-width: 1180px;
   margin-inline: auto;
   padding: 0.45rem 0.85rem;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background:
-    linear-gradient(135deg, rgba(61, 184, 154, 0.1) 0%, transparent 42%),
-    rgba(18, 22, 30, 0.72) !important;
-  backdrop-filter: blur(18px) saturate(1.35);
-  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  /* Transparent shell — fill + blur on ::before so absolute dropdowns are not clipped. */
+  background: transparent !important;
   box-shadow:
     0 14px 40px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: visible;
   transition:
     box-shadow 0.28s ease,
-    background-color 0.28s ease,
     border-color 0.28s ease,
     padding 0.28s ease,
     transform 0.28s ease;
 }
 
+html[data-blp-floating-header="1"] #primary-nav.navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(61, 184, 154, 0.1) 0%, transparent 42%),
+    rgba(18, 22, 30, 0.72);
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  pointer-events: none;
+  z-index: -1;
+  transition: background-color 0.28s ease, background 0.28s ease;
+}
+
 html[data-blp-floating-header="1"][data-blp-header-compact="1"] #primary-nav.navbar {
   padding: 0.28rem 0.75rem;
   border-color: rgba(255, 255, 255, 0.14) !important;
-  background:
-    linear-gradient(135deg, rgba(61, 184, 154, 0.12) 0%, transparent 40%),
-    rgba(14, 17, 24, 0.88) !important;
   box-shadow:
     0 10px 32px rgba(0, 0, 0, 0.48),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+html[data-blp-floating-header="1"][data-blp-header-compact="1"] #primary-nav.navbar::before {
+  background:
+    linear-gradient(135deg, rgba(61, 184, 154, 0.12) 0%, transparent 40%),
+    rgba(14, 17, 24, 0.88);
 }
 
 html[data-blp-floating-header="1"] #primary-nav .navbar-brand {
@@ -109,7 +127,8 @@ html[data-blp-floating-header="1"] #primary-nav .input-group:focus-within .searc
 }
 
 html[data-blp-floating-header="1"] #primary-nav .dropdown-menu {
-  margin-top: 0.4rem !important;
+  /* Flush to toggle — margin creates a hover dead zone before the cursor reaches the menu. */
+  margin-top: 0 !important;
   border-radius: 12px !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   background: rgba(18, 22, 30, 0.94) !important;
