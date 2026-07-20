@@ -340,13 +340,49 @@ export function cacheMeterPct(part, denom) {
   return Math.max(0, Math.min(100, (part / denom) * 100));
 }
 
+/** Rounded 0–100 fill vs soft budget. */
+export function cacheFillPct(stats) {
+  const s = stats || getCacheUsageStats();
+  return Math.round(cacheMeterPct(s.usedBytes, s.limitBytes));
+}
+
+/** Visual tone for fill level: low under 70, mid under 90, else high. */
+export function cacheFillTone(pct) {
+  const n = Math.max(0, Math.min(100, Number(pct) || 0));
+  if (n >= 90) return 'high';
+  if (n >= 70) return 'mid';
+  return 'low';
+}
+
+export function buildCacheTabBadgeHtml(stats) {
+  const s = stats || getCacheUsageStats();
+  const pct = cacheFillPct(s);
+  const tone = cacheFillTone(pct);
+  const label = fmt(t.cacheBarPct, { pct });
+  const aria = fmt(t.cacheTabFillAria, { pct });
+  return `<span class="blp-settings__tab-badge blp-settings__tab-badge--${tone}" data-blp-cache-tab-badge aria-label="${escapeAttr(aria)}">${escapeHtml(label)}</span>`;
+}
+
+export function paintCacheTabBadge(root, stats) {
+  const badge = root?.querySelector?.('[data-blp-cache-tab-badge]');
+  if (!badge) return;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = buildCacheTabBadgeHtml(stats).trim();
+  const next = wrap.firstElementChild;
+  if (next) badge.replaceWith(next);
+}
+
 export function buildCacheMeterHtml(stats) {
   const s = stats || getCacheUsageStats();
   const denom = Math.max(s.usedBytes, s.limitBytes, 1);
   const fullPct = cacheMeterPct(s.fullBytes, denom);
   const partialPct = cacheMeterPct(s.partialBytes, denom);
   const freePct = cacheMeterPct(s.freeBytes, denom);
+  const fillPct = cacheFillPct(s);
+  const tone = cacheFillTone(fillPct);
+  const pctLabel = fmt(t.cacheBarPct, { pct: fillPct });
   const aria = fmt(t.cacheBarAria, {
+    pct: fillPct,
     full: formatCacheBytes(s.fullBytes),
     partial: formatCacheBytes(s.partialBytes),
     free: formatCacheBytes(s.freeBytes),
@@ -365,6 +401,10 @@ export function buildCacheMeterHtml(stats) {
   return `
     <div class="blp-cache-meter" data-blp-cache-meter>
       <div class="blp-cache-meter__head">
+        <div class="blp-cache-meter__pct blp-cache-meter__pct--${tone}">
+          <span class="blp-cache-meter__pct-value">${escapeHtml(pctLabel)}</span>
+          <span class="blp-cache-meter__pct-caption">${escapeHtml(t.cacheBarFilled)}</span>
+        </div>
         <span class="blp-cache-meter__used">${escapeHtml(
           fmt(t.cacheBarUsed, {
             used: formatCacheBytes(s.usedBytes),
@@ -388,12 +428,15 @@ export function buildCacheMeterHtml(stats) {
 }
 
 export function paintCacheMeter(root) {
+  const stats = getCacheUsageStats();
   const current = root?.querySelector?.('[data-blp-cache-meter]');
-  if (!current) return;
-  const wrap = document.createElement('div');
-  wrap.innerHTML = buildCacheMeterHtml(getCacheUsageStats()).trim();
-  const next = wrap.firstElementChild;
-  if (next) current.replaceWith(next);
+  if (current) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = buildCacheMeterHtml(stats).trim();
+    const next = wrap.firstElementChild;
+    if (next) current.replaceWith(next);
+  }
+  paintCacheTabBadge(root, stats);
 }
 
 export function clearCache() {

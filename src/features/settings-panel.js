@@ -1,5 +1,6 @@
 import {
   buildCacheMeterHtml,
+  buildCacheTabBadgeHtml,
   clearCache,
   clearSteamOverride,
   getSteamOverride,
@@ -77,6 +78,7 @@ function fieldHtml(id, label, controlHtml, hint) {
 function buildTabsHtml(activeId) {
   const tabs = SETTINGS_TABS.map(({ id, labelKey }) => {
     const active = id === activeId;
+    const badge = id === 'cache' ? buildCacheTabBadgeHtml() : '';
     return `
       <button
         type="button"
@@ -87,7 +89,7 @@ function buildTabsHtml(activeId) {
         aria-selected="${active ? 'true' : 'false'}"
         aria-controls="blp-panel-${escapeAttr(id)}"
         tabindex="${active ? '0' : '-1'}"
-      >${escapeHtml(t[labelKey])}</button>
+      ><span class="blp-settings__tab-label">${escapeHtml(t[labelKey])}</span>${badge}</button>
     `;
   }).join('');
   return `<span class="blp-settings__tab-ink" aria-hidden="true"></span>${tabs}`;
@@ -394,6 +396,7 @@ export function openSettings() {
   backdrop.querySelector('[data-blp-clear]')?.addEventListener('click', () => {
     const count = clearCache();
     paintCacheMeter(backdrop);
+    syncTabInk(dialog);
     showToast(count ? fmt(t.cacheCleared, { count }) : t.cacheEmpty, {
       type: count ? 'success' : 'info',
       title: count ? t.toastCacheClearedTitle : t.cacheEmptyTitle,
