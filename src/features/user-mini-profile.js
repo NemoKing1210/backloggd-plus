@@ -3,7 +3,6 @@ import {
   isUserProfileRootHref,
   parseUsernameFromHref,
   peekCachedUserProfile,
-  resolveProfileTier,
   tierIdFromProfile,
 } from '../api/user-profile.js';
 import {
@@ -156,17 +155,42 @@ function badgesHtml(badges) {
   return `<div class="blp-ump__section"><div class="blp-ump__section-label">${escapeHtml(t.miniProfileBadges)}</div><div class="blp-ump__badges">${items}</div></div>`;
 }
 
+function skelBone(extraClass = '') {
+  return `<span class="blp-ump__bone ${extraClass}" aria-hidden="true"></span>`;
+}
+
 function renderLoading(username) {
-  const tier = resolveProfileTier(0);
+  const cached = peekCachedUserProfile(username);
+  const tierId = cached ? tierIdFromProfile(cached) : 'rookie';
   return `
-    <div class="blp-ump__card blp-ump__card--${escapeAttr(tier.id)} is-skeleton">
+    <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)} is-skeleton" aria-busy="true">
       <div class="blp-ump__shine" aria-hidden="true"></div>
+      <div class="blp-ump__foil" aria-hidden="true"></div>
       <div class="blp-ump__top">
-        <span class="blp-ump__tier-pill">${escapeHtml(tierLabel(tier.id))}</span>
+        ${skelBone('blp-ump__bone--pill')}
+        ${skelBone('blp-ump__bone--avg')}
       </div>
-      <div class="blp-ump__avatar blp-ump__avatar--skel"></div>
-      <div class="blp-ump__name">${escapeHtml(username)}</div>
-      <div class="blp-ump__status">${escapeHtml(t.miniProfileLoading)}</div>
+      <div class="blp-ump__avatar blp-ump__avatar--skel" aria-hidden="true"></div>
+      <div class="blp-ump__name blp-ump__name--skel">${escapeHtml(username)}</div>
+      ${skelBone('blp-ump__bone--sub')}
+      <div class="blp-ump__stats" aria-hidden="true">
+        <div class="blp-ump__stat blp-ump__stat--skel">${skelBone('blp-ump__bone--stat-n')}${skelBone('blp-ump__bone--stat-l')}</div>
+        <div class="blp-ump__stat blp-ump__stat--skel">${skelBone('blp-ump__bone--stat-n')}${skelBone('blp-ump__bone--stat-l')}</div>
+        <div class="blp-ump__stat blp-ump__stat--skel">${skelBone('blp-ump__bone--stat-n')}${skelBone('blp-ump__bone--stat-l')}</div>
+      </div>
+      <div class="blp-ump__ratings blp-ump__ratings--skel" aria-hidden="true">
+        ${Array.from({ length: 10 }, (_, i) => `<span class="blp-ump__bar blp-ump__bar--skel" style="--h:${18 + ((i * 17) % 70)}%; --d:${i * 0.05}s"></span>`).join('')}
+      </div>
+      <div class="blp-ump__section" aria-hidden="true">
+        ${skelBone('blp-ump__bone--label')}
+        <div class="blp-ump__covers" style="--ump-slots:5">
+          ${Array.from({ length: 5 }, (_, i) => `<span class="blp-ump__cover blp-ump__cover--skel" style="--d:${0.12 + i * 0.06}s"></span>`).join('')}
+        </div>
+      </div>
+      <div class="blp-ump__status">
+        <span class="blp-ump__spinner" aria-hidden="true"></span>
+        ${escapeHtml(t.miniProfileLoading)}
+      </div>
     </div>
   `;
 }

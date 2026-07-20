@@ -201,9 +201,130 @@ a[data-blp-profile-hover='1'] img {
 }
 
 .blp-ump__avatar--skel {
-  background: linear-gradient(90deg, #2a241c, #3a3228, #2a241c);
-  background-size: 200% 100%;
-  animation: blp-ump-skel 1.2s linear infinite;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.08), transparent 42%),
+    linear-gradient(110deg, #1a1612 0%, #2e2820 40%, #3a3228 50%, #2e2820 60%, #1a1612 100%);
+  background-size: 100% 100%, 220% 100%;
+  animation: blp-ump-skel 1.35s ease-in-out infinite;
+}
+
+.blp-ump__bone {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.05) 90%
+  );
+  background-size: 220% 100%;
+  animation: blp-ump-skel 1.35s ease-in-out infinite;
+}
+
+.blp-ump__bone--pill {
+  width: 72px;
+  height: 20px;
+  border-radius: 999px;
+}
+
+.blp-ump__bone--avg {
+  width: 36px;
+  height: 14px;
+  border-radius: 4px;
+  animation-delay: 0.08s;
+}
+
+.blp-ump__bone--sub {
+  width: 48%;
+  height: 10px;
+  margin: 6px auto 12px;
+  animation-delay: 0.12s;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__bone--stat-n {
+  width: 42%;
+  height: 15px;
+  margin: 0 auto 6px;
+}
+
+.blp-ump__bone--stat-l {
+  width: 58%;
+  height: 8px;
+  margin: 0 auto;
+  animation-delay: 0.1s;
+}
+
+.blp-ump__bone--label {
+  width: 64px;
+  height: 9px;
+  margin-bottom: 8px;
+  animation-delay: 0.16s;
+}
+
+.blp-ump__stat--skel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.blp-ump__name--skel {
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.blp-ump__bar--skel {
+  opacity: 0.35;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
+  animation: blp-ump-skel-bar 1.2s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+.blp-ump__cover--skel {
+  flex: 0 0 calc((100% - (var(--ump-slots) - 1) * var(--ump-gap)) / var(--ump-slots));
+  width: calc((100% - (var(--ump-slots) - 1) * var(--ump-gap)) / var(--ump-slots));
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.04) 90%
+  );
+  background-size: 220% 100%;
+  animation: blp-ump-skel 1.35s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  pointer-events: none;
+}
+
+.blp-ump__card.is-skeleton .blp-ump__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 0 2px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.blp-ump__spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-top-color: var(--ump-accent, #c5b59a);
+  animation: blp-ump-spin 0.7s linear infinite;
+}
+
+.blp-ump__card.is-skeleton .blp-ump__shine {
+  animation-duration: 2.4s;
 }
 
 .blp-ump__name {
@@ -516,7 +637,25 @@ a[data-blp-profile-hover='1'] img {
 }
 
 .blp-ump__card.is-skeleton .blp-ump__name {
-  opacity: 0.7;
+  opacity: 0.85;
+}
+
+@keyframes blp-ump-skel-bar {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scaleY(0.92);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes blp-ump-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes blp-ump-shine {
@@ -564,6 +703,11 @@ a[data-blp-profile-hover='1'] img {
   .blp-ump__card--legend .blp-ump__tier-pill,
   .blp-ump__cover,
   .blp-ump__cta,
+  .blp-ump__bone,
+  .blp-ump__avatar--skel,
+  .blp-ump__cover--skel,
+  .blp-ump__bar--skel,
+  .blp-ump__spinner,
   .blp-profile-header,
   .blp-profile-avatar,
   .blp-profile-tier-chip__bar > span,
