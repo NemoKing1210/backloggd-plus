@@ -51,6 +51,7 @@ export const HLTB_SEARCH_URL = `${HLTB_SITE}/api/bleed`;
 export const ITAD_SITE = 'https://isthereanydeal.com';
 export const PCGW_SITE = 'https://www.pcgamingwiki.com';
 export const GOGDB_SITE = 'https://www.gogdb.org';
+export const GAMESLIKE_SITE = 'https://gameslike.co';
 export const STEAM_CDN_APPS = 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps';
 export const STEAM_CDN_STORE_ASSETS = 'https://shared.fastly.steamstatic.com/store_item_assets';
 export const STEAM_CDN_COMMUNITY_ICONS = 'https://shared.fastly.steamstatic.com/community_assets/images/apps';
@@ -78,6 +79,7 @@ export const LINK_KEYS = [
   'pcgamingwiki',
   'itad',
   'gogdb',
+  'gameslike',
 ];
 export const LINK_DOMAINS = {
   igdb: 'igdb.com',
@@ -89,6 +91,7 @@ export const LINK_DOMAINS = {
   pcgamingwiki: 'pcgamingwiki.com',
   itad: 'isthereanydeal.com',
   gogdb: 'gogdb.org',
+  gameslike: 'gameslike.co',
 };
 
 export const DEFAULT_SETTINGS = {
@@ -136,5 +139,6 @@ export const DEFAULT_SETTINGS = {
     pcgamingwiki: true,
     itad: true,
     gogdb: true,
+    gameslike: true,
   },
 };

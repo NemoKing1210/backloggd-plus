@@ -50,6 +50,7 @@ export function linkLabelKey(key) {
     pcgamingwiki: 'linkPcgamingwiki',
     itad: 'linkItad',
     gogdb: 'linkGogdb',
+    gameslike: 'linkGameslike',
   };
   return map[key] || key;
 }

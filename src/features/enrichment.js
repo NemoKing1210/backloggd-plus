@@ -15,6 +15,7 @@ import {
   ENRICH_ATTR,
   FAVICON_URL,
   GAMESTATUS_SITE_BASE,
+  GAMESLIKE_SITE,
   GOGDB_SITE,
   ITAD_SITE,
   PCGW_SITE,
@@ -26,7 +27,7 @@ import { fmt } from '../i18n/index.js';
 import { isLinkEnabled } from '../settings.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
-import { metacriticGameUrl } from '../utils/slug.js';
+import { metacriticGameUrl, slugifyForBackloggd } from '../utils/slug.js';
 import { bindGameCoverViewer, unbindGameCoverViewer } from './gallery.js';
 import { applySimilarGames, ensureSimilarMount, removeSimilarGamesUi } from './similar.js';
 import {
@@ -422,6 +423,20 @@ export function buildExternalLinks({ title, slug, igdbUrl, steam }) {
       key: 'gogdb',
       label: t.linkGogdb,
       url: `${GOGDB_SITE}/?q=${q}`,
+    });
+  }
+  if (steam?.appId) {
+    const glSlug =
+      slugifyForBackloggd(steam.name || title) ||
+      String(slug || '')
+        .replace(/^\/+|\/+$/g, '')
+        .replace(/--\d+$/i, '');
+    links.push({
+      key: 'gameslike',
+      label: t.linkGameslike,
+      url: glSlug
+        ? `${GAMESLIKE_SITE}/app/${steam.appId}/${glSlug}`
+        : `${GAMESLIKE_SITE}/app/${steam.appId}`,
     });
   }
   return links.filter((l) => isLinkEnabled(l.key, settings));
@@ -1172,7 +1187,10 @@ export async function enrichGamePage() {
     needSteamDb ||
     settings.showSimilarGames ||
     settings.showSteamDbDetails !== false ||
-    (settings.showLinks && (settings.links?.itad !== false || settings.links?.steamdb !== false));
+    (settings.showLinks &&
+      (settings.links?.itad !== false ||
+        settings.links?.steamdb !== false ||
+        settings.links?.gameslike !== false));
   const needUserdata =
     settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
 
