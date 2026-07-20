@@ -21,6 +21,33 @@ export function resolveProfileTier(gamesPlayed) {
   return { ...tier, gamesPlayed: n };
 }
 
+/** Next tier + progress toward it (null at Legend). */
+export function getNextProfileTier(gamesPlayed) {
+  const current = resolveProfileTier(gamesPlayed);
+  const idx = PROFILE_CARD_TIERS.findIndex((row) => row.id === current.id);
+  const next = idx >= 0 ? PROFILE_CARD_TIERS[idx + 1] : null;
+  if (!next) return null;
+  const span = Math.max(1, next.min - current.min);
+  const into = Math.max(0, current.gamesPlayed - current.min);
+  return {
+    current,
+    next,
+    remaining: Math.max(0, next.min - current.gamesPlayed),
+    progress: Math.min(1, into / span),
+  };
+}
+
+export function tierIdFromProfile(profile) {
+  if (!profile) return 'rookie';
+  if (profile.tierId) return profile.tierId;
+  return resolveProfileTier(profile.gamesPlayed).id;
+}
+
+export function cacheUserProfile(profile) {
+  if (!profile?.username) return;
+  setCached(profileCacheKey(profile.username), profile, { ttlMs: PROFILE_TTL_MS });
+}
+
 export function parseUsernameFromHref(href) {
   const m = String(href || '').match(/\/u\/([^/?#]+)/i);
   if (!m) return '';
@@ -28,6 +55,18 @@ export function parseUsernameFromHref(href) {
     return decodeURIComponent(m[1]).trim();
   } catch {
     return m[1].trim();
+  }
+}
+
+/** True for `/u/{user}` / `/u/{user}/` only — not badges, games, reviews, etc. */
+export function isUserProfileRootHref(href) {
+  const raw = String(href || '').trim();
+  if (!raw) return false;
+  try {
+    const path = new URL(raw, 'https://www.backloggd.com/').pathname;
+    return /^\/u\/[^/]+\/?$/i.test(path);
+  } catch {
+    return /^\/u\/[^/?#]+\/?$/i.test(raw.split(/[?#]/, 2)[0]);
   }
 }
 
@@ -143,8 +182,8 @@ function parseProfileStats(doc) {
   return stats;
 }
 
-export function parseUserProfileHtml(html, usernameHint = '') {
-  const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+export function parseUserProfileDoc(doc, usernameHint = '') {
+  if (!doc) return null;
   const headerName = textOf(doc.querySelector('#profile-header h3.main-header'));
   const username = headerName || String(usernameHint || '').trim();
   if (!username) return null;
@@ -193,18 +232,17 @@ export function parseUserProfileHtml(html, usernameHint = '') {
   };
 }
 
+export function parseUserProfileHtml(html, usernameHint = '') {
+  const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+  return parseUserProfileDoc(doc, usernameHint);
+}
+
 /** Synchronous cache peek (no network). */
 export function peekCachedUserProfile(username) {
   const name = String(username || '').trim();
   if (!name) return null;
   const cached = getCached(profileCacheKey(name));
   return cached?.username ? cached : null;
-}
-
-export function tierIdFromProfile(profile) {
-  if (!profile) return 'rookie';
-  if (profile.tierId) return profile.tierId;
-  return resolveProfileTier(profile.gamesPlayed).id;
 }
 
 export async function fetchUserProfile(username) {
@@ -229,7 +267,7 @@ export async function fetchUserProfile(username) {
     });
     const profile = parseUserProfileHtml(html, name);
     if (!profile) return null;
-    setCached(cacheKey, profile, { ttlMs: PROFILE_TTL_MS });
+    cacheUserProfile(profile);
     return asCacheMiss(profile);
   })().catch(() => null);
 
@@ -240,4 +278,3 @@ export async function fetchUserProfile(username) {
     inflight.delete(cacheKey);
   }
 }
-

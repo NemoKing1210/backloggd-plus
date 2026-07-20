@@ -14,6 +14,7 @@ import { applyFloatingHeader } from './header.js';
 import { bindFixMatchClicks, ensureNavSettingsButton } from './settings-panel.js';
 import { bindLogEditorExportObserver, ensureLogEditorExportMount } from './export-game.js';
 import { scheduleUserMiniProfiles } from './user-mini-profile.js';
+import { scheduleProfilePage } from './profile-page.js';
 
 export function scanPage() {
   ensureNavSettingsButton();
@@ -25,6 +26,7 @@ export function scanPage() {
   enrichGamePage();
   scheduleCardBadges();
   scheduleUserMiniProfiles();
+  scheduleProfilePage();
 }
 
 export function isBlpManagedElement(el) {
@@ -60,6 +62,7 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-toast-host') ||
     el.classList?.contains('blp-toast') ||
     el.classList?.contains('blp-ump') ||
+    el.classList?.contains('blp-profile-tier-chip') ||
     el.id === 'blp-toast-host' ||
     el.id === 'blp-user-mini-profile'
   ) {
@@ -67,7 +70,7 @@ export function isBlpManagedElement(el) {
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-profile-tier-chip`
     )
   );
 }

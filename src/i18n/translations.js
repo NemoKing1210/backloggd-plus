@@ -29,7 +29,7 @@ export const TRANSLATIONS = {
       'Hides empty Fuse / incontent ad rows on the homepage (e.g. data-fuse="…_homepage").',
     showUserMiniProfile: 'User mini-profile cards',
     showUserMiniProfileHint:
-      'Show a FIFA-style mini profile when hovering avatars on reviews, lists, and activity. Tier grows with games played (25+ bronze … 1000+ legend).',
+      'FIFA-style mini profile on avatar hover, and tier styling on profile pages. Tier grows with games played (25+ bronze … 1000+ legend).',
     miniProfilePlayed: 'Played',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'This year',
@@ -49,6 +49,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Diamond',
     miniProfileTierMaster: 'Master',
     miniProfileTierLegend: 'Legend',
+    profileTierProgress: '{n} to {tier}',
+    profileTierMax: 'Max tier',
     debugMode: 'Debug mode',
     debugModeHint:
       'Show one debug panel on the game page with sources and a full response dump. Enrichment rows get a hatch + Cache/Network badge.',
@@ -356,7 +358,7 @@ export const TRANSLATIONS = {
       'Убирает пустые ряды Fuse / incontent на главной (например data-fuse="…_homepage").',
     showUserMiniProfile: 'Мини-профиль пользователя',
     showUserMiniProfileHint:
-      'Карточка в стиле FIFA при наведении на аватар в отзывах, списках и ленте. Тир растёт с числом сыгранных игр (25+ бронза … 1000+ легенда).',
+      'Карточка в стиле FIFA при наведении на аватар и оформление страницы профиля по тиру. Тир растёт с числом сыгранных игр (25+ бронза … 1000+ легенда).',
     miniProfilePlayed: 'Сыграно',
     miniProfileBacklog: 'Бэклог',
     miniProfileThisYear: 'В этом году',
@@ -376,6 +378,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Алмаз',
     miniProfileTierMaster: 'Мастер',
     miniProfileTierLegend: 'Легенда',
+    profileTierProgress: '{n} до «{tier}»',
+    profileTierMax: 'Максимальный тир',
     debugMode: 'Режим отладки',
     debugModeHint:
       'Одна панель отладки на странице игры: источники и полный дамп. Ряды обогащения — штриховка и бейдж Кэш/Сеть.',
@@ -701,6 +705,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: '钻石',
     miniProfileTierMaster: '大师',
     miniProfileTierLegend: '传奇',
+    profileTierProgress: '距{tier}还差 {n}',
+    profileTierMax: '已满级',
     debugMode: '调试模式',
     debugModeHint:
       '在游戏页显示调试面板与完整响应。各增强行带斜线底纹和缓存/网络徽章。',
@@ -1020,6 +1026,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Diamante',
     miniProfileTierMaster: 'Maestro',
     miniProfileTierLegend: 'Leyenda',
+    profileTierProgress: '{n} para {tier}',
+    profileTierMax: 'Nivel máximo',
     debugMode: 'Modo depuración',
     debugModeHint:
       'Panel de depuración con fuentes y volcado. Filas enriquecidas: tramado + insignia Caché/Red.',
@@ -1348,6 +1356,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Diamante',
     miniProfileTierMaster: 'Mestre',
     miniProfileTierLegend: 'Lenda',
+    profileTierProgress: '{n} para {tier}',
+    profileTierMax: 'Nível máximo',
     debugMode: 'Modo debug',
     debugModeHint:
       'Painel de debug com fontes e dump. Linhas de enriquecimento: hachura + badge Cache/Rede.',
@@ -1676,6 +1686,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Diamant',
     miniProfileTierMaster: 'Meister',
     miniProfileTierLegend: 'Legende',
+    profileTierProgress: '{n} bis {tier}',
+    profileTierMax: 'Maximalstufe',
     debugMode: 'Debug-Modus',
     debugModeHint:
       'Debug-Panel mit Quellen und Dump. Anreicherungszeilen: Schraffur + Cache/Netz-Badge.',
@@ -2004,6 +2016,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Diamant',
     miniProfileTierMaster: 'Maître',
     miniProfileTierLegend: 'Légende',
+    profileTierProgress: '{n} avant {tier}',
+    profileTierMax: 'Palier max',
     debugMode: 'Mode debug',
     debugModeHint:
       'Panneau debug avec sources et dump. Lignes d’enrichissement : hachures + badge Cache/Réseau.',
@@ -2332,6 +2346,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'ダイヤモンド',
     miniProfileTierMaster: 'マスター',
     miniProfileTierLegend: 'レジェンド',
+    profileTierProgress: '{tier}まであと {n}',
+    profileTierMax: '最高ティア',
     debugMode: 'デバッグモード',
     debugModeHint:
       'デバッグパネルと応答ダンプ。各行に斜線ハッチとキャッシュ/ネットワークバッジ。',
@@ -2660,6 +2676,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: '다이아몬드',
     miniProfileTierMaster: '마스터',
     miniProfileTierLegend: '레전드',
+    profileTierProgress: '{tier}까지 {n}',
+    profileTierMax: '최고 티어',
     debugMode: '디버그 모드',
     debugModeHint:
       '디버그 패널과 응답 덤프. 각 보강 행에 빗금 + 캐시/네트워크 배지.',
@@ -2988,6 +3006,8 @@ export const TRANSLATIONS = {
     miniProfileTierDiamond: 'Diament',
     miniProfileTierMaster: 'Mistrz',
     miniProfileTierLegend: 'Legenda',
+    profileTierProgress: '{n} do {tier}',
+    profileTierMax: 'Maksymalny poziom',
     debugMode: 'Tryb debug',
     debugModeHint:
       'Panel debug ze źródłami i dumpem. Wiersze wzbogacenia: kreskowanie + badge Cache/Sieć.',

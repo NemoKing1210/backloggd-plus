@@ -1,5 +1,6 @@
 import {
   fetchUserProfile,
+  isUserProfileRootHref,
   parseUsernameFromHref,
   peekCachedUserProfile,
   resolveProfileTier,
@@ -235,20 +236,38 @@ function renderProfile(profile) {
   `;
 }
 
+function clearAvatarMark(anchor) {
+  if (!anchor?.removeAttribute) return;
+  anchor.removeAttribute(MARK_ATTR);
+  anchor.removeAttribute(TIER_ATTR);
+  anchor.removeAttribute(HOVER_ATTR);
+}
+
 function isEligibleAvatarAnchor(anchor) {
   if (!anchor || anchor.nodeType !== 1) return false;
   if (anchor.closest(`#${POPOVER_ID}, .blp-ump, .blp-settings-backdrop, #primary-nav, #profile-header`)) {
     return false;
   }
-  if (!anchor.matches?.('a[href*="/u/"]')) return false;
+  // Achievement badges link to /u/{user}/badges/ and contain an <img> — skip those.
+  if (anchor.closest('.badge-tooltip, .badges, .backlog-badge-cus-col, .badge-image')) {
+    return false;
+  }
+  const href = anchor.getAttribute('href') || anchor.href || '';
+  if (!isUserProfileRootHref(href)) return false;
   if (!anchor.querySelector('img')) return false;
-  return Boolean(parseUsernameFromHref(anchor.getAttribute('href') || anchor.href));
+  return Boolean(parseUsernameFromHref(href));
 }
 
 function markAvatarAnchor(anchor) {
-  if (!isEligibleAvatarAnchor(anchor)) return null;
+  if (!isEligibleAvatarAnchor(anchor)) {
+    clearAvatarMark(anchor);
+    return null;
+  }
   const username = parseUsernameFromHref(anchor.getAttribute('href') || anchor.href);
-  if (!username) return null;
+  if (!username) {
+    clearAvatarMark(anchor);
+    return null;
+  }
   anchor.setAttribute(MARK_ATTR, '1');
   const cached = peekCachedUserProfile(username);
   if (cached) {
@@ -271,11 +290,7 @@ function applyTierToUsername(username, tierId) {
 }
 
 function clearAllAvatarMarks() {
-  document.querySelectorAll(`a[${MARK_ATTR}], a[${TIER_ATTR}], a[${HOVER_ATTR}]`).forEach((a) => {
-    a.removeAttribute(MARK_ATTR);
-    a.removeAttribute(TIER_ATTR);
-    a.removeAttribute(HOVER_ATTR);
-  });
+  document.querySelectorAll(`a[${MARK_ATTR}], a[${TIER_ATTR}], a[${HOVER_ATTR}]`).forEach(clearAvatarMark);
 }
 
 function decorateAvatars(root = document) {

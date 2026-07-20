@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.72] - 2026-07-20
+
+### Added
+
+- Profile page tier chrome: header wash, avatar frame, tier chip with progress to next rank, tinted stats and nav accent (same Games Played tiers as mini-profile cards)
+
 ## [0.7.71] - 2026-07-20
 
 ### Added
