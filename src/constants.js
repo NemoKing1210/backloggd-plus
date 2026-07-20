@@ -37,8 +37,9 @@ export const PROFILE_CARD_TIERS = [
   { id: 'master', min: 500 },
   { id: 'legend', min: 1000 },
 ];
-export const PROFILE_HOVER_OPEN_MS = 320;
-export const PROFILE_HOVER_CLOSE_MS = 220;
+export const PROFILE_HOVER_OPEN_MS = 280;
+export const PROFILE_HOVER_CLOSE_MS = 180;
+export const PROFILE_LEAVE_MS = 300;
 export const PROFILE_FETCH_CONCURRENCY = 2;
 export const CACHE_HOURS_MAX = 168;
 /** Soft advisory budget for the settings meter (GM storage has no fixed quota). */

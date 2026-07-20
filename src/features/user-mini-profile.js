@@ -9,6 +9,7 @@ import {
   PROFILE_FETCH_CONCURRENCY,
   PROFILE_HOVER_CLOSE_MS,
   PROFILE_HOVER_OPEN_MS,
+  PROFILE_LEAVE_MS,
 } from '../constants.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
@@ -22,6 +23,8 @@ const POPOVER_ID = 'blp-user-mini-profile';
 let bound = false;
 let openTimer = 0;
 let closeTimer = 0;
+let leaveTimer = 0;
+let leaveHandler = null;
 let activeAnchor = null;
 let activeUsername = '';
 let popoverEl = null;
@@ -82,13 +85,63 @@ function ensurePopover() {
   return popoverEl;
 }
 
-function hidePopover() {
+function finishHidePopover() {
+  window.clearTimeout(leaveTimer);
+  if (popoverEl && leaveHandler) {
+    popoverEl.removeEventListener('transitionend', leaveHandler);
+    leaveHandler = null;
+  }
   if (!popoverEl) return;
-  popoverEl.classList.remove('is-open', 'is-loading');
+  popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready');
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
   activeAnchor = null;
   activeUsername = '';
+}
+
+function hidePopover({ immediate = false } = {}) {
+  if (!popoverEl) return;
+  window.clearTimeout(leaveTimer);
+  if (leaveHandler) {
+    popoverEl.removeEventListener('transitionend', leaveHandler);
+    leaveHandler = null;
+  }
+
+  const wasOpen = popoverEl.classList.contains('is-open');
+  if (immediate || !wasOpen) {
+    finishHidePopover();
+    return;
+  }
+
+  popoverEl.classList.add('is-leaving');
+  popoverEl.classList.remove('is-open', 'is-loading', 'is-ready');
+  popoverEl.setAttribute('aria-hidden', 'true');
+
+  leaveHandler = (e) => {
+    if (e.target !== popoverEl) return;
+    if (e.propertyName !== 'opacity' && e.propertyName !== 'transform') return;
+    finishHidePopover();
+  };
+  popoverEl.addEventListener('transitionend', leaveHandler);
+  leaveTimer = window.setTimeout(finishHidePopover, PROFILE_LEAVE_MS);
+}
+
+function openPopover(el) {
+  window.clearTimeout(leaveTimer);
+  if (leaveHandler) {
+    el.removeEventListener('transitionend', leaveHandler);
+    leaveHandler = null;
+  }
+  el.classList.remove('is-leaving');
+  // Restart enter transition when reopening mid-leave.
+  if (!el.classList.contains('is-open')) {
+    void el.offsetWidth;
+  }
+  el.classList.add('is-open');
+  el.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(() => {
+    el.classList.add('is-ready');
+  });
 }
 
 function positionPopover(anchor) {
@@ -339,37 +392,45 @@ async function showForAnchor(anchor, username) {
   const cached = peekCachedUserProfile(username);
   if (cached) {
     applyTierToUsername(username, tierIdFromProfile(cached));
-    el.classList.add('is-open');
     el.classList.remove('is-loading');
-    el.setAttribute('aria-hidden', 'false');
     el.innerHTML = renderProfile(cached);
+    openPopover(el);
     positionPopover(anchor);
     requestAnimationFrame(() => positionPopover(anchor));
     return;
   }
 
-  el.classList.add('is-open', 'is-loading');
-  el.setAttribute('aria-hidden', 'false');
+  el.classList.add('is-loading');
   el.innerHTML = renderLoading(username);
+  openPopover(el);
   positionPopover(anchor);
 
   const profile = await enqueueFetch(() => fetchUserProfile(username));
   if (seq !== fetchSeq || activeUsername !== username) return;
 
   el.classList.remove('is-loading');
+  el.classList.remove('is-ready');
   if (!profile) {
     el.innerHTML = renderError(username);
   } else {
     applyTierToUsername(username, tierIdFromProfile(profile));
     el.innerHTML = renderProfile(profile);
   }
-  positionPopover(anchor);
-  requestAnimationFrame(() => positionPopover(anchor));
+  // Soft re-enter for content swap.
+  void el.offsetWidth;
+  requestAnimationFrame(() => {
+    el.classList.add('is-ready');
+    positionPopover(anchor);
+  });
 }
 
 function scheduleOpen(anchor, username) {
   window.clearTimeout(closeTimer);
   window.clearTimeout(openTimer);
+  // Cancel an in-progress leave immediately when user re-hovers.
+  if (popoverEl?.classList.contains('is-leaving')) {
+    popoverEl.classList.remove('is-leaving');
+  }
   openTimer = window.setTimeout(() => {
     showForAnchor(anchor, username);
   }, PROFILE_HOVER_OPEN_MS);
@@ -420,7 +481,7 @@ function onPointerOut(e) {
 function onScrollOrResize() {
   if (!popoverEl?.classList.contains('is-open') || !activeAnchor) return;
   if (!document.contains(activeAnchor)) {
-    hidePopover();
+    hidePopover({ immediate: true });
     return;
   }
   positionPopover(activeAnchor);
@@ -428,7 +489,7 @@ function onScrollOrResize() {
 
 export function bindUserMiniProfiles() {
   if (settings.showUserMiniProfile === false) {
-    hidePopover();
+    hidePopover({ immediate: true });
     clearAllAvatarMarks();
     return;
   }
