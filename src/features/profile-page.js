@@ -53,6 +53,17 @@ function clearProfileChrome() {
   });
   document.getElementById('profile-stats')?.classList.remove('blp-profile-stats');
   document.getElementById('profile-nav')?.classList.remove('blp-profile-nav');
+  document.getElementById('profile-nav-row')?.classList.remove('blp-profile-nav-row');
+  const favs = document.getElementById('profile-favorites');
+  if (favs) {
+    favs.classList.remove('blp-profile-favorites');
+    favs.querySelectorAll('.game-cover[data-blp-fav-rank]').forEach((cover) => {
+      cover.removeAttribute('data-blp-fav-rank');
+    });
+  }
+  document.querySelectorAll('.blp-profile-fav-title').forEach((el) => {
+    el.classList.remove('blp-profile-fav-title');
+  });
 }
 
 function ensureTierChip(header, profile, tierId) {
@@ -91,6 +102,30 @@ function ensureTierChip(header, profile, tierId) {
   `;
 }
 
+function decorateFavorites() {
+  const favs = document.getElementById('profile-favorites');
+  if (!favs) return;
+  favs.classList.add('blp-profile-favorites');
+
+  const title =
+    favs.previousElementSibling?.querySelector?.('h2') ||
+    document.getElementById('profile-recent-play');
+  if (title && /favorite/i.test(title.textContent || '')) {
+    title.classList.add('blp-profile-fav-title');
+  }
+
+  [...favs.querySelectorAll('.game-cover')].forEach((cover, i) => {
+    cover.setAttribute('data-blp-fav-rank', String(i + 1));
+  });
+}
+
+function decorateNav() {
+  const nav = document.getElementById('profile-nav');
+  const row = document.getElementById('profile-nav-row');
+  if (nav) nav.classList.add('blp-profile-nav');
+  if (row) row.classList.add('blp-profile-nav-row');
+}
+
 function applyProfileChrome(profile) {
   const header = document.getElementById('profile-header');
   if (!header || !profile) return;
@@ -108,7 +143,8 @@ function applyProfileChrome(profile) {
   ensureTierChip(header, profile, tierId);
 
   document.getElementById('profile-stats')?.classList.add('blp-profile-stats');
-  document.getElementById('profile-nav')?.classList.add('blp-profile-nav');
+  decorateNav();
+  decorateFavorites();
 }
 
 async function resolveProfileForPage() {
