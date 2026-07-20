@@ -15,6 +15,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    sectionAbout: 'About',
+    aboutDescription:
+      'Backloggd Plus is a userscript that enriches Backloggd with Steam data, scores, Deck/Proton, HLTB, GameStatus, cover badges, screenshots, similar games, and quality-of-life tools. It also adds a Backloggd button on Steam and SteamDB app pages.',
+    aboutLicense: 'MIT License',
+    aboutRepo: 'GitHub repository',
+    aboutAuthor: 'Author',
     enhanceHeader: 'Floating header',
     enhanceHeaderHint:
       'Sticky glass navbar that floats over the page and tightens slightly while scrolling.',
@@ -313,6 +319,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Кэш',
     sectionDebug: 'Отладка',
+    sectionAbout: 'О скрипте',
+    aboutDescription:
+      'Backloggd Plus — userscript, который дополняет Backloggd данными Steam, оценками, Deck/Proton, HLTB, GameStatus, бейджами на обложках, скриншотами, похожими играми и удобными инструментами. Также добавляет кнопку Backloggd на страницах игр Steam и SteamDB.',
+    aboutLicense: 'Лицензия MIT',
+    aboutRepo: 'Репозиторий на GitHub',
+    aboutAuthor: 'Автор',
     enhanceHeader: 'Плавающий хедер',
     enhanceHeaderHint:
       'Липкая стеклянная панель навигации поверх страницы; при прокрутке чуть уплотняется.',
@@ -611,6 +623,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: '缓存',
     sectionDebug: '调试',
+    sectionAbout: '关于',
+    aboutDescription:
+      'Backloggd Plus 是一款 userscript，为 Backloggd 补充 Steam 数据、评分、Deck/Proton、HLTB、GameStatus、封面徽章、截图、相似游戏与实用工具，并在 Steam / SteamDB 游戏页加入 Backloggd 按钮。',
+    aboutLicense: 'MIT 许可证',
+    aboutRepo: 'GitHub 仓库',
+    aboutAuthor: '作者',
     enhanceHeader: '浮动顶栏',
     enhanceHeaderHint: '粘性毛玻璃导航栏，随页面滚动略微收紧。',
     hideHomepageFuse: '隐藏 Fuse 广告位',
@@ -899,6 +917,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Caché',
     sectionDebug: 'Depuración',
+    sectionAbout: 'Acerca de',
+    aboutDescription:
+      'Backloggd Plus es un userscript que enriquece Backloggd con datos de Steam, puntuaciones, Deck/Proton, HLTB, GameStatus, insignias en portadas, capturas, juegos similares y herramientas de uso diario. También añade un botón de Backloggd en páginas de Steam y SteamDB.',
+    aboutLicense: 'Licencia MIT',
+    aboutRepo: 'Repositorio en GitHub',
+    aboutAuthor: 'Autor',
     enhanceHeader: 'Cabecera flotante',
     enhanceHeaderHint:
       'Barra de navegación de cristal adhesiva sobre la página; se compacta un poco al desplazarse.',
@@ -1198,6 +1222,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Depuração',
+    sectionAbout: 'Sobre',
+    aboutDescription:
+      'Backloggd Plus é um userscript que enriquece o Backloggd com dados da Steam, notas, Deck/Proton, HLTB, GameStatus, badges nas capas, capturas, jogos semelhantes e ferramentas de QoL. Também adiciona um botão Backloggd nas páginas da Steam e do SteamDB.',
+    aboutLicense: 'Licença MIT',
+    aboutRepo: 'Repositório no GitHub',
+    aboutAuthor: 'Autor',
     enhanceHeader: 'Cabeçalho flutuante',
     enhanceHeaderHint:
       'Barra de navegação em vidro adesiva sobre a página; fica um pouco mais compacta ao rolar.',
@@ -1497,6 +1527,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    sectionAbout: 'Über',
+    aboutDescription:
+      'Backloggd Plus ist ein Userscript, das Backloggd um Steam-Daten, Wertungen, Deck/Proton, HLTB, GameStatus, Cover-Badges, Screenshots, ähnliche Spiele und QoL-Tools ergänzt. Auf Steam- und SteamDB-App-Seiten erscheint zusätzlich ein Backloggd-Button.',
+    aboutLicense: 'MIT-Lizenz',
+    aboutRepo: 'GitHub-Repository',
+    aboutAuthor: 'Autor',
     enhanceHeader: 'Schwebender Header',
     enhanceHeaderHint:
       'Klebende Glas-Navigation über der Seite; wird beim Scrollen etwas kompakter.',
@@ -1796,6 +1832,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Débogage',
+    sectionAbout: 'À propos',
+    aboutDescription:
+      'Backloggd Plus est un userscript qui enrichit Backloggd avec des données Steam, des notes, Deck/Proton, HLTB, GameStatus, des badges de couverture, des captures, des jeux similaires et des outils QoL. Il ajoute aussi un bouton Backloggd sur les pages Steam et SteamDB.',
+    aboutLicense: 'Licence MIT',
+    aboutRepo: 'Dépôt GitHub',
+    aboutAuthor: 'Auteur',
     enhanceHeader: 'En-tête flottant',
     enhanceHeaderHint:
       'Barre de navigation en verre collante au-dessus de la page ; se compacte un peu au défilement.',
@@ -2095,6 +2137,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'キャッシュ',
     sectionDebug: 'デバッグ',
+    sectionAbout: 'このスクリプトについて',
+    aboutDescription:
+      'Backloggd Plus は、Steam データ、スコア、Deck/Proton、HLTB、GameStatus、カバーバッジ、スクリーンショット、類似ゲーム、QoL 機能で Backloggd を拡張する userscript です。Steam / SteamDB のゲームページには Backloggd ボタンも追加します。',
+    aboutLicense: 'MIT ライセンス',
+    aboutRepo: 'GitHub リポジトリ',
+    aboutAuthor: '作者',
     enhanceHeader: 'フローティングヘッダー',
     enhanceHeaderHint:
       'ページ上に浮かぶガラス風の固定ナビ。スクロールすると少しコンパクトになります。',
@@ -2394,6 +2442,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: '캐시',
     sectionDebug: '디버그',
+    sectionAbout: '정보',
+    aboutDescription:
+      'Backloggd Plus는 Steam 데이터, 점수, Deck/Proton, HLTB, GameStatus, 커버 배지, 스크린샷, 유사 게임, QoL 도구로 Backloggd를 확장하는 userscript입니다. Steam / SteamDB 게임 페이지에 Backloggd 버튼도 추가합니다.',
+    aboutLicense: 'MIT 라이선스',
+    aboutRepo: 'GitHub 저장소',
+    aboutAuthor: '제작자',
     enhanceHeader: '플로팅 헤더',
     enhanceHeaderHint:
       '페이지 위에 떠 있는 글래스 스타일 고정 내비. 스크롤 시 조금 더 컴팩트해집니다.',
@@ -2693,6 +2747,12 @@ export const TRANSLATIONS = {
     sectionUi: 'UI',
     sectionCache: 'Cache',
     sectionDebug: 'Debug',
+    sectionAbout: 'O skrypcie',
+    aboutDescription:
+      'Backloggd Plus to userscript, który wzbogaca Backloggd o dane Steam, oceny, Deck/Proton, HLTB, GameStatus, odznaki na okładkach, zrzuty ekranu, podobne gry i narzędzia QoL. Dodaje też przycisk Backloggd na stronach Steam i SteamDB.',
+    aboutLicense: 'Licencja MIT',
+    aboutRepo: 'Repozytorium GitHub',
+    aboutAuthor: 'Autor',
     enhanceHeader: 'Pływający nagłówek',
     enhanceHeaderHint:
       'Przyklejony szklany pasek nawigacji nad stroną; przy przewijaniu lekko się zagęszcza.',

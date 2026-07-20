@@ -8,6 +8,11 @@ import {
   setSteamOverride,
 } from '../cache.js';
 import {
+  AUTHOR_AVATAR_URL,
+  AUTHOR_EMAIL,
+  AUTHOR_HANDLE,
+  AUTHOR_NAME,
+  AUTHOR_URL,
   CACHE_HOURS_MAX,
   DEFAULT_SETTINGS,
   FAVICON_URL,
@@ -32,6 +37,7 @@ const SETTINGS_TABS = [
   { id: 'links', labelKey: 'sectionLinks' },
   { id: 'cache', labelKey: 'sectionCache' },
   { id: 'debug', labelKey: 'sectionDebug' },
+  { id: 'about', labelKey: 'sectionAbout' },
 ];
 
 function switchHtml(attrs, on) {
@@ -98,6 +104,65 @@ function buildTabsHtml(activeId) {
 function panelAttrs(id, activeId) {
   const active = id === activeId;
   return `class="blp-settings__panel${active ? ' is-active' : ''}" id="blp-panel-${escapeAttr(id)}" role="tabpanel" aria-labelledby="blp-tab-${escapeAttr(id)}"${active ? '' : ' hidden'}`;
+}
+
+function buildAboutHtml() {
+  const githubFav = FAVICON_URL.replace('{domain}', 'github.com');
+  return `
+    <div class="blp-about">
+      <div class="blp-settings-list blp-settings-list--stack blp-about__script">
+        <p class="blp-about__desc">${escapeHtml(t.aboutDescription)}</p>
+        <div class="blp-about__meta">
+          <span class="blp-about__chip">v${escapeHtml(SCRIPT_VERSION)}</span>
+          <span class="blp-about__chip">${escapeHtml(t.aboutLicense)}</span>
+        </div>
+        <a
+          class="blp-about__repo"
+          href="${escapeAttr(REPO_URL)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img class="blp-about__repo-icon" src="${escapeAttr(githubFav)}" alt="" width="16" height="16" loading="lazy" decoding="async" />
+          <span class="blp-about__repo-text">
+            <span class="blp-about__repo-label">${escapeHtml(t.aboutRepo)}</span>
+            <span class="blp-about__repo-hint">${escapeHtml(t.repoAbout)}</span>
+          </span>
+        </a>
+      </div>
+      <div class="blp-settings-list blp-settings-list--stack blp-about__author">
+        <p class="blp-about__author-label">${escapeHtml(t.aboutAuthor)}</p>
+        <div class="blp-about__author-row">
+          <a
+            class="blp-about__avatar-link"
+            href="${escapeAttr(AUTHOR_URL)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="${escapeAttr(AUTHOR_NAME)}"
+          >
+            <img
+              class="blp-about__avatar"
+              src="${escapeAttr(AUTHOR_AVATAR_URL)}"
+              alt=""
+              width="56"
+              height="56"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+          <div class="blp-about__author-info">
+            <a
+              class="blp-about__name"
+              href="${escapeAttr(AUTHOR_URL)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >${escapeHtml(AUTHOR_NAME)}</a>
+            <span class="blp-about__handle">@${escapeHtml(AUTHOR_HANDLE)}</span>
+            <a class="blp-about__email" href="mailto:${escapeAttr(AUTHOR_EMAIL)}">${escapeHtml(AUTHOR_EMAIL)}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function syncTabInk(root) {
@@ -285,12 +350,14 @@ export function openSettings() {
         ${listHtml(toggleHtml('debugMode', draft.debugMode, 'debugModeHint'))}
       </section>
       </div>
+      <div ${panelAttrs('about', activeTab)}>
+      <section>
+        <h3>${escapeHtml(t.sectionAbout)}</h3>
+        ${buildAboutHtml()}
+      </section>
+      </div>
       </div>
       <div class="blp-settings__foot">
-        <div class="blp-settings__footer">
-          <a href="${escapeAttr(REPO_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.repoLink)}</a>
-          <span>${escapeHtml(t.repoAbout)}</span>
-        </div>
         <div class="blp-actions">
           <button type="button" data-blp-cancel>${escapeHtml(t.cancel)}</button>
           <button type="button" class="blp-primary" data-blp-save>${escapeHtml(t.saveReload)}</button>
