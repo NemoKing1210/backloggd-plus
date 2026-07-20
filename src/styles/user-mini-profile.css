@@ -1,0 +1,576 @@
+/* User mini-profile hover card (FIFA-style tiers by games played) */
+
+/* Eligible avatar ring — default until tier is known from cache */
+a[data-blp-ump] > img,
+a[data-blp-ump] img {
+  outline: 2px solid rgba(200, 210, 220, 0.42);
+  outline-offset: 2px;
+  border-radius: 6px;
+  transition:
+    outline-color 0.2s ease,
+    outline-width 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+a[data-blp-ump][data-blp-ump-tier='rookie'] img {
+  outline-color: #8b9098;
+  box-shadow: 0 0 0 1px rgba(139, 144, 152, 0.25);
+}
+
+a[data-blp-ump][data-blp-ump-tier='bronze'] img {
+  outline-color: #c8843d;
+  box-shadow: 0 0 8px rgba(200, 132, 61, 0.35);
+}
+
+a[data-blp-ump][data-blp-ump-tier='silver'] img {
+  outline-color: #c5ced8;
+  box-shadow: 0 0 8px rgba(197, 206, 216, 0.4);
+}
+
+a[data-blp-ump][data-blp-ump-tier='gold'] img {
+  outline-color: #e6b735;
+  box-shadow: 0 0 10px rgba(230, 183, 53, 0.45);
+}
+
+a[data-blp-ump][data-blp-ump-tier='platinum'] img {
+  outline-color: #9ad7e8;
+  box-shadow: 0 0 10px rgba(154, 215, 232, 0.45);
+}
+
+a[data-blp-ump][data-blp-ump-tier='diamond'] img {
+  outline-color: #6de0ff;
+  box-shadow: 0 0 12px rgba(109, 224, 255, 0.5);
+}
+
+a[data-blp-ump][data-blp-ump-tier='master'] img {
+  outline-color: #3ecf8e;
+  box-shadow: 0 0 12px rgba(62, 207, 142, 0.5);
+}
+
+a[data-blp-ump][data-blp-ump-tier='legend'] img {
+  outline-color: #ffc14d;
+  box-shadow:
+    0 0 0 1px rgba(255, 193, 77, 0.35),
+    0 0 14px rgba(255, 160, 40, 0.55);
+}
+
+a[data-blp-profile-hover='1'] img {
+  outline-width: 3px;
+  filter: brightness(1.06);
+}
+
+.blp-ump {
+  position: fixed;
+  z-index: 1000005;
+  width: min(304px, calc(100vw - 24px));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
+}
+
+.blp-ump.is-open {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.blp-ump__card {
+  --ump-ink: #f4efe6;
+  --ump-muted: rgba(244, 239, 230, 0.72);
+  --ump-bg0: #1a1714;
+  --ump-bg1: #2a241c;
+  --ump-accent: #9a8b78;
+  --ump-edge: rgba(255, 220, 170, 0.28);
+  --ump-glow: rgba(180, 140, 90, 0.2);
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 14px 14px 12px;
+  color: var(--ump-ink);
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--ump-glow), transparent 55%),
+    linear-gradient(160deg, var(--ump-bg1), var(--ump-bg0) 58%, #0e0c0a);
+  border: 1px solid var(--ump-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+  font-family: Montserrat, Roboto, system-ui, sans-serif;
+}
+
+.blp-ump__card::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 13px;
+  border: 1px solid var(--ump-edge);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.blp-ump__shine,
+.blp-ump__foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.blp-ump__shine {
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.08) 48%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  animation: blp-ump-shine 4.8s ease-in-out infinite;
+}
+
+.blp-ump__foil {
+  opacity: 0;
+  mix-blend-mode: soft-light;
+  background:
+    repeating-linear-gradient(
+      -18deg,
+      rgba(255, 255, 255, 0.05) 0 2px,
+      transparent 2px 7px
+    ),
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.2), transparent 45%);
+}
+
+.blp-ump__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__tier-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #120e0a;
+  background: linear-gradient(180deg, #fff6e8, var(--ump-accent));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+}
+
+.blp-ump__avg {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ump-ink);
+  opacity: 0.9;
+}
+
+.blp-ump__avatar-link {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto;
+  border: 3px solid var(--ump-accent);
+  box-shadow:
+    0 0 0 3px rgba(0, 0, 0, 0.35),
+    0 10px 24px rgba(0, 0, 0, 0.35);
+  background: #111;
+}
+
+.blp-ump__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.blp-ump__avatar--skel {
+  background: linear-gradient(90deg, #2a241c, #3a3228, #2a241c);
+  background-size: 200% 100%;
+  animation: blp-ump-skel 1.2s linear infinite;
+}
+
+.blp-ump__name {
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--ump-ink);
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+  line-height: 1.2;
+}
+
+.blp-ump__name:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+.blp-ump__tier-sub {
+  text-align: center;
+  font-size: 11px;
+  color: var(--ump-muted);
+  margin: 4px 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__status {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ump-muted);
+  margin: 8px 0 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__stat {
+  text-align: center;
+  padding: 7px 4px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.blp-ump__stat strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.blp-ump__stat span {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ump-muted);
+  line-height: 1.2;
+}
+
+.blp-ump__ratings {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 36px;
+  margin: 0 2px 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__bar {
+  flex: 1;
+  height: var(--h, 10%);
+  min-height: 4px;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(180deg, #fff, var(--ump-accent));
+  opacity: 0.9;
+}
+
+.blp-ump__bio {
+  margin: 0 0 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ump-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__section {
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.blp-ump__section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ump-muted);
+  margin-bottom: 6px;
+}
+
+.blp-ump__covers {
+  --ump-slots: 5;
+  --ump-gap: 5px;
+  display: flex;
+  gap: var(--ump-gap);
+}
+
+.blp-ump__cover {
+  flex: 0 0 calc((100% - (var(--ump-slots) - 1) * var(--ump-gap)) / var(--ump-slots));
+  width: calc((100% - (var(--ump-slots) - 1) * var(--ump-gap)) / var(--ump-slots));
+  max-width: calc((100% - (var(--ump-slots) - 1) * var(--ump-gap)) / var(--ump-slots));
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0a0908;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.blp-ump__cover:hover {
+  transform: translateY(-2px);
+  border-color: var(--ump-accent);
+}
+
+.blp-ump__cover img,
+.blp-ump__cover-ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.blp-ump__cover-ph {
+  background: #2a241c;
+}
+
+.blp-ump__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.blp-ump__badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blp-ump__badge img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.blp-ump__cta {
+  display: block;
+  text-align: center;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #120e0a;
+  background: linear-gradient(180deg, #fff4e4, var(--ump-accent));
+  position: relative;
+  z-index: 1;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.blp-ump__cta:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  color: #120e0a;
+  text-decoration: none;
+}
+
+/* —— Tier skins —— */
+.blp-ump__card--rookie {
+  --ump-accent: #8b9098;
+  --ump-bg0: #15171a;
+  --ump-bg1: #23262b;
+  --ump-edge: rgba(180, 190, 200, 0.22);
+  --ump-glow: rgba(140, 150, 160, 0.16);
+}
+
+.blp-ump__card--bronze {
+  --ump-accent: #c8843d;
+  --ump-bg0: #1a120c;
+  --ump-bg1: #3a2414;
+  --ump-edge: rgba(210, 140, 70, 0.4);
+  --ump-glow: rgba(200, 120, 50, 0.28);
+}
+
+.blp-ump__card--silver {
+  --ump-accent: #c5ced8;
+  --ump-bg0: #12151a;
+  --ump-bg1: #2a313a;
+  --ump-edge: rgba(210, 220, 230, 0.38);
+  --ump-glow: rgba(190, 205, 220, 0.24);
+  --ump-ink: #f2f5f8;
+}
+
+.blp-ump__card--gold {
+  --ump-accent: #e6b735;
+  --ump-bg0: #1a1406;
+  --ump-bg1: #3d2e0a;
+  --ump-edge: rgba(240, 190, 60, 0.48);
+  --ump-glow: rgba(230, 180, 40, 0.32);
+}
+
+.blp-ump__card--gold .blp-ump__foil {
+  opacity: 0.35;
+}
+
+.blp-ump__card--platinum {
+  --ump-accent: #9ad7e8;
+  --ump-bg0: #0c1418;
+  --ump-bg1: #1b2c34;
+  --ump-edge: rgba(160, 220, 235, 0.45);
+  --ump-glow: rgba(120, 200, 220, 0.28);
+  --ump-ink: #eef8fb;
+}
+
+.blp-ump__card--platinum .blp-ump__foil {
+  opacity: 0.42;
+}
+
+.blp-ump__card--diamond {
+  --ump-accent: #6de0ff;
+  --ump-bg0: #071018;
+  --ump-bg1: #123044;
+  --ump-edge: rgba(110, 220, 255, 0.5);
+  --ump-glow: rgba(80, 200, 255, 0.34);
+  --ump-ink: #eaf9ff;
+}
+
+.blp-ump__card--diamond .blp-ump__foil {
+  opacity: 0.5;
+  background:
+    conic-gradient(from 120deg, rgba(255, 255, 255, 0.15), transparent 30%, rgba(120, 220, 255, 0.2), transparent 70%),
+    repeating-linear-gradient(-18deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 7px);
+}
+
+.blp-ump__card--master {
+  --ump-accent: #3ecf8e;
+  --ump-bg0: #07140f;
+  --ump-bg1: #123528;
+  --ump-edge: rgba(70, 220, 150, 0.48);
+  --ump-glow: rgba(50, 200, 130, 0.32);
+  --ump-ink: #eafff4;
+}
+
+.blp-ump__card--master .blp-ump__foil {
+  opacity: 0.45;
+}
+
+.blp-ump__card--legend {
+  --ump-accent: #ffc14d;
+  --ump-bg0: #100a05;
+  --ump-bg1: #2a1808;
+  --ump-edge: rgba(255, 190, 70, 0.55);
+  --ump-glow: rgba(255, 160, 40, 0.36);
+}
+
+.blp-ump__card--legend .blp-ump__foil {
+  opacity: 0.55;
+  animation: blp-ump-foil 6s linear infinite;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(255, 80, 80, 0.18),
+      rgba(255, 200, 60, 0.22),
+      rgba(80, 220, 160, 0.18),
+      rgba(80, 160, 255, 0.2),
+      rgba(255, 80, 80, 0.18)
+    );
+  background-size: 220% 220%;
+}
+
+.blp-ump__card--legend .blp-ump__tier-pill {
+  background: linear-gradient(90deg, #ffb347, #ffd76a, #ffe9a8, #ffb347);
+  background-size: 200% 100%;
+  animation: blp-ump-legend-pill 2.8s linear infinite;
+}
+
+.blp-ump__card.is-skeleton .blp-ump__name {
+  opacity: 0.7;
+}
+
+@keyframes blp-ump-shine {
+  0%,
+  55% {
+    transform: translateX(-120%);
+  }
+  75%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes blp-ump-foil {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes blp-ump-legend-pill {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes blp-ump-skel {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blp-ump,
+  .blp-ump__shine,
+  .blp-ump__foil,
+  .blp-ump__card--legend .blp-ump__tier-pill,
+  .blp-ump__cover,
+  .blp-ump__cta {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .blp-ump__shine,
+  .blp-ump__foil {
+    opacity: 0.15;
+    transform: none;
+  }
+}

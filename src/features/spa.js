@@ -13,6 +13,7 @@ import { applyHomepageFuseVisibility } from './homepage.js';
 import { applyFloatingHeader } from './header.js';
 import { bindFixMatchClicks, ensureNavSettingsButton } from './settings-panel.js';
 import { bindLogEditorExportObserver, ensureLogEditorExportMount } from './export-game.js';
+import { scheduleUserMiniProfiles } from './user-mini-profile.js';
 
 export function scanPage() {
   ensureNavSettingsButton();
@@ -23,6 +24,7 @@ export function scanPage() {
   applyFloatingHeader();
   enrichGamePage();
   scheduleCardBadges();
+  scheduleUserMiniProfiles();
 }
 
 export function isBlpManagedElement(el) {
@@ -57,13 +59,15 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-game-id') ||
     el.classList?.contains('blp-toast-host') ||
     el.classList?.contains('blp-toast') ||
-    el.id === 'blp-toast-host'
+    el.classList?.contains('blp-ump') ||
+    el.id === 'blp-toast-host' ||
+    el.id === 'blp-user-mini-profile'
   ) {
     return true;
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump`
     )
   );
 }

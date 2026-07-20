@@ -69,6 +69,8 @@ export default defineConfig({
           'https://steamdb.info/app/*',
         ],
         connect: [
+          'www.backloggd.com',
+          'backloggd.com',
           'store.steampowered.com',
           'api.steampowered.com',
           'steamdb.info',

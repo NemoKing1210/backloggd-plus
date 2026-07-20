@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.71] - 2026-07-20
+
+### Added
+
+- Hover mini-profile cards on user avatars (reviews, lists, activity): stats, rating bars, favorites, recent games, badges
+- FIFA-style card tiers by Games Played: Rookie → Bronze (25+) → Silver (50+) → Gold (100+) → Platinum (200+) → Diamond (300+) → Master (500+) → Legend (1000+)
+- Settings → UI toggle **User mini-profile cards** (on by default)
+
 ## [0.7.70] - 2026-07-20
 
 ### Added

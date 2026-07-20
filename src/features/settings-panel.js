@@ -272,7 +272,12 @@ export function openSettings() {
         <h3>${escapeHtml(t.sectionUi)}</h3>
         ${listHtml(
           toggleHtml('enhanceHeader', draft.enhanceHeader === true, 'enhanceHeaderHint'),
-          toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint')
+          toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint'),
+          toggleHtml(
+            'showUserMiniProfile',
+            draft.showUserMiniProfile !== false,
+            'showUserMiniProfileHint'
+          )
         )}
       </section>
       </div>

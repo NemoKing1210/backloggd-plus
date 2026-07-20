@@ -26,6 +26,20 @@ export const CARD_CONCURRENCY = 3;
 export const CARD_ROOT_MARGIN = '240px 0px';
 export const CARD_SKIP_ANCESTOR =
   '#game-profile, #game-body, #logging-sidebar-section, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop';
+/** FIFA-style mini-profile card tiers by Games Played count. */
+export const PROFILE_CARD_TIERS = [
+  { id: 'rookie', min: 0 },
+  { id: 'bronze', min: 25 },
+  { id: 'silver', min: 50 },
+  { id: 'gold', min: 100 },
+  { id: 'platinum', min: 200 },
+  { id: 'diamond', min: 300 },
+  { id: 'master', min: 500 },
+  { id: 'legend', min: 1000 },
+];
+export const PROFILE_HOVER_OPEN_MS = 320;
+export const PROFILE_HOVER_CLOSE_MS = 220;
+export const PROFILE_FETCH_CONCURRENCY = 2;
 export const CACHE_HOURS_MAX = 168;
 /** Soft advisory budget for the settings meter (GM storage has no fixed quota). */
 export const CACHE_SOFT_LIMIT_BYTES = 5 * 1024 * 1024;
@@ -128,6 +142,7 @@ export const DEFAULT_SETTINGS = {
   showGameId: false,
   hideHomepageFuse: false,
   enhanceHeader: false,
+  showUserMiniProfile: true,
   debugMode: false,
   links: {
     igdb: true,
