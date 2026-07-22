@@ -52,7 +52,7 @@ export default {
     '페이지 위에 떠 있는 글래스 스타일 고정 내비. 스크롤 시 조금 더 컴팩트해집니다.',
   hideHomepageFuse: 'Fuse 광고 슬롯 숨기기',
   hideHomepageFuseHint:
-    '홈페이지의 빈 Fuse / incontent 광고 행을 숨깁니다(예: data-fuse="…_homepage").',
+    '빈 Fuse / incontent 광고 행을 숨깁니다(홈, 게임 리뷰 등).',
   showUserMiniProfile: '사용자 미니 프로필',
   showUserMiniProfileHint:
     '아바타에 마우스를 올리면 요약 미니 카드를 표시합니다. 플레이 수에 따라 티어가 올라갑니다(25+ 브론즈 … 1000+ 레전드).',

@@ -52,7 +52,7 @@ export default {
     'Sticky glass navbar that floats over the page and tightens slightly while scrolling.',
   hideHomepageFuse: 'Hide Fuse ad slots',
   hideHomepageFuseHint:
-    'Hides empty Fuse / incontent ad rows on the homepage (e.g. data-fuse="…_homepage").',
+    'Hides empty Fuse / incontent ad rows (homepage, game reviews, etc.).',
   showUserMiniProfile: 'User mini-profile cards',
   showUserMiniProfileHint:
     'Brief mini profile on avatar hover. Tier grows with games played (25+ bronze … 1000+ legend).',

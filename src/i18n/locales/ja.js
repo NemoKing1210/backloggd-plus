@@ -52,7 +52,7 @@ export default {
     'ページ上に浮かぶガラス風の固定ナビ。スクロールすると少しコンパクトになります。',
   hideHomepageFuse: 'Fuse広告枠を非表示',
   hideHomepageFuseHint:
-    'ホームページの空の Fuse / incontent 広告行を非表示にします（例: data-fuse="…_homepage"）。',
+    '空の Fuse / incontent 広告行を非表示にします（ホーム、ゲームレビューなど）。',
   showUserMiniProfile: 'ユーザーミニプロフィール',
   showUserMiniProfileHint:
     'アバターにホバーすると簡易カードを表示。プレイ数が増えるほどティアが上がります（25+ ブロンズ … 1000+ レジェンド）。',

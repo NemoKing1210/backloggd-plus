@@ -52,7 +52,7 @@ export default {
     'Barra de navegação em vidro adesiva sobre a página; fica um pouco mais compacta ao rolar.',
   hideHomepageFuse: 'Ocultar espaços de anúncio Fuse',
   hideHomepageFuseHint:
-    'Oculta linhas vazias Fuse / incontent na página inicial (ex.: data-fuse="…_homepage").',
+    'Oculta linhas vazias Fuse / incontent (página inicial, análises do jogo, etc.).',
   showUserMiniProfile: 'Mini perfil do usuário',
   showUserMiniProfileHint:
     'Mostra um card com informações resumidas ao passar o mouse sobre avatares. O nível sobe com jogos jogados (25+ bronze … 1000+ lenda).',

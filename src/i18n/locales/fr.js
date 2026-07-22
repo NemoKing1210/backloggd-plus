@@ -52,7 +52,7 @@ export default {
     'Barre de navigation en verre collante au-dessus de la page ; se compacte un peu au défilement.',
   hideHomepageFuse: 'Masquer les emplacements pub Fuse',
   hideHomepageFuseHint:
-    'Masque les rangées Fuse / incontent vides sur la page d’accueil (ex. data-fuse="…_homepage").',
+    'Masque les rangées Fuse / incontent vides (accueil, avis de jeu, etc.).',
   showUserMiniProfile: 'Mini-profil utilisateur',
   showUserMiniProfileHint:
     'Carte avec un aperçu au survol des avatars. Le palier monte avec les jeux joués (25+ bronze … 1000+ légende).',

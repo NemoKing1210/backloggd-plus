@@ -52,7 +52,7 @@ export default {
     'Klebende Glas-Navigation über der Seite; wird beim Scrollen etwas kompakter.',
   hideHomepageFuse: 'Fuse-Werbeplätze ausblenden',
   hideHomepageFuseHint:
-    'Blendet leere Fuse-/incontent-Werbezeilen auf der Startseite aus (z. B. data-fuse="…_homepage").',
+    'Blendet leere Fuse-/incontent-Werbezeilen aus (Startseite, Spielrezensionen usw.).',
   showUserMiniProfile: 'Mini-Profilkarten',
   showUserMiniProfileHint:
     'Minikarte mit Kurzinfos beim Hover über Avatare. Stufe steigt mit gespielten Spielen (25+ Bronze … 1000+ Legende).',

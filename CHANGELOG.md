@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.78] - 2026-07-22
+
+### Changed
+
+- Settings → UI **Hide Fuse ad slots**: also hides game-page incontent / review Fuse rows (not only homepage)
+- Auto-translate reviews no longer expands collapsed review bodies (manual Translate still does)
+
+### Fixed
+
+- Hide Fuse no longer collapses the whole `#game-profile` layout (only dedicated ad rows)
+
 ## [0.7.77] - 2026-07-22
 
 ### Added

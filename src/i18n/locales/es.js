@@ -52,7 +52,7 @@ export default {
     'Barra de navegación de cristal adhesiva sobre la página; se compacta un poco al desplazarse.',
   hideHomepageFuse: 'Ocultar espacios publicitarios Fuse',
   hideHomepageFuseHint:
-    'Oculta filas vacías de Fuse / incontent en la página de inicio (p. ej. data-fuse="…_homepage").',
+    'Oculta filas vacías de Fuse / incontent (inicio, reseñas del juego, etc.).',
   showUserMiniProfile: 'Mini perfil de usuario',
   showUserMiniProfileHint:
     'Muestra una carta con información breve al pasar el cursor sobre avatares. El nivel sube con juegos jugados (25+ bronce … 1000+ leyenda).',

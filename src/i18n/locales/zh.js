@@ -47,7 +47,7 @@ export default {
   enhanceHeader: '浮动顶栏',
   enhanceHeaderHint: '粘性毛玻璃导航栏，随页面滚动略微收紧。',
   hideHomepageFuse: '隐藏 Fuse 广告位',
-  hideHomepageFuseHint: '隐藏首页空的 Fuse / incontent 广告行（如 data-fuse="…_homepage"）。',
+  hideHomepageFuseHint: '隐藏空的 Fuse / incontent 广告行（首页、游戏评论区等）。',
   showUserMiniProfile: '用户迷你资料卡',
   showUserMiniProfileHint:
     '悬停头像时显示简明资料。等级随游玩数量提升（25+ 青铜 … 1000+ 传奇）。',

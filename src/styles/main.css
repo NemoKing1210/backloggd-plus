@@ -2,8 +2,13 @@ turbo-frame#game-stats[data-blp-hide-game-stats="1"] {
   display: none !important;
 }
 
-html[data-blp-hide-homepage-fuse="1"] .min-fuse-height[data-fuse*="homepage"],
-html[data-blp-hide-homepage-fuse="1"] .row:has(.min-fuse-height[data-fuse*="homepage"]) {
+/* Only hide dedicated ad rows (col → fuse), not ancestor layout rows. */
+html[data-blp-hide-homepage-fuse="1"] .fuse-unit,
+html[data-blp-hide-homepage-fuse="1"] .min-fuse-height[data-fuse],
+html[data-blp-hide-homepage-fuse="1"] .row:has(> .col > .fuse-unit),
+html[data-blp-hide-homepage-fuse="1"] .row:has(> .col > .min-fuse-height[data-fuse]),
+html[data-blp-hide-homepage-fuse="1"] .row.d-sm-flex:has(> .col > [data-fuse]),
+html[data-blp-hide-homepage-fuse="1"] .row.d-none:has(> .col > [data-fuse]) {
   display: none !important;
 }
 

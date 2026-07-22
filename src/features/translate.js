@@ -307,13 +307,13 @@ function mountBelowResult(textEl, host, translatedHtml, isReview) {
 /**
  * @returns {Promise<'ok' | 'same' | 'error' | 'skip'>}
  */
-async function applyTranslation({ textEl, host, card, btn, isReview }) {
+async function applyTranslation({ textEl, host, card, btn, isReview, expand = true }) {
   if (!textEl) return 'skip';
   if (btn?.getAttribute(STATE_ATTR) === 'translated') return 'skip';
   if (textEl.hasAttribute(ORIG_ATTR) && displayMode() === 'replace') return 'skip';
   if (isReview && card?.querySelector?.(`.${RESULT_CLASS}`)) return 'skip';
 
-  if (isReview) expandCollapsedReview(textEl, card);
+  if (isReview && expand) expandCollapsedReview(textEl, card);
 
   const sourceHtml =
     textEl.hasAttribute(ORIG_ATTR) ? textEl.getAttribute(ORIG_ATTR) : textEl.innerHTML;
@@ -341,7 +341,7 @@ async function applyTranslation({ textEl, host, card, btn, isReview }) {
 
   const translatedHtml = plainToHtml(result.text);
   const mode = displayMode();
-  if (isReview) expandCollapsedReview(textEl, card);
+  if (isReview && expand) expandCollapsedReview(textEl, card);
 
   if (mode === 'below') {
     mountBelowResult(textEl, host, translatedHtml, isReview);
@@ -356,7 +356,7 @@ async function applyTranslation({ textEl, host, card, btn, isReview }) {
     textEl.setAttribute(ORIG_ATTR, sourceHtml);
   }
   textEl.innerHTML = translatedHtml;
-  if (isReview) expandCollapsedReview(textEl, card);
+  if (isReview && expand) expandCollapsedReview(textEl, card);
   if (btn) {
     btn.setAttribute(STATE_ATTR, 'translated');
     setButtonLabel(btn, 'original');
@@ -431,6 +431,7 @@ function pumpAutoQueue() {
           card,
           btn,
           isReview: true,
+          expand: false,
         })
       )
       .then((status) => {

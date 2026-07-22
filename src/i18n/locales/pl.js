@@ -52,7 +52,7 @@ export default {
     'Przyklejony szklany pasek nawigacji nad stroną; przy przewijaniu lekko się zagęszcza.',
   hideHomepageFuse: 'Ukryj sloty reklamowe Fuse',
   hideHomepageFuseHint:
-    'Ukrywa puste wiersze Fuse / incontent na stronie głównej (np. data-fuse="…_homepage").',
+    'Ukrywa puste wiersze Fuse / incontent (strona główna, recenzje gry itd.).',
   showUserMiniProfile: 'Mini profil użytkownika',
   showUserMiniProfileHint:
     'Karta z krótkimi informacjami po najechaniu na awatar. Poziom rośnie wraz z liczbą gier (25+ brąz … 1000+ legenda).',
