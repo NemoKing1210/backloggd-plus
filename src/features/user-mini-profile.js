@@ -20,6 +20,8 @@ const HOVER_ATTR = 'data-blp-profile-hover';
 const MARK_ATTR = 'data-blp-ump';
 const TIER_ATTR = 'data-blp-ump-tier';
 const PRELOAD_ATTR = 'data-blp-ump-preload';
+const LOADING_ATTR = 'data-blp-ump-loading';
+const AVATAR_SPIN_CLASS = 'blp-ump-avatar-spin';
 const POPOVER_ID = 'blp-user-mini-profile';
 
 let bound = false;
@@ -35,6 +37,10 @@ let inFlightFetches = 0;
 const fetchQueue = [];
 let preloadObserver = null;
 const preloadQueued = new Set();
+/** Lowercase usernames with an in-flight profile fetch (spinner on page avatars). */
+const loadingUsernames = new Set();
+/** Shared fetch promises keyed by lowercase username. */
+const profileFetches = new Map();
 
 function tierLabel(tierId) {
   const map = {
@@ -227,7 +233,9 @@ function renderLoading(username) {
         ${skelBone('blp-ump__bone--pill')}
         ${skelBone('blp-ump__bone--avg')}
       </div>
-      <div class="blp-ump__avatar blp-ump__avatar--skel" aria-hidden="true"></div>
+      <div class="blp-ump__avatar blp-ump__avatar--skel" aria-hidden="true">
+        <span class="blp-ump__spinner blp-ump__spinner--avatar" aria-hidden="true"></span>
+      </div>
       <div class="blp-ump__name blp-ump__name--skel">${escapeHtml(username)}</div>
       ${skelBone('blp-ump__bone--sub')}
       <div class="blp-ump__stats" aria-hidden="true">
@@ -244,10 +252,7 @@ function renderLoading(username) {
           ${Array.from({ length: 5 }, (_, i) => `<span class="blp-ump__cover blp-ump__cover--skel" style="--d:${0.12 + i * 0.06}s"></span>`).join('')}
         </div>
       </div>
-      <div class="blp-ump__status">
-        <span class="blp-ump__spinner" aria-hidden="true"></span>
-        ${escapeHtml(t.miniProfileLoading)}
-      </div>
+      <div class="blp-ump__status">${escapeHtml(t.miniProfileLoading)}</div>
     </div>
   `;
 }
@@ -317,8 +322,92 @@ function renderProfile(profile) {
   `;
 }
 
+function avatarSpinHost(anchor) {
+  return (
+    anchor.querySelector('.overflow-wrapper') ||
+    anchor.querySelector('img')?.parentElement ||
+    anchor
+  );
+}
+
+function setAvatarLoading(anchor, on) {
+  if (!anchor?.setAttribute) return;
+  const host = avatarSpinHost(anchor);
+  if (on) {
+    anchor.setAttribute(LOADING_ATTR, '1');
+    if (!host.querySelector(`.${AVATAR_SPIN_CLASS}`)) {
+      const spin = document.createElement('span');
+      spin.className = AVATAR_SPIN_CLASS;
+      spin.setAttribute('aria-hidden', 'true');
+      host.appendChild(spin);
+    }
+    return;
+  }
+  anchor.removeAttribute(LOADING_ATTR);
+  host.querySelector(`.${AVATAR_SPIN_CLASS}`)?.remove();
+  // Also clear a spin left on the anchor from an earlier host choice.
+  if (host !== anchor) anchor.querySelector(`.${AVATAR_SPIN_CLASS}`)?.remove();
+}
+
+function applyLoadingToUsername(username, on) {
+  const want = String(username || '').toLowerCase();
+  if (!want) return;
+  document.querySelectorAll(`a[${MARK_ATTR}]`).forEach((anchor) => {
+    const name = parseUsernameFromHref(anchor.getAttribute('href') || anchor.href);
+    if (name.toLowerCase() === want) setAvatarLoading(anchor, on);
+  });
+}
+
+function setUsernameLoading(username, on) {
+  const key = String(username || '')
+    .trim()
+    .toLowerCase();
+  if (!key) return;
+  if (on) {
+    if (loadingUsernames.has(key)) {
+      applyLoadingToUsername(username, true);
+      return;
+    }
+    loadingUsernames.add(key);
+    applyLoadingToUsername(username, true);
+    return;
+  }
+  if (!loadingUsernames.has(key)) return;
+  loadingUsernames.delete(key);
+  applyLoadingToUsername(username, false);
+}
+
+function ensureProfileFetch(username) {
+  const name = String(username || '').trim();
+  if (!name) return Promise.resolve(null);
+  const key = name.toLowerCase();
+  const cached = peekCachedUserProfile(name);
+  if (cached) {
+    setUsernameLoading(name, false);
+    return Promise.resolve(cached);
+  }
+  let pending = profileFetches.get(key);
+  if (pending) {
+    setUsernameLoading(name, true);
+    return pending;
+  }
+  setUsernameLoading(name, true);
+  pending = enqueueFetch(() => fetchUserProfile(name))
+    .then((profile) => {
+      if (profile) applyTierToUsername(name, tierIdFromProfile(profile));
+      return profile;
+    })
+    .finally(() => {
+      profileFetches.delete(key);
+      setUsernameLoading(name, false);
+    });
+  profileFetches.set(key, pending);
+  return pending;
+}
+
 function clearAvatarMark(anchor) {
   if (!anchor?.removeAttribute) return;
+  setAvatarLoading(anchor, false);
   anchor.removeAttribute(MARK_ATTR);
   anchor.removeAttribute(TIER_ATTR);
   anchor.removeAttribute(HOVER_ATTR);
@@ -354,8 +443,12 @@ function markAvatarAnchor(anchor) {
   const cached = peekCachedUserProfile(username);
   if (cached) {
     anchor.setAttribute(TIER_ATTR, tierIdFromProfile(cached));
+    setAvatarLoading(anchor, false);
   } else if (!anchor.hasAttribute(TIER_ATTR)) {
     // leave unmarked tier → default outline
+  }
+  if (loadingUsernames.has(username.toLowerCase())) {
+    setAvatarLoading(anchor, true);
   }
   return { anchor, username };
 }
@@ -372,8 +465,12 @@ function applyTierToUsername(username, tierId) {
 }
 
 function clearAllAvatarMarks() {
+  loadingUsernames.clear();
+  profileFetches.clear();
   document
-    .querySelectorAll(`a[${MARK_ATTR}], a[${TIER_ATTR}], a[${HOVER_ATTR}], a[${PRELOAD_ATTR}]`)
+    .querySelectorAll(
+      `a[${MARK_ATTR}], a[${TIER_ATTR}], a[${HOVER_ATTR}], a[${PRELOAD_ATTR}], a[${LOADING_ATTR}]`
+    )
     .forEach(clearAvatarMark);
 }
 
@@ -388,9 +485,7 @@ function preloadUsername(username) {
   const key = name.toLowerCase();
   if (peekCachedUserProfile(name) || preloadQueued.has(key)) return;
   preloadQueued.add(key);
-  enqueueFetch(() => fetchUserProfile(name)).then((profile) => {
-    if (profile) applyTierToUsername(name, tierIdFromProfile(profile));
-  });
+  ensureProfileFetch(name);
 }
 
 function ensurePreloadObserver() {
@@ -469,7 +564,7 @@ async function showForAnchor(anchor, username) {
   openPopover(el);
   positionPopover(anchor);
 
-  const profile = await enqueueFetch(() => fetchUserProfile(username));
+  const profile = await ensureProfileFetch(username);
   if (seq !== fetchSeq || activeUsername !== username) return;
 
   el.classList.remove('is-loading');
@@ -477,7 +572,6 @@ async function showForAnchor(anchor, username) {
   if (!profile) {
     el.innerHTML = renderError(username);
   } else {
-    applyTierToUsername(username, tierIdFromProfile(profile));
     el.innerHTML = renderProfile(profile);
   }
   // Soft re-enter for content swap.
@@ -525,6 +619,11 @@ function onPointerOver(e) {
   const hit = resolveAvatarAnchor(e.target);
   if (!hit) return;
   markAvatarAnchor(hit.anchor);
+  // Start fetch immediately so the avatar spinner shows even before the card opens,
+  // and keeps spinning if the pointer leaves mid-load.
+  if (!peekCachedUserProfile(hit.username)) {
+    ensureProfileFetch(hit.username);
+  }
   if (hit.anchor === activeAnchor && popoverEl?.classList.contains('is-open')) {
     window.clearTimeout(closeTimer);
     return;

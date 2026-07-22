@@ -66,6 +66,7 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-toast-host') ||
     el.classList?.contains('blp-toast') ||
     el.classList?.contains('blp-ump') ||
+    el.classList?.contains('blp-ump-avatar-spin') ||
     el.classList?.contains('blp-profile-tier-chip') ||
     el.classList?.contains('blp-translate-btn') ||
     el.classList?.contains('blp-translate-result') ||
@@ -78,7 +79,7 @@ export function isBlpManagedElement(el) {
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], [data-blp-translate], .blp-translate-btn, .blp-translate-result, .blp-translate-desc-slot, .blp-translate-review-slot, #blp-nav-settings, #blp-profile-menu-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-profile-tier-chip`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], [data-blp-translate], .blp-translate-btn, .blp-translate-result, .blp-translate-desc-slot, .blp-translate-review-slot, #blp-nav-settings, #blp-profile-menu-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-ump-avatar-spin, .blp-profile-tier-chip`
     )
   );
 }

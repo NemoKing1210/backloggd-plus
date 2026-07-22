@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.79] - 2026-07-22
+
+### Added
+
+- Spinner on page avatars while a mini-profile loads (starts on hover/preload, stays until fetch finishes even if the pointer leaves; same accent ring as Translate)
+
 ## [0.7.78] - 2026-07-22
 
 ### Changed
