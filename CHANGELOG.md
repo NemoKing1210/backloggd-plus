@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.77] - 2026-07-22
+
+### Added
+
+- Settings → **User profile**: dedicated tab for mini-profile hover cards and profile-page chrome
+- Per-block toggles for profile page styling: header & avatar, tier chip, stats, navigation, favorites
+
+### Changed
+
+- **User mini-profile cards** moved from General → User profile (hover cards only; profile-page styling is separate)
+
 ## [0.7.76] - 2026-07-22
 
 ### Changed

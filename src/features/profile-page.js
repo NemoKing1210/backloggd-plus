@@ -19,6 +19,34 @@ const AVATAR_CLASS = 'blp-profile-avatar';
 
 let applySeq = 0;
 
+function profilePageEnabled() {
+  return settings.showProfilePage !== false;
+}
+
+function wantHeader() {
+  return profilePageEnabled() && settings.showProfileHeader !== false;
+}
+
+function wantTierChip() {
+  return profilePageEnabled() && settings.showProfileTierChip !== false;
+}
+
+function wantStats() {
+  return profilePageEnabled() && settings.showProfileStats !== false;
+}
+
+function wantNav() {
+  return profilePageEnabled() && settings.showProfileNav !== false;
+}
+
+function wantFavorites() {
+  return profilePageEnabled() && settings.showProfileFavorites !== false;
+}
+
+function anyProfileChromeEnabled() {
+  return wantHeader() || wantTierChip() || wantStats() || wantNav() || wantFavorites();
+}
+
 function tierLabel(tierId) {
   const map = {
     rookie: t.miniProfileTierRookie,
@@ -133,18 +161,22 @@ function applyProfileChrome(profile) {
   const tierId = tierIdFromProfile(profile);
   clearProfileChrome();
 
+  if (!anyProfileChromeEnabled()) return;
+
+  // Root tier tokens feed CSS vars used by stats / nav / favorites even without header wash.
   document.documentElement.setAttribute(ROOT_ATTR, tierId);
-  header.setAttribute(ROOT_ATTR, tierId);
-  header.classList.add('blp-profile-header');
 
-  const avatar = header.querySelector('.avatar');
-  if (avatar) avatar.classList.add(AVATAR_CLASS);
+  if (wantHeader()) {
+    header.setAttribute(ROOT_ATTR, tierId);
+    header.classList.add('blp-profile-header');
+    const avatar = header.querySelector('.avatar');
+    if (avatar) avatar.classList.add(AVATAR_CLASS);
+  }
 
-  ensureTierChip(header, profile, tierId);
-
-  document.getElementById('profile-stats')?.classList.add('blp-profile-stats');
-  decorateNav();
-  decorateFavorites();
+  if (wantTierChip()) ensureTierChip(header, profile, tierId);
+  if (wantStats()) document.getElementById('profile-stats')?.classList.add('blp-profile-stats');
+  if (wantNav()) decorateNav();
+  if (wantFavorites()) decorateFavorites();
 }
 
 async function resolveProfileForPage() {
@@ -177,7 +209,7 @@ async function resolveProfileForPage() {
 }
 
 export async function enhanceProfilePage() {
-  if (settings.showUserMiniProfile === false) {
+  if (!anyProfileChromeEnabled()) {
     clearProfileChrome();
     return;
   }

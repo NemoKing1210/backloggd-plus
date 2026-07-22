@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.76-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.77-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -112,8 +112,9 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](DEVELOPMENT.md#r
 
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
-- Tabbed panel: General · UI · Game page · Lists · Translation · Links · Cache · Debug · About
+- Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
 - Interface language (Auto or fixed locale)
+- User profile: mini-profile hover cards; profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump

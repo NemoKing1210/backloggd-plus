@@ -4,6 +4,26 @@ import {
 } from '$';
 import { DEFAULT_SETTINGS, SETTINGS_KEY } from './constants.js';
 
+/** Keys that used to ride on showUserMiniProfile before the Profile settings tab. */
+const PROFILE_PAGE_SETTING_KEYS = [
+  'showProfilePage',
+  'showProfileHeader',
+  'showProfileTierChip',
+  'showProfileStats',
+  'showProfileNav',
+  'showProfileFavorites',
+];
+
+function migrateProfilePageSettings(raw, merged) {
+  // Old combined toggle: mini-profile off meant no profile-page chrome either.
+  if (!('showProfilePage' in raw) && raw.showUserMiniProfile === false) {
+    for (const key of PROFILE_PAGE_SETTING_KEYS) {
+      merged[key] = false;
+    }
+  }
+  return merged;
+}
+
 export function loadSettings() {
   try {
     const raw = GM_getValue(SETTINGS_KEY, null);
@@ -13,11 +33,12 @@ export function loadSettings() {
         links: { ...DEFAULT_SETTINGS.links },
       };
     }
-    return {
+    const merged = {
       ...DEFAULT_SETTINGS,
       ...raw,
       links: { ...DEFAULT_SETTINGS.links, ...(raw.links || {}) },
     };
+    return migrateProfilePageSettings(raw, merged);
   } catch (_) {
     return {
       ...DEFAULT_SETTINGS,

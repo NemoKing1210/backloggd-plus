@@ -184,6 +184,12 @@ export const DEFAULT_SETTINGS = {
   hideHomepageFuse: false,
   enhanceHeader: false,
   showUserMiniProfile: true,
+  showProfilePage: true,
+  showProfileHeader: true,
+  showProfileTierChip: true,
+  showProfileStats: true,
+  showProfileNav: true,
+  showProfileFavorites: true,
   showProfileMenuSettings: false,
   debugMode: false,
   links: {

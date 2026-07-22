@@ -36,6 +36,7 @@ import { queueToast, showToast } from './toast.js';
 
 const SETTINGS_TABS = [
   { id: 'general', labelKey: 'sectionGeneral' },
+  { id: 'profile', labelKey: 'sectionProfile' },
   { id: 'game', labelKey: 'sectionGame' },
   { id: 'lists', labelKey: 'sectionLists' },
   { id: 'translate', labelKey: 'sectionTranslate' },
@@ -411,14 +412,60 @@ export function openSettings() {
           toggleHtml('enhanceHeader', draft.enhanceHeader === true, 'enhanceHeaderHint'),
           toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint'),
           toggleHtml(
-            'showUserMiniProfile',
-            draft.showUserMiniProfile !== false,
-            'showUserMiniProfileHint'
-          ),
-          toggleHtml(
             'showProfileMenuSettings',
             draft.showProfileMenuSettings === true,
             'showProfileMenuSettingsHint'
+          )
+        )
+      )}
+      </div>
+      <div ${panelAttrs('profile', activeTab)}>
+      ${groupHtml(
+        'profileGroupHover',
+        'profileGroupHoverHint',
+        listHtml(
+          toggleHtml(
+            'showUserMiniProfile',
+            draft.showUserMiniProfile !== false,
+            'showUserMiniProfileHint'
+          )
+        )
+      )}
+      ${groupHtml(
+        'profileGroupPage',
+        'profileGroupPageHint',
+        listHtml(
+          toggleHtml('showProfilePage', draft.showProfilePage !== false, 'showProfilePageHint')
+        )
+      )}
+      ${groupHtml(
+        'profileGroupBlocks',
+        'profileGroupBlocksHint',
+        listHtml(
+          toggleHtml(
+            'showProfileHeader',
+            draft.showProfileHeader !== false,
+            'showProfileHeaderHint'
+          ),
+          toggleHtml(
+            'showProfileTierChip',
+            draft.showProfileTierChip !== false,
+            'showProfileTierChipHint'
+          ),
+          toggleHtml(
+            'showProfileStats',
+            draft.showProfileStats !== false,
+            'showProfileStatsHint'
+          ),
+          toggleHtml(
+            'showProfileNav',
+            draft.showProfileNav !== false,
+            'showProfileNavHint'
+          ),
+          toggleHtml(
+            'showProfileFavorites',
+            draft.showProfileFavorites !== false,
+            'showProfileFavoritesHint'
           )
         )
       )}
