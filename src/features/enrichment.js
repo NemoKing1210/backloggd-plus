@@ -1,3 +1,4 @@
+import { formatConvertedSalePair } from '../api/fx.js';
 import { fetchGameStatus, renderGameStatusValues } from '../api/gamestatus.js';
 import { fetchHltb, formatHoursCompact } from '../api/hltb.js';
 import { fetchOpenCritic } from '../api/opencritic.js';
@@ -321,29 +322,93 @@ export function formatOriginalPriceText(steam) {
   return text;
 }
 
+/** Inject FX placeholder for hydratePriceConversions (sync paint, async rate). */
+export function appendFxPlaceholder(priceHtml, steam) {
+  if (!settings.showPriceConvert || steam?.isFree || !steam?.price?.currency) {
+    return priceHtml;
+  }
+  const from = String(steam.price.currency).toUpperCase();
+  const to = String(settings.convertCurrency || 'RUB').toUpperCase();
+  if (!from || !to || from === to) return priceHtml;
+  if (!Number.isFinite(Number(steam.price.final))) return priceHtml;
+  const onSale =
+    Number(steam.price.discount_percent) > 0 &&
+    Number.isFinite(Number(steam.price.initial)) &&
+    Number(steam.price.initial) > Number(steam.price.final);
+  const initialAttr = onSale
+    ? ` data-blp-fx-initial="${escapeAttr(String(steam.price.initial))}"`
+    : '';
+  // Inline: ~ current  [smaller strikethrough ~ was] when on sale.
+  const marker = `<span class="blp-price__fx" data-blp-fx data-blp-fx-from="${escapeAttr(from)}" data-blp-fx-final="${escapeAttr(String(steam.price.final))}" data-blp-fx-to="${escapeAttr(to)}"${initialAttr} hidden></span>`;
+  if (priceHtml.includes('</a>')) {
+    return priceHtml.replace('</a>', ` ${marker}</a>`);
+  }
+  return `${priceHtml} ${marker}`;
+}
+
 export function renderSteamPriceHtml(steam) {
   const priceText = formatPriceText(steam);
   if (!priceText) return '';
 
   const onSale = steam.price?.discount_percent > 0;
+  let html;
   if (!onSale) {
-    return `<a class="game-details-value blp-ext-link blp-price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}</a>`;
-  }
+    html = `<a class="game-details-value blp-ext-link blp-price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}</a>`;
+  } else {
+    const original = formatOriginalPriceText(steam);
+    const endsLabel = formatDiscountEndDate(steam.discountEndDate);
+    const wasHtml = original
+      ? `<span class="blp-price__was">${escapeHtml(original)}</span>`
+      : '';
+    const endsHtml = endsLabel
+      ? `<span class="blp-discount-ends">${escapeHtml(fmt(t.discountEnds, { date: endsLabel }))}</span>`
+      : '';
 
-  const original = formatOriginalPriceText(steam);
-  const endsLabel = formatDiscountEndDate(steam.discountEndDate);
-  const wasHtml = original
-    ? `<span class="blp-price__was">${escapeHtml(original)}</span>`
-    : '';
-  const endsHtml = endsLabel
-    ? `<span class="blp-discount-ends">${escapeHtml(fmt(t.discountEnds, { date: endsLabel }))}</span>`
-    : '';
-
-  return `<a class="game-details-value blp-ext-link blp-price blp-price--sale" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">
+    html = `<a class="game-details-value blp-ext-link blp-price blp-price--sale" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">
     <span class="blp-discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>
     <span class="blp-price__stack">${wasHtml}<span class="blp-price__now">${escapeHtml(priceText)}</span></span>
     ${endsHtml}
   </a>`;
+  }
+  return appendFxPlaceholder(html, steam);
+}
+
+/** Fill [data-blp-fx] nodes under root after Steam price is painted. */
+export async function hydratePriceConversions(root = document) {
+  if (!settings.showPriceConvert) return;
+  const scope = root?.querySelectorAll ? root : document;
+  const nodes = scope.querySelectorAll('[data-blp-fx]');
+  await Promise.all(
+    [...nodes].map(async (el) => {
+      const from = el.getAttribute('data-blp-fx-from');
+      const to = el.getAttribute('data-blp-fx-to');
+      const final = Number(el.getAttribute('data-blp-fx-final'));
+      const initialRaw = el.getAttribute('data-blp-fx-initial');
+      const initial = initialRaw != null && initialRaw !== '' ? Number(initialRaw) : NaN;
+      if (!from || !to || from === to || !Number.isFinite(final)) return;
+
+      const pair = await formatConvertedSalePair(
+        {
+          final,
+          initial: Number.isFinite(initial) ? initial : undefined,
+          currency: from,
+          discount_percent:
+            Number.isFinite(initial) && initial > final ? 1 : 0,
+        },
+        to
+      );
+      if (!pair?.now) return;
+
+      if (pair.was) {
+        // Single line: ~ current  then smaller strikethrough ~ original (no discount).
+        el.innerHTML = `<span class="blp-price__fx-now">~ ${escapeHtml(pair.now)}</span><span class="blp-price__fx-was">~ ${escapeHtml(pair.was)}</span>`;
+      } else {
+        el.textContent = `~ ${pair.now}`;
+      }
+      el.hidden = false;
+      el.removeAttribute('hidden');
+    })
+  );
 }
 
 export function formatDiscountEndDate(unixSeconds) {
@@ -990,6 +1055,7 @@ export function renderEnrichment(rows, { steam, links, error, owned = false, wis
       setRowValues(rows.steam, renderSteamValues(steam, { owned, wishlist, slug }));
       showRow(rows.steam);
       paintDebugCacheMark(rows.steam, getCacheSource(steam) || 'miss');
+      void hydratePriceConversions(rows.steam);
     }
   }
 

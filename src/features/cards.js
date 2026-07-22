@@ -1,3 +1,4 @@
+import { formatConvertedSalePair } from '../api/fx.js';
 import { fetchGameStatus, getGsStatusLabel, getGsStatusType } from '../api/gamestatus.js';
 import { fetchSteamByAppId, fetchSteamUserdata, resolveSteamForGame } from '../api/steam.js';
 import {
@@ -26,6 +27,8 @@ import { getPageContext } from './page.js';
 export function cardBadgeToken() {
   return [
     settings.steamCountry || 'US',
+    settings.showPriceConvert ? 1 : 0,
+    settings.convertCurrency || 'RUB',
     settings.showCardBadges ? 1 : 0,
     settings.showCardBadgePrice !== false ? 1 : 0,
     settings.showCardBadgeReview !== false ? 1 : 0,
@@ -100,7 +103,7 @@ export function ensureCardBadgeMount(cover) {
   return mount;
 }
 
-export function renderCardBadgesHtml({ steam, owned, wishlist, gamestatus }) {
+export async function renderCardBadgesHtml({ steam, owned, wishlist, gamestatus }) {
   const chips = [];
   if (steam?.found) {
     if (settings.showCardBadgePrice !== false) {
@@ -110,8 +113,22 @@ export function renderCardBadgesHtml({ steam, owned, wishlist, gamestatus }) {
           steam.price?.discount_percent > 0
             ? ` <span class="blp-card-badge--discount">${escapeHtml(fmt(t.discount, { n: steam.price.discount_percent }))}</span>`
             : '';
+        let fx = '';
+        if (settings.showPriceConvert && steam.price && !steam.isFree) {
+          const pair = await formatConvertedSalePair(
+            steam.price,
+            settings.convertCurrency || 'RUB'
+          );
+          if (pair?.now) {
+            if (pair.was) {
+              fx = ` <span class="blp-card-badge--fx"><span class="blp-card-badge--fx-now">~ ${escapeHtml(pair.now)}</span><span class="blp-card-badge--fx-was">~ ${escapeHtml(pair.was)}</span></span>`;
+            } else {
+              fx = ` <span class="blp-card-badge--fx">~ ${escapeHtml(pair.now)}</span>`;
+            }
+          }
+        }
         chips.push(
-          `<a class="blp-card-badge blp-card-badge--price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}</a>`
+          `<a class="blp-card-badge blp-card-badge--price" href="${escapeAttr(steam.storeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(priceText)}${discount}${fx}</a>`
         );
       }
     }
@@ -278,7 +295,7 @@ export async function enrichGameCard(cover) {
         userdata.wishlist.has(id);
     }
 
-    const html = renderCardBadgesHtml({ steam, owned, wishlist, gamestatus });
+    const html = await renderCardBadgesHtml({ steam, owned, wishlist, gamestatus });
     mount.classList.remove('is-loading');
     if (!html) {
       // Mark empty before DOM remove so MutationObserver → scanPage does not re-queue.

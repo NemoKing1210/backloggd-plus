@@ -7,6 +7,7 @@ import {
   paintCacheMeter,
   setSteamOverride,
 } from '../cache.js';
+import { CONVERT_CURRENCIES } from '../api/fx.js';
 import {
   AUTHOR_AVATAR_URL,
   AUTHOR_EMAIL,
@@ -20,6 +21,7 @@ import {
   LINK_KEYS,
   REPO_URL,
   SCRIPT_VERSION,
+  STEAM_COUNTRY_CODES,
 } from '../constants.js';
 import { LOCALE_FLAG_AUTO, LOCALE_FLAGS, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
 import { linkLabelKey, saveSettings } from '../settings.js';
@@ -239,12 +241,21 @@ export function openSettings() {
 
   const steamCcSelect = `
     <select id="blp-steam-cc">
-      ${['US', 'GB', 'DE', 'FR', 'RU', 'BR', 'JP', 'KR', 'CN', 'AU', 'CA', 'PL', 'ES', 'IT', 'TR', 'UA']
-        .map(
-          (cc) =>
-            `<option value="${cc}" ${draft.steamCountry === cc ? 'selected' : ''}>${cc}</option>`
-        )
-        .join('')}
+      ${STEAM_COUNTRY_CODES.map(
+        (cc) =>
+          `<option value="${cc}" ${draft.steamCountry === cc ? 'selected' : ''}>${cc}</option>`
+      ).join('')}
+    </select>
+  `;
+
+  const convertCcySelect = `
+    <select id="blp-convert-ccy" ${draft.showPriceConvert ? '' : 'disabled'}>
+      ${CONVERT_CURRENCIES.map(
+        (ccy) =>
+          `<option value="${ccy}" ${
+            (draft.convertCurrency || 'RUB') === ccy ? 'selected' : ''
+          }>${ccy}</option>`
+      ).join('')}
     </select>
   `;
 
@@ -285,6 +296,10 @@ export function openSettings() {
       <section>
         <h3>${escapeHtml(t.sectionGame)}</h3>
         ${listHtml(fieldHtml('blp-steam-cc', t.steamCountry, steamCcSelect, t.steamCountryHint))}
+        ${listHtml(
+          toggleHtml('showPriceConvert', Boolean(draft.showPriceConvert), 'showPriceConvertHint'),
+          fieldHtml('blp-convert-ccy', t.convertCurrency, convertCcySelect, t.convertCurrencyHint)
+        )}
         ${listHtml(
           toggleHtml('showSteam', draft.showSteam),
           toggleHtml('showSteamOwned', draft.showSteamOwned, 'showSteamOwnedHint'),
@@ -445,6 +460,10 @@ export function openSettings() {
       const key = btn.getAttribute('data-blp-toggle');
       draft[key] = !draft[key];
       setSwitchOn(btn, draft[key]);
+      if (key === 'showPriceConvert') {
+        const sel = backdrop.querySelector('#blp-convert-ccy');
+        if (sel) sel.disabled = !draft.showPriceConvert;
+      }
     });
   });
 
@@ -482,6 +501,9 @@ export function openSettings() {
     draft.uiLocale =
       uiLocale === 'auto' || SUPPORTED_LOCALES.includes(uiLocale) ? uiLocale : 'auto';
     draft.steamCountry = String(cc).toUpperCase();
+    const convertCcy = backdrop.querySelector('#blp-convert-ccy')?.value || 'RUB';
+    draft.convertCurrency = String(convertCcy).toUpperCase();
+    draft.showPriceConvert = Boolean(draft.showPriceConvert);
     draft.cacheHours = Number.isFinite(hours)
       ? Math.max(0, Math.min(CACHE_HOURS_MAX, hours))
       : DEFAULT_SETTINGS.cacheHours;
