@@ -29,6 +29,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'GitHub repository',
     aboutAuthor: 'Author',
     aboutContributors: 'Contributors',
+    aboutContributorsThanks: 'Thank you to everyone who helps improve Backloggd Plus.',
+    aboutBackloggd: 'Backloggd profile',
+    aboutBackloggdHint: '@{user} on Backloggd',
+    aboutBackloggdNote:
+      'Feel free to add me as a friend, say hello, or share feedback — always happy to chat.',
+    aboutContribute: 'Contribute',
+    aboutContributeHint: 'Open source — anyone can help make Backloggd better.',
+    aboutContributeBody:
+      'Ideas, bug reports, translations, and pull requests are all welcome. Every contribution helps the community.',
+    aboutContributeCta: 'Open the repository',
+    aboutContributeCtaHint: 'Issues, PRs, and discussions on GitHub',
     enhanceHeader: 'Floating header',
     enhanceHeaderHint:
       'Sticky glass navbar that floats over the page and tightens slightly while scrolling.',
@@ -410,6 +421,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'Репозиторий на GitHub',
     aboutAuthor: 'Автор',
     aboutContributors: 'Участники',
+    aboutContributorsThanks: 'Спасибо всем, кто помогает улучшать Backloggd Plus.',
+    aboutBackloggd: 'Профиль на Backloggd',
+    aboutBackloggdHint: '@{user} на Backloggd',
+    aboutBackloggdNote:
+      'Можете добавить меня в друзья, написать или поделиться идеями — всегда рад общению.',
+    aboutContribute: 'Участие',
+    aboutContributeHint: 'Скрипт открытый — каждый может помочь сделать Backloggd удобнее.',
+    aboutContributeBody:
+      'Идеи, баг-репорты, переводы и pull request’ы приветствуются. Любой вклад помогает сообществу.',
+    aboutContributeCta: 'Открыть репозиторий',
+    aboutContributeCtaHint: 'Issues, PR и обсуждения на GitHub',
     enhanceHeader: 'Плавающий хедер',
     enhanceHeaderHint:
       'Липкая стеклянная панель навигации поверх страницы; при прокрутке чуть уплотняется.',
@@ -789,6 +811,15 @@ export const TRANSLATIONS = {
     aboutRepo: 'GitHub 仓库',
     aboutAuthor: '作者',
     aboutContributors: '贡献者',
+    aboutContributorsThanks: '感谢所有帮助改进 Backloggd Plus 的人。',
+    aboutBackloggd: 'Backloggd 主页',
+    aboutBackloggdHint: 'Backloggd 上的 @{user}',
+    aboutBackloggdNote: '欢迎加我好友、打个招呼或分享反馈——很乐意交流。',
+    aboutContribute: '参与贡献',
+    aboutContributeHint: '开源项目——任何人都能让 Backloggd 变得更好。',
+    aboutContributeBody: '欢迎提出想法、报告问题、翻译或提交 PR。每一份贡献都惠及社区。',
+    aboutContributeCta: '打开仓库',
+    aboutContributeCtaHint: '在 GitHub 上提 Issue、PR 与讨论',
     enhanceHeader: '浮动顶栏',
     enhanceHeaderHint: '粘性毛玻璃导航栏，随页面滚动略微收紧。',
     hideHomepageFuse: '隐藏 Fuse 广告位',
@@ -1156,6 +1187,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'Repositorio en GitHub',
     aboutAuthor: 'Autor',
     aboutContributors: 'Colaboradores',
+    aboutContributorsThanks: 'Gracias a todos los que ayudan a mejorar Backloggd Plus.',
+    aboutBackloggd: 'Perfil en Backloggd',
+    aboutBackloggdHint: '@{user} en Backloggd',
+    aboutBackloggdNote:
+      'Si quieres, agrégame como amigo, saluda o comparte ideas — siempre encantado de charlar.',
+    aboutContribute: 'Contribuir',
+    aboutContributeHint: 'Código abierto: cualquiera puede ayudar a mejorar Backloggd.',
+    aboutContributeBody:
+      'Ideas, reportes de errores, traducciones y pull requests son bienvenidos. Cada aporte ayuda a la comunidad.',
+    aboutContributeCta: 'Abrir el repositorio',
+    aboutContributeCtaHint: 'Issues, PR y debates en GitHub',
     enhanceHeader: 'Cabecera flotante',
     enhanceHeaderHint:
       'Barra de navegación de cristal adhesiva sobre la página; se compacta un poco al desplazarse.',
@@ -1538,6 +1580,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'Repositório no GitHub',
     aboutAuthor: 'Autor',
     aboutContributors: 'Colaboradores',
+    aboutContributorsThanks: 'Obrigado a todos que ajudam a melhorar o Backloggd Plus.',
+    aboutBackloggd: 'Perfil no Backloggd',
+    aboutBackloggdHint: '@{user} no Backloggd',
+    aboutBackloggdNote:
+      'Sinta-se à vontade para me adicionar como amigo, dizer oi ou enviar feedback — adoro conversar.',
+    aboutContribute: 'Contribuir',
+    aboutContributeHint: 'Código aberto — qualquer um pode ajudar a melhorar o Backloggd.',
+    aboutContributeBody:
+      'Ideias, relatos de bugs, traduções e pull requests são bem-vindos. Cada contribuição ajuda a comunidade.',
+    aboutContributeCta: 'Abrir o repositório',
+    aboutContributeCtaHint: 'Issues, PRs e discussões no GitHub',
     enhanceHeader: 'Cabeçalho flutuante',
     enhanceHeaderHint:
       'Barra de navegação em vidro adesiva sobre a página; fica um pouco mais compacta ao rolar.',
@@ -1920,6 +1973,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'GitHub-Repository',
     aboutAuthor: 'Autor',
     aboutContributors: 'Mitwirkende',
+    aboutContributorsThanks: 'Danke an alle, die Backloggd Plus mitverbessern.',
+    aboutBackloggd: 'Backloggd-Profil',
+    aboutBackloggdHint: '@{user} auf Backloggd',
+    aboutBackloggdNote:
+      'Gerne als Freund hinzufügen, Hallo sagen oder Feedback teilen — ich freue mich über Austausch.',
+    aboutContribute: 'Mitmachen',
+    aboutContributeHint: 'Open Source — jeder kann helfen, Backloggd besser zu machen.',
+    aboutContributeBody:
+      'Ideen, Fehlermeldungen, Übersetzungen und Pull Requests sind willkommen. Jeder Beitrag hilft der Community.',
+    aboutContributeCta: 'Repository öffnen',
+    aboutContributeCtaHint: 'Issues, PRs und Diskussionen auf GitHub',
     enhanceHeader: 'Schwebender Header',
     enhanceHeaderHint:
       'Klebende Glas-Navigation über der Seite; wird beim Scrollen etwas kompakter.',
@@ -2302,6 +2366,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'Dépôt GitHub',
     aboutAuthor: 'Auteur',
     aboutContributors: 'Contributeurs',
+    aboutContributorsThanks: 'Merci à toutes les personnes qui aident à améliorer Backloggd Plus.',
+    aboutBackloggd: 'Profil Backloggd',
+    aboutBackloggdHint: '@{user} sur Backloggd',
+    aboutBackloggdNote:
+      'N’hésitez pas à m’ajouter en ami, à dire bonjour ou à partager vos retours — toujours content d’échanger.',
+    aboutContribute: 'Contribuer',
+    aboutContributeHint: 'Open source — chacun peut aider à améliorer Backloggd.',
+    aboutContributeBody:
+      'Idées, rapports de bugs, traductions et pull requests sont les bienvenus. Chaque contribution aide la communauté.',
+    aboutContributeCta: 'Ouvrir le dépôt',
+    aboutContributeCtaHint: 'Issues, PR et discussions sur GitHub',
     enhanceHeader: 'En-tête flottant',
     enhanceHeaderHint:
       'Barre de navigation en verre collante au-dessus de la page ; se compacte un peu au défilement.',
@@ -2684,6 +2759,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'GitHub リポジトリ',
     aboutAuthor: '作者',
     aboutContributors: '貢献者',
+    aboutContributorsThanks: 'Backloggd Plus の改善に協力してくださる皆さんに感謝します。',
+    aboutBackloggd: 'Backloggd プロフィール',
+    aboutBackloggdHint: 'Backloggd の @{user}',
+    aboutBackloggdNote:
+      'フレンド追加やあいさつ、フィードバックも大歓迎です。気軽にどうぞ。',
+    aboutContribute: 'コントリビュート',
+    aboutContributeHint: 'オープンソース — 誰でも Backloggd をより良くできます。',
+    aboutContributeBody:
+      'アイデア、バグ報告、翻訳、プルリクエストを歓迎します。すべての貢献がコミュニティの助けになります。',
+    aboutContributeCta: 'リポジトリを開く',
+    aboutContributeCtaHint: 'GitHub の Issue・PR・議論',
     enhanceHeader: 'フローティングヘッダー',
     enhanceHeaderHint:
       'ページ上に浮かぶガラス風の固定ナビ。スクロールすると少しコンパクトになります。',
@@ -3064,6 +3150,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'GitHub 저장소',
     aboutAuthor: '제작자',
     aboutContributors: '기여자',
+    aboutContributorsThanks: 'Backloggd Plus 개선에 도움을 주시는 모든 분께 감사드립니다.',
+    aboutBackloggd: 'Backloggd 프로필',
+    aboutBackloggdHint: 'Backloggd의 @{user}',
+    aboutBackloggdNote:
+      '친구 추가, 인사, 피드백 모두 환영합니다. 편하게 연락해 주세요.',
+    aboutContribute: '기여하기',
+    aboutContributeHint: '오픈 소스 — 누구나 Backloggd를 더 좋게 만들 수 있습니다.',
+    aboutContributeBody:
+      '아이디어, 버그 제보, 번역, PR을 환영합니다. 모든 기여가 커뮤니티에 도움이 됩니다.',
+    aboutContributeCta: '저장소 열기',
+    aboutContributeCtaHint: 'GitHub의 Issue, PR, 토론',
     enhanceHeader: '플로팅 헤더',
     enhanceHeaderHint:
       '페이지 위에 떠 있는 글래스 스타일 고정 내비. 스크롤 시 조금 더 컴팩트해집니다.',
@@ -3443,6 +3540,17 @@ export const TRANSLATIONS = {
     aboutRepo: 'Repozytorium GitHub',
     aboutAuthor: 'Autor',
     aboutContributors: 'Współtwórcy',
+    aboutContributorsThanks: 'Dziękujemy wszystkim, którzy pomagają ulepszać Backloggd Plus.',
+    aboutBackloggd: 'Profil Backloggd',
+    aboutBackloggdHint: '@{user} na Backloggd',
+    aboutBackloggdNote:
+      'Śmiało dodaj mnie do znajomych, napisz lub podziel się opinią — zawsze chętnie pogadam.',
+    aboutContribute: 'Współtwórz',
+    aboutContributeHint: 'Open source — każdy może pomóc ulepszyć Backloggd.',
+    aboutContributeBody:
+      'Pomysły, zgłoszenia błędów, tłumaczenia i pull requesty są mile widziane. Każdy wkład pomaga społeczności.',
+    aboutContributeCta: 'Otwórz repozytorium',
+    aboutContributeCtaHint: 'Issues, PR i dyskusje na GitHubie',
     enhanceHeader: 'Pływający nagłówek',
     enhanceHeaderHint:
       'Przyklejony szklany pasek nawigacji nad stroną; przy przewijaniu lekko się zagęszcza.',

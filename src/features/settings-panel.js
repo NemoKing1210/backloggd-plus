@@ -10,6 +10,8 @@ import {
 import { CONVERT_CURRENCIES } from '../api/fx.js';
 import {
   AUTHOR_AVATAR_URL,
+  AUTHOR_BACKLOGGD_HANDLE,
+  AUTHOR_BACKLOGGD_URL,
   AUTHOR_EMAIL,
   AUTHOR_HANDLE,
   AUTHOR_NAME,
@@ -164,51 +166,83 @@ function personCardHtml({ name, handle, url, avatarUrl, email }) {
   `;
 }
 
-function buildAboutHtml() {
-  const githubFav = FAVICON_URL.replace('{domain}', 'github.com');
-  const contributorsHtml = CONTRIBUTORS.length
-    ? `
-      <div class="blp-settings-list blp-settings-list--stack blp-about__contributors">
-        <p class="blp-about__author-label">${escapeHtml(t.aboutContributors)}</p>
-        <div class="blp-about__people">
-          ${CONTRIBUTORS.map((person) => personCardHtml(person)).join('')}
-        </div>
-      </div>
-    `
-    : '';
+function aboutLinkHtml({ url, domain, label, hint }) {
+  const icon = FAVICON_URL.replace('{domain}', encodeURIComponent(domain));
   return `
-    <div class="blp-about">
-      <div class="blp-settings-list blp-settings-list--stack blp-about__script">
-        <p class="blp-about__desc">${escapeHtml(t.aboutDescription)}</p>
-        <div class="blp-about__meta">
-          <span class="blp-about__chip">v${escapeHtml(SCRIPT_VERSION)}</span>
-          <span class="blp-about__chip">${escapeHtml(t.aboutLicense)}</span>
+    <a
+      class="blp-about__link"
+      href="${escapeAttr(url)}"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img class="blp-about__link-icon" src="${escapeAttr(icon)}" alt="" width="16" height="16" loading="lazy" decoding="async" />
+      <span class="blp-about__link-text">
+        <span class="blp-about__link-label">${escapeHtml(label)}</span>
+        <span class="blp-about__link-hint">${escapeHtml(hint)}</span>
+      </span>
+    </a>
+  `;
+}
+
+function buildAboutHtml() {
+  const contributorsBlock = CONTRIBUTORS.length
+    ? groupHtml(
+        'aboutContributors',
+        'aboutContributorsThanks',
+        `
+          <div class="blp-settings-list blp-settings-list--stack blp-about__people-card">
+            <div class="blp-about__people">
+              ${CONTRIBUTORS.map((person) => personCardHtml(person)).join('')}
+            </div>
+          </div>
+        `
+      )
+    : '';
+
+  return `
+    ${groupHtml(
+      'sectionAbout',
+      null,
+      `
+        <div class="blp-settings-list blp-settings-list--stack blp-about__script">
+          <p class="blp-about__desc">${escapeHtml(t.aboutDescription)}</p>
+          <div class="blp-about__meta">
+            <span class="blp-about__chip">v${escapeHtml(SCRIPT_VERSION)}</span>
+            <span class="blp-about__chip">${escapeHtml(t.aboutLicense)}</span>
+          </div>
+          ${aboutLinkHtml({
+            url: REPO_URL,
+            domain: 'github.com',
+            label: t.aboutRepo,
+            hint: t.repoAbout,
+          })}
+          <p class="blp-about__note blp-about__note--contribute">${escapeHtml(t.aboutContributeBody)}</p>
         </div>
-        <a
-          class="blp-about__repo"
-          href="${escapeAttr(REPO_URL)}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img class="blp-about__repo-icon" src="${escapeAttr(githubFav)}" alt="" width="16" height="16" loading="lazy" decoding="async" />
-          <span class="blp-about__repo-text">
-            <span class="blp-about__repo-label">${escapeHtml(t.aboutRepo)}</span>
-            <span class="blp-about__repo-hint">${escapeHtml(t.repoAbout)}</span>
-          </span>
-        </a>
-      </div>
-      <div class="blp-settings-list blp-settings-list--stack blp-about__author">
-        <p class="blp-about__author-label">${escapeHtml(t.aboutAuthor)}</p>
-        ${personCardHtml({
-          name: AUTHOR_NAME,
-          handle: AUTHOR_HANDLE,
-          url: AUTHOR_URL,
-          avatarUrl: AUTHOR_AVATAR_URL,
-          email: AUTHOR_EMAIL,
-        })}
-      </div>
-      ${contributorsHtml}
-    </div>
+      `
+    )}
+    ${groupHtml(
+      'aboutAuthor',
+      null,
+      `
+        <div class="blp-settings-list blp-settings-list--stack blp-about__author">
+          ${personCardHtml({
+            name: AUTHOR_NAME,
+            handle: AUTHOR_HANDLE,
+            url: AUTHOR_URL,
+            avatarUrl: AUTHOR_AVATAR_URL,
+            email: AUTHOR_EMAIL,
+          })}
+          ${aboutLinkHtml({
+            url: AUTHOR_BACKLOGGD_URL,
+            domain: 'backloggd.com',
+            label: t.aboutBackloggd,
+            hint: fmt(t.aboutBackloggdHint, { user: AUTHOR_BACKLOGGD_HANDLE }),
+          })}
+          <p class="blp-about__note">${escapeHtml(t.aboutBackloggdNote)}</p>
+        </div>
+      `
+    )}
+    ${contributorsBlock}
   `;
 }
 
@@ -508,7 +542,7 @@ export function openSettings() {
       )}
       </div>
       <div ${panelAttrs('about', activeTab)}>
-      ${groupHtml('sectionAbout', null, buildAboutHtml())}
+      ${buildAboutHtml()}
       </div>
       </div>
       <div class="blp-settings__foot">

@@ -2984,6 +2984,7 @@ img.blp-cover-zoomable:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.blp-about__link,
 .blp-about__repo {
   display: flex;
   align-items: center;
@@ -3000,11 +3001,13 @@ img.blp-cover-zoomable:focus-visible {
     background-color 0.15s ease;
 }
 
+.blp-about__link:hover,
 .blp-about__repo:hover {
   border-color: rgba(61, 184, 154, 0.4);
   background: rgba(61, 184, 154, 0.08);
 }
 
+.blp-about__link-icon,
 .blp-about__repo-icon {
   flex: 0 0 auto;
   width: 16px;
@@ -3012,6 +3015,7 @@ img.blp-cover-zoomable:focus-visible {
   border-radius: 3px;
 }
 
+.blp-about__link-text,
 .blp-about__repo-text {
   display: flex;
   flex-direction: column;
@@ -3019,14 +3023,33 @@ img.blp-cover-zoomable:focus-visible {
   min-width: 0;
 }
 
+.blp-about__link-label,
 .blp-about__repo-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--blp-accent);
 }
 
+.blp-about__link-hint,
 .blp-about__repo-hint {
   font-size: 11.5px;
+  color: var(--blp-muted);
+}
+
+.blp-about__note {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(61, 184, 154, 0.18);
+  background: rgba(61, 184, 154, 0.07);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--blp-text);
+}
+
+.blp-about__note--contribute {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
   color: var(--blp-muted);
 }
 

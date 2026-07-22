@@ -6,6 +6,8 @@ export const AUTHOR_HANDLE = 'NemoKing1210';
 export const AUTHOR_URL = 'https://github.com/NemoKing1210';
 export const AUTHOR_EMAIL = 'nemoking1210@gmail.com';
 export const AUTHOR_AVATAR_URL = 'https://avatars.githubusercontent.com/u/58397369?s=96&v=4';
+export const AUTHOR_BACKLOGGD_URL = 'https://backloggd.com/u/NemoKing/';
+export const AUTHOR_BACKLOGGD_HANDLE = 'NemoKing';
 /** People credited in Settings → About (besides the author). */
 export const CONTRIBUTORS = [
   {
