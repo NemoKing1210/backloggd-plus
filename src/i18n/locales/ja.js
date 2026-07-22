@@ -270,9 +270,51 @@ export default {
   gameGroupHostsHint: 'Steam / SteamDB のゲームページに Backloggd ボタンを表示します。',
   navSettings: 'Plus',
   navSettingsTitle: 'Backloggd Plus 設定',
+  sectionCacheHint: 'このブラウザプロファイルがソフト上限5MBに対して保持している照会データの量。',
+
+  sectionCacheDuration: '保持期間',
+
+  sectionCacheSources: 'キャッシュする内容',
+
+  sectionCacheSourcesHint: 'ソースをオフにすると保存を止めます。保存時にそのソースの既存エントリは削除されます。',
+
+  sectionCacheClear: '消去',
+
   cacheHours: 'キャッシュ時間（時間）',
   cacheHoursHint:
-    'Steam・GameStatus・スコア・メディア・類似ゲーム照会の再利用時間。0でそのキャッシュを無効。Steamライブラリ/ウィッシュリスト・タグマップは独自の短いTTLを維持。オンラインプレイヤー数はキャッシュしない。',
+    'ゲーム照会（Steam・GameStatus・スコア・メディア・類似）の再利用時間。0でそのカテゴリを無効。プロフィール・翻訳・FXは各トグルがオンなら独自TTLを維持。オンラインプレイヤー数はキャッシュしない。',
+  cacheGameData: 'ゲームデータ',
+
+  cacheGameDataHint: 'Steam、SteamDB、GameStatus、OpenCritic、HLTB、ProtonDB、スクリーンショット、類似ゲーム。',
+
+  cacheUserProfiles: 'ユーザーミニプロフィール',
+
+  cacheUserProfilesHint: 'ホバーカードとBackloggdユーザーページの装飾。',
+
+  cacheTranslations: '翻訳',
+
+  cacheTranslationsHint: '説明文・レビューのGoogle翻訳結果。',
+
+  cacheFx: '為替レート',
+
+  cacheFxHint: 'おおよその価格換算に使うFXレート。',
+
+  cacheCatGame: 'ゲーム',
+
+  cacheCatProfiles: 'プロフィール',
+
+  cacheCatTranslations: '翻訳',
+
+  cacheCatFx: '通貨',
+
+  cacheCatSystem: 'システム',
+
+  cacheCatOff: 'オフ',
+
+  cacheBarCatCount: '{count}',
+
+  cacheBarEntries: '{count} 件',
+
   clearCache: 'キャッシュを消去',
   cacheCleared: '{count} 件を削除しました',
   cacheEmpty: 'クリアするものはありません — すでに空です',
@@ -284,10 +326,13 @@ export default {
   cacheBarPct: '{pct}%',
   cacheBarFilled: '使用中',
   cacheBarHint:
-    '目安の容量上限。完全＝利用可能な照会、部分＝不完全または期限切れでまだ残っている項目。',
+    'カテゴリ別の目安容量。システム（ライブラリ/ウィッシュリスト＋タグマップ）は常にオン。色は下のトグルと対応。',
+  cacheBarAriaCats: 'キャッシュ使用率 {pct}% — {detail}',
+
   cacheBarAria: 'キャッシュ使用率 {pct}% — 完全 {full}、部分 {partial}、空き {free}',
   cacheTabFillAria: 'キャッシュ使用率 {pct}%',
-  cacheClearHint: 'このブラウザプロファイルのSteam / GameStatus照会を削除します。',
+  cacheClearHint:
+    'このブラウザプロファイルの照会エントリをすべて削除（トグルは変更しません）。',
   toastSettingsSaved: 'ページを再読み込みすると設定が反映されます。',
   toastCacheClearedOnUpdate: 'v{version} — 照会キャッシュをクリアしました',
   toastSteamMatchSaved: 'Steam App ID を {id} に設定',

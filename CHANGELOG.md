@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.81] - 2026-07-22
+
+### Added
+
+- Settings → Cache: colored usage bar by category (game data, profiles, translations, currency, system) with per-category size and entry counts
+- Settings → Cache: toggles for what to store — game data, user mini-profiles, translations, FX rates (system library/tag map stays on; saving with a source off prunes its entries)
+
+### Changed
+
+- Cache duration hint clarifies that profiles / translations / FX keep their own TTLs when enabled
+
 ## [0.7.80] - 2026-07-22
 
 ### Fixed

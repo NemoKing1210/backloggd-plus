@@ -254,9 +254,51 @@ export default {
   gameGroupHostsHint: '在 Steam 和 SteamDB 游戏页显示 Backloggd 按钮。',
   navSettings: 'Plus',
   navSettingsTitle: 'Backloggd Plus 设置',
+  sectionCacheHint: '此浏览器配置相对 5 MB 软上限当前占用的查询数据量。',
+
+  sectionCacheDuration: '时长',
+
+  sectionCacheSources: '缓存内容',
+
+  sectionCacheSourcesHint: '关闭某来源即不再写入；保存时会删除该来源的已有条目。',
+
+  sectionCacheClear: '清除',
+
   cacheHours: '缓存时长（小时）',
   cacheHoursHint:
-    '复用 Steam、GameStatus、评分、媒体与相似游戏查询的时间。0 禁用该缓存。Steam 库/愿望单与标签表仍使用各自的短 TTL。在线玩家数不缓存。',
+    '游戏查询（Steam、GameStatus、评分、媒体、相似游戏）的复用时长。0 禁用该类别。开启对应开关时，资料、翻译与汇率仍使用各自 TTL。在线玩家数不缓存。',
+  cacheGameData: '游戏数据',
+
+  cacheGameDataHint: 'Steam、SteamDB、GameStatus、OpenCritic、HLTB、ProtonDB、截图、相似游戏。',
+
+  cacheUserProfiles: '用户迷你资料',
+
+  cacheUserProfilesHint: '悬停卡片与 Backloggd 用户页增强。',
+
+  cacheTranslations: '翻译',
+
+  cacheTranslationsHint: '描述与评论的 Google 翻译结果。',
+
+  cacheFx: '汇率',
+
+  cacheFxHint: '用于大致价格换算的 FX 汇率。',
+
+  cacheCatGame: '游戏',
+
+  cacheCatProfiles: '资料',
+
+  cacheCatTranslations: '翻译',
+
+  cacheCatFx: '货币',
+
+  cacheCatSystem: '系统',
+
+  cacheCatOff: '关',
+
+  cacheBarCatCount: '{count}',
+
+  cacheBarEntries: '{count} 条',
+
   clearCache: '清除缓存',
   cacheCleared: '已清除 {count} 条记录',
   cacheEmpty: '无需清理 — 缓存已为空',
@@ -267,10 +309,14 @@ export default {
   cacheBarUsed: '{used} / {limit}',
   cacheBarPct: '{pct}%',
   cacheBarFilled: '已用',
-  cacheBarHint: '软性存储上限。完整 = 可用查询；部分 = 不完整或已过期但仍占用空间的条目。',
+  cacheBarHint:
+    '按类别的软性存储上限。系统（库/愿望单 + 标签表）始终开启。颜色与下方开关对应。',
+  cacheBarAriaCats: '缓存已用 {pct}% — {detail}',
+
   cacheBarAria: '缓存已用 {pct}% — 完整 {full}，部分 {partial}，可用 {free}',
   cacheTabFillAria: '缓存已用 {pct}%',
-  cacheClearHint: '删除此浏览器配置中的 Steam / GameStatus 查询缓存。',
+  cacheClearHint:
+    '清除此浏览器配置中的全部查询条目（不改变开关）。',
   toastSettingsSaved: '偏好设置将在页面刷新后生效。',
   toastCacheClearedOnUpdate: 'v{version} — 查询缓存已清空',
   toastSteamMatchSaved: 'Steam App ID 已设为 {id}',

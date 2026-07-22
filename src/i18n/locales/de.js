@@ -272,9 +272,51 @@ export default {
   gameGroupHostsHint: 'Backloggd-Buttons auf Steam- und SteamDB-Spielseiten.',
   navSettings: 'Plus',
   navSettingsTitle: 'Backloggd Plus Einstellungen',
+  sectionCacheHint: 'Wie viel Lookup-Daten dieses Browserprofil gegen das weiche 5-MB-Budget speichert.',
+
+  sectionCacheDuration: 'Dauer',
+
+  sectionCacheSources: 'Was cachen',
+
+  sectionCacheSourcesHint: 'Quelle ausschalten, um sie nicht mehr zu speichern. Vorhandene Einträge werden beim Speichern entfernt.',
+
+  sectionCacheClear: 'Leeren',
+
   cacheHours: 'Cache-Dauer (Stunden)',
   cacheHoursHint:
-    'Wie lange Steam-, GameStatus-, Score-, Medien- und Similar-Game-Abfragen wiederverwendet werden. 0 deaktiviert diesen Cache. Steam-Bibliothek/Wunschliste und die Tag-Map behalten eigene kurze TTLs. Online-Spieler werden nicht gecacht.',
+    'Wie lange Spiel-Lookups (Steam, GameStatus, Scores, Medien, Similar) wiederverwendet werden. 0 deaktiviert diese Kategorie. Profile, Übersetzungen und FX behalten eigene TTLs, wenn die Schalter an sind. Online-Spieler werden nicht gecacht.',
+  cacheGameData: 'Spieldaten',
+
+  cacheGameDataHint: 'Steam, SteamDB, GameStatus, OpenCritic, HLTB, ProtonDB, Screenshots, ähnliche Spiele.',
+
+  cacheUserProfiles: 'User-Mini-Profile',
+
+  cacheUserProfilesHint: 'Hover-Karten und Profilseiten-Anreicherung für Backloggd-Nutzer.',
+
+  cacheTranslations: 'Übersetzungen',
+
+  cacheTranslationsHint: 'Zwischengespeicherte Google-Translate-Ergebnisse für Beschreibungen und Reviews.',
+
+  cacheFx: 'Wechselkurse',
+
+  cacheFxHint: 'FX-Kurse für ungefähre Preisumrechnung.',
+
+  cacheCatGame: 'Spieldaten',
+
+  cacheCatProfiles: 'Profile',
+
+  cacheCatTranslations: 'Übersetzungen',
+
+  cacheCatFx: 'Währung',
+
+  cacheCatSystem: 'System',
+
+  cacheCatOff: 'Aus',
+
+  cacheBarCatCount: '{count}',
+
+  cacheBarEntries: '{count} Einträge',
+
   clearCache: 'Cache leeren',
   cacheCleared: '{count} Einträge entfernt',
   cacheEmpty: 'Nichts zu löschen — Cache ist schon leer',
@@ -286,10 +328,13 @@ export default {
   cacheBarPct: '{pct}%',
   cacheBarFilled: 'belegt',
   cacheBarHint:
-    'Weiches Speicherbudget. Voll = nutzbare Einträge; teilweise = unvollständig oder abgelaufen, aber noch gespeichert.',
+    'Weiches Speicherbudget nach Kategorie. System (Bibliothek/Wunschliste + Tag-Map) bleibt an. Farben entsprechen den Schaltern unten.',
+  cacheBarAriaCats: 'Cache zu {pct}% voll — {detail}',
+
   cacheBarAria: 'Cache zu {pct}% voll — {full} voll, {partial} teilweise, {free} frei',
   cacheTabFillAria: 'Cache zu {pct}% voll',
-  cacheClearHint: 'Entfernt gespeicherte Steam-/GameStatus-Abfragen aus diesem Profil.',
+  cacheClearHint:
+    'Entfernt alle Lookup-Einträge aus diesem Browserprofil (ändert die Schalter nicht).',
   toastSettingsSaved: 'Deine Einstellungen greifen nach dem Neuladen der Seite.',
   toastCacheClearedOnUpdate: 'v{version} — Abfrage-Cache geleert',
   toastSteamMatchSaved: 'Steam App ID: {id}',

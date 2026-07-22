@@ -272,9 +272,51 @@ export default {
   gameGroupHostsHint: 'Botones de Backloggd en páginas de Steam y SteamDB.',
   navSettings: 'Plus',
   navSettingsTitle: 'Ajustes de Backloggd Plus',
+  sectionCacheHint: 'Cuántos datos de consultas guarda este perfil frente al presupuesto suave de 5 MB.',
+
+  sectionCacheDuration: 'Duración',
+
+  sectionCacheSources: 'Qué cachear',
+
+  sectionCacheSourcesHint: 'Desactiva una fuente para dejar de guardarla. Al guardar se eliminan las entradas de esa fuente.',
+
+  sectionCacheClear: 'Vaciar',
+
   cacheHours: 'Duración de caché (horas)',
   cacheHoursHint:
-    'Cuánto reutilizar búsquedas de Steam, GameStatus, puntuaciones, medios y juegos similares. 0 desactiva esa caché. La biblioteca/wishlist de Steam y el mapa de etiquetas conservan sus TTL cortos. Los jugadores online no se cachean.',
+    'Cuánto reutilizar consultas de juegos (Steam, GameStatus, puntuaciones, medios, similares). 0 desactiva esa categoría. Perfiles, traducciones y FX conservan sus TTL si los interruptores están activos. Los jugadores online no se cachean.',
+  cacheGameData: 'Datos de juegos',
+
+  cacheGameDataHint: 'Steam, SteamDB, GameStatus, OpenCritic, HLTB, ProtonDB, capturas, juegos similares.',
+
+  cacheUserProfiles: 'Mini-perfiles',
+
+  cacheUserProfilesHint: 'Tarjetas al pasar el cursor y enriquecimiento de páginas de usuario.',
+
+  cacheTranslations: 'Traducciones',
+
+  cacheTranslationsHint: 'Resultados de Google Translate para descripciones y reseñas.',
+
+  cacheFx: 'Tipos de cambio',
+
+  cacheFxHint: 'Tipos FX para conversión aproximada de precios.',
+
+  cacheCatGame: 'Juegos',
+
+  cacheCatProfiles: 'Perfiles',
+
+  cacheCatTranslations: 'Traducciones',
+
+  cacheCatFx: 'Moneda',
+
+  cacheCatSystem: 'Sistema',
+
+  cacheCatOff: 'Off',
+
+  cacheBarCatCount: '{count}',
+
+  cacheBarEntries: '{count} entradas',
+
   clearCache: 'Vaciar caché',
   cacheCleared: '{count} entradas eliminadas',
   cacheEmpty: 'Nada que borrar — ya está vacía',
@@ -286,10 +328,13 @@ export default {
   cacheBarPct: '{pct}%',
   cacheBarFilled: 'ocupado',
   cacheBarHint:
-    'Límite blando de almacenamiento. Completo = consultas útiles; parcial = incompletas o caducadas que aún ocupan espacio.',
+    'Presupuesto suave por categoría. Sistema (biblioteca/wishlist + mapa de tags) siempre activo. Los colores coinciden con los interruptores.',
+  cacheBarAriaCats: 'Caché al {pct}% — {detail}',
+
   cacheBarAria: 'Caché al {pct}% — {full} completo, {partial} parcial, {free} libre',
   cacheTabFillAria: 'Caché al {pct}%',
-  cacheClearHint: 'Elimina las búsquedas de Steam / GameStatus de este perfil.',
+  cacheClearHint:
+    'Elimina todas las entradas de este perfil del navegador (no cambia los interruptores).',
   toastSettingsSaved: 'Tus preferencias se aplicarán al recargar la página.',
   toastCacheClearedOnUpdate: 'v{version} — caché de consultas vaciada',
   toastSteamMatchSaved: 'Steam App ID: {id}',

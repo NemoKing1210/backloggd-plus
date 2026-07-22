@@ -145,6 +145,10 @@ export const STEAM_COUNTRY_CODES = [
 
 export const DEFAULT_SETTINGS = {
   cacheHours: 12,
+  cacheGameData: true,
+  cacheUserProfiles: true,
+  cacheTranslations: true,
+  cacheFx: true,
   uiLocale: 'auto',
   steamCountry: 'US',
   showPriceConvert: false,

@@ -269,9 +269,51 @@ export default {
   gameGroupHostsHint: 'Steam 및 SteamDB 게임 페이지의 Backloggd 버튼.',
   navSettings: 'Plus',
   navSettingsTitle: 'Backloggd Plus 설정',
+  sectionCacheHint: '이 브라우저 프로필이 소프트 한도 5MB 기준으로 보관 중인 조회 데이터 양.',
+
+  sectionCacheDuration: '보관 시간',
+
+  sectionCacheSources: '캐시할 항목',
+
+  sectionCacheSourcesHint: '소스를 끄면 더 이상 저장하지 않습니다. 저장 시 해당 소스의 기존 항목이 삭제됩니다.',
+
+  sectionCacheClear: '비우기',
+
   cacheHours: '캐시 시간(시간)',
   cacheHoursHint:
-    'Steam, GameStatus, 점수, 미디어, 유사 게임 조회 재사용 시간. 0은 해당 캐시 비활성. Steam 라이브러리/위시리스트, 태그 맵은 자체 짧은 TTL을 유지. 온라인 플레이어 수는 캐시하지 않음.',
+    '게임 조회(Steam, GameStatus, 점수, 미디어, 유사 게임) 재사용 시간. 0은 해당 카테고리 비활성. 프로필·번역·FX는 토글이 켜져 있으면 자체 TTL 유지. 온라인 플레이어 수는 캐시하지 않음.',
+  cacheGameData: '게임 데이터',
+
+  cacheGameDataHint: 'Steam, SteamDB, GameStatus, OpenCritic, HLTB, ProtonDB, 스크린샷, 유사 게임.',
+
+  cacheUserProfiles: '유저 미니 프로필',
+
+  cacheUserProfilesHint: '호버 카드와 Backloggd 유저 페이지 꾸밈.',
+
+  cacheTranslations: '번역',
+
+  cacheTranslationsHint: '설명·리뷰용 Google Translate 결과.',
+
+  cacheFx: '환율',
+
+  cacheFxHint: '대략적인 가격 환산에 쓰는 FX 환율.',
+
+  cacheCatGame: '게임',
+
+  cacheCatProfiles: '프로필',
+
+  cacheCatTranslations: '번역',
+
+  cacheCatFx: '통화',
+
+  cacheCatSystem: '시스템',
+
+  cacheCatOff: '끔',
+
+  cacheBarCatCount: '{count}',
+
+  cacheBarEntries: '{count}개 항목',
+
   clearCache: '캐시 비우기',
   cacheCleared: '{count}개 항목 삭제됨',
   cacheEmpty: '지울 항목 없음 — 이미 비어 있음',
@@ -283,10 +325,13 @@ export default {
   cacheBarPct: '{pct}%',
   cacheBarFilled: '사용 중',
   cacheBarHint:
-    '소프트 저장 한도. 완전 = 사용 가능한 조회, 부분 = 불완전하거나 만료됐지만 아직 남아 있는 항목.',
+    '카테고리별 소프트 한도. 시스템(라이브러리/위시리스트 + 태그 맵)은 항상 켜짐. 색은 아래 토글과 일치.',
+  cacheBarAriaCats: '캐시 {pct}% 사용 — {detail}',
+
   cacheBarAria: '캐시 {pct}% 사용 — 완전 {full}, 부분 {partial}, 여유 {free}',
   cacheTabFillAria: '캐시 {pct}% 사용',
-  cacheClearHint: '이 브라우저 프로필의 Steam / GameStatus 조회를 삭제합니다.',
+  cacheClearHint:
+    '이 브라우저 프로필의 모든 조회 항목을 삭제합니다(토글은 바꾸지 않음).',
   toastSettingsSaved: '페이지를 새로고침하면 설정이 적용됩니다.',
   toastCacheClearedOnUpdate: 'v{version} — 조회 캐시가 지워짐',
   toastSteamMatchSaved: 'Steam App ID: {id}',

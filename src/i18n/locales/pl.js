@@ -272,9 +272,51 @@ export default {
   gameGroupHostsHint: 'Przyciski Backloggd na stronach Steam i SteamDB.',
   navSettings: 'Plus',
   navSettingsTitle: 'Ustawienia Backloggd Plus',
+  sectionCacheHint: 'Ile danych zapytań ten profil przeglądarki trzyma względem miękkiego limitu 5 MB.',
+
+  sectionCacheDuration: 'Czas przechowywania',
+
+  sectionCacheSources: 'Co cache’ować',
+
+  sectionCacheSourcesHint: 'Wyłącz źródło, aby go nie zapisywać. Przy zapisie wpisy tego typu zostaną usunięte.',
+
+  sectionCacheClear: 'Czyszczenie',
+
   cacheHours: 'Czas cache (godziny)',
   cacheHoursHint:
-    'Jak długo ponownie używać zapytań Steam, GameStatus, ocen, mediów i podobnych gier. 0 wyłącza ten cache. Biblioteka/wishlist Steam i mapa tagów zachowują własne krótkie TTL. Gracze online nigdy nie są cache’owani.',
+    'Jak długo ponownie używać zapytań o gry (Steam, GameStatus, oceny, media, podobne). 0 wyłącza tę kategorię. Profile, tłumaczenia i FX zachowują własne TTL, gdy przełączniki są włączone. Gracze online nigdy nie są cache’owani.',
+  cacheGameData: 'Dane gier',
+
+  cacheGameDataHint: 'Steam, SteamDB, GameStatus, OpenCritic, HLTB, ProtonDB, zrzuty, podobne gry.',
+
+  cacheUserProfiles: 'Mini-profile',
+
+  cacheUserProfilesHint: 'Karty po najechaniu i wzbogacenie stron użytkowników Backloggd.',
+
+  cacheTranslations: 'Tłumaczenia',
+
+  cacheTranslationsHint: 'Wyniki Google Translate dla opisów i recenzji.',
+
+  cacheFx: 'Kursy walut',
+
+  cacheFxHint: 'Kursy FX do przybliżonej konwersji ceny.',
+
+  cacheCatGame: 'Gry',
+
+  cacheCatProfiles: 'Profile',
+
+  cacheCatTranslations: 'Tłumaczenia',
+
+  cacheCatFx: 'Waluta',
+
+  cacheCatSystem: 'System',
+
+  cacheCatOff: 'Wył.',
+
+  cacheBarCatCount: '{count}',
+
+  cacheBarEntries: 'wpisów: {count}',
+
   clearCache: 'Wyczyść cache',
   cacheCleared: 'Usunięto wpisów: {count}',
   cacheEmpty: 'Nie ma czego czyścić — cache jest pusty',
@@ -286,10 +328,13 @@ export default {
   cacheBarPct: '{pct}%',
   cacheBarFilled: 'zajęte',
   cacheBarHint:
-    'Miękki limit pamięci. Pełny = użyteczne wpisy; częściowy = niekompletne lub wygasłe, nadal zapisane.',
+    'Miękki limit według kategorii. System (biblioteka/wishlist + mapa tagów) zawsze włączony. Kolory odpowiadają przełącznikom poniżej.',
+  cacheBarAriaCats: 'Cache zapełniony w {pct}% — {detail}',
+
   cacheBarAria: 'Cache zapełniony w {pct}% — {full} pełny, {partial} częściowy, {free} wolne',
   cacheTabFillAria: 'Cache zapełniony w {pct}%',
-  cacheClearHint: 'Usuwa zapisane zapytania Steam / GameStatus z tego profilu.',
+  cacheClearHint:
+    'Usuwa wszystkie wpisy z tego profilu przeglądarki (nie zmienia przełączników).',
   toastSettingsSaved: 'Preferencje zostaną zastosowane po przeładowaniu strony.',
   toastCacheClearedOnUpdate: 'v{version} — cache zapytań wyczyszczony',
   toastSteamMatchSaved: 'Steam App ID: {id}',

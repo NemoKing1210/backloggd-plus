@@ -5,6 +5,7 @@ import {
   clearSteamOverride,
   getSteamOverride,
   paintCacheMeter,
+  pruneDisabledCacheCategories,
   setSteamOverride,
 } from '../cache.js';
 import { CONVERT_CURRENCIES } from '../api/fx.js';
@@ -125,6 +126,29 @@ function paintTranslateTabBadge(root, code) {
   wrap.innerHTML = buildTranslateTabBadgeHtml(code).trim();
   const next = wrap.firstElementChild;
   if (next) badge.replaceWith(next);
+}
+
+const CACHE_SOURCE_KEYS = [
+  'cacheGameData',
+  'cacheUserProfiles',
+  'cacheTranslations',
+  'cacheFx',
+];
+
+/** Preview meter “off” badges from unsaved draft without committing settings. */
+function previewCacheMeterFromDraft(root, draft) {
+  const prev = {};
+  for (const key of CACHE_SOURCE_KEYS) {
+    prev[key] = settings[key];
+    settings[key] = draft[key] !== false;
+  }
+  try {
+    paintCacheMeter(root);
+  } finally {
+    for (const key of CACHE_SOURCE_KEYS) {
+      settings[key] = prev[key];
+    }
+  }
 }
 
 function buildTabsHtml(activeId, draft) {
@@ -601,15 +625,45 @@ export function openSettings() {
       <div ${panelAttrs('cache', activeTab)}>
       ${groupHtml(
         'sectionCache',
-        null,
+        'sectionCacheHint',
         `<div class="blp-settings-list blp-settings-list--stack">
           ${buildCacheMeterHtml()}
+        </div>`
+      )}
+      ${groupHtml(
+        'sectionCacheDuration',
+        null,
+        `<div class="blp-settings-list blp-settings-list--stack">
           ${fieldHtml(
             'blp-cache-hours',
             t.cacheHours,
             `<input id="blp-cache-hours" type="number" min="0" max="${CACHE_HOURS_MAX}" value="${Number(draft.cacheHours) || 0}" />`,
             t.cacheHoursHint
           )}
+        </div>`
+      )}
+      ${groupHtml(
+        'sectionCacheSources',
+        'sectionCacheSourcesHint',
+        listHtml(
+          toggleHtml('cacheGameData', draft.cacheGameData !== false, 'cacheGameDataHint'),
+          toggleHtml(
+            'cacheUserProfiles',
+            draft.cacheUserProfiles !== false,
+            'cacheUserProfilesHint'
+          ),
+          toggleHtml(
+            'cacheTranslations',
+            draft.cacheTranslations !== false,
+            'cacheTranslationsHint'
+          ),
+          toggleHtml('cacheFx', draft.cacheFx !== false, 'cacheFxHint')
+        )
+      )}
+      ${groupHtml(
+        'sectionCacheClear',
+        null,
+        `<div class="blp-settings-list blp-settings-list--stack">
           <div class="blp-settings-list__actions">
             <button type="button" class="blp-btn" data-blp-clear>${escapeHtml(t.clearCache)}</button>
             <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
@@ -720,6 +774,15 @@ export function openSettings() {
         const sel = backdrop.querySelector('#blp-convert-ccy');
         if (sel) sel.disabled = !draft.showPriceConvert;
       }
+      if (
+        key === 'cacheGameData' ||
+        key === 'cacheUserProfiles' ||
+        key === 'cacheTranslations' ||
+        key === 'cacheFx'
+      ) {
+        previewCacheMeterFromDraft(backdrop, draft);
+        syncTabInk(dialog);
+      }
     });
   });
 
@@ -770,8 +833,13 @@ export function openSettings() {
     draft.cacheHours = Number.isFinite(hours)
       ? Math.max(0, Math.min(CACHE_HOURS_MAX, hours))
       : DEFAULT_SETTINGS.cacheHours;
+    draft.cacheGameData = draft.cacheGameData !== false;
+    draft.cacheUserProfiles = draft.cacheUserProfiles !== false;
+    draft.cacheTranslations = draft.cacheTranslations !== false;
+    draft.cacheFx = draft.cacheFx !== false;
     saveSettings(draft);
     reloadRuntimeSettings();
+    pruneDisabledCacheCategories();
     queueToast(t.toastSettingsSaved, {
       type: 'success',
       title: t.toastSettingsSavedTitle,
