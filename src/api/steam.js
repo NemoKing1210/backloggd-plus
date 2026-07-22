@@ -154,8 +154,14 @@ export async function fetchSteamStoreItem(appId, country) {
   const cachedTags = getCached(tagsKey);
   const cachedAssets = getCached(assetsKey);
   const cachedExtras = getCached(extrasKey);
-  if (cachedTags && cachedAssets && cachedExtras) {
-    return { tags: cachedTags, assets: cachedAssets, extras: cachedExtras, _cache: 'hit' };
+  const hasAssetsCache = cachedAssets != null;
+  if (cachedTags && hasAssetsCache && cachedExtras) {
+    return {
+      tags: cachedTags,
+      assets: cachedAssets.empty ? null : cachedAssets,
+      extras: cachedExtras,
+      _cache: 'hit',
+    };
   }
 
   if (inflight.has(inflightKey)) return inflight.get(inflightKey);
@@ -204,21 +210,22 @@ export async function fetchSteamStoreItem(appId, country) {
         ...purchase,
       };
       setCached(tagsKey, tags);
-      if (assets) setCached(assetsKey, assets);
+      // Always persist assets (empty sentinel) so later visits do not re-hit GetItems.
+      setCached(assetsKey, assets || { empty: true });
       setCached(extrasKey, extras);
-      const partialHit = Boolean(cachedTags || cachedAssets || cachedExtras);
+      const partialHit = Boolean(cachedTags || hasAssetsCache || cachedExtras);
       return {
         tags: tags.length ? tags : cachedTags || [],
-        assets: assets || cachedAssets || null,
+        assets: assets || (cachedAssets && !cachedAssets.empty ? cachedAssets : null) || null,
         extras: extras || cachedExtras || null,
         _cache: partialHit ? 'mixed' : 'miss',
       };
     } catch (_) {
       return {
         tags: cachedTags || [],
-        assets: cachedAssets || null,
+        assets: cachedAssets && !cachedAssets.empty ? cachedAssets : null,
         extras: cachedExtras || null,
-        _cache: cachedTags || cachedAssets || cachedExtras ? 'hit' : 'miss',
+        _cache: cachedTags || hasAssetsCache || cachedExtras ? 'hit' : 'miss',
       };
     }
   })();
@@ -1082,9 +1089,10 @@ export async function fetchSteamDbExtras(appId, { onPartial, country } = {}) {
     emit(buildResult());
   }
 
-  const assetsPromise = needMedia
-    ? fetchSteamStoreAssets(id, cc).catch(() => null)
-    : Promise.resolve(null);
+  const assetsPromise =
+    needMedia && !mediaFromCache
+      ? fetchSteamStoreAssets(id, cc).catch(() => null)
+      : Promise.resolve(null);
 
   const shotsPromise =
     needGallery && !Array.isArray(screenshots)

@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.80] - 2026-07-22
+
+### Fixed
+
+- Game page remounts paint Steam / scores / GameStatus / Proton / SteamDB / similar from lookup cache in the same tick (no full skeleton flash on revisit)
+- Steam GetItems is not re-fetched when `steamdb:media` is already cached; empty store assets are stored as a sentinel so later visits stay cache hits
+- Pending cache writes flush on `pagehide` / tab hide; LRU access times persist with a short throttle
+
 ## [0.7.79] - 2026-07-22
 
 ### Added

@@ -30,6 +30,7 @@ import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { metacriticGameUrl, slugifyForBackloggd } from '../utils/slug.js';
 import { bindGameCoverViewer, unbindGameCoverViewer } from './gallery.js';
+import { peekGamePageCache } from './hydrate-game-cache.js';
 import { applySimilarGames, ensureSimilarMount, removeSimilarGamesUi } from './similar.js';
 import {
   applyGameStatsVisibility,
@@ -1242,9 +1243,6 @@ export async function enrichGamePage() {
     settings.showSteamDbDetails !== false;
   const needSteamDbMedia =
     settings.showSteamDbIcon || settings.showSteamDbCover || settings.showSteamDbGallery;
-  if (needSteamDbMedia) mountSteamDbSkeletons(token);
-  else syncExportButton(token);
-  if (settings.showSimilarGames) ensureSimilarMount(token);
   const needSteam =
     settings.showSteam ||
     settings.showMetacritic ||
@@ -1260,16 +1258,26 @@ export async function enrichGamePage() {
   const needUserdata =
     settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
 
+  // Sync hydrate before any await so remounts paint from cache without a skeleton flash.
+  const cachedPage = peekGamePageCache({
+    title,
+    slug: ctx.slug,
+    country: settings.steamCountry || 'US',
+  });
+  if (needSteamDbMedia) mountSteamDbSkeletons(token);
+  else syncExportButton(token);
+  if (settings.showSimilarGames) ensureSimilarMount(token);
+
   const state = {
-    steam: null,
+    steam: cachedPage.steam || null,
     owned: false,
     wishlist: false,
-    userdata: null,
-    gamestatus: null,
-    steamDb: null,
-    opencritic: null,
-    hltb: null,
-    proton: null,
+    userdata: cachedPage.userdata || null,
+    gamestatus: cachedPage.gamestatus || null,
+    steamDb: cachedPage.steamDb || null,
+    opencritic: cachedPage.opencritic || null,
+    hltb: cachedPage.hltb || null,
+    proton: cachedPage.proton || null,
     error: false,
   };
 
@@ -1413,8 +1421,20 @@ export async function enrichGamePage() {
     updateUnifiedRatingWidget(state);
   };
 
-  // Links that don't depend on Steam can appear immediately.
-  paintLinks(null);
+  // Links that don't depend on Steam can appear immediately; cache hits paint in the same tick.
+  paintLinks(state.steam);
+  if (state.steam) paintSteamBlock();
+  if (state.opencritic) paintOpenCritic();
+  if (state.hltb) paintHltb();
+  if (state.steam || state.proton) paintDeckProton();
+  if (state.gamestatus) paintGameStatus();
+  if (state.steamDb) {
+    applySteamDbUi(state.steamDb, token);
+    paintSteamDbDetails();
+  }
+  if (cachedPage.similar && state.steam?.appId != null) {
+    applySimilarGames(cachedPage.similar, state.steam.appId, token, { final: true });
+  }
 
   let dependentsStarted = false;
   let dependentsPromise = Promise.resolve();
@@ -1535,6 +1555,8 @@ export async function enrichGamePage() {
 
     dependentsPromise = Promise.all(jobs);
   };
+
+  if (state.steam?.found) startDependents(state.steam);
 
   try {
     const scoreJobs = [];

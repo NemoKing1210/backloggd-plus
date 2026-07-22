@@ -29,6 +29,10 @@ import { escapeAttr, escapeHtml } from './utils/html.js';
 
 export const CACHE_PINNED_KEYS = new Set([USERDATA_CACHE_KEY, TAG_MAP_CACHE_KEY]);
 
+const CACHE_TOUCH_PERSIST_THROTTLE_MS = 5000;
+let cacheTouchPersistAt = 0;
+let cachePersistFlushBound = false;
+
 export function readCacheStore() {
   if (cacheStore) return cacheStore;
   try {
@@ -40,10 +44,24 @@ export function readCacheStore() {
   return cacheStore;
 }
 
+export function flushCachePersist() {
+  if (!cachePersistTimer) return;
+  clearTimeout(cachePersistTimer);
+  setCachePersistTimer(0);
+  try {
+    pruneExpiredCache();
+    evictCacheToBudget();
+    GM_setValue(CACHE_KEY, readCacheStore());
+  } catch (_) {
+    /* ignore */
+  }
+}
+
 export function persistCacheSoon() {
   clearTimeout(cachePersistTimer);
   setCachePersistTimer(
     setTimeout(() => {
+      setCachePersistTimer(0);
       try {
         pruneExpiredCache();
         evictCacheToBudget();
@@ -53,6 +71,17 @@ export function persistCacheSoon() {
       }
     }, 400)
   );
+}
+
+/** Flush pending cache writes on tab hide / unload so remounts keep warm hits. */
+export function bindCachePersistFlush() {
+  if (cachePersistFlushBound || typeof window === 'undefined') return;
+  cachePersistFlushBound = true;
+  const flush = () => flushCachePersist();
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flush();
+  });
 }
 
 export function cacheTtlMs() {
@@ -99,7 +128,12 @@ export function isCacheEntryExpired(key, entry) {
 }
 
 export function touchCacheEntry(entry) {
-  if (entry && typeof entry === 'object') entry.at = Date.now();
+  if (!entry || typeof entry !== 'object') return;
+  entry.at = Date.now();
+  const now = Date.now();
+  if (now - cacheTouchPersistAt < CACHE_TOUCH_PERSIST_THROTTLE_MS) return;
+  cacheTouchPersistAt = now;
+  persistCacheSoon();
 }
 
 export function getCached(key) {
