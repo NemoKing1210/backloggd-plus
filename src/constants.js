@@ -37,7 +37,7 @@ export const CARD_CONCURRENCY = 3;
 export const CARD_ROOT_MARGIN = '240px 0px';
 export const CARD_SKIP_ANCESTOR =
   '#game-profile, #game-body, #logging-sidebar-section, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop';
-/** FIFA-style mini-profile card tiers by Games Played count. */
+/** Mini-profile card tiers by Games Played count. */
 export const PROFILE_CARD_TIERS = [
   { id: 'rookie', min: 0 },
   { id: 'bronze', min: 25 },
@@ -52,6 +52,8 @@ export const PROFILE_HOVER_OPEN_MS = 280;
 export const PROFILE_HOVER_CLOSE_MS = 180;
 export const PROFILE_LEAVE_MS = 300;
 export const PROFILE_FETCH_CONCURRENCY = 2;
+/** Preload mini-profiles slightly before avatars enter the viewport. */
+export const PROFILE_PRELOAD_ROOT_MARGIN = '160px 0px';
 export const CACHE_HOURS_MAX = 168;
 /** Soft advisory budget for the settings meter (GM storage has no fixed quota). */
 export const CACHE_SOFT_LIMIT_BYTES = 5 * 1024 * 1024;
@@ -184,6 +186,7 @@ export const DEFAULT_SETTINGS = {
   hideHomepageFuse: false,
   enhanceHeader: false,
   showUserMiniProfile: true,
+  preloadUserMiniProfile: false,
   showProfilePage: true,
   showProfileHeader: true,
   showProfileTierChip: true,

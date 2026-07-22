@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Settings → **User profile**: dedicated tab for mini-profile hover cards and profile-page chrome
+- Settings → **Profile**: dedicated tab for mini-profile hover cards and profile-page chrome
 - Per-block toggles for profile page styling: header & avatar, tier chip, stats, navigation, favorites
+- Settings → Profile: **Preload in viewport** for mini-profiles (off by default; fetches when avatars enter view)
 
 ### Changed
 
-- **User mini-profile cards** moved from General → User profile (hover cards only; profile-page styling is separate)
+- Settings tab label shortened to **Profile** (was “User profile”)
+- **User mini-profile cards** moved from General → Profile (hover cards only; profile-page styling is separate)
 
 ## [0.7.76] - 2026-07-22
 
@@ -57,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Hover mini-profile cards on user avatars (reviews, lists, activity): stats, rating bars, favorites, recent games, badges
-- FIFA-style card tiers by Games Played: Rookie → Bronze (25+) → Silver (50+) → Gold (100+) → Platinum (200+) → Diamond (300+) → Master (500+) → Legend (1000+)
+- Card tiers by Games Played: Rookie → Bronze (25+) → Silver (50+) → Gold (100+) → Platinum (200+) → Diamond (300+) → Master (500+) → Legend (1000+)
 - Settings → UI toggle **User mini-profile cards** (on by default)
 
 ## [0.7.70] - 2026-07-20

@@ -10,6 +10,7 @@ import {
   PROFILE_HOVER_CLOSE_MS,
   PROFILE_HOVER_OPEN_MS,
   PROFILE_LEAVE_MS,
+  PROFILE_PRELOAD_ROOT_MARGIN,
 } from '../constants.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
@@ -18,6 +19,7 @@ import { debounce } from '../utils/debounce.js';
 const HOVER_ATTR = 'data-blp-profile-hover';
 const MARK_ATTR = 'data-blp-ump';
 const TIER_ATTR = 'data-blp-ump-tier';
+const PRELOAD_ATTR = 'data-blp-ump-preload';
 const POPOVER_ID = 'blp-user-mini-profile';
 
 let bound = false;
@@ -31,6 +33,8 @@ let popoverEl = null;
 let fetchSeq = 0;
 let inFlightFetches = 0;
 const fetchQueue = [];
+let preloadObserver = null;
+const preloadQueued = new Set();
 
 function tierLabel(tierId) {
   const map = {
@@ -318,6 +322,7 @@ function clearAvatarMark(anchor) {
   anchor.removeAttribute(MARK_ATTR);
   anchor.removeAttribute(TIER_ATTR);
   anchor.removeAttribute(HOVER_ATTR);
+  anchor.removeAttribute(PRELOAD_ATTR);
 }
 
 function isEligibleAvatarAnchor(anchor) {
@@ -367,18 +372,77 @@ function applyTierToUsername(username, tierId) {
 }
 
 function clearAllAvatarMarks() {
-  document.querySelectorAll(`a[${MARK_ATTR}], a[${TIER_ATTR}], a[${HOVER_ATTR}]`).forEach(clearAvatarMark);
+  document
+    .querySelectorAll(`a[${MARK_ATTR}], a[${TIER_ATTR}], a[${HOVER_ATTR}], a[${PRELOAD_ATTR}]`)
+    .forEach(clearAvatarMark);
+}
+
+function stopProfilePreload() {
+  preloadObserver?.disconnect();
+  preloadObserver = null;
+}
+
+function preloadUsername(username) {
+  const name = String(username || '').trim();
+  if (!name) return;
+  const key = name.toLowerCase();
+  if (peekCachedUserProfile(name) || preloadQueued.has(key)) return;
+  preloadQueued.add(key);
+  enqueueFetch(() => fetchUserProfile(name)).then((profile) => {
+    if (profile) applyTierToUsername(name, tierIdFromProfile(profile));
+  });
+}
+
+function ensurePreloadObserver() {
+  if (preloadObserver) return preloadObserver;
+  preloadObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const anchor = entry.target;
+        preloadObserver.unobserve(anchor);
+        const username = parseUsernameFromHref(anchor.getAttribute('href') || anchor.href);
+        if (!username) continue;
+        preloadUsername(username);
+      }
+    },
+    { rootMargin: PROFILE_PRELOAD_ROOT_MARGIN, threshold: 0.01 }
+  );
+  return preloadObserver;
+}
+
+function scheduleProfilePreload() {
+  if (settings.showUserMiniProfile === false || settings.preloadUserMiniProfile !== true) {
+    stopProfilePreload();
+    return;
+  }
+  const obs = ensurePreloadObserver();
+  document.querySelectorAll(`a[${MARK_ATTR}]`).forEach((anchor) => {
+    if (anchor.getAttribute(PRELOAD_ATTR) === '1') return;
+    const username = parseUsernameFromHref(anchor.getAttribute('href') || anchor.href);
+    if (!username) return;
+    const cached = peekCachedUserProfile(username);
+    if (cached) {
+      applyTierToUsername(username, tierIdFromProfile(cached));
+      anchor.setAttribute(PRELOAD_ATTR, '1');
+      return;
+    }
+    anchor.setAttribute(PRELOAD_ATTR, '1');
+    obs.observe(anchor);
+  });
 }
 
 function decorateAvatars(root = document) {
   if (settings.showUserMiniProfile === false) {
     clearAllAvatarMarks();
+    stopProfilePreload();
     return;
   }
   const scope = root.querySelectorAll ? root : document;
   scope.querySelectorAll('a[href*="/u/"]').forEach((anchor) => {
     markAvatarAnchor(anchor);
   });
+  scheduleProfilePreload();
 }
 
 const decorateAvatarsSoon = debounce(() => decorateAvatars(), 120);
@@ -491,6 +555,7 @@ export function bindUserMiniProfiles() {
   if (settings.showUserMiniProfile === false) {
     hidePopover({ immediate: true });
     clearAllAvatarMarks();
+    stopProfilePreload();
     return;
   }
   if (bound) return;

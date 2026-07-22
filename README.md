@@ -114,7 +114,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](DEVELOPMENT.md#r
 
 - Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
 - Interface language (Auto or fixed locale)
-- User profile: mini-profile hover cards; profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
+- User profile: mini-profile hover cards (optional viewport preload); profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump

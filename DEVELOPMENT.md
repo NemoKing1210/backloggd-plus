@@ -71,7 +71,7 @@ backloggd-plus/
 │   ├── gm.js                # GM_xmlhttpRequest wrapper
 │   ├── api/                 # External data fetchers
 │   ├── features/            # UI features (enrichment, cards, …)
-│   ├── i18n/                # Translations
+│   ├── i18n/                # Translations (locales/ per language)
 │   ├── styles/              # CSS
 │   └── utils/               # Shared helpers
 ├── scripts/                 # Build / CI helpers

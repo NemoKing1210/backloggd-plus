@@ -33,7 +33,7 @@ backloggd-plus/
 │   ├── settings.js          # load/save settings, link helpers
 │   ├── cache.js             # GM lookup cache + overrides
 │   ├── gm.js                # GM_xmlhttpRequest wrapper
-│   ├── i18n/                # TRANSLATIONS + locale helpers
+│   ├── i18n/                # TRANSLATIONS (locales/*.js) + locale helpers
 │   ├── utils/               # html, title match, debounce, slug
 │   ├── styles/              # CSS (injected via vite-plugin-monkey)
 │   ├── api/                 # Steam, SteamDB meta, HLTB, OpenCritic, ProtonDB, GameStatus

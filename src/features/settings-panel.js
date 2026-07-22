@@ -428,6 +428,11 @@ export function openSettings() {
             'showUserMiniProfile',
             draft.showUserMiniProfile !== false,
             'showUserMiniProfileHint'
+          ),
+          toggleHtml(
+            'preloadUserMiniProfile',
+            draft.preloadUserMiniProfile === true,
+            'preloadUserMiniProfileHint'
           )
         )
       )}

@@ -41,7 +41,7 @@ Thanks for your interest in improving Backloggd Plus.
 
 UI locales: `en`, `ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl` (plus `auto` = browser).
 
-- Add every new user-facing string to **all** locales in [`src/i18n/`](src/i18n/).
+- Add every new user-facing string to **all** locale files in [`src/i18n/locales/`](src/i18n/locales/).
 - Keep localized `@name` / `@description` in `vite.config.js` aligned when changing the product description.
 
 ## Contributors
