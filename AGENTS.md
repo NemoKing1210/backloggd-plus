@@ -17,7 +17,7 @@ Built with [Vite](https://vitejs.dev/) + [vite-plugin-monkey](https://github.com
 - **Source:** `src/main.js`
 - **Canonical install artifacts (committed):** `backloggd-plus.user.js`, `backloggd-plus.meta.js` (also `@downloadURL` / `@updateURL`)
 - **Version source of truth:** `package.json` `version` (userscript header + `SCRIPT_VERSION`)
-- **Docs:** `README.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`
+- **Docs:** `README.md`, `DEVELOPMENT.md`, `CONTRIBUTING.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`
 - **License:** MIT
 
 Edit source under `src/`, then run `npm run build` to refresh the root install files. Do not hand-edit the built `.user.js` / `.meta.js`.
@@ -51,7 +51,9 @@ backloggd-plus/
 ├── backloggd-plus.meta.js   # Built metadata-only mirror for update checks
 ├── package.json
 ├── vite.config.js
-├── README.md
+├── README.md                # User-facing install + features
+├── DEVELOPMENT.md           # Local setup, layout, releases
+├── CONTRIBUTING.md          # PR guidelines + contributors
 ├── CHANGELOG.md
 ├── LICENSE
 ├── AGENTS.md                # This file (cross-tool agent instructions)

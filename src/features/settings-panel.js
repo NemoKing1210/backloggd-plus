@@ -104,10 +104,36 @@ function fieldHtml(id, label, controlHtml, hint) {
   `;
 }
 
-function buildTabsHtml(activeId) {
+function normalizeTranslateLocale(code) {
+  const raw = code || 'auto';
+  return raw === 'auto' || SUPPORTED_LOCALES.includes(raw) ? raw : 'auto';
+}
+
+function buildTranslateTabBadgeHtml(code) {
+  const localeCode = normalizeTranslateLocale(code);
+  const label = localeCode.toUpperCase();
+  const title =
+    localeCode === 'auto' ? t.translateAsUi : LOCALE_NATIVE_NAMES[localeCode] || label;
+  return `<span class="blp-settings__tab-badge blp-settings__tab-badge--low" data-blp-translate-tab-badge title="${escapeAttr(title)}" aria-label="${escapeAttr(title)}">${escapeHtml(label)}</span>`;
+}
+
+function paintTranslateTabBadge(root, code) {
+  const badge = root?.querySelector?.('[data-blp-translate-tab-badge]');
+  if (!badge) return;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = buildTranslateTabBadgeHtml(code).trim();
+  const next = wrap.firstElementChild;
+  if (next) badge.replaceWith(next);
+}
+
+function buildTabsHtml(activeId, draft) {
   const tabs = SETTINGS_TABS.map(({ id, labelKey }) => {
     const active = id === activeId;
-    const badge = id === 'cache' ? buildCacheTabBadgeHtml() : '';
+    let badge = '';
+    if (id === 'cache') badge = buildCacheTabBadgeHtml();
+    else if (id === 'translate') {
+      badge = buildTranslateTabBadgeHtml(draft?.translateTargetLocale || settings.translateTargetLocale);
+    }
     return `
       <button
         type="button"
@@ -369,7 +395,7 @@ export function openSettings() {
         <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
       </div>
       <div class="blp-settings__tabs" role="tablist" aria-label="${escapeAttr(t.panelTitle)}">
-        ${buildTabsHtml(activeTab)}
+        ${buildTabsHtml(activeTab, draft)}
       </div>
       <div class="blp-settings__body">
       <div ${panelAttrs('general', activeTab)}>
@@ -388,6 +414,11 @@ export function openSettings() {
             'showUserMiniProfile',
             draft.showUserMiniProfile !== false,
             'showUserMiniProfileHint'
+          ),
+          toggleHtml(
+            'showProfileMenuSettings',
+            draft.showProfileMenuSettings === true,
+            'showProfileMenuSettingsHint'
           )
         )
       )}
@@ -591,6 +622,11 @@ export function openSettings() {
 
   backdrop.querySelector('[data-blp-cancel]')?.addEventListener('click', close);
 
+  backdrop.querySelector('#blp-translate-locale')?.addEventListener('change', (e) => {
+    paintTranslateTabBadge(backdrop, e.target?.value);
+    syncTabInk(dialog);
+  });
+
   dialog?.querySelector('.blp-settings__tabs')?.addEventListener('click', (e) => {
     const btn = e.target?.closest?.('[data-blp-tab]');
     if (!btn || !dialog.contains(btn)) return;
@@ -700,9 +736,59 @@ export function openSettings() {
 }
 
 export const NAV_BTN_ID = 'blp-nav-settings';
+export const PROFILE_MENU_SETTINGS_ID = 'blp-profile-menu-settings';
+
+export function ensureProfileMenuSettingsLink() {
+  const existing = document.getElementById(PROFILE_MENU_SETTINGS_ID);
+  if (settings.showProfileMenuSettings !== true) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+
+  const menu =
+    document.querySelector('#profile-li .dropdown-menu') ||
+    document.querySelector('#navbarDropdown + .dropdown-menu');
+  if (!menu) return;
+
+  const link = document.createElement('a');
+  link.id = PROFILE_MENU_SETTINGS_ID;
+  link.className = 'dropdown-item py-1';
+  link.href = '#';
+  link.textContent = t.navSettings;
+  link.title = t.navSettingsTitle;
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openSettings();
+  });
+
+  const nativeSettings = menu.querySelector(
+    'a.dropdown-item[href="/settings/"], a.dropdown-item[href="/settings"]'
+  );
+  if (nativeSettings) {
+    nativeSettings.insertAdjacentElement('beforebegin', link);
+    return;
+  }
+  const logout = menu.querySelector(
+    'a.dropdown-item[href="/users/sign_out"], a.dropdown-item[href="/users/sign_out/"]'
+  );
+  if (logout) {
+    logout.insertAdjacentElement('beforebegin', link);
+    return;
+  }
+  menu.appendChild(link);
+}
 
 export function ensureNavSettingsButton() {
-  if (document.getElementById(NAV_BTN_ID)) return;
+  ensureProfileMenuSettingsLink();
+
+  const existingBtn = document.getElementById(NAV_BTN_ID);
+  if (settings.showProfileMenuSettings === true) {
+    existingBtn?.remove();
+    return;
+  }
+  if (existingBtn) return;
 
   const btn = document.createElement('button');
   btn.id = NAV_BTN_ID;

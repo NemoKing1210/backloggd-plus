@@ -184,6 +184,7 @@ export const DEFAULT_SETTINGS = {
   hideHomepageFuse: false,
   enhanceHeader: false,
   showUserMiniProfile: true,
+  showProfileMenuSettings: false,
   debugMode: false,
   links: {
     igdb: true,

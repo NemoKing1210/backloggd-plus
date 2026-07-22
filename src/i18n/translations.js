@@ -49,6 +49,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'User mini-profile cards',
     showUserMiniProfileHint:
       'FIFA-style mini profile on avatar hover, and tier styling on profile pages. Tier grows with games played (25+ bronze … 1000+ legend).',
+    showProfileMenuSettings: 'Plus settings in profile menu',
+    showProfileMenuSettingsHint:
+      'Adds a Plus entry to the account dropdown (next to Settings) and hides the header Plus button.',
     miniProfilePlayed: 'Played',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'This year',
@@ -441,6 +444,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'Мини-профиль пользователя',
     showUserMiniProfileHint:
       'Карточка в стиле FIFA при наведении на аватар и оформление страницы профиля по тиру. Тир растёт с числом сыгранных игр (25+ бронза … 1000+ легенда).',
+    showProfileMenuSettings: 'Настройки Plus в меню профиля',
+    showProfileMenuSettingsHint:
+      'Добавляет пункт Plus в меню аккаунта рядом с Settings и скрывает кнопку Plus в хедере.',
     miniProfilePlayed: 'Сыграно',
     miniProfileBacklog: 'Бэклог',
     miniProfileThisYear: 'В этом году',
@@ -827,6 +833,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: '用户迷你资料卡',
     showUserMiniProfileHint:
       '悬停头像时显示 FIFA 风格迷你资料。等级随游玩数量提升（25+ 青铜 … 1000+ 传奇）。',
+    showProfileMenuSettings: '在个人菜单中显示 Plus 设置',
+    showProfileMenuSettingsHint:
+      '在账号下拉菜单中靠近 Settings 处添加 Plus 项，并隐藏顶栏 Plus 按钮。',
     miniProfilePlayed: '已玩',
     miniProfileBacklog: '待玩',
     miniProfileThisYear: '今年',
@@ -1207,6 +1216,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'Mini perfil de usuario',
     showUserMiniProfileHint:
       'Muestra una carta estilo FIFA al pasar el cursor sobre avatares. El nivel sube con juegos jugados (25+ bronce … 1000+ leyenda).',
+    showProfileMenuSettings: 'Ajustes Plus en el menú de perfil',
+    showProfileMenuSettingsHint:
+      'Añade una entrada Plus al menú de la cuenta (junto a Settings) y oculta el botón Plus del encabezado.',
     miniProfilePlayed: 'Jugados',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'Este año',
@@ -1600,6 +1612,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'Mini perfil do usuário',
     showUserMiniProfileHint:
       'Mostra um card estilo FIFA ao passar o mouse sobre avatares. O nível sobe com jogos jogados (25+ bronze … 1000+ lenda).',
+    showProfileMenuSettings: 'Configurações Plus no menu do perfil',
+    showProfileMenuSettingsHint:
+      'Adiciona um item Plus ao menu da conta (ao lado de Settings) e oculta o botão Plus do cabeçalho.',
     miniProfilePlayed: 'Jogados',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'Este ano',
@@ -1993,6 +2008,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'Mini-Profilkarten',
     showUserMiniProfileHint:
       'FIFA-artige Minikarte beim Hover über Avatare. Stufe steigt mit gespielten Spielen (25+ Bronze … 1000+ Legende).',
+    showProfileMenuSettings: 'Plus-Einstellungen im Profilmenü',
+    showProfileMenuSettingsHint:
+      'Fügt einen Plus-Eintrag im Kontomenü (neben Settings) hinzu und blendet den Plus-Button im Header aus.',
     miniProfilePlayed: 'Gespielt',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'Dieses Jahr',
@@ -2386,6 +2404,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'Mini-profil utilisateur',
     showUserMiniProfileHint:
       'Carte style FIFA au survol des avatars. Le palier monte avec les jeux joués (25+ bronze … 1000+ légende).',
+    showProfileMenuSettings: 'Réglages Plus dans le menu profil',
+    showProfileMenuSettingsHint:
+      'Ajoute une entrée Plus au menu du compte (à côté de Settings) et masque le bouton Plus de l’en-tête.',
     miniProfilePlayed: 'Joués',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'Cette année',
@@ -2779,6 +2800,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'ユーザーミニプロフィール',
     showUserMiniProfileHint:
       'アバターにホバーすると FIFA 風のミニカードを表示。プレイ数が増えるほどティアが上がります（25+ ブロンズ … 1000+ レジェンド）。',
+    showProfileMenuSettings: 'プロフィールメニューに Plus 設定',
+    showProfileMenuSettingsHint:
+      'アカウントのドロップダウン（Settings の近く）に Plus を追加し、ヘッダーの Plus ボタンを非表示にします。',
     miniProfilePlayed: 'プレイ済み',
     miniProfileBacklog: 'バックログ',
     miniProfileThisYear: '今年',
@@ -3170,6 +3194,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: '사용자 미니 프로필',
     showUserMiniProfileHint:
       '아바타에 마우스를 올리면 FIFA 스타일 미니 카드를 표시합니다. 플레이 수에 따라 티어가 올라갑니다(25+ 브론즈 … 1000+ 레전드).',
+    showProfileMenuSettings: '프로필 메뉴에 Plus 설정',
+    showProfileMenuSettingsHint:
+      '계정 드롭다운의 Settings 옆에 Plus 항목을 추가하고 헤더 Plus 버튼을 숨깁니다.',
     miniProfilePlayed: '플레이',
     miniProfileBacklog: '백로그',
     miniProfileThisYear: '올해',
@@ -3560,6 +3587,9 @@ export const TRANSLATIONS = {
     showUserMiniProfile: 'Mini profil użytkownika',
     showUserMiniProfileHint:
       'Karta w stylu FIFA po najechaniu na awatar. Poziom rośnie wraz z liczbą gier (25+ brąz … 1000+ legenda).',
+    showProfileMenuSettings: 'Ustawienia Plus w menu profilu',
+    showProfileMenuSettingsHint:
+      'Dodaje pozycję Plus w menu konta (obok Settings) i ukrywa przycisk Plus w nagłówku.',
     miniProfilePlayed: 'Zagrane',
     miniProfileBacklog: 'Backlog',
     miniProfileThisYear: 'W tym roku',

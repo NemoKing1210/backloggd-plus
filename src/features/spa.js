@@ -43,6 +43,7 @@ export function isBlpManagedElement(el) {
     el.hasAttribute?.('data-blp-token') ||
     el.hasAttribute?.('data-blp-translate') ||
     el.id === 'blp-nav-settings' ||
+    el.id === 'blp-profile-menu-settings' ||
     el.id === 'blp-steam-backloggd-btn' ||
     el.id === 'blp-steamdb-backloggd-btn'
   ) {
@@ -77,7 +78,7 @@ export function isBlpManagedElement(el) {
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], [data-blp-translate], .blp-translate-btn, .blp-translate-result, .blp-translate-desc-slot, .blp-translate-review-slot, #blp-nav-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-profile-tier-chip`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], [data-blp-translate], .blp-translate-btn, .blp-translate-result, .blp-translate-desc-slot, .blp-translate-review-slot, #blp-nav-settings, #blp-profile-menu-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-profile-tier-chip`
     )
   );
 }
