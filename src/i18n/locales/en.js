@@ -7,6 +7,13 @@ export default {
   cancel: 'Cancel',
   save: 'Save',
   saveReload: 'Save & Reload page',
+  resetSettings: 'Reset',
+  resetSettingsConfirmTitle: 'Reset settings?',
+  resetSettingsConfirm:
+    'All preferences will be restored to defaults. The page will reload. Your lookup cache is not cleared.',
+  resetSettingsConfirmAction: 'Reset',
+  toastSettingsResetTitle: 'Settings reset',
+  toastSettingsReset: 'Defaults restored. The page will reload.',
   repoLink: 'GitHub',
   repoAbout: 'Source code, updates, and issue reports',
   sectionGame: 'Game page',

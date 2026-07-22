@@ -7,6 +7,13 @@ export default {
   cancel: 'Annuler',
   save: 'Enregistrer',
   saveReload: 'Enregistrer et recharger',
+  resetSettings: 'Réinitialiser',
+  resetSettingsConfirmTitle: 'Réinitialiser les réglages ?',
+  resetSettingsConfirm:
+    'Toutes les préférences seront restaurées aux valeurs par défaut. La page sera rechargée. Le cache de recherche n’est pas effacé.',
+  resetSettingsConfirmAction: 'Réinitialiser',
+  toastSettingsResetTitle: 'Réglages réinitialisés',
+  toastSettingsReset: 'Valeurs par défaut restaurées. La page va se recharger.',
   repoLink: 'GitHub',
   repoAbout: 'Code source, mises à jour et signalements',
   sectionGame: 'Page jeu',

@@ -187,7 +187,7 @@ export const DEFAULT_SETTINGS = {
   translateDescription: true,
   translateReviews: true,
   translateReviewsAuto: false,
-  hideHomepageFuse: false,
+  hideHomepageFuse: true,
   enhanceHeader: false,
   showUserMiniProfile: true,
   preloadUserMiniProfile: false,

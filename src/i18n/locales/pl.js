@@ -7,6 +7,13 @@ export default {
   cancel: 'Anuluj',
   save: 'Zapisz',
   saveReload: 'Zapisz i przeładuj',
+  resetSettings: 'Resetuj',
+  resetSettingsConfirmTitle: 'Zresetować ustawienia?',
+  resetSettingsConfirm:
+    'Wszystkie preferencje wrócą do wartości domyślnych. Strona zostanie przeładowana. Cache wyszukiwań nie jest czyszczony.',
+  resetSettingsConfirmAction: 'Resetuj',
+  toastSettingsResetTitle: 'Ustawienia zresetowane',
+  toastSettingsReset: 'Przywrócono domyślne wartości. Strona zostanie przeładowana.',
   repoLink: 'GitHub',
   repoAbout: 'Kod źródłowy, aktualizacje i zgłoszenia',
   sectionGame: 'Strona gry',

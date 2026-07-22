@@ -7,6 +7,13 @@ export default {
   cancel: 'Cancelar',
   save: 'Salvar',
   saveReload: 'Salvar e recarregar',
+  resetSettings: 'Redefinir',
+  resetSettingsConfirmTitle: 'Redefinir configurações?',
+  resetSettingsConfirm:
+    'Todas as preferências voltarão aos valores padrão. A página será recarregada. O cache de consultas não é limpo.',
+  resetSettingsConfirmAction: 'Redefinir',
+  toastSettingsResetTitle: 'Configurações redefinidas',
+  toastSettingsReset: 'Padrões restaurados. A página será recarregada.',
   repoLink: 'GitHub',
   repoAbout: 'Código, atualizações e relatórios',
   sectionGame: 'Página do jogo',

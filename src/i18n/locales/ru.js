@@ -7,6 +7,13 @@ export default {
   cancel: 'Отмена',
   save: 'Сохранить',
   saveReload: 'Сохранить и перезагрузить',
+  resetSettings: 'Сбросить',
+  resetSettingsConfirmTitle: 'Сбросить настройки?',
+  resetSettingsConfirm:
+    'Все параметры будут возвращены к значениям по умолчанию. Страница перезагрузится. Кэш поиска не очищается.',
+  resetSettingsConfirmAction: 'Сбросить',
+  toastSettingsResetTitle: 'Настройки сброшены',
+  toastSettingsReset: 'Значения по умолчанию восстановлены. Страница будет перезагружена.',
   repoLink: 'GitHub',
   repoAbout: 'Исходники, обновления и баг-репорты',
   sectionGame: 'Страница игры',

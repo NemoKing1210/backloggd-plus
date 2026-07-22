@@ -56,6 +56,13 @@ export function saveSettings(next) {
   GM_setValue(SETTINGS_KEY, merged);
 }
 
+export function resetSettings() {
+  saveSettings({
+    ...DEFAULT_SETTINGS,
+    links: { ...DEFAULT_SETTINGS.links },
+  });
+}
+
 export function isLinkEnabled(key, cfg) {
   return Boolean(cfg.showLinks && cfg.links && cfg.links[key] !== false);
 }

@@ -7,6 +7,13 @@ export default {
   cancel: 'キャンセル',
   save: '保存',
   saveReload: '保存して再読み込み',
+  resetSettings: 'リセット',
+  resetSettingsConfirmTitle: '設定をリセットしますか？',
+  resetSettingsConfirm:
+    'すべての設定が初期値に戻ります。ページが再読み込みされます。検索キャッシュは消えません。',
+  resetSettingsConfirmAction: 'リセット',
+  toastSettingsResetTitle: '設定をリセットしました',
+  toastSettingsReset: '初期値に戻しました。ページを再読み込みします。',
   repoLink: 'GitHub',
   repoAbout: 'ソースコード、更新、Issue報告',
   sectionGame: 'ゲームページ',

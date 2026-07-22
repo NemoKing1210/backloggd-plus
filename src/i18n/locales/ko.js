@@ -7,6 +7,13 @@ export default {
   cancel: '취소',
   save: '저장',
   saveReload: '저장 후 새로고침',
+  resetSettings: '초기화',
+  resetSettingsConfirmTitle: '설정을 초기화할까요?',
+  resetSettingsConfirm:
+    '모든 설정이 기본값으로 돌아갑니다. 페이지가 새로고침됩니다. 조회 캐시는 지워지지 않습니다.',
+  resetSettingsConfirmAction: '초기화',
+  toastSettingsResetTitle: '설정 초기화됨',
+  toastSettingsReset: '기본값이 복원되었습니다. 페이지를 새로고침합니다.',
   repoLink: 'GitHub',
   repoAbout: '소스 코드, 업데이트, 이슈 보고',
   sectionGame: '게임 페이지',

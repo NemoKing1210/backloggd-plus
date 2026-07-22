@@ -28,7 +28,7 @@ import {
   STEAM_COUNTRY_CODES,
 } from '../constants.js';
 import { LOCALE_FLAG_AUTO, LOCALE_FLAGS, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
-import { linkLabelKey, saveSettings } from '../settings.js';
+import { linkLabelKey, resetSettings, saveSettings } from '../settings.js';
 import { reloadRuntimeSettings, settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { scheduleCardBadges } from './cards.js';
@@ -332,6 +332,48 @@ function activateSettingsTab(root, tabId) {
   });
 }
 
+function openConfirmDialog({ title, message, confirmLabel, danger = false, onConfirm }) {
+  if (document.querySelector('.blp-confirm-backdrop')) return;
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'blp-confirm-backdrop';
+  backdrop.innerHTML = `
+    <div class="blp-confirm-dialog" role="dialog" aria-modal="true" aria-label="${escapeAttr(title)}">
+      <h3>${escapeHtml(title)}</h3>
+      <p class="blp-hint">${escapeHtml(message)}</p>
+      <div class="blp-actions">
+        <button type="button" class="blp-btn" data-blp-confirm-cancel>${escapeHtml(t.cancel)}</button>
+        <button type="button" class="blp-btn ${danger ? 'blp-danger' : 'blp-primary'}" data-blp-confirm-ok>${escapeHtml(confirmLabel)}</button>
+      </div>
+    </div>
+  `;
+
+  const close = () => {
+    document.removeEventListener('keydown', onKeydown, true);
+    backdrop.remove();
+  };
+
+  const onKeydown = (e) => {
+    if (e.key !== 'Escape') return;
+    e.preventDefault();
+    e.stopPropagation();
+    close();
+  };
+
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) close();
+  });
+  backdrop.querySelector('[data-blp-confirm-cancel]')?.addEventListener('click', close);
+  backdrop.querySelector('[data-blp-confirm-ok]')?.addEventListener('click', () => {
+    close();
+    onConfirm?.();
+  });
+
+  document.body.appendChild(backdrop);
+  document.addEventListener('keydown', onKeydown, true);
+  backdrop.querySelector('[data-blp-confirm-cancel]')?.focus();
+}
+
 export function openSettings() {
   if (document.querySelector('.blp-settings-backdrop')) return;
 
@@ -434,7 +476,7 @@ export function openSettings() {
         'generalGroupInterfaceHint',
         listHtml(
           toggleHtml('enhanceHeader', draft.enhanceHeader === true, 'enhanceHeaderHint'),
-          toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint'),
+          toggleHtml('hideHomepageFuse', draft.hideHomepageFuse !== false, 'hideHomepageFuseHint'),
           toggleHtml(
             'showProfileMenuSettings',
             draft.showProfileMenuSettings === true,
@@ -683,6 +725,9 @@ export function openSettings() {
       </div>
       </div>
       <div class="blp-settings__foot">
+        <div class="blp-actions blp-actions--start">
+          <button type="button" data-blp-reset>${escapeHtml(t.resetSettings)}</button>
+        </div>
         <div class="blp-actions">
           <button type="button" data-blp-cancel>${escapeHtml(t.cancel)}</button>
           <button type="button" class="blp-primary" data-blp-save>${escapeHtml(t.saveReload)}</button>
@@ -714,6 +759,7 @@ export function openSettings() {
 
   const onKeydown = (e) => {
     if (e.key === 'Escape') {
+      if (document.querySelector('.blp-confirm-backdrop')) return;
       e.preventDefault();
       close();
     }
@@ -810,6 +856,24 @@ export function openSettings() {
     showToast(count ? fmt(t.cacheCleared, { count }) : t.cacheEmpty, {
       type: count ? 'success' : 'info',
       title: count ? t.toastCacheClearedTitle : t.cacheEmptyTitle,
+    });
+  });
+
+  backdrop.querySelector('[data-blp-reset]')?.addEventListener('click', () => {
+    openConfirmDialog({
+      title: t.resetSettingsConfirmTitle,
+      message: t.resetSettingsConfirm,
+      confirmLabel: t.resetSettingsConfirmAction,
+      danger: true,
+      onConfirm: () => {
+        resetSettings();
+        reloadRuntimeSettings();
+        queueToast(t.toastSettingsReset, {
+          type: 'success',
+          title: t.toastSettingsResetTitle,
+        });
+        location.reload();
+      },
     });
   });
 

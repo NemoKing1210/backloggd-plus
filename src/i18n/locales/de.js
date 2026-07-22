@@ -7,6 +7,13 @@ export default {
   cancel: 'Abbrechen',
   save: 'Speichern',
   saveReload: 'Speichern & neu laden',
+  resetSettings: 'Zurücksetzen',
+  resetSettingsConfirmTitle: 'Einstellungen zurücksetzen?',
+  resetSettingsConfirm:
+    'Alle Einstellungen werden auf die Standardwerte zurückgesetzt. Die Seite wird neu geladen. Der Lookup-Cache bleibt erhalten.',
+  resetSettingsConfirmAction: 'Zurücksetzen',
+  toastSettingsResetTitle: 'Einstellungen zurückgesetzt',
+  toastSettingsReset: 'Standardwerte wiederhergestellt. Die Seite wird neu geladen.',
   repoLink: 'GitHub',
   repoAbout: 'Quellcode, Updates und Issue-Reports',
   sectionGame: 'Spieleseite',
