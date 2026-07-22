@@ -2680,6 +2680,29 @@ img.blp-cover-zoomable:focus-visible {
   margin-top: 4px;
 }
 
+.blp-settings-backup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.blp-settings-backup__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.blp-settings-backup__item .blp-btn {
+  flex: 0 0 auto;
+  min-width: 7.5rem;
+}
+
+.blp-settings-backup__hint {
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .blp-settings-list > .blp-toggle + .blp-toggle,
 .blp-settings-list > .blp-field + .blp-toggle,
 .blp-settings-list > .blp-toggle + .blp-field {

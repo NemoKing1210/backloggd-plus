@@ -28,7 +28,14 @@ import {
   STEAM_COUNTRY_CODES,
 } from '../constants.js';
 import { LOCALE_FLAG_AUTO, LOCALE_FLAGS, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
-import { linkLabelKey, resetSettings, saveSettings } from '../settings.js';
+import {
+  buildSettingsExport,
+  linkLabelKey,
+  parseSettingsImport,
+  resetSettings,
+  saveSettings,
+  settingsExportFilename,
+} from '../settings.js';
 import { reloadRuntimeSettings, settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { scheduleCardBadges } from './cards.js';
@@ -104,6 +111,47 @@ function fieldHtml(id, label, controlHtml, hint) {
       ${hint ? `<p class="blp-hint">${escapeHtml(hint)}</p>` : ''}
     </div>
   `;
+}
+
+function backupActionHtml(action, titleKey, hintKey) {
+  return `
+    <div class="blp-settings-backup__item">
+      <button type="button" class="blp-btn" data-blp-settings-${escapeAttr(action)}>
+        ${escapeHtml(t[titleKey])}
+      </button>
+      <p class="blp-hint blp-settings-backup__hint">${escapeHtml(t[hintKey])}</p>
+    </div>
+  `;
+}
+
+function downloadJsonFile(filename, data) {
+  const text = `${JSON.stringify(data, null, 2)}\n`;
+  const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error || new Error('read failed'));
+    reader.readAsText(file);
+  });
+}
+
+function settingsImportErrorMessage(code) {
+  if (code === 'too_large') return t.toastSettingsImportTooLarge;
+  if (code === 'empty') return t.toastSettingsImportEmpty;
+  if (code === 'invalid_json' || code === 'not_settings') return t.toastSettingsImportInvalid;
+  return t.toastSettingsImportReadFailed;
 }
 
 function normalizeTranslateLocale(code) {
@@ -484,6 +532,22 @@ export function openSettings() {
           )
         )
       )}
+      ${groupHtml(
+        'generalGroupBackup',
+        'generalGroupBackupHint',
+        `<div class="blp-settings-list blp-settings-list--stack">
+          <div class="blp-settings-backup">
+            ${backupActionHtml('export', 'settingsExport', 'settingsExportHint')}
+            ${backupActionHtml('import', 'settingsImport', 'settingsImportHint')}
+          </div>
+          <input
+            type="file"
+            accept=".json,application/json,text/json"
+            hidden
+            data-blp-settings-import-file
+          />
+        </div>`
+      )}
       </div>
       <div ${panelAttrs('profile', activeTab)}>
       ${groupHtml(
@@ -857,6 +921,89 @@ export function openSettings() {
       type: count ? 'success' : 'info',
       title: count ? t.toastCacheClearedTitle : t.cacheEmptyTitle,
     });
+  });
+
+  backdrop.querySelector('[data-blp-settings-export]')?.addEventListener('click', () => {
+    try {
+      // Prefer live draft so unsaved panel tweaks are included in the backup.
+      const cc = backdrop.querySelector('#blp-steam-cc')?.value;
+      const hours = Number(backdrop.querySelector('#blp-cache-hours')?.value);
+      const uiLocale = backdrop.querySelector('#blp-ui-locale')?.value;
+      const translateLocaleVal = backdrop.querySelector('#blp-translate-locale')?.value;
+      const translateModeVal = backdrop.querySelector('#blp-translate-mode')?.value;
+      const convertCcy = backdrop.querySelector('#blp-convert-ccy')?.value;
+      const snapshot = {
+        ...draft,
+        links: { ...draft.links },
+      };
+      if (uiLocale != null) snapshot.uiLocale = uiLocale;
+      if (translateLocaleVal != null) snapshot.translateTargetLocale = translateLocaleVal;
+      if (translateModeVal != null) snapshot.translateDisplayMode = translateModeVal;
+      if (cc != null) snapshot.steamCountry = cc;
+      if (convertCcy != null) snapshot.convertCurrency = convertCcy;
+      if (Number.isFinite(hours)) snapshot.cacheHours = hours;
+
+      downloadJsonFile(settingsExportFilename(), buildSettingsExport(snapshot));
+      showToast(t.toastSettingsExported, {
+        type: 'success',
+        title: t.toastSettingsExportedTitle,
+      });
+    } catch (_) {
+      showToast(t.toastSettingsExportFailed, {
+        type: 'error',
+        title: t.toastSettingsExportFailedTitle,
+      });
+    }
+  });
+
+  const importFileInput = backdrop.querySelector('[data-blp-settings-import-file]');
+  const applyImportedSettings = (parsed) => {
+    saveSettings(parsed.settings);
+    reloadRuntimeSettings();
+    pruneDisabledCacheCategories();
+    queueToast(t.toastSettingsImported, {
+      type: 'success',
+      title: t.toastSettingsImportedTitle,
+    });
+    location.reload();
+  };
+
+  const handleSettingsImportFile = async (file) => {
+    if (!file) return;
+    try {
+      const text = await readFileAsText(file);
+      const parsed = parseSettingsImport(text, file.size || 0);
+      if (!parsed.ok) {
+        showToast(settingsImportErrorMessage(parsed.code), {
+          type: 'error',
+          title: t.toastSettingsImportFailedTitle,
+        });
+        return;
+      }
+      openConfirmDialog({
+        title: t.settingsImportConfirmTitle,
+        message: t.settingsImportConfirm,
+        confirmLabel: t.settingsImportConfirmAction,
+        danger: true,
+        onConfirm: () => applyImportedSettings(parsed),
+      });
+    } catch (_) {
+      showToast(t.toastSettingsImportReadFailed, {
+        type: 'error',
+        title: t.toastSettingsImportFailedTitle,
+      });
+    }
+  };
+
+  backdrop.querySelector('[data-blp-settings-import]')?.addEventListener('click', () => {
+    if (!importFileInput) return;
+    importFileInput.value = '';
+    importFileInput.click();
+  });
+
+  importFileInput?.addEventListener('change', () => {
+    const file = importFileInput.files?.[0];
+    void handleSettingsImportFile(file);
   });
 
   backdrop.querySelector('[data-blp-reset]')?.addEventListener('click', () => {
