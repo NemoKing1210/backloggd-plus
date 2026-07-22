@@ -230,6 +230,12 @@ After changes that should ship, run `npm run build` and commit the regenerated r
 
 Shared constants live in [`src/constants.js`](src/constants.js); feature toggles and UI strings are in settings / `src/i18n/`.
 
+## Contributors
+
+Thanks to everyone who helps improve Backloggd Plus:
+
+- [Nikitamce](https://github.com/Nikitamce)
+
 ## Affiliation
 
 This project is **not affiliated** with Backloggd. It is an independent community userscript.

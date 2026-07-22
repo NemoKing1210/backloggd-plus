@@ -15,6 +15,7 @@ import {
   AUTHOR_NAME,
   AUTHOR_URL,
   CACHE_HOURS_MAX,
+  CONTRIBUTORS,
   DEFAULT_SETTINGS,
   FAVICON_URL,
   LINK_DOMAINS,
@@ -108,8 +109,55 @@ function panelAttrs(id, activeId) {
   return `class="blp-settings__panel${active ? ' is-active' : ''}" id="blp-panel-${escapeAttr(id)}" role="tabpanel" aria-labelledby="blp-tab-${escapeAttr(id)}"${active ? '' : ' hidden'}`;
 }
 
+function personCardHtml({ name, handle, url, avatarUrl, email }) {
+  const emailHtml = email
+    ? `<a class="blp-about__email" href="mailto:${escapeAttr(email)}">${escapeHtml(email)}</a>`
+    : '';
+  return `
+    <div class="blp-about__author-row">
+      <a
+        class="blp-about__avatar-link"
+        href="${escapeAttr(url)}"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="${escapeAttr(name)}"
+      >
+        <img
+          class="blp-about__avatar"
+          src="${escapeAttr(avatarUrl)}"
+          alt=""
+          width="56"
+          height="56"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+      <div class="blp-about__author-info">
+        <a
+          class="blp-about__name"
+          href="${escapeAttr(url)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >${escapeHtml(name)}</a>
+        <span class="blp-about__handle">@${escapeHtml(handle)}</span>
+        ${emailHtml}
+      </div>
+    </div>
+  `;
+}
+
 function buildAboutHtml() {
   const githubFav = FAVICON_URL.replace('{domain}', 'github.com');
+  const contributorsHtml = CONTRIBUTORS.length
+    ? `
+      <div class="blp-settings-list blp-settings-list--stack blp-about__contributors">
+        <p class="blp-about__author-label">${escapeHtml(t.aboutContributors)}</p>
+        <div class="blp-about__people">
+          ${CONTRIBUTORS.map((person) => personCardHtml(person)).join('')}
+        </div>
+      </div>
+    `
+    : '';
   return `
     <div class="blp-about">
       <div class="blp-settings-list blp-settings-list--stack blp-about__script">
@@ -133,36 +181,15 @@ function buildAboutHtml() {
       </div>
       <div class="blp-settings-list blp-settings-list--stack blp-about__author">
         <p class="blp-about__author-label">${escapeHtml(t.aboutAuthor)}</p>
-        <div class="blp-about__author-row">
-          <a
-            class="blp-about__avatar-link"
-            href="${escapeAttr(AUTHOR_URL)}"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="${escapeAttr(AUTHOR_NAME)}"
-          >
-            <img
-              class="blp-about__avatar"
-              src="${escapeAttr(AUTHOR_AVATAR_URL)}"
-              alt=""
-              width="56"
-              height="56"
-              loading="lazy"
-              decoding="async"
-            />
-          </a>
-          <div class="blp-about__author-info">
-            <a
-              class="blp-about__name"
-              href="${escapeAttr(AUTHOR_URL)}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >${escapeHtml(AUTHOR_NAME)}</a>
-            <span class="blp-about__handle">@${escapeHtml(AUTHOR_HANDLE)}</span>
-            <a class="blp-about__email" href="mailto:${escapeAttr(AUTHOR_EMAIL)}">${escapeHtml(AUTHOR_EMAIL)}</a>
-          </div>
-        </div>
+        ${personCardHtml({
+          name: AUTHOR_NAME,
+          handle: AUTHOR_HANDLE,
+          url: AUTHOR_URL,
+          avatarUrl: AUTHOR_AVATAR_URL,
+          email: AUTHOR_EMAIL,
+        })}
       </div>
+      ${contributorsHtml}
     </div>
   `;
 }

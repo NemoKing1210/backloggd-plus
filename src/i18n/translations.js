@@ -21,6 +21,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'MIT License',
     aboutRepo: 'GitHub repository',
     aboutAuthor: 'Author',
+    aboutContributors: 'Contributors',
     enhanceHeader: 'Floating header',
     enhanceHeaderHint:
       'Sticky glass navbar that floats over the page and tightens slightly while scrolling.',
@@ -355,6 +356,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'Лицензия MIT',
     aboutRepo: 'Репозиторий на GitHub',
     aboutAuthor: 'Автор',
+    aboutContributors: 'Участники',
     enhanceHeader: 'Плавающий хедер',
     enhanceHeaderHint:
       'Липкая стеклянная панель навигации поверх страницы; при прокрутке чуть уплотняется.',
@@ -689,6 +691,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'MIT 许可证',
     aboutRepo: 'GitHub 仓库',
     aboutAuthor: '作者',
+    aboutContributors: '贡献者',
     enhanceHeader: '浮动顶栏',
     enhanceHeaderHint: '粘性毛玻璃导航栏，随页面滚动略微收紧。',
     hideHomepageFuse: '隐藏 Fuse 广告位',
@@ -1013,6 +1016,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'Licencia MIT',
     aboutRepo: 'Repositorio en GitHub',
     aboutAuthor: 'Autor',
+    aboutContributors: 'Colaboradores',
     enhanceHeader: 'Cabecera flotante',
     enhanceHeaderHint:
       'Barra de navegación de cristal adhesiva sobre la página; se compacta un poco al desplazarse.',
@@ -1348,6 +1352,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'Licença MIT',
     aboutRepo: 'Repositório no GitHub',
     aboutAuthor: 'Autor',
+    aboutContributors: 'Colaboradores',
     enhanceHeader: 'Cabeçalho flutuante',
     enhanceHeaderHint:
       'Barra de navegação em vidro adesiva sobre a página; fica um pouco mais compacta ao rolar.',
@@ -1683,6 +1688,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'MIT-Lizenz',
     aboutRepo: 'GitHub-Repository',
     aboutAuthor: 'Autor',
+    aboutContributors: 'Mitwirkende',
     enhanceHeader: 'Schwebender Header',
     enhanceHeaderHint:
       'Klebende Glas-Navigation über der Seite; wird beim Scrollen etwas kompakter.',
@@ -2018,6 +2024,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'Licence MIT',
     aboutRepo: 'Dépôt GitHub',
     aboutAuthor: 'Auteur',
+    aboutContributors: 'Contributeurs',
     enhanceHeader: 'En-tête flottant',
     enhanceHeaderHint:
       'Barre de navigation en verre collante au-dessus de la page ; se compacte un peu au défilement.',
@@ -2353,6 +2360,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'MIT ライセンス',
     aboutRepo: 'GitHub リポジトリ',
     aboutAuthor: '作者',
+    aboutContributors: '貢献者',
     enhanceHeader: 'フローティングヘッダー',
     enhanceHeaderHint:
       'ページ上に浮かぶガラス風の固定ナビ。スクロールすると少しコンパクトになります。',
@@ -2688,6 +2696,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'MIT 라이선스',
     aboutRepo: 'GitHub 저장소',
     aboutAuthor: '제작자',
+    aboutContributors: '기여자',
     enhanceHeader: '플로팅 헤더',
     enhanceHeaderHint:
       '페이지 위에 떠 있는 글래스 스타일 고정 내비. 스크롤 시 조금 더 컴팩트해집니다.',
@@ -3023,6 +3032,7 @@ export const TRANSLATIONS = {
     aboutLicense: 'Licencja MIT',
     aboutRepo: 'Repozytorium GitHub',
     aboutAuthor: 'Autor',
+    aboutContributors: 'Współtwórcy',
     enhanceHeader: 'Pływający nagłówek',
     enhanceHeaderHint:
       'Przyklejony szklany pasek nawigacji nad stroną; przy przewijaniu lekko się zagęszcza.',

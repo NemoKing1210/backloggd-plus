@@ -3031,6 +3031,12 @@ img.blp-cover-zoomable:focus-visible {
   color: var(--blp-muted);
 }
 
+.blp-about__people {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .blp-about__author-row {
   display: flex;
   align-items: center;

@@ -6,6 +6,15 @@ export const AUTHOR_HANDLE = 'NemoKing1210';
 export const AUTHOR_URL = 'https://github.com/NemoKing1210';
 export const AUTHOR_EMAIL = 'nemoking1210@gmail.com';
 export const AUTHOR_AVATAR_URL = 'https://avatars.githubusercontent.com/u/58397369?s=96&v=4';
+/** People credited in Settings → About (besides the author). */
+export const CONTRIBUTORS = [
+  {
+    name: 'Nikitamce',
+    handle: 'Nikitamce',
+    url: 'https://github.com/Nikitamce',
+    avatarUrl: 'https://avatars.githubusercontent.com/u/187407575?s=96&v=4',
+  },
+];
 export const SCRIPT_VERSION = pkg.version;
 export const SETTINGS_KEY = 'blp_settings';
 export const CACHE_KEY = 'blp_cache_v1';
