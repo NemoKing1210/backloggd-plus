@@ -4,8 +4,8 @@
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.82-green?style=for-the-badge)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
+[![Version](https://img.shields.io/badge/version-0.7.82-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -20,19 +20,19 @@ Also listed on [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
   <br />
   <em>Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links</em>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/game-page-stats.png" alt="Game page — Plus rating, screenshots gallery, and similar games" width="900" />
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png" alt="Game page — Plus rating, screenshots gallery, and similar games" width="900" />
   <br />
   <em>Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges</em>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
   <br />
   <em>Settings — Game page toggles</em>
 </p>
@@ -65,7 +65,7 @@ Paste the [GitHub install URL](#quick-install) above when installing from a mana
 
 ### Manual install
 
-1. Open the built [`backloggd-plus.user.js`](backloggd-plus.user.js) in this repository (or run `npm run build` after cloning).
+1. Open the built [`backloggd-plus.user.js`](https://github.com/NemoKing1210/backloggd-plus/blob/main/backloggd-plus.user.js) in this repository (or run `npm run build` after cloning).
 2. Copy the entire file contents.
 3. In your userscript manager, create a new script and paste the code.
 4. Save and enable the script.
@@ -74,7 +74,7 @@ Paste the [GitHub install URL](#quick-install) above when installing from a mana
 
 The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw GitHub file. Supported managers check for updates automatically.
 
-Release steps for maintainers: see [DEVELOPMENT.md § Releases](DEVELOPMENT.md#releases).
+Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.com/NemoKing1210/backloggd-plus/blob/main/DEVELOPMENT.md#releases).
 
 ## Features
 
@@ -133,9 +133,9 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](DEVELOPMENT.md#r
 
 ## Development & contributing
 
-- [DEVELOPMENT.md](DEVELOPMENT.md) — local setup, repo layout, metadata, permissions, releases
-- [CONTRIBUTING.md](CONTRIBUTING.md) — PR guidelines, conventions, localization, contributors
-- [AGENTS.md](AGENTS.md) — architecture notes for AI coding agents
+- [DEVELOPMENT.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/DEVELOPMENT.md) — local setup, repo layout, metadata, permissions, releases
+- [CONTRIBUTING.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/CONTRIBUTING.md) — PR guidelines, conventions, localization, contributors
+- [AGENTS.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/AGENTS.md) — architecture notes for AI coding agents
 
 ```bash
 npm install
@@ -150,4 +150,4 @@ This project is **not affiliated** with Backloggd. It is an independent communit
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) 2026 NemoKing
+[MIT](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE) — Copyright (c) 2026 NemoKing

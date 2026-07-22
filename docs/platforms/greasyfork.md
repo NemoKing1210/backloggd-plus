@@ -8,23 +8,30 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 
 **Links**
 
+- Greasy Fork: https://greasyfork.org/scripts/587296-backloggd-plus
 - GitHub: https://github.com/NemoKing1210/backloggd-plus
 - Install (newest): https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js
 - Changelog: https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md
 
 ## Screenshots
 
-![Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
+  <br />
+  <em>Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links</em>
+</p>
 
-*Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links*
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png" alt="Game page — Plus rating, screenshots gallery, and similar games" width="900" />
+  <br />
+  <em>Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges</em>
+</p>
 
-![Game page — Plus rating, screenshots gallery, and similar games](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png)
-
-*Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges*
-
-![Settings panel — Game page toggles](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png)
-
-*Settings — Game page toggles*
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
+  <br />
+  <em>Settings — Game page toggles</em>
+</p>
 
 ## Features
 

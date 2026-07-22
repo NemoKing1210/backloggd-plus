@@ -17,10 +17,12 @@ Built with [Vite](https://vitejs.dev/) + [vite-plugin-monkey](https://github.com
 - **Source:** `src/main.js`
 - **Canonical install artifacts (committed):** `backloggd-plus.user.js`, `backloggd-plus.meta.js` (also `@downloadURL` / `@updateURL`)
 - **Version source of truth:** `package.json` `version` (userscript header + `SCRIPT_VERSION`)
-- **Docs:** `README.md`, `DEVELOPMENT.md`, `CONTRIBUTING.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`
+- **Docs:** `README.md`, `DEVELOPMENT.md`, `CONTRIBUTING.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`, `docs/platforms/` (Greasy Fork / ScriptCat listing copy)
 - **License:** MIT
 
 Edit source under `src/`, then run `npm run build` to refresh the root install files. Do not hand-edit the built `.user.js` / `.meta.js`.
+
+When user-facing README content changes (features, screenshots, status, supported pages, install/update notes, contributors, affiliation), keep `docs/platforms/greasyfork.md` and `docs/platforms/scriptcat.md` in sync — those files are the paste-ready Additional info for the catalog listings. Prefer absolute GitHub/`raw.githubusercontent.com` URLs in README and platform docs so images and links work outside the repo.
 
 ## Repository layout
 
@@ -42,7 +44,9 @@ backloggd-plus/
 │   ├── copy-dist.mjs        # Copies dist → root after build
 │   ├── verify-artifacts.mjs # CI: dist ↔ root + git freshness
 │   └── lib/artifacts.mjs    # Shared artifact filenames
-├── docs/screenshots/        # README preview images
+├── docs/
+│   ├── screenshots/         # README / catalog preview images
+│   └── platforms/           # Greasy Fork / ScriptCat listing descriptions
 ├── .github/
 │   ├── workflows/ci.yml     # Build + verify committed artifacts
 │   └── dependabot.yml
@@ -96,6 +100,7 @@ When shipping a user-visible change:
 2. Run `npm run build` to regenerate `backloggd-plus.user.js` and `backloggd-plus.meta.js`.
 3. Add a Keep a Changelog entry in `CHANGELOG.md`.
 4. Update README version badge / docs if they mention the version or new behavior.
+5. If README user-facing copy changed, update `docs/platforms/greasyfork.md` and `docs/platforms/scriptcat.md` to match.
 
 Changing `SCRIPT_VERSION` (via `package.json`) also clears the lookup cache on next run (`blp_cache_script_version`).
 
