@@ -178,6 +178,7 @@ export const DEFAULT_SETTINGS = {
   translateDisplayMode: 'replace',
   translateDescription: true,
   translateReviews: true,
+  translateReviewsAuto: false,
   hideHomepageFuse: false,
   enhanceHeader: false,
   showUserMiniProfile: true,

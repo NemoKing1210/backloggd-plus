@@ -410,7 +410,12 @@ export function openSettings() {
             draft.translateDescription !== false,
             'translateDescriptionHint'
           ),
-          toggleHtml('translateReviews', draft.translateReviews !== false, 'translateReviewsHint')
+          toggleHtml('translateReviews', draft.translateReviews !== false, 'translateReviewsHint'),
+          toggleHtml(
+            'translateReviewsAuto',
+            draft.translateReviewsAuto === true,
+            'translateReviewsAutoHint'
+          )
         )}
       </section>
       </div>

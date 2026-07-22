@@ -9,8 +9,14 @@ const RESULT_CLASS = 'blp-translate-result';
 const MARK_ATTR = 'data-blp-translate';
 const STATE_ATTR = 'data-blp-translate-state';
 const ORIG_ATTR = 'data-blp-translate-original';
+const AUTO_ATTR = 'data-blp-translate-auto';
+const AUTO_ROOT_MARGIN = '120px 0px';
+const AUTO_CONCURRENCY = 2;
 
 let clicksBound = false;
+let autoObserver = null;
+let autoActive = 0;
+const autoQueue = [];
 
 function resolveTranslateTarget() {
   const pref = settings.translateTargetLocale || 'auto';
@@ -47,7 +53,12 @@ function findReviewTextEl(card) {
   );
 }
 
+function reviewButton(card) {
+  return card?.querySelector?.(`.${BTN_CLASS}[data-blp-translate-kind="review"]`) || null;
+}
+
 function removeTranslateUi(scope = document) {
+  stopAutoTranslate();
   scope.querySelectorAll('.blp-translate-desc-slot, .blp-translate-review-slot').forEach((el) => {
     el.remove();
   });
@@ -55,6 +66,9 @@ function removeTranslateUi(scope = document) {
   scope.querySelectorAll(`.${RESULT_CLASS}`).forEach((el) => el.remove());
   scope.querySelectorAll(`[${MARK_ATTR}]`).forEach((el) => {
     el.removeAttribute(MARK_ATTR);
+  });
+  scope.querySelectorAll(`[${AUTO_ATTR}]`).forEach((el) => {
+    el.removeAttribute(AUTO_ATTR);
   });
   scope.querySelectorAll(`[${ORIG_ATTR}]`).forEach((el) => {
     const orig = el.getAttribute(ORIG_ATTR);
@@ -65,6 +79,7 @@ function removeTranslateUi(scope = document) {
 }
 
 function setButtonLabel(btn, kind) {
+  if (!btn) return;
   if (kind === 'loading') {
     btn.innerHTML = `<span class="blp-translate-btn__spin" aria-hidden="true"></span><span class="blp-translate-btn__label">${escapeHtml(t.translateLoading)}</span>`;
     btn.setAttribute('aria-busy', 'true');
@@ -210,7 +225,6 @@ function expandCollapsedReview(textEl, card) {
 
   if (!isCollapsed) return;
 
-  // Prefer page Bootstrap/jQuery (userscript .click() often does not reach page handlers).
   try {
     const pageWindow = unsafeWindow || window;
     const $ = pageWindow?.jQuery || pageWindow?.$;
@@ -221,7 +235,6 @@ function expandCollapsedReview(textEl, card) {
     /* fall through to DOM force */
   }
 
-  // Always force-visible: Bootstrap CSS + any truncated preview styles.
   textEl.classList.remove('collapsing');
   textEl.classList.add('collapse', 'show');
   textEl.style.display = 'block';
@@ -291,6 +304,66 @@ function mountBelowResult(textEl, host, translatedHtml, isReview) {
   return box;
 }
 
+/**
+ * @returns {Promise<'ok' | 'same' | 'error' | 'skip'>}
+ */
+async function applyTranslation({ textEl, host, card, btn, isReview }) {
+  if (!textEl) return 'skip';
+  if (btn?.getAttribute(STATE_ATTR) === 'translated') return 'skip';
+  if (textEl.hasAttribute(ORIG_ATTR) && displayMode() === 'replace') return 'skip';
+  if (isReview && card?.querySelector?.(`.${RESULT_CLASS}`)) return 'skip';
+
+  if (isReview) expandCollapsedReview(textEl, card);
+
+  const sourceHtml =
+    textEl.hasAttribute(ORIG_ATTR) ? textEl.getAttribute(ORIG_ATTR) : textEl.innerHTML;
+  const plain = htmlToPlain(sourceHtml);
+  if (!plain) return 'skip';
+
+  const tl = resolveTranslateTarget();
+  setButtonLabel(btn, 'loading');
+
+  const result = await translateText(plain, tl);
+  if (!result?.text) {
+    setButtonLabel(btn, 'error');
+    if (btn) setTimeout(() => setButtonLabel(btn, 'idle'), 1800);
+    return 'error';
+  }
+
+  const detected = String(result.detectedSourceLang || '')
+    .toLowerCase()
+    .slice(0, 2);
+  if (detected && detected === tl && result.text.trim() === plain) {
+    if (btn) btn.style.display = 'none';
+    setButtonLabel(btn, 'idle');
+    return 'same';
+  }
+
+  const translatedHtml = plainToHtml(result.text);
+  const mode = displayMode();
+  if (isReview) expandCollapsedReview(textEl, card);
+
+  if (mode === 'below') {
+    mountBelowResult(textEl, host, translatedHtml, isReview);
+    if (btn) {
+      btn.setAttribute(STATE_ATTR, 'translated');
+      setButtonLabel(btn, 'hide');
+    }
+    return 'ok';
+  }
+
+  if (!textEl.hasAttribute(ORIG_ATTR)) {
+    textEl.setAttribute(ORIG_ATTR, sourceHtml);
+  }
+  textEl.innerHTML = translatedHtml;
+  if (isReview) expandCollapsedReview(textEl, card);
+  if (btn) {
+    btn.setAttribute(STATE_ATTR, 'translated');
+    setButtonLabel(btn, 'original');
+  }
+  return 'ok';
+}
+
 async function onTranslateClick(e) {
   const btn = e.target?.closest?.(`.${BTN_CLASS}`);
   if (!btn || btn.classList.contains('is-loading')) return;
@@ -302,6 +375,7 @@ async function onTranslateClick(e) {
   const { textEl, host, card } = target;
   const mode = displayMode();
   const state = btn.getAttribute(STATE_ATTR) || 'idle';
+  const isReview = btn.getAttribute('data-blp-translate-kind') === 'review';
 
   if (mode === 'replace' && state === 'translated') {
     const orig = textEl.getAttribute(ORIG_ATTR);
@@ -319,58 +393,105 @@ async function onTranslateClick(e) {
     return;
   }
 
-  if (btn.getAttribute('data-blp-translate-kind') === 'review') {
-    expandCollapsedReview(textEl, card);
-  }
-
-  const sourceHtml =
-    textEl.hasAttribute(ORIG_ATTR) ? textEl.getAttribute(ORIG_ATTR) : textEl.innerHTML;
-  const plain = htmlToPlain(sourceHtml);
-  if (!plain) return;
-
-  const tl = resolveTranslateTarget();
-  setButtonLabel(btn, 'loading');
-
-  const result = await translateText(plain, tl);
-  if (!result?.text) {
-    setButtonLabel(btn, 'error');
-    setTimeout(() => setButtonLabel(btn, 'idle'), 1800);
-    return;
-  }
-
-  const detected = String(result.detectedSourceLang || '')
-    .toLowerCase()
-    .slice(0, 2);
-  if (detected && detected === tl && result.text.trim() === plain) {
-    btn.style.display = 'none';
-    setButtonLabel(btn, 'idle');
-    return;
-  }
-
-  const translatedHtml = plainToHtml(result.text);
-  const isReview = btn.getAttribute('data-blp-translate-kind') === 'review';
-  if (isReview) expandCollapsedReview(textEl, card);
-
-  if (mode === 'below') {
-    mountBelowResult(textEl, host, translatedHtml, isReview);
-    btn.setAttribute(STATE_ATTR, 'translated');
-    setButtonLabel(btn, 'hide');
-    return;
-  }
-
-  if (!textEl.hasAttribute(ORIG_ATTR)) {
-    textEl.setAttribute(ORIG_ATTR, sourceHtml);
-  }
-  textEl.innerHTML = translatedHtml;
-  if (isReview) expandCollapsedReview(textEl, card);
-  btn.setAttribute(STATE_ATTR, 'translated');
-  setButtonLabel(btn, 'original');
+  await applyTranslation({ textEl, host, card, btn, isReview });
 }
 
 function ensureTranslateClicks() {
   if (clicksBound) return;
   clicksBound = true;
   document.addEventListener('click', onTranslateClick, true);
+}
+
+function stopAutoTranslate() {
+  if (autoObserver) {
+    autoObserver.disconnect();
+    autoObserver = null;
+  }
+  autoQueue.length = 0;
+  autoActive = 0;
+}
+
+function pumpAutoQueue() {
+  while (autoActive < AUTO_CONCURRENCY && autoQueue.length) {
+    const card = autoQueue.shift();
+    if (!card?.isConnected) continue;
+    if (card.getAttribute(AUTO_ATTR) === 'done' || card.getAttribute(AUTO_ATTR) === 'busy') {
+      continue;
+    }
+    autoActive += 1;
+    card.setAttribute(AUTO_ATTR, 'busy');
+    const textEl = findReviewTextEl(card);
+    const btn = reviewButton(card);
+    const host = textEl?.parentElement || textEl;
+    Promise.resolve()
+      .then(() =>
+        applyTranslation({
+          textEl,
+          host,
+          card,
+          btn,
+          isReview: true,
+        })
+      )
+      .then((status) => {
+        if (status === 'ok' || status === 'same') card.setAttribute(AUTO_ATTR, 'done');
+        else card.removeAttribute(AUTO_ATTR);
+      })
+      .catch(() => {
+        card.removeAttribute(AUTO_ATTR);
+      })
+      .finally(() => {
+        autoActive -= 1;
+        pumpAutoQueue();
+      });
+  }
+}
+
+function enqueueAutoTranslate(card) {
+  if (!card || card.getAttribute(AUTO_ATTR) === 'done' || card.getAttribute(AUTO_ATTR) === 'busy') {
+    return;
+  }
+  if (autoQueue.includes(card)) return;
+  autoQueue.push(card);
+  pumpAutoQueue();
+}
+
+function syncAutoTranslate() {
+  const enabled =
+    settings.showTranslate !== false &&
+    settings.translateReviews !== false &&
+    settings.translateReviewsAuto === true;
+
+  if (!enabled) {
+    stopAutoTranslate();
+    document.querySelectorAll(`.review-card[${AUTO_ATTR}="busy"]`).forEach((el) => {
+      el.removeAttribute(AUTO_ATTR);
+    });
+    return;
+  }
+
+  if (!autoObserver) {
+    autoObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const card = entry.target;
+          autoObserver?.unobserve(card);
+          enqueueAutoTranslate(card);
+        }
+      },
+      { root: null, rootMargin: AUTO_ROOT_MARGIN, threshold: 0.15 }
+    );
+  }
+
+  document.querySelectorAll('.review-card').forEach((card) => {
+    if (card.getAttribute(AUTO_ATTR) === 'done' || card.getAttribute(AUTO_ATTR) === 'busy') {
+      return;
+    }
+    const textEl = findReviewTextEl(card);
+    if (!textEl || !htmlToPlain(textEl.innerHTML)) return;
+    autoObserver.observe(card);
+  });
 }
 
 export function syncTranslateUi() {
@@ -383,4 +504,5 @@ export function syncTranslateUi() {
 
   ensureDescriptionButton();
   syncReviewButtons();
+  syncAutoTranslate();
 }
