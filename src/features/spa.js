@@ -15,6 +15,7 @@ import { bindFixMatchClicks, ensureNavSettingsButton } from './settings-panel.js
 import { bindLogEditorExportObserver, ensureLogEditorExportMount } from './export-game.js';
 import { scheduleUserMiniProfiles } from './user-mini-profile.js';
 import { scheduleProfilePage } from './profile-page.js';
+import { syncTranslateUi } from './translate.js';
 
 export function scanPage() {
   ensureNavSettingsButton();
@@ -27,6 +28,7 @@ export function scanPage() {
   scheduleCardBadges();
   scheduleUserMiniProfiles();
   scheduleProfilePage();
+  syncTranslateUi();
 }
 
 export function isBlpManagedElement(el) {
@@ -39,6 +41,7 @@ export function isBlpManagedElement(el) {
     el.hasAttribute?.(CARD_STATE_ATTR) ||
     el.hasAttribute?.('data-blp-debug') ||
     el.hasAttribute?.('data-blp-token') ||
+    el.hasAttribute?.('data-blp-translate') ||
     el.id === 'blp-nav-settings' ||
     el.id === 'blp-steam-backloggd-btn' ||
     el.id === 'blp-steamdb-backloggd-btn'
@@ -63,6 +66,10 @@ export function isBlpManagedElement(el) {
     el.classList?.contains('blp-toast') ||
     el.classList?.contains('blp-ump') ||
     el.classList?.contains('blp-profile-tier-chip') ||
+    el.classList?.contains('blp-translate-btn') ||
+    el.classList?.contains('blp-translate-result') ||
+    el.classList?.contains('blp-translate-desc-slot') ||
+    el.classList?.contains('blp-translate-review-slot') ||
     el.id === 'blp-toast-host' ||
     el.id === 'blp-user-mini-profile'
   ) {
@@ -70,7 +77,7 @@ export function isBlpManagedElement(el) {
   }
   return Boolean(
     el.closest?.(
-      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], #blp-nav-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-profile-tier-chip`
+      `[${ENRICH_ATTR}], [${STEAMDB_ATTR}], [${SIMILAR_ATTR}], [${CARD_ATTR}], .blp-card-badges, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop, .blp-export-wrap, .blp-export-log-wrap, [data-blp-debug], [data-blp-translate], .blp-translate-btn, .blp-translate-result, .blp-translate-desc-slot, .blp-translate-review-slot, #blp-nav-settings, #blp-toast-host, .blp-toast-host, #blp-user-mini-profile, .blp-ump, .blp-profile-tier-chip`
     )
   );
 }

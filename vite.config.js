@@ -83,6 +83,7 @@ export default defineConfig({
           'protondb.com',
           'cdn.jsdelivr.net',
           'latest.currency-api.pages.dev',
+          'translate.googleapis.com',
         ],
         'run-at': 'document-idle',
         noframes: true,

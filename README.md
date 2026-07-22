@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.73-green?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.74-green?style=for-the-badge)](CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -91,6 +91,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 - SteamDB details row: franchise / OS from Steam store APIs; technologies & last record update from SteamDB when reachable
 - Export button under the Steam header and in the log editor (optional; Settings → Game; Notion CSV / Markdown / JSON)
 - Optional Backloggd game ID after the title (Settings → Game; click to copy)
+- Translate buttons on the game description and review cards (Settings → Translation; Google Translate)
 - Steam header / community icon on game pages; screenshot gallery after game stats
 - Similar games under screenshots (Steam More Like This) with tag match %; cards link to Backloggd and can show the same cover badges as list grids
 - Skeleton placeholders while Steam / GameStatus / score data loads
@@ -116,10 +117,10 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
-- Tabbed panel: General · Game page · Lists · Links · Cache · Debug
+- Tabbed panel: General · UI · Game page · Lists · Translation · Links · Cache · Debug · About
 - Interface language (Auto or fixed locale)
 - Steam store region (price currency)
-- Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / list cover badges (per type) / links / Steam & SteamDB Backloggd buttons
+- Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump
 - Per-site link visibility (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike)
 - Cache duration + clear cache (expired prune + LRU soft limit; library/tag map keep short TTLs; online players are live)

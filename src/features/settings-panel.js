@@ -37,6 +37,7 @@ const SETTINGS_TABS = [
   { id: 'ui', labelKey: 'sectionUi' },
   { id: 'game', labelKey: 'sectionGame' },
   { id: 'lists', labelKey: 'sectionLists' },
+  { id: 'translate', labelKey: 'sectionTranslate' },
   { id: 'links', labelKey: 'sectionLinks' },
   { id: 'cache', labelKey: 'sectionCache' },
   { id: 'debug', labelKey: 'sectionDebug' },
@@ -286,6 +287,27 @@ export function openSettings() {
     </select>
   `;
 
+  const translateLocale = draft.translateTargetLocale || 'auto';
+  const translateLocaleSelect = `
+    <select id="blp-translate-locale">
+      <option value="auto" ${translateLocale === 'auto' ? 'selected' : ''}>${LOCALE_FLAG_AUTO} ${escapeHtml(t.translateAsUi)}</option>
+      ${SUPPORTED_LOCALES.map((code) => {
+        const selected = translateLocale === code ? 'selected' : '';
+        const name = LOCALE_NATIVE_NAMES[code] || code;
+        const flag = LOCALE_FLAGS[code] || '';
+        return `<option value="${code}" ${selected}>${flag} ${escapeHtml(name)}</option>`;
+      }).join('')}
+    </select>
+  `;
+
+  const translateMode = draft.translateDisplayMode === 'below' ? 'below' : 'replace';
+  const translateModeSelect = `
+    <select id="blp-translate-mode">
+      <option value="replace" ${translateMode === 'replace' ? 'selected' : ''}>${escapeHtml(t.translateModeReplace)}</option>
+      <option value="below" ${translateMode === 'below' ? 'selected' : ''}>${escapeHtml(t.translateModeBelow)}</option>
+    </select>
+  `;
+
   const activeTab = 'general';
   const backdrop = document.createElement('div');
   backdrop.className = 'blp-settings-backdrop';
@@ -363,6 +385,32 @@ export function openSettings() {
           toggleHtml('showCardBadgeOwned', draft.showCardBadgeOwned),
           toggleHtml('showCardBadgeWishlist', draft.showCardBadgeWishlist),
           toggleHtml('showCardBadgeGameStatus', draft.showCardBadgeGameStatus)
+        )}
+      </section>
+      </div>
+      <div ${panelAttrs('translate', activeTab)}>
+      <section>
+        <h3>${escapeHtml(t.sectionTranslate)}</h3>
+        ${listHtml(
+          toggleHtml('showTranslate', draft.showTranslate !== false, 'showTranslateHint'),
+          fieldHtml(
+            'blp-translate-locale',
+            t.translateTargetLocale,
+            translateLocaleSelect,
+            t.translateTargetLocaleHint
+          ),
+          fieldHtml(
+            'blp-translate-mode',
+            t.translateDisplayMode,
+            translateModeSelect,
+            t.translateDisplayModeHint
+          ),
+          toggleHtml(
+            'translateDescription',
+            draft.translateDescription !== false,
+            'translateDescriptionHint'
+          ),
+          toggleHtml('translateReviews', draft.translateReviews !== false, 'translateReviewsHint')
         )}
       </section>
       </div>
@@ -527,6 +575,13 @@ export function openSettings() {
     const uiLocale = backdrop.querySelector('#blp-ui-locale')?.value || 'auto';
     draft.uiLocale =
       uiLocale === 'auto' || SUPPORTED_LOCALES.includes(uiLocale) ? uiLocale : 'auto';
+    const translateLocaleVal = backdrop.querySelector('#blp-translate-locale')?.value || 'auto';
+    draft.translateTargetLocale =
+      translateLocaleVal === 'auto' || SUPPORTED_LOCALES.includes(translateLocaleVal)
+        ? translateLocaleVal
+        : 'auto';
+    const translateModeVal = backdrop.querySelector('#blp-translate-mode')?.value || 'replace';
+    draft.translateDisplayMode = translateModeVal === 'below' ? 'below' : 'replace';
     draft.steamCountry = String(cc).toUpperCase();
     const convertCcy = backdrop.querySelector('#blp-convert-ccy')?.value || 'RUB';
     draft.convertCurrency = String(convertCcy).toUpperCase();
