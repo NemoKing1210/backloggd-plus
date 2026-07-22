@@ -14,7 +14,7 @@ function onScroll() {
   );
 }
 
-/** Sticky glass navbar (#primary-nav) when Settings → UI → enhance header is on. */
+/** Sticky glass navbar (#primary-nav) when Settings → General → floating header is on. */
 export function applyFloatingHeader() {
   const root = document.documentElement;
   if (settings.enhanceHeader === true) {

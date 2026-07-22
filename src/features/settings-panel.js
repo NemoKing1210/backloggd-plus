@@ -34,11 +34,9 @@ import { queueToast, showToast } from './toast.js';
 
 const SETTINGS_TABS = [
   { id: 'general', labelKey: 'sectionGeneral' },
-  { id: 'ui', labelKey: 'sectionUi' },
   { id: 'game', labelKey: 'sectionGame' },
   { id: 'lists', labelKey: 'sectionLists' },
   { id: 'translate', labelKey: 'sectionTranslate' },
-  { id: 'links', labelKey: 'sectionLinks' },
   { id: 'cache', labelKey: 'sectionCache' },
   { id: 'debug', labelKey: 'sectionDebug' },
   { id: 'about', labelKey: 'sectionAbout' },
@@ -73,6 +71,25 @@ function toggleHtml(key, on, hintKey) {
 
 function listHtml(...rows) {
   return `<div class="blp-settings-list">${rows.filter(Boolean).join('')}</div>`;
+}
+
+/**
+ * Settings group: titled block with optional hint and one or more lists.
+ * Use on every settings tab so spacing between groups stays consistent.
+ */
+function groupHtml(titleKey, hintKey, ...content) {
+  const hint = hintKey
+    ? `<p class="blp-settings__intro">${escapeHtml(t[hintKey])}</p>`
+    : '';
+  return `
+    <section class="blp-settings-group">
+      <header class="blp-settings-group__head">
+        <h3>${escapeHtml(t[titleKey])}</h3>
+        ${hint}
+      </header>
+      ${content.filter(Boolean).join('')}
+    </section>
+  `;
 }
 
 function fieldHtml(id, label, controlHtml, hint) {
@@ -322,15 +339,15 @@ export function openSettings() {
       </div>
       <div class="blp-settings__body">
       <div ${panelAttrs('general', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionGeneral)}</h3>
-        ${listHtml(fieldHtml('blp-ui-locale', t.uiLanguage, localeSelect, t.uiLanguageHint))}
-      </section>
-      </div>
-      <div ${panelAttrs('ui', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionUi)}</h3>
-        ${listHtml(
+      ${groupHtml(
+        'generalGroupLanguage',
+        'generalGroupLanguageHint',
+        listHtml(fieldHtml('blp-ui-locale', t.uiLanguage, localeSelect, t.uiLanguageHint))
+      )}
+      ${groupHtml(
+        'generalGroupInterface',
+        'generalGroupInterfaceHint',
+        listHtml(
           toggleHtml('enhanceHeader', draft.enhanceHeader === true, 'enhanceHeaderHint'),
           toggleHtml('hideHomepageFuse', draft.hideHomepageFuse === true, 'hideHomepageFuseHint'),
           toggleHtml(
@@ -338,60 +355,105 @@ export function openSettings() {
             draft.showUserMiniProfile !== false,
             'showUserMiniProfileHint'
           )
-        )}
-      </section>
+        )
+      )}
       </div>
       <div ${panelAttrs('game', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionGame)}</h3>
-        ${listHtml(fieldHtml('blp-steam-cc', t.steamCountry, steamCcSelect, t.steamCountryHint))}
-        ${listHtml(
+      ${groupHtml(
+        'gameGroupSteam',
+        null,
+        listHtml(fieldHtml('blp-steam-cc', t.steamCountry, steamCcSelect, t.steamCountryHint)),
+        listHtml(
           toggleHtml('showPriceConvert', Boolean(draft.showPriceConvert), 'showPriceConvertHint'),
           fieldHtml('blp-convert-ccy', t.convertCurrency, convertCcySelect, t.convertCurrencyHint)
-        )}
-        ${listHtml(
+        ),
+        listHtml(
           toggleHtml('showSteam', draft.showSteam),
           toggleHtml('showSteamOwned', draft.showSteamOwned, 'showSteamOwnedHint'),
           toggleHtml('showSteamWishlist', draft.showSteamWishlist, 'showSteamWishlistHint'),
           toggleHtml('showSteamTags', draft.showSteamTags, 'showSteamTagsHint'),
-          toggleHtml('showSteamCategories', draft.showSteamCategories, 'showSteamCategoriesHint'),
+          toggleHtml('showSteamCategories', draft.showSteamCategories, 'showSteamCategoriesHint')
+        )
+      )}
+      ${groupHtml(
+        'gameGroupScores',
+        null,
+        listHtml(
           toggleHtml('showMetacritic', draft.showMetacritic),
           toggleHtml('showOpenCritic', draft.showOpenCritic, 'showOpenCriticHint'),
-          toggleHtml('showHltb', draft.showHltb, 'showHltbHint'),
+          toggleHtml('showHltb', draft.showHltb, 'showHltbHint')
+        )
+      )}
+      ${groupHtml(
+        'gameGroupCompat',
+        null,
+        listHtml(
           toggleHtml('showDeckProton', draft.showDeckProton, 'showDeckProtonHint'),
           toggleHtml('showGameStatus', draft.showGameStatus, 'showGameStatusHint'),
-          toggleHtml('showLinks', draft.showLinks),
-          toggleHtml('showSteamPageLink', draft.showSteamPageLink, 'showSteamPageLinkHint'),
-          toggleHtml('showSteamDbPageLink', draft.showSteamDbPageLink, 'showSteamDbPageLinkHint'),
+          toggleHtml('showSteamPlayers', draft.showSteamPlayers, 'showSteamPlayersHint'),
+          toggleHtml('showSteamDbDetails', draft.showSteamDbDetails, 'showSteamDbDetailsHint')
+        )
+      )}
+      ${groupHtml(
+        'gameGroupMedia',
+        null,
+        listHtml(
           toggleHtml('showSteamDbIcon', draft.showSteamDbIcon, 'showSteamDbIconHint'),
           toggleHtml('showSteamDbCover', draft.showSteamDbCover, 'showSteamDbCoverHint'),
           toggleHtml('showSteamDbGallery', draft.showSteamDbGallery, 'showSteamDbGalleryHint'),
           toggleHtml('showSimilarGames', draft.showSimilarGames, 'showSimilarGamesHint'),
-          toggleHtml('showGameStats', draft.showGameStats, 'showGameStatsHint'),
-          toggleHtml('showSteamPlayers', draft.showSteamPlayers, 'showSteamPlayersHint'),
-          toggleHtml('showSteamDbDetails', draft.showSteamDbDetails, 'showSteamDbDetailsHint'),
+          toggleHtml('showGameStats', draft.showGameStats, 'showGameStatsHint')
+        )
+      )}
+      ${groupHtml(
+        'gameGroupTools',
+        null,
+        listHtml(
           toggleHtml('showExport', draft.showExport, 'showExportHint'),
           toggleHtml('showGameId', draft.showGameId, 'showGameIdHint')
-        )}
-      </section>
+        )
+      )}
+      ${groupHtml(
+        'sectionLinks',
+        'sectionLinksHint',
+        listHtml(toggleHtml('showLinks', draft.showLinks), ...linkToggles)
+      )}
+      ${groupHtml(
+        'gameGroupHosts',
+        'gameGroupHostsHint',
+        listHtml(
+          toggleHtml('showSteamPageLink', draft.showSteamPageLink, 'showSteamPageLinkHint'),
+          toggleHtml('showSteamDbPageLink', draft.showSteamDbPageLink, 'showSteamDbPageLinkHint')
+        )
+      )}
       </div>
       <div ${panelAttrs('lists', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionLists)}</h3>
-        ${listHtml(
-          toggleHtml('showCardBadges', draft.showCardBadges, 'showCardBadgesHint'),
-          toggleHtml('showCardBadgePrice', draft.showCardBadgePrice),
-          toggleHtml('showCardBadgeReview', draft.showCardBadgeReview),
-          toggleHtml('showCardBadgeOwned', draft.showCardBadgeOwned),
-          toggleHtml('showCardBadgeWishlist', draft.showCardBadgeWishlist),
-          toggleHtml('showCardBadgeGameStatus', draft.showCardBadgeGameStatus)
-        )}
-      </section>
+      ${groupHtml(
+        'sectionLists',
+        'sectionListsHint',
+        listHtml(toggleHtml('showCardBadges', draft.showCardBadges, 'showCardBadgesHint'))
+      )}
+      ${groupHtml(
+        'cardGroupTypes',
+        'cardGroupTypesHint',
+        listHtml(
+          toggleHtml('showCardBadgePrice', draft.showCardBadgePrice, 'showCardBadgePriceHint'),
+          toggleHtml('showCardBadgeReview', draft.showCardBadgeReview, 'showCardBadgeReviewHint'),
+          toggleHtml('showCardBadgeOwned', draft.showCardBadgeOwned, 'showCardBadgeOwnedHint'),
+          toggleHtml('showCardBadgeWishlist', draft.showCardBadgeWishlist, 'showCardBadgeWishlistHint'),
+          toggleHtml(
+            'showCardBadgeGameStatus',
+            draft.showCardBadgeGameStatus,
+            'showCardBadgeGameStatusHint'
+          )
+        )
+      )}
       </div>
       <div ${panelAttrs('translate', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionTranslate)}</h3>
-        ${listHtml(
+      ${groupHtml(
+        'sectionTranslate',
+        null,
+        listHtml(
           toggleHtml('showTranslate', draft.showTranslate !== false, 'showTranslateHint'),
           fieldHtml(
             'blp-translate-locale',
@@ -416,20 +478,14 @@ export function openSettings() {
             draft.translateReviewsAuto === true,
             'translateReviewsAutoHint'
           )
-        )}
-      </section>
-      </div>
-      <div ${panelAttrs('links', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionLinks)}</h3>
-        <p class="blp-settings__intro">${escapeHtml(t.sectionLinksHint)}</p>
-        ${listHtml(...linkToggles)}
-      </section>
+        )
+      )}
       </div>
       <div ${panelAttrs('cache', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionCache)}</h3>
-        <div class="blp-settings-list blp-settings-list--stack">
+      ${groupHtml(
+        'sectionCache',
+        null,
+        `<div class="blp-settings-list blp-settings-list--stack">
           ${buildCacheMeterHtml()}
           ${fieldHtml(
             'blp-cache-hours',
@@ -441,20 +497,18 @@ export function openSettings() {
             <button type="button" class="blp-btn" data-blp-clear>${escapeHtml(t.clearCache)}</button>
             <p class="blp-hint">${escapeHtml(t.cacheClearHint)}</p>
           </div>
-        </div>
-      </section>
+        </div>`
+      )}
       </div>
       <div ${panelAttrs('debug', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionDebug)}</h3>
-        ${listHtml(toggleHtml('debugMode', draft.debugMode, 'debugModeHint'))}
-      </section>
+      ${groupHtml(
+        'sectionDebug',
+        null,
+        listHtml(toggleHtml('debugMode', draft.debugMode, 'debugModeHint'))
+      )}
       </div>
       <div ${panelAttrs('about', activeTab)}>
-      <section>
-        <h3>${escapeHtml(t.sectionAbout)}</h3>
-        ${buildAboutHtml()}
-      </section>
+      ${groupHtml('sectionAbout', null, buildAboutHtml())}
       </div>
       </div>
       <div class="blp-settings__foot">

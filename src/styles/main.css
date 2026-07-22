@@ -7,7 +7,7 @@ html[data-blp-hide-homepage-fuse="1"] .row:has(.min-fuse-height[data-fuse*="home
   display: none !important;
 }
 
-/* Floating / glass header (Settings → UI) */
+/* Floating / glass header (Settings → General → Interface) */
 html[data-blp-floating-header="1"] body > header,
 html[data-blp-floating-header="1"] header:has(#primary-nav) {
   position: sticky;
@@ -2620,14 +2620,21 @@ img.blp-cover-zoomable:focus-visible {
   font-size: 13px;
 }
 
-.blp-settings section {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
+.blp-settings-group {
+  margin: 0 0 22px;
 }
 
-.blp-settings h3 {
+.blp-settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.blp-settings-group__head {
   margin: 0 0 10px;
+}
+
+.blp-settings-group__head h3,
+.blp-settings h3 {
+  margin: 0;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2635,8 +2642,9 @@ img.blp-cover-zoomable:focus-visible {
   font-weight: 700;
 }
 
+.blp-settings-group__head .blp-settings__intro,
 .blp-settings__intro {
-  margin: 0 0 10px;
+  margin: 5px 0 0;
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--blp-muted);

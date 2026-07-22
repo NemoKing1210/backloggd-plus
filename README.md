@@ -102,7 +102,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 
 **Lists / search / journal (cover grids):**
 
-- Compact badges on `.game-cover` cards — price, Steam review %, Owned, Wishlist, GameStatus (lazy-loaded in viewport; per-type toggles in Settings → Lists)
+- Compact badges on `.game-cover` cards — price, Steam review %, Owned, Wishlist, GameStatus (lazy-loaded in viewport; per-type toggles in Settings → Game card)
 - Same cover badges on Similar games cards (game page strip)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):
