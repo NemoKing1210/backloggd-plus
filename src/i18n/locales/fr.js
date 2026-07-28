@@ -84,10 +84,10 @@ export default {
     'Masque les rangées Fuse / incontent vides (accueil, avis de jeu, etc.).',
   showUserMiniProfile: 'Mini-profil utilisateur',
   showUserMiniProfileHint:
-    'Carte avec un aperçu au survol des avatars. Le palier monte avec les jeux joués (25+ bronze … 1000+ légende).',
+    'Carte avec un aperçu au survol des avatars ou des noms. Le palier monte avec les jeux joués (25+ bronze … 1000+ légende).',
   preloadUserMiniProfile: 'Précharger dans le viewport',
   preloadUserMiniProfileHint:
-    'Récupère les données du mini-profil pour les avatars visibles afin d’ouvrir la carte immédiatement.',
+    'Récupère les données du mini-profil pour les liens de profil visibles afin d’ouvrir la carte immédiatement.',
   showProfilePage: 'Améliorer la page de profil',
   showProfilePageHint:
     'Applique le style par palier à la page de profil. Désactivez des blocs ci-dessous si besoin.',

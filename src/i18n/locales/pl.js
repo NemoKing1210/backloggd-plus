@@ -84,10 +84,10 @@ export default {
     'Ukrywa puste wiersze Fuse / incontent (strona główna, recenzje gry itd.).',
   showUserMiniProfile: 'Mini profil użytkownika',
   showUserMiniProfileHint:
-    'Karta z krótkimi informacjami po najechaniu na awatar. Poziom rośnie wraz z liczbą gier (25+ brąz … 1000+ legenda).',
+    'Karta z krótkimi informacjami po najechaniu na awatar lub nick. Poziom rośnie wraz z liczbą gier (25+ brąz … 1000+ legenda).',
   preloadUserMiniProfile: 'Wczytuj w obszarze widoczności',
   preloadUserMiniProfileHint:
-    'Pobiera dane mini profilu awatarów w polu widzenia, by karta otwierała się od razu.',
+    'Pobiera dane mini profilu dla linków profilu w polu widzenia, by karta otwierała się od razu.',
   showProfilePage: 'Ulepsz stronę profilu',
   showProfilePageHint:
     'Stosuje styl poziomu do strony profilu. Poszczególne bloki można wyłączyć poniżej.',

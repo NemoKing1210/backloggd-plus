@@ -52,7 +52,7 @@ export const PROFILE_HOVER_OPEN_MS = 280;
 export const PROFILE_HOVER_CLOSE_MS = 180;
 export const PROFILE_LEAVE_MS = 300;
 export const PROFILE_FETCH_CONCURRENCY = 2;
-/** Preload mini-profiles slightly before avatars enter the viewport. */
+/** Preload mini-profiles slightly before profile links enter the viewport. */
 export const PROFILE_PRELOAD_ROOT_MARGIN = '160px 0px';
 export const GAME_HOVER_OPEN_MS = 280;
 export const GAME_HOVER_CLOSE_MS = 180;

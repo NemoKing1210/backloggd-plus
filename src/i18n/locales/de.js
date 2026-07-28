@@ -84,10 +84,10 @@ export default {
     'Blendet leere Fuse-/incontent-Werbezeilen aus (Startseite, Spielrezensionen usw.).',
   showUserMiniProfile: 'Mini-Profilkarten',
   showUserMiniProfileHint:
-    'Minikarte mit Kurzinfos beim Hover über Avatare. Stufe steigt mit gespielten Spielen (25+ Bronze … 1000+ Legende).',
+    'Minikarte mit Kurzinfos beim Hover über Avatare oder Nutzernamen. Stufe steigt mit gespielten Spielen (25+ Bronze … 1000+ Legende).',
   preloadUserMiniProfile: 'Im Sichtbereich vorladen',
   preloadUserMiniProfileHint:
-    'Lädt Miniprofil-Daten für Avatare im Sichtbereich vor, damit die Karte sofort öffnet.',
+    'Lädt Miniprofil-Daten für Profil-Links im Sichtbereich vor, damit die Karte sofort öffnet.',
   showProfilePage: 'Profilseite aufwerten',
   showProfilePageHint:
     'Wendet Stufen-Styling auf die Profilseite an. Einzelne Blöcke unten abschaltbar.',

@@ -330,8 +330,17 @@ function avatarSpinHost(anchor) {
   );
 }
 
+function hasAvatarImage(anchor) {
+  return Boolean(anchor?.querySelector?.('img'));
+}
+
 function setAvatarLoading(anchor, on) {
   if (!anchor?.setAttribute) return;
+  // Username-only links have no avatar to overlay — skip spinner chrome.
+  if (!hasAvatarImage(anchor)) {
+    if (!on) anchor.removeAttribute(LOADING_ATTR);
+    return;
+  }
   const host = avatarSpinHost(anchor);
   if (on) {
     anchor.setAttribute(LOADING_ATTR, '1');
@@ -414,7 +423,8 @@ function clearAvatarMark(anchor) {
   anchor.removeAttribute(PRELOAD_ATTR);
 }
 
-function isEligibleAvatarAnchor(anchor) {
+/** Root `/u/{user}` links — avatars and username text (e.g. `.username-link`). */
+function isEligibleProfileAnchor(anchor) {
   if (!anchor || anchor.nodeType !== 1) return false;
   if (anchor.closest(`#${POPOVER_ID}, .blp-ump, .blp-settings-backdrop, #primary-nav, #profile-header`)) {
     return false;
@@ -425,12 +435,11 @@ function isEligibleAvatarAnchor(anchor) {
   }
   const href = anchor.getAttribute('href') || anchor.href || '';
   if (!isUserProfileRootHref(href)) return false;
-  if (!anchor.querySelector('img')) return false;
   return Boolean(parseUsernameFromHref(href));
 }
 
-function markAvatarAnchor(anchor) {
-  if (!isEligibleAvatarAnchor(anchor)) {
+function markProfileAnchor(anchor) {
+  if (!isEligibleProfileAnchor(anchor)) {
     clearAvatarMark(anchor);
     return null;
   }
@@ -445,7 +454,7 @@ function markAvatarAnchor(anchor) {
     anchor.setAttribute(TIER_ATTR, tierIdFromProfile(cached));
     setAvatarLoading(anchor, false);
   } else if (!anchor.hasAttribute(TIER_ATTR)) {
-    // leave unmarked tier → default outline
+    // leave unmarked tier → default outline (avatars only; CSS targets img)
   }
   if (loadingUsernames.has(username.toLowerCase())) {
     setAvatarLoading(anchor, true);
@@ -527,7 +536,7 @@ function scheduleProfilePreload() {
   });
 }
 
-function decorateAvatars(root = document) {
+function decorateProfileAnchors(root = document) {
   if (settings.showUserMiniProfile === false) {
     clearAllAvatarMarks();
     stopProfilePreload();
@@ -535,12 +544,12 @@ function decorateAvatars(root = document) {
   }
   const scope = root.querySelectorAll ? root : document;
   scope.querySelectorAll('a[href*="/u/"]').forEach((anchor) => {
-    markAvatarAnchor(anchor);
+    markProfileAnchor(anchor);
   });
   scheduleProfilePreload();
 }
 
-const decorateAvatarsSoon = debounce(() => decorateAvatars(), 120);
+const decorateProfileAnchorsSoon = debounce(() => decorateProfileAnchors(), 120);
 
 async function showForAnchor(anchor, username) {
   const el = ensurePopover();
@@ -602,13 +611,13 @@ function scheduleClose() {
   }, PROFILE_HOVER_CLOSE_MS);
 }
 
-function resolveAvatarAnchor(target) {
+function resolveProfileAnchor(target) {
   if (!target || target.nodeType !== 1) return null;
   if (target.closest?.(`#${POPOVER_ID}, .blp-ump, .blp-settings-backdrop, #primary-nav`)) {
     return null;
   }
   const anchor = target.closest?.('a[href*="/u/"]');
-  if (!anchor || !isEligibleAvatarAnchor(anchor)) return null;
+  if (!anchor || !isEligibleProfileAnchor(anchor)) return null;
   const username = parseUsernameFromHref(anchor.getAttribute('href') || anchor.href);
   if (!username) return null;
   return { anchor, username };
@@ -616,9 +625,9 @@ function resolveAvatarAnchor(target) {
 
 function onPointerOver(e) {
   if (settings.showUserMiniProfile === false) return;
-  const hit = resolveAvatarAnchor(e.target);
+  const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
-  markAvatarAnchor(hit.anchor);
+  markProfileAnchor(hit.anchor);
   // Start fetch immediately so the avatar spinner shows even before the card opens,
   // and keeps spinning if the pointer leaves mid-load.
   if (!peekCachedUserProfile(hit.username)) {
@@ -633,7 +642,7 @@ function onPointerOver(e) {
 }
 
 function onPointerOut(e) {
-  const hit = resolveAvatarAnchor(e.target);
+  const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   const related = e.relatedTarget;
   if (related && (hit.anchor.contains(related) || popoverEl?.contains(related))) return;
@@ -667,5 +676,5 @@ export function bindUserMiniProfiles() {
 
 export function scheduleUserMiniProfiles() {
   bindUserMiniProfiles();
-  decorateAvatarsSoon();
+  decorateProfileAnchorsSoon();
 }

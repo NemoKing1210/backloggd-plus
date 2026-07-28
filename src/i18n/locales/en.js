@@ -84,10 +84,10 @@ export default {
     'Hides empty Fuse / incontent ad rows (homepage, game reviews, etc.).',
   showUserMiniProfile: 'User mini-profile cards',
   showUserMiniProfileHint:
-    'Brief mini profile on avatar hover. Tier grows with games played (25+ bronze … 1000+ legend).',
+    'Brief mini profile on avatar or username hover. Tier grows with games played (25+ bronze … 1000+ legend).',
   preloadUserMiniProfile: 'Preload in viewport',
   preloadUserMiniProfileHint:
-    'Fetch mini-profile data for avatars as they enter the viewport so hover cards open instantly.',
+    'Fetch mini-profile data for profile links as they enter the viewport so hover cards open instantly.',
   showProfilePage: 'Enhance profile page',
   showProfilePageHint:
     'Applies tier styling to the profile page. Turn off individual blocks below as needed.',

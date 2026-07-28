@@ -84,10 +84,10 @@ export default {
     'Oculta filas vacías de Fuse / incontent (inicio, reseñas del juego, etc.).',
   showUserMiniProfile: 'Mini perfil de usuario',
   showUserMiniProfileHint:
-    'Muestra una carta con información breve al pasar el cursor sobre avatares. El nivel sube con juegos jugados (25+ bronce … 1000+ leyenda).',
+    'Muestra una carta con información breve al pasar el cursor sobre avatares o nombres. El nivel sube con juegos jugados (25+ bronce … 1000+ leyenda).',
   preloadUserMiniProfile: 'Precargar en el viewport',
   preloadUserMiniProfileHint:
-    'Obtiene los datos del miniperfil de los avatares al entrar en el viewport para abrir la carta al instante.',
+    'Obtiene los datos del miniperfil de los enlaces de perfil al entrar en el viewport para abrir la carta al instante.',
   showProfilePage: 'Mejorar página de perfil',
   showProfilePageHint:
     'Aplica el estilo por nivel a la página de perfil. Desactiva bloques abajo si quieres.',

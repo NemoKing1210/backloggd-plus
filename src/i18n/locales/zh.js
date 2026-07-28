@@ -76,9 +76,9 @@ export default {
   hideHomepageFuseHint: '隐藏空的 Fuse / incontent 广告行（首页、游戏评论区等）。',
   showUserMiniProfile: '用户迷你资料卡',
   showUserMiniProfileHint:
-    '悬停头像时显示简明资料。等级随游玩数量提升（25+ 青铜 … 1000+ 传奇）。',
+    '悬停头像或用户名时显示简明资料。等级随游玩数量提升（25+ 青铜 … 1000+ 传奇）。',
   preloadUserMiniProfile: '进入视口时预加载',
-  preloadUserMiniProfileHint: '头像进入视口时预取迷你资料数据，悬停时可立即打开卡片。',
+  preloadUserMiniProfileHint: '资料链接进入视口时预取迷你资料数据，悬停时可立即打开卡片。',
   showProfilePage: '美化资料页',
   showProfilePageHint: '为资料页应用等级样式。可在下方单独关闭各区块。',
   showProfileHeader: '顶部与头像',

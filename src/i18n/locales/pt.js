@@ -84,10 +84,10 @@ export default {
     'Oculta linhas vazias Fuse / incontent (página inicial, análises do jogo, etc.).',
   showUserMiniProfile: 'Mini perfil do usuário',
   showUserMiniProfileHint:
-    'Mostra um card com informações resumidas ao passar o mouse sobre avatares. O nível sobe com jogos jogados (25+ bronze … 1000+ lenda).',
+    'Mostra um card com informações resumidas ao passar o mouse sobre avatares ou nomes. O nível sobe com jogos jogados (25+ bronze … 1000+ lenda).',
   preloadUserMiniProfile: 'Pré-carregar na viewport',
   preloadUserMiniProfileHint:
-    'Busca os dados do mini perfil dos avatares ao entrarem na viewport para o card abrir na hora.',
+    'Busca os dados do mini perfil dos links de perfil ao entrarem na viewport para o card abrir na hora.',
   showProfilePage: 'Melhorar página de perfil',
   showProfilePageHint:
     'Aplica o visual por nível à página de perfil. Desative blocos abaixo se quiser.',
