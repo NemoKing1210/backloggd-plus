@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.84] - 2026-07-28
+
+### Fixed
+
+- Game mini-profile no longer injects a spinner into cover markup (layout stayed intact; loading stays in the popover skeleton)
+
+## [0.7.83] - 2026-07-28
+
+### Added
+
+- Hover mini-profile on game cover cards (browse / search / journal / Similar games): Backloggd title, rating, platforms, description snippet, Steam price/reviews/owned·wishlist, GameStatus, and quick links
+- Settings → Game card: master toggle + optional viewport preload (cached under game data as `game:mini:{slug}`)
+
 ## [0.7.82] - 2026-07-22
 
 ### Added

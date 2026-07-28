@@ -19,7 +19,7 @@ export default {
   sectionGame: 'Page jeu',
   sectionLists: 'Fiche jeu',
   sectionListsHint:
-    'Badges sur les jaquettes en browse, recherche, journal et Jeux similaires.',
+    'Badges et mini-profils au survol sur les jaquettes en browse, recherche, journal et Jeux similaires.',
   sectionGeneral: 'Général',
   sectionProfile: 'Profil',
   sectionUi: 'UI',
@@ -276,6 +276,18 @@ export default {
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint:
     'Chip de statut GameStatus.info lorsqu’une correspondance Steam existe.',
+  cardGroupHover: 'Cartes au survol',
+  cardGroupHoverHint: 'Mini-profil au survol d’une jaquette de jeu.',
+  showGameMiniProfile: 'Mini-profils de jeu',
+  showGameMiniProfileHint:
+    'Survolez une jaquette pour voir titre, note, plateformes, prix/avis Steam et liens rapides.',
+  preloadGameMiniProfile: 'Précharger dans le viewport',
+  preloadGameMiniProfileHint:
+    'Charge les données du mini-profil quand les jaquettes entrent dans le viewport pour une ouverture instantanée.',
+  miniGameRating: 'Note Backloggd',
+  miniGameOpen: 'Ouvrir le jeu',
+  miniGameLoading: 'Chargement du jeu…',
+  miniGameError: 'Impossible de charger le jeu',
   steamBackloggdTooltip: 'Voir sur Backloggd',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: 'Possédé',

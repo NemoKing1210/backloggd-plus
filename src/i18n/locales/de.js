@@ -19,7 +19,7 @@ export default {
   sectionGame: 'Spieleseite',
   sectionLists: 'Spielkarte',
   sectionListsHint:
-    'Badges auf Covers in Browse, Suche, Journal und Ähnliche Spiele.',
+    'Badges und Hover-Mini-Profile auf Covers in Browse, Suche, Journal und Ähnliche Spiele.',
   sectionGeneral: 'Allgemein',
   sectionProfile: 'Profil',
   sectionUi: 'UI',
@@ -276,6 +276,18 @@ export default {
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint:
     'Status-Chip von GameStatus.info bei vorhandenem Steam-Match.',
+  cardGroupHover: 'Hover-Karten',
+  cardGroupHoverHint: 'Mini-Profil-Popover beim Überfahren eines Spielcovers.',
+  showGameMiniProfile: 'Spiel-Mini-Profile',
+  showGameMiniProfileHint:
+    'Cover überfahren für Titel, Bewertung, Plattformen, Steam-Preis/Reviews und Schnelllinks.',
+  preloadGameMiniProfile: 'Im Sichtbereich vorladen',
+  preloadGameMiniProfileHint:
+    'Lädt Mini-Profil-Daten für Covers im Sichtbereich, damit Hover-Karten sofort öffnen.',
+  miniGameRating: 'Backloggd-Bewertung',
+  miniGameOpen: 'Spiel öffnen',
+  miniGameLoading: 'Spiel wird geladen…',
+  miniGameError: 'Spiel konnte nicht geladen werden',
   steamBackloggdTooltip: 'Auf Backloggd ansehen',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: 'Im Besitz',

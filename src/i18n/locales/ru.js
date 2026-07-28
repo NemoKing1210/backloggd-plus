@@ -19,7 +19,7 @@ export default {
   sectionGame: 'Страница игры',
   sectionLists: 'Карточка игры',
   sectionListsHint:
-    'Бейджи на обложках в каталоге, поиске, журнале и блоке «Похожие игры».',
+    'Бейджи и мини-профили при наведении на обложки в каталоге, поиске, журнале и блоке «Похожие игры».',
   sectionGeneral: 'Общие',
   sectionProfile: 'Профиль',
   sectionUi: 'UI',
@@ -275,6 +275,18 @@ export default {
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint:
     'Статус релиза с GameStatus.info, если есть матч Steam.',
+  cardGroupHover: 'Карточки при наведении',
+  cardGroupHoverHint: 'Мини-профиль при наведении на обложку игры.',
+  showGameMiniProfile: 'Мини-профиль игры',
+  showGameMiniProfileHint:
+    'При наведении на обложку — название, рейтинг, платформы, цена/отзывы Steam и быстрые ссылки.',
+  preloadGameMiniProfile: 'Предзагрузка в зоне видимости',
+  preloadGameMiniProfileHint:
+    'Загружает данные мини-профиля для обложек в зоне видимости, чтобы карточка открывалась сразу.',
+  miniGameRating: 'Рейтинг Backloggd',
+  miniGameOpen: 'Открыть игру',
+  miniGameLoading: 'Загрузка игры…',
+  miniGameError: 'Не удалось загрузить игру',
   steamBackloggdTooltip: 'Открыть на Backloggd',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: 'Куплено',

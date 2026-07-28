@@ -19,7 +19,7 @@ export default {
   sectionGame: 'Game page',
   sectionLists: 'Game card',
   sectionListsHint:
-    'Badges on cover cards in browse, search, journal, and Similar games.',
+    'Badges and hover mini-profiles on cover cards in browse, search, journal, and Similar games.',
   sectionGeneral: 'General',
   sectionProfile: 'Profile',
   sectionUi: 'UI',
@@ -276,6 +276,18 @@ export default {
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint:
     'Release / status chip from GameStatus.info when a Steam match exists.',
+  cardGroupHover: 'Hover cards',
+  cardGroupHoverHint: 'Mini-profile popover when hovering a game cover.',
+  showGameMiniProfile: 'Game mini-profile cards',
+  showGameMiniProfileHint:
+    'Hover a cover to preview title, rating, platforms, Steam price/reviews, and quick links.',
+  preloadGameMiniProfile: 'Preload in viewport',
+  preloadGameMiniProfileHint:
+    'Fetch game mini-profile data as covers enter the viewport so hover cards open instantly.',
+  miniGameRating: 'Backloggd rating',
+  miniGameOpen: 'Open game',
+  miniGameLoading: 'Loading game…',
+  miniGameError: 'Could not load game',
   steamBackloggdTooltip: 'View on Backloggd',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: 'Owned',

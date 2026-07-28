@@ -4,6 +4,7 @@ import {
 import './styles/main.css';
 import './styles/unified-rating.css';
 import './styles/user-mini-profile.css';
+import './styles/game-mini-profile.css';
 import { bindCachePersistFlush, migrateCacheForScriptVersion } from './cache.js';
 import { ROOT_ATTR, SCRIPT_VERSION } from './constants.js';
 import { ensureNavSettingsButton, openSettings } from './features/settings-panel.js';

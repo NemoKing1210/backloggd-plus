@@ -19,7 +19,7 @@ export default {
   sectionGame: 'ゲームページ',
   sectionLists: 'ゲームカード',
   sectionListsHint:
-    'browse / 検索 / journal と「似ているゲーム」のカバーに出すバッジ。',
+    'browse / 検索 / journal と「似ているゲーム」のカバーバッジとホバーミニプロフィール。',
   sectionGeneral: '一般',
   sectionProfile: 'プロフィール',
   sectionUi: 'UI',
@@ -274,6 +274,18 @@ export default {
     'Steam ウィッシュリストにある場合に表示（所持時は非表示）。Steam ログインが必要。',
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint: 'Steam マッチがあるときの GameStatus.info ステータスチップ。',
+  cardGroupHover: 'ホバーカード',
+  cardGroupHoverHint: 'ゲームカバーにホバーしたときのミニプロフィール。',
+  showGameMiniProfile: 'ゲームミニプロフィール',
+  showGameMiniProfileHint:
+    'カバーにホバーするとタイトル・評価・プラットフォーム・Steam価格/レビュー・クイックリンクを表示。',
+  preloadGameMiniProfile: '表示領域で事前読込',
+  preloadGameMiniProfileHint:
+    'カバーが表示領域に入るとミニプロフィールを先読みし、ホバーですぐ開けます。',
+  miniGameRating: 'Backloggd評価',
+  miniGameOpen: 'ゲームを開く',
+  miniGameLoading: 'ゲームを読み込み中…',
+  miniGameError: 'ゲームを読み込めませんでした',
   steamBackloggdTooltip: 'Backloggdで見る',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: '所持',

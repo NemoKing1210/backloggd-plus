@@ -19,7 +19,7 @@ export default {
   sectionGame: 'Strona gry',
   sectionLists: 'Karta gry',
   sectionListsHint:
-    'Odznaki na okładkach w browse, wyszukiwaniu, journal i Podobnych grach.',
+    'Odznaki i mini profile po najechaniu na okładki w browse, wyszukiwaniu, journal i Podobnych grach.',
   sectionGeneral: 'Ogólne',
   sectionProfile: 'Profil',
   sectionUi: 'UI',
@@ -276,6 +276,18 @@ export default {
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint:
     'Chip statusu z GameStatus.info przy dopasowaniu Steam.',
+  cardGroupHover: 'Karty po najechaniu',
+  cardGroupHoverHint: 'Mini profil po najechaniu na okładkę gry.',
+  showGameMiniProfile: 'Mini profile gier',
+  showGameMiniProfileHint:
+    'Najedź na okładkę, by zobaczyć tytuł, ocenę, platformy, cenę/recenzje Steam i szybkie linki.',
+  preloadGameMiniProfile: 'Wczytuj w obszarze widoczności',
+  preloadGameMiniProfileHint:
+    'Pobiera dane mini profilu, gdy okładki wchodzą w widok, by karty otwierały się od razu.',
+  miniGameRating: 'Ocena Backloggd',
+  miniGameOpen: 'Otwórz grę',
+  miniGameLoading: 'Ładowanie gry…',
+  miniGameError: 'Nie udało się wczytać gry',
   steamBackloggdTooltip: 'Zobacz na Backloggd',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: 'Posiadane',

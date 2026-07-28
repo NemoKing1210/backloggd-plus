@@ -19,7 +19,7 @@ export default {
   sectionGame: '게임 페이지',
   sectionLists: '게임 카드',
   sectionListsHint:
-    'browse / 검색 / journal 및 비슷한 게임 커버의 배지.',
+    'browse / 검색 / journal 및 비슷한 게임 커버의 배지와 호버 미니 프로필.',
   sectionGeneral: '일반',
   sectionProfile: '프로필',
   sectionUi: 'UI',
@@ -273,6 +273,18 @@ export default {
     'Steam 위시리스트에 있을 때 표시(보유 시 숨김). Steam 로그인 필요.',
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint: 'Steam 매치가 있을 때 GameStatus.info 상태 칩.',
+  cardGroupHover: '호버 카드',
+  cardGroupHoverHint: '게임 커버에 마우스를 올리면 미니 프로필이 열립니다.',
+  showGameMiniProfile: '게임 미니 프로필',
+  showGameMiniProfileHint:
+    '커버에 마우스를 올리면 제목, 평점, 플랫폼, Steam 가격/리뷰, 바로가기 링크를 봅니다.',
+  preloadGameMiniProfile: '화면에 보이면 미리 불러오기',
+  preloadGameMiniProfileHint:
+    '커버가 화면에 들어오면 미니 프로필을 미리 가져와 호버 시 바로 엽니다.',
+  miniGameRating: 'Backloggd 평점',
+  miniGameOpen: '게임 열기',
+  miniGameLoading: '게임 불러오는 중…',
+  miniGameError: '게임을 불러오지 못했습니다',
   steamBackloggdTooltip: 'Backloggd에서 보기',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: '보유',

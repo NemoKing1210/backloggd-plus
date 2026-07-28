@@ -54,6 +54,12 @@ export const PROFILE_LEAVE_MS = 300;
 export const PROFILE_FETCH_CONCURRENCY = 2;
 /** Preload mini-profiles slightly before avatars enter the viewport. */
 export const PROFILE_PRELOAD_ROOT_MARGIN = '160px 0px';
+export const GAME_HOVER_OPEN_MS = 280;
+export const GAME_HOVER_CLOSE_MS = 180;
+export const GAME_LEAVE_MS = 300;
+export const GAME_FETCH_CONCURRENCY = 2;
+/** Preload game mini-profiles slightly before covers enter the viewport. */
+export const GAME_PRELOAD_ROOT_MARGIN = '160px 0px';
 export const CACHE_HOURS_MAX = 168;
 /** Soft advisory budget for the settings meter (GM storage has no fixed quota). */
 export const CACHE_SOFT_LIMIT_BYTES = 5 * 1024 * 1024;
@@ -179,6 +185,8 @@ export const DEFAULT_SETTINGS = {
   showCardBadgeOwned: true,
   showCardBadgeWishlist: true,
   showCardBadgeGameStatus: true,
+  showGameMiniProfile: true,
+  preloadGameMiniProfile: false,
   showExport: false,
   showGameId: false,
   showTranslate: true,

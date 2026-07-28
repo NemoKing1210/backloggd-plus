@@ -695,6 +695,22 @@ export function openSettings() {
           )
         )
       )}
+      ${groupHtml(
+        'cardGroupHover',
+        'cardGroupHoverHint',
+        listHtml(
+          toggleHtml(
+            'showGameMiniProfile',
+            draft.showGameMiniProfile !== false,
+            'showGameMiniProfileHint'
+          ),
+          toggleHtml(
+            'preloadGameMiniProfile',
+            draft.preloadGameMiniProfile === true,
+            'preloadGameMiniProfileHint'
+          )
+        )
+      )}
       </div>
       <div ${panelAttrs('translate', activeTab)}>
       ${groupHtml(

@@ -19,7 +19,7 @@ export default {
   sectionGame: 'Página del juego',
   sectionLists: 'Tarjeta de juego',
   sectionListsHint:
-    'Insignias en portadas de browse, búsqueda, journal y Juegos similares.',
+    'Insignias y mini perfiles al pasar el cursor en portadas de browse, búsqueda, journal y Juegos similares.',
   sectionGeneral: 'General',
   sectionProfile: 'Perfil',
   sectionUi: 'UI',
@@ -276,6 +276,18 @@ export default {
   showCardBadgeGameStatus: 'GameStatus',
   showCardBadgeGameStatusHint:
     'Chip de estado de GameStatus.info cuando hay coincidencia de Steam.',
+  cardGroupHover: 'Tarjetas al pasar el cursor',
+  cardGroupHoverHint: 'Mini perfil al pasar el cursor sobre la portada de un juego.',
+  showGameMiniProfile: 'Mini perfiles de juego',
+  showGameMiniProfileHint:
+    'Pasa el cursor sobre una portada para ver título, nota, plataformas, precio/reseñas de Steam y enlaces.',
+  preloadGameMiniProfile: 'Precargar en el viewport',
+  preloadGameMiniProfileHint:
+    'Obtiene datos del mini perfil cuando las portadas entran en el viewport para abrir al instante.',
+  miniGameRating: 'Nota de Backloggd',
+  miniGameOpen: 'Abrir juego',
+  miniGameLoading: 'Cargando juego…',
+  miniGameError: 'No se pudo cargar el juego',
   steamBackloggdTooltip: 'Ver en Backloggd',
   steamDbBackloggdLabel: 'Backloggd',
   steamOwned: 'En propiedad',
