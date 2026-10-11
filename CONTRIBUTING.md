@@ -42,6 +42,19 @@ Thanks for your interest in improving Backloggd Plus.
 UI locales: `en`, `ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl` (plus `auto` = browser).
 
 - Add every new user-facing string to **all** locale files in [`src/i18n/locales/`](src/i18n/locales/).
+
+### Site language (Backloggd itself)
+
+Dictionaries live in [`src/i18n/site/`](src/i18n/site/). `en.json` is the key list: each key is the English phrase as it appears on Backloggd, and the value is the same English phrase. A translation file uses those same keys.
+
+To add a language:
+
+1. Copy `src/i18n/site/en.json` to `src/i18n/site/<code>.json` (`de.json`, `es.json`, …). Use a two-letter code.
+2. Translate the values. Leave the keys unchanged.
+3. An empty string hides that fragment (used when a sentence is split by a link).
+4. Open a pull request. The new file shows up in Settings → General → Site language. No registry edit is required.
+
+Reviews, game descriptions, and game titles are not part of these files. Russian grammar for dates and counters lives in `src/features/site-locale.js` and applies only when the site language is Russian. Other languages use exact phrases from their JSON file.
 - Keep localized `@name` / `@description` in `vite.config.js` aligned when changing the product description.
 
 ## Contributors

@@ -134,40 +134,73 @@ function ensureDescriptionButton() {
 
   summary.setAttribute(MARK_ATTR, 'desc');
 
-  let btn = document.querySelector(`.${BTN_CLASS}[data-blp-translate-kind="desc"]`);
-  if (btn) return;
+  document.querySelectorAll('.review-card .blp-translate-desc-slot').forEach((el) => el.remove());
+  document.querySelectorAll(`.review-card .${BTN_CLASS}[data-blp-translate-kind="desc"]`).forEach((el) => {
+    el.remove();
+  });
 
-  btn = makeButton('desc');
+  const existing = [...document.querySelectorAll(`.${BTN_CLASS}[data-blp-translate-kind="desc"]`)].filter(
+    (el) => !el.closest('.review-card')
+  );
+  existing.slice(1).forEach((el) => {
+    el.closest('.blp-translate-desc-slot')?.remove();
+    el.remove();
+  });
+  if (existing[0]) return;
+
+  const btn = makeButton('desc');
+  const wrap = document.createElement('div');
+  wrap.className = 'col-auto my-auto blp-translate-desc-slot';
+  wrap.appendChild(btn);
+
   const expand = document.getElementById('summary-expand-btn');
-  const slot = expand?.closest('.col-auto');
+  const slot = expand && !expand.closest('.review-card') ? expand.closest('.col-auto') : null;
   if (slot) {
-    const wrap = document.createElement('div');
-    wrap.className = 'col-auto my-auto blp-translate-desc-slot';
-    wrap.appendChild(btn);
     slot.insertAdjacentElement('beforebegin', wrap);
     return;
   }
-  textEl.insertAdjacentElement('afterend', btn);
+  if (summary.closest('.review-card')) return;
+  const row = summary.querySelector('.row') || summary;
+  row.appendChild(wrap);
 }
 
 function ensureReviewButton(card) {
-  if (card.querySelector(`.${BTN_CLASS}[data-blp-translate-kind="review"]`)) return;
+  if (card.parentElement?.closest('.review-card')) return;
   const textEl = findReviewTextEl(card);
   if (!textEl || !htmlToPlain(textEl.innerHTML)) return;
+  const bars = [...card.querySelectorAll('.review-bottom-bar')].filter(
+    (bar) => !bar.parentElement?.closest('.review-bottom-bar') && bar.closest('.review-card') === card
+  );
+  const bar = bars[0];
+  if (!bar) return;
 
-  card.setAttribute(MARK_ATTR, 'review');
-  const btn = makeButton('review');
-  const bar = card.querySelector('.review-bottom-bar');
-  if (bar) {
+  card.querySelectorAll('.blp-translate-desc-slot').forEach((el) => el.remove());
+  card.querySelectorAll(`.${BTN_CLASS}[data-blp-translate-kind="desc"]`).forEach((el) => el.remove());
+
+  const slots = [...card.querySelectorAll('.blp-translate-review-slot')];
+  let keep = slots.find((slot) => bar.contains(slot) && !slot.closest('.expand-review-col'));
+  slots.forEach((slot) => {
+    if (slot !== keep) slot.remove();
+  });
+  let btn = keep?.querySelector(`.${BTN_CLASS}[data-blp-translate-kind="review"]`) || null;
+  if (!btn) {
+    card.setAttribute(MARK_ATTR, 'review');
+    btn = makeButton('review');
     const col = document.createElement('div');
     col.className = 'col-auto my-auto pr-1 blp-translate-review-slot';
     col.appendChild(btn);
-    const expand = bar.querySelector('.expand-review-col');
-    if (expand) expand.insertAdjacentElement('beforebegin', col);
+    const expand = bar.querySelector('.expand-review-col, a.review-more, #summary-expand-btn');
+    const expandCol = expand?.closest('.col, .col-auto');
+    if (expandCol && bar.contains(expandCol)) expandCol.insertAdjacentElement('beforebegin', col);
     else bar.appendChild(col);
-    return;
+    keep = col;
   }
-  textEl.insertAdjacentElement('afterend', btn);
+  card.querySelectorAll(`.${BTN_CLASS}`).forEach((other) => {
+    if (other === btn) return;
+    const slot = other.closest('.blp-translate-review-slot, .blp-translate-desc-slot');
+    if (slot) slot.remove();
+    else other.remove();
+  });
 }
 
 function syncReviewButtons() {
@@ -182,6 +215,12 @@ function syncReviewButtons() {
     return;
   }
   document.querySelectorAll('.review-card').forEach((card) => ensureReviewButton(card));
+  document.querySelectorAll(`.${BTN_CLASS}[data-blp-translate-kind="review"]`).forEach((btn) => {
+    if (btn.closest('.review-bottom-bar')) return;
+    const slot = btn.closest('.blp-translate-review-slot');
+    if (slot) slot.remove();
+    else btn.remove();
+  });
 }
 
 function getTargetForButton(btn) {

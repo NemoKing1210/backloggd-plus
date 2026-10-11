@@ -212,6 +212,11 @@ export function sanitizeSettings(raw) {
     next.uiLocale = coerceLocale(raw.uiLocale, base.uiLocale);
     appliedKeys.push('uiLocale');
   }
+  if ('siteLocale' in raw) {
+    const value = String(raw.siteLocale ?? '').trim().toLowerCase();
+    next.siteLocale = value === 'off' || /^[a-z]{2}$/.test(value) ? value : 'off';
+    appliedKeys.push('siteLocale');
+  }
   if ('translateTargetLocale' in raw) {
     next.translateTargetLocale = coerceLocale(
       raw.translateTargetLocale,

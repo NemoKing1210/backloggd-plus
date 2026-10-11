@@ -28,6 +28,7 @@ import {
   STEAM_COUNTRY_CODES,
 } from '../constants.js';
 import { LOCALE_FLAG_AUTO, LOCALE_FLAGS, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
+import { sitePackCodes } from './site-locale.js';
 import {
   buildSettingsExport,
   linkLabelKey,
@@ -459,6 +460,19 @@ export function openSettings() {
     </select>
   `;
 
+  const siteLocale = draft.siteLocale || 'off';
+  const siteLocaleSelect = `
+    <select id="blp-site-locale">
+      <option value="off" ${siteLocale === 'off' ? 'selected' : ''}>${escapeHtml(t.siteLanguageOff || 'As on the site')}</option>
+      ${sitePackCodes().map((code) => {
+        const selected = siteLocale === code ? 'selected' : '';
+        const name = LOCALE_NATIVE_NAMES[code] || code;
+        const flag = LOCALE_FLAGS[code] || '';
+        return `<option value="${code}" ${selected}>${flag} ${escapeHtml(name)}</option>`;
+      }).join('')}
+    </select>
+  `;
+
   const steamCcSelect = `
     <select id="blp-steam-cc">
       ${STEAM_COUNTRY_CODES.map(
@@ -517,7 +531,10 @@ export function openSettings() {
       ${groupHtml(
         'generalGroupLanguage',
         'generalGroupLanguageHint',
-        listHtml(fieldHtml('blp-ui-locale', t.uiLanguage, localeSelect, t.uiLanguageHint))
+        listHtml(
+          fieldHtml('blp-ui-locale', t.uiLanguage, localeSelect, t.uiLanguageHint),
+          fieldHtml('blp-site-locale', t.siteLanguage || 'Site language', siteLocaleSelect, t.siteLanguageHint || '')
+        )
       )}
       ${groupHtml(
         'generalGroupInterface',
@@ -1046,6 +1063,9 @@ export function openSettings() {
     const uiLocale = backdrop.querySelector('#blp-ui-locale')?.value || 'auto';
     draft.uiLocale =
       uiLocale === 'auto' || SUPPORTED_LOCALES.includes(uiLocale) ? uiLocale : 'auto';
+    const siteLocaleVal = backdrop.querySelector('#blp-site-locale')?.value || 'off';
+    draft.siteLocale =
+      siteLocaleVal === 'off' || sitePackCodes().includes(siteLocaleVal) ? siteLocaleVal : 'off';
     const translateLocaleVal = backdrop.querySelector('#blp-translate-locale')?.value || 'auto';
     draft.translateTargetLocale =
       translateLocaleVal === 'auto' || SUPPORTED_LOCALES.includes(translateLocaleVal)
