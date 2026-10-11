@@ -156,6 +156,7 @@ export const DEFAULT_SETTINGS = {
   cacheTranslations: true,
   cacheFx: true,
   uiLocale: 'auto',
+  siteLocale: 'off',
   steamCountry: 'US',
   showPriceConvert: false,
   convertCurrency: 'RUB',
