@@ -65,6 +65,30 @@
 .blp-gmp.is-open.is-ready .blp-gmp__card > *:nth-child(7) { transition-delay: 0.14s; }
 .blp-gmp.is-open.is-ready .blp-gmp__card > *:nth-child(8) { transition-delay: 0.16s; }
 
+/* In-place content swap (skeleton → data): keep the card steady, no second entrance. */
+.blp-gmp.is-updating {
+  transition:
+    opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.34s ease,
+    top 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blp-gmp.is-updating .blp-gmp__card {
+  animation: none;
+}
+
+.blp-gmp.is-updating.is-open .blp-gmp__card > *:not(.blp-gmp__shine) {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.blp-gmp.is-updating.is-open .blp-gmp__shine {
+  display: none;
+}
+
 .blp-gmp.is-leaving .blp-gmp__card {
   animation: blp-gmp-card-out 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
 }

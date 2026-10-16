@@ -114,7 +114,7 @@ function finishHidePopover() {
     leaveHandler = null;
   }
   if (!popoverEl) return;
-  popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready');
+  popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready', 'is-updating');
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
   activeCover = null;
@@ -641,19 +641,12 @@ const decorateCoversSoon = debounce(() => decorateCovers(), 120);
 async function paintCard(cover, ctx, { soft = false } = {}) {
   const el = ensurePopover();
   el.classList.toggle('is-loading', Boolean(ctx.loadingProfile && !ctx.profile));
-  if (soft) el.classList.remove('is-ready');
+  // Soft = swap content of the already-open card in place (skeleton → data); no entrance replay.
+  el.classList.toggle('is-updating', soft);
   el.innerHTML = await renderCard(ctx);
   openPopover(el);
-  if (soft) {
-    void el.offsetWidth;
-    requestAnimationFrame(() => {
-      el.classList.add('is-ready');
-      positionPopover(cover);
-    });
-  } else {
-    positionPopover(cover);
-    requestAnimationFrame(() => positionPopover(cover));
-  }
+  positionPopover(cover);
+  requestAnimationFrame(() => positionPopover(cover));
 }
 
 async function showForCover(cover, { slug, title, appId, coverHint }) {
@@ -699,13 +692,10 @@ async function showForCover(cover, { slug, title, appId, coverHint }) {
 
   el.classList.remove('is-loading');
   if (!profile) {
-    el.classList.remove('is-ready');
+    el.classList.add('is-updating');
     el.innerHTML = renderError(slug, title);
-    void el.offsetWidth;
-    requestAnimationFrame(() => {
-      el.classList.add('is-ready');
-      positionPopover(cover);
-    });
+    positionPopover(cover);
+    requestAnimationFrame(() => positionPopover(cover));
     const result = await enrichPromise;
     if (seq !== fetchSeq || activeSlug !== slug) return;
     enrichState = result;

@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Hide ad blocks also hides Backloggd's new Prosper ad frames (`.prosper-adframe`) and rows that contain only such a frame
+- Game mini-profile card no longer "re-appears" or jerks while loading: skeleton → data now swaps in place without replaying the entrance animation (position eases to the new height)
+- Game mini-profile (and cover badges) now work on covers in activity feeds such as "Latest from friends", whose cover link points to a log (`/u/{user}/logs/{slug}/`) instead of `/games/{slug}/`
 - Game mini-profile now opens on covers in Backloggd's native Related Games block (DLC / Remakes / Editions / Series / In Bundles) on game pages; the main game cover stays excluded
 
 ## [0.7.86] - 2026-10-17

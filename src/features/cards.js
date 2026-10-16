@@ -66,7 +66,10 @@ export function parseCardSlug(cover) {
     const m = href.match(/\/games\/([^/?#]+)/i);
     if (m) return m[1].toLowerCase();
   }
-  return '';
+  // Activity feeds (e.g. "Latest from friends") link the cover to a log: /u/{user}/logs/{game-slug}/
+  const logHref = cover.querySelector?.('a.cover-link')?.getAttribute('href') || '';
+  const log = logHref.match(/\/u\/[^/?#]+\/logs\/([^/?#]+)/i);
+  return log ? log[1].toLowerCase() : '';
 }
 
 export function parseCardTitle(cover, slug) {
