@@ -86,7 +86,7 @@ export default {
   enhanceHeader: 'Cabeçalho flutuante',
   enhanceHeaderHint:
     'Barra de navegação em vidro adesiva sobre a página; fica um pouco mais compacta ao rolar.',
-  hideHomepageFuse: 'Ocultar espaços de anúncio Fuse',
+  hideHomepageFuse: 'Ocultar blocos de anúncios',
   hideHomepageFuseHint:
     'Oculta linhas vazias Fuse / incontent (página inicial, análises do jogo, etc.).',
   showUserMiniProfile: 'Mini perfil do usuário',

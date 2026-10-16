@@ -86,7 +86,7 @@ export default {
   enhanceHeader: 'Floating header',
   enhanceHeaderHint:
     'Sticky glass navbar that floats over the page and tightens slightly while scrolling.',
-  hideHomepageFuse: 'Hide Fuse ad slots',
+  hideHomepageFuse: 'Hide ad blocks',
   hideHomepageFuseHint:
     'Hides empty Fuse / incontent ad rows (homepage, game reviews, etc.).',
   showUserMiniProfile: 'User mini-profile cards',

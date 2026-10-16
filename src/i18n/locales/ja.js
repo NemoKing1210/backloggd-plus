@@ -86,7 +86,7 @@ export default {
   enhanceHeader: 'フローティングヘッダー',
   enhanceHeaderHint:
     'ページ上に浮かぶガラス風の固定ナビ。スクロールすると少しコンパクトになります。',
-  hideHomepageFuse: 'Fuse広告枠を非表示',
+  hideHomepageFuse: '広告枠を非表示',
   hideHomepageFuseHint:
     '空の Fuse / incontent 広告行を非表示にします（ホーム、ゲームレビューなど）。',
   showUserMiniProfile: 'ユーザーミニプロフィール',

@@ -38,6 +38,10 @@ const POPOVER_ID = 'blp-game-mini-profile';
 const GMP_SKIP =
   `#${POPOVER_ID}, .blp-gmp, #blp-user-mini-profile, .blp-ump, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop`;
 
+/** Covers allowed inside the game page skip zone: Plus Similar games and Backloggd's native Related Games. */
+const GMP_ALLOW_IN_GAME_PAGE =
+  '.blp-similar__cover, turbo-frame#game_detail_section .game-cover';
+
 let bound = false;
 let openTimer = 0;
 let closeTimer = 0;
@@ -527,7 +531,7 @@ function isEligibleCover(cover) {
     return false;
   }
   if (cover.closest(GMP_SKIP)) return false;
-  if (cover.closest(CARD_SKIP_ANCESTOR) && !cover.classList.contains('blp-similar__cover')) {
+  if (cover.closest(CARD_SKIP_ANCESTOR) && !cover.matches(GMP_ALLOW_IN_GAME_PAGE)) {
     return false;
   }
   const slug = parseCardSlug(cover);

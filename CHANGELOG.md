@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.87] - 2026-10-17
+
+### Changed
+
+- Settings → General: "Hide Fuse ad slots" renamed to "Hide ad blocks" (all locales)
+
+### Fixed
+
+- Hide ad blocks also hides Backloggd's new Prosper ad frames (`.prosper-adframe`) and rows that contain only such a frame
+- Game mini-profile now opens on covers in Backloggd's native Related Games block (DLC / Remakes / Editions / Series / In Bundles) on game pages; the main game cover stays excluded
+
 ## [0.7.86] - 2026-10-17
 
 ### Added

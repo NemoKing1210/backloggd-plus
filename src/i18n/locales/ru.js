@@ -86,7 +86,7 @@ export default {
   enhanceHeader: 'Плавающий хедер',
   enhanceHeaderHint:
     'Липкая стеклянная панель навигации поверх страницы; при прокрутке чуть уплотняется.',
-  hideHomepageFuse: 'Скрывать рекламные блоки Fuse',
+  hideHomepageFuse: 'Скрывать рекламные блоки',
   hideHomepageFuseHint:
     'Убирает пустые ряды Fuse / incontent (главная, отзывы на странице игры и т.п.).',
   showUserMiniProfile: 'Мини-профиль пользователя',

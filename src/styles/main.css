@@ -12,6 +12,12 @@ html[data-blp-hide-homepage-fuse="1"] .row.d-none:has(> .col > [data-fuse]) {
   display: none !important;
 }
 
+/* Prosper ad frames (replaced Fuse on Backloggd): the frame and a row that holds nothing else. */
+html[data-blp-hide-homepage-fuse="1"] .prosper-adframe,
+html[data-blp-hide-homepage-fuse="1"] .row:has(> .col:only-child > .prosper-adframe:only-child) {
+  display: none !important;
+}
+
 /* Floating / glass header (Settings → General → Interface) */
 html[data-blp-floating-header="1"] body > header,
 html[data-blp-floating-header="1"] header:has(#primary-nav) {

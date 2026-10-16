@@ -86,7 +86,7 @@ export default {
   enhanceHeader: '플로팅 헤더',
   enhanceHeaderHint:
     '페이지 위에 떠 있는 글래스 스타일 고정 내비. 스크롤 시 조금 더 컴팩트해집니다.',
-  hideHomepageFuse: 'Fuse 광고 슬롯 숨기기',
+  hideHomepageFuse: '광고 블록 숨기기',
   hideHomepageFuseHint:
     '빈 Fuse / incontent 광고 행을 숨깁니다(홈, 게임 리뷰 등).',
   showUserMiniProfile: '사용자 미니 프로필',

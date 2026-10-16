@@ -86,7 +86,7 @@ export default {
   enhanceHeader: 'Pływający nagłówek',
   enhanceHeaderHint:
     'Przyklejony szklany pasek nawigacji nad stroną; przy przewijaniu lekko się zagęszcza.',
-  hideHomepageFuse: 'Ukryj sloty reklamowe Fuse',
+  hideHomepageFuse: 'Ukryj bloki reklamowe',
   hideHomepageFuseHint:
     'Ukrywa puste wiersze Fuse / incontent (strona główna, recenzje gry itd.).',
   showUserMiniProfile: 'Mini profil użytkownika',

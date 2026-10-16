@@ -86,7 +86,7 @@ export default {
   enhanceHeader: 'Schwebender Header',
   enhanceHeaderHint:
     'Klebende Glas-Navigation über der Seite; wird beim Scrollen etwas kompakter.',
-  hideHomepageFuse: 'Fuse-Werbeplätze ausblenden',
+  hideHomepageFuse: 'Werbeblöcke ausblenden',
   hideHomepageFuseHint:
     'Blendet leere Fuse-/incontent-Werbezeilen aus (Startseite, Spielrezensionen usw.).',
   showUserMiniProfile: 'Mini-Profilkarten',
