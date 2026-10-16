@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.86] - 2026-10-17
+
+### Added
+
+- Optional Backloggd site translation (Settings → General → Site language): built-in dictionaries in `src/i18n/site/*.json` (Russian included), off by default; contributed by [Nikitamce](https://github.com/Nikitamce) / [MaksVolkov7863](https://github.com/MaksVolkov7863)
+- Settings → General → Accent color: preset swatches, custom color picker, live preview, reset; applied to Plus buttons, badges, mini-profiles, and the unified rating block (included in settings export/import)
+- Settings → General → Data transfer: link to the companion [Backloggd Data Transfer](https://github.com/NemoKing1210/backloggd-data-transfer) userscript
+- MaksVolkov7863 listed under Settings → About contributors
+
+### Changed
+
+- Profile page styling (Settings → Profile) is off by default for new installs and after a settings reset; existing saved choices are kept
+- One Translate button per review; the review expand control keeps working when its label is translated
+
 ## [0.7.85] - 2026-07-28
 
 ### Changed

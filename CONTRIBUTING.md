@@ -62,6 +62,7 @@ Reviews, game descriptions, and game titles are not part of these files. Russian
 Thanks to everyone who helps improve Backloggd Plus:
 
 - [Nikitamce](https://github.com/Nikitamce)
+- [MaksVolkov7863](https://github.com/MaksVolkov7863)
 
 ## License
 

@@ -1,6 +1,21 @@
 import pkg from '../package.json' with { type: 'json' };
 
 export const REPO_URL = 'https://github.com/NemoKing1210/backloggd-plus';
+/** Default Plus accent color; presets offered in Settings → General → Accent color. */
+export const DEFAULT_ACCENT_COLOR = '#3db89a';
+export const ACCENT_PRESETS = [
+  DEFAULT_ACCENT_COLOR,
+  '#66c0f4',
+  '#8b9cf7',
+  '#c084fc',
+  '#f472b6',
+  '#ea377a',
+  '#f87171',
+  '#fb923c',
+  '#facc15',
+  '#a3e635',
+];
+export const DATA_TRANSFER_REPO_URL = 'https://github.com/NemoKing1210/backloggd-data-transfer';
 export const AUTHOR_NAME = 'NemoKing';
 export const AUTHOR_HANDLE = 'NemoKing1210';
 export const AUTHOR_URL = 'https://github.com/NemoKing1210';
@@ -15,6 +30,12 @@ export const CONTRIBUTORS = [
     handle: 'Nikitamce',
     url: 'https://github.com/Nikitamce',
     avatarUrl: 'https://avatars.githubusercontent.com/u/187407575?s=96&v=4',
+  },
+  {
+    name: 'MaksVolkov7863',
+    handle: 'MaksVolkov7863',
+    url: 'https://github.com/MaksVolkov7863',
+    avatarUrl: 'https://avatars.githubusercontent.com/u/128893502?s=96&v=4',
   },
 ];
 export const SCRIPT_VERSION = pkg.version;
@@ -157,6 +178,7 @@ export const DEFAULT_SETTINGS = {
   cacheFx: true,
   uiLocale: 'auto',
   siteLocale: 'off',
+  accentColor: DEFAULT_ACCENT_COLOR,
   steamCountry: 'US',
   showPriceConvert: false,
   convertCurrency: 'RUB',
@@ -200,7 +222,7 @@ export const DEFAULT_SETTINGS = {
   enhanceHeader: false,
   showUserMiniProfile: true,
   preloadUserMiniProfile: false,
-  showProfilePage: true,
+  showProfilePage: false,
   showProfileHeader: true,
   showProfileTierChip: true,
   showProfileStats: true,

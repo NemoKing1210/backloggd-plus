@@ -13,18 +13,18 @@
   position: relative;
   overflow: hidden;
   padding: 0.85rem 1rem 0.9rem !important;
-  border: 1px solid rgba(61, 184, 154, 0.32) !important;
+  border: 1px solid rgba(var(--blp-accent-rgb, 61, 184, 154), 0.32) !important;
   background:
-    radial-gradient(110% 120% at 100% 0%, rgba(61, 184, 154, 0.14), transparent 52%),
+    radial-gradient(110% 120% at 100% 0%, rgba(var(--blp-accent-rgb, 61, 184, 154), 0.14), transparent 52%),
     radial-gradient(90% 90% at 0% 100%, rgba(102, 192, 244, 0.08), transparent 48%),
     var(--back-container, #1a1d24) !important;
 }
 
 .blp-unified-rating[data-grade="high"] {
-  border-color: rgba(190, 238, 17, 0.4) !important;
+  border-color: rgba(var(--blp-accent-rgb, 61, 184, 154), 0.5) !important;
 }
 .blp-unified-rating[data-grade="mid"] {
-  border-color: rgba(61, 184, 154, 0.38) !important;
+  border-color: rgba(var(--blp-accent-rgb, 61, 184, 154), 0.38) !important;
 }
 .blp-unified-rating[data-grade="low"] {
   border-color: rgba(255, 102, 119, 0.32) !important;
@@ -145,7 +145,7 @@
   height: 100%;
   width: 0%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #66c0f4 0%, #3db89a 52%, #beee11 100%);
+  background: linear-gradient(90deg, #66c0f4 0%, var(--blp-accent, #3db89a) 52%, #beee11 100%);
   transform-origin: left center;
   transition:
     width 0.55s cubic-bezier(0.22, 1, 0.36, 1),
@@ -198,7 +198,7 @@
   from {
     opacity: 0.45;
     transform: translateY(3px);
-    border-color: rgba(61, 184, 154, 0.35);
+    border-color: rgba(var(--blp-accent-rgb, 61, 184, 154), 0.35);
   }
   to {
     opacity: 1;

@@ -18,7 +18,10 @@ import {
   AUTHOR_NAME,
   AUTHOR_URL,
   CACHE_HOURS_MAX,
+  ACCENT_PRESETS,
   CONTRIBUTORS,
+  DATA_TRANSFER_REPO_URL,
+  DEFAULT_ACCENT_COLOR,
   DEFAULT_SETTINGS,
   FAVICON_URL,
   LINK_DOMAINS,
@@ -28,6 +31,7 @@ import {
   STEAM_COUNTRY_CODES,
 } from '../constants.js';
 import { LOCALE_FLAG_AUTO, LOCALE_FLAGS, LOCALE_NATIVE_NAMES, SUPPORTED_LOCALES, fmt } from '../i18n/index.js';
+import { applyAccentColor, normalizeAccentColor } from './accent.js';
 import { sitePackCodes } from './site-locale.js';
 import {
   buildSettingsExport,
@@ -550,6 +554,36 @@ export function openSettings() {
         )
       )}
       ${groupHtml(
+        'generalGroupAccent',
+        'generalGroupAccentHint',
+        `<div class="blp-settings-list blp-settings-list--stack">
+          <div class="blp-accent-picker">
+            <div class="blp-accent-picker__swatches" role="group" aria-label="${escapeAttr(t.generalGroupAccent)}">
+              ${ACCENT_PRESETS.map((color) => `
+                <button
+                  type="button"
+                  class="blp-accent-picker__swatch"
+                  style="--blp-swatch: ${escapeAttr(color)}"
+                  data-blp-accent="${escapeAttr(color)}"
+                  aria-label="${escapeAttr(color)}"
+                  title="${escapeAttr(color)}"
+                ></button>`).join('')}
+            </div>
+            <div class="blp-accent-picker__custom">
+              <input
+                type="color"
+                id="blp-accent-color"
+                value="${escapeAttr(normalizeAccentColor(draft.accentColor))}"
+                aria-label="${escapeAttr(t.accentColorPick)}"
+                title="${escapeAttr(t.accentColorPick)}"
+              />
+              <span class="blp-accent-picker__value" data-blp-accent-value></span>
+              <button type="button" class="blp-btn" data-blp-accent-reset>${escapeHtml(t.accentColorReset)}</button>
+            </div>
+          </div>
+        </div>`
+      )}
+      ${groupHtml(
         'generalGroupBackup',
         'generalGroupBackupHint',
         `<div class="blp-settings-list blp-settings-list--stack">
@@ -563,6 +597,18 @@ export function openSettings() {
             hidden
             data-blp-settings-import-file
           />
+        </div>`
+      )}
+      ${groupHtml(
+        'generalGroupTransfer',
+        'generalGroupTransferHint',
+        `<div class="blp-settings-list blp-settings-list--stack">
+          ${aboutLinkHtml({
+            url: DATA_TRANSFER_REPO_URL,
+            domain: 'github.com',
+            label: 'Backloggd Data Transfer',
+            hint: t.transferLinkHint,
+          })}
         </div>`
       )}
       </div>
@@ -848,6 +894,8 @@ export function openSettings() {
       finished = true;
       backdrop.remove();
       document.documentElement.style.overflow = prevOverflow;
+      // Drop any unsaved accent preview.
+      applyAccentColor();
     };
     backdrop.addEventListener('transitionend', done, { once: true });
     setTimeout(done, 240);
@@ -870,6 +918,29 @@ export function openSettings() {
   });
 
   backdrop.querySelector('[data-blp-cancel]')?.addEventListener('click', close);
+
+  const accentInput = backdrop.querySelector('#blp-accent-color');
+  const accentValue = backdrop.querySelector('[data-blp-accent-value]');
+  const setAccent = (value) => {
+    const color = normalizeAccentColor(value);
+    draft.accentColor = color;
+    if (accentInput) accentInput.value = color;
+    if (accentValue) accentValue.textContent = color.toUpperCase();
+    backdrop.querySelectorAll('[data-blp-accent]').forEach((swatch) => {
+      const on = swatch.dataset.blpAccent === color;
+      swatch.classList.toggle('is-active', on);
+      swatch.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    applyAccentColor(color);
+  };
+  setAccent(draft.accentColor);
+  accentInput?.addEventListener('input', () => setAccent(accentInput.value));
+  backdrop.querySelectorAll('[data-blp-accent]').forEach((swatch) => {
+    swatch.addEventListener('click', () => setAccent(swatch.dataset.blpAccent));
+  });
+  backdrop
+    .querySelector('[data-blp-accent-reset]')
+    ?.addEventListener('click', () => setAccent(DEFAULT_ACCENT_COLOR));
 
   backdrop.querySelector('#blp-translate-locale')?.addEventListener('change', (e) => {
     paintTranslateTabBadge(backdrop, e.target?.value);

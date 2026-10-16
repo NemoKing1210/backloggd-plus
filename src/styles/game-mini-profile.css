@@ -101,8 +101,8 @@
   --gmp-muted: rgba(238, 243, 246, 0.7);
   --gmp-bg0: #12161c;
   --gmp-bg1: #1c2430;
-  --gmp-accent: #3db89a;
-  --gmp-edge: rgba(61, 184, 154, 0.28);
+  --gmp-accent: var(--blp-accent, #3db89a);
+  --gmp-edge: rgba(var(--blp-accent-rgb, 61, 184, 154), 0.28);
   position: relative;
   overflow: hidden;
   border-radius: 14px;
@@ -446,7 +446,7 @@
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
-  color: #0b1512;
+  color: var(--blp-accent-ink, #0b1512);
   background: linear-gradient(180deg, color-mix(in srgb, var(--gmp-accent) 92%, #fff), var(--gmp-accent));
   border-radius: 9px;
   padding: 8px 12px;

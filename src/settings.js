@@ -11,6 +11,7 @@ import {
   STEAM_COUNTRY_CODES,
 } from './constants.js';
 import { SUPPORTED_LOCALES } from './i18n/index.js';
+import { normalizeHexColor } from './utils/color.js';
 
 /** Envelope marker for exported JSON backups. */
 export const SETTINGS_EXPORT_KIND = 'backloggd-plus-settings';
@@ -216,6 +217,10 @@ export function sanitizeSettings(raw) {
     const value = String(raw.siteLocale ?? '').trim().toLowerCase();
     next.siteLocale = value === 'off' || /^[a-z]{2}$/.test(value) ? value : 'off';
     appliedKeys.push('siteLocale');
+  }
+  if ('accentColor' in raw) {
+    next.accentColor = normalizeHexColor(raw.accentColor, base.accentColor);
+    appliedKeys.push('accentColor');
   }
   if ('translateTargetLocale' in raw) {
     next.translateTargetLocale = coerceLocale(

@@ -91,6 +91,7 @@ The script includes `@updateURL` and `@downloadURL` metadata pointing to the raw
 Thanks to everyone who helps improve Backloggd Plus:
 
 - [Nikitamce](https://github.com/Nikitamce)
+- [MaksVolkov7863](https://github.com/MaksVolkov7863)
 
 ## Affiliation
 
