@@ -14,6 +14,7 @@ import {
   STEAMDB_APP_URL,
 } from '../constants.js';
 import { fmt } from '../i18n/index.js';
+import { normalizeMiniProfileTrigger } from '../settings.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { debounce } from '../utils/debounce.js';
@@ -60,6 +61,10 @@ const profileFetches = new Map();
 /** Shared Steam+GS enrich promises keyed by lowercase slug. */
 const enrichFetches = new Map();
 
+function triggerMode() {
+  return normalizeMiniProfileTrigger(settings.gameMiniProfileTrigger);
+}
+
 function enqueueFetch(fn) {
   return new Promise((resolve) => {
     const run = async () => {
@@ -101,7 +106,8 @@ function ensurePopover() {
     window.clearTimeout(closeTimer);
   });
   popoverEl.addEventListener('pointerleave', () => {
-    scheduleClose();
+    // Click-triggered cards stay until an outside click / Escape.
+    if (triggerMode() === 'hover') scheduleClose();
   });
   document.body.appendChild(popoverEl);
   return popoverEl;
@@ -117,6 +123,7 @@ function finishHidePopover() {
   popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready', 'is-updating');
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
+  activeCover?.removeAttribute?.(HOVER_ATTR);
   activeCover = null;
   activeSlug = '';
 }
@@ -651,6 +658,8 @@ async function paintCard(cover, ctx, { soft = false } = {}) {
 
 async function showForCover(cover, { slug, title, appId, coverHint }) {
   const el = ensurePopover();
+  if (activeCover && activeCover !== cover) activeCover.removeAttribute(HOVER_ATTR);
+  cover.setAttribute(HOVER_ATTR, '1');
   activeCover = cover;
   activeSlug = slug;
   const seq = ++fetchSeq;
@@ -749,7 +758,7 @@ function resolveCover(target) {
 }
 
 function onPointerOver(e) {
-  if (settings.showGameMiniProfile === false) return;
+  if (settings.showGameMiniProfile === false || triggerMode() !== 'hover') return;
   const hit = resolveCover(e.target);
   if (!hit) return;
   if (!peekCachedGameMiniProfile(hit.slug)) {
@@ -764,12 +773,51 @@ function onPointerOver(e) {
 }
 
 function onPointerOut(e) {
+  if (triggerMode() !== 'hover') return;
   const hit = resolveCover(e.target);
   if (!hit) return;
   const related = e.relatedTarget;
   if (related && (hit.cover.contains(related) || popoverEl?.contains(related))) return;
   hit.cover.removeAttribute(HOVER_ATTR);
   scheduleClose();
+}
+
+/** Right-click / Shift+click modes: open the card instead of the native menu / navigation. */
+function onClickTrigger(e) {
+  if (settings.showGameMiniProfile === false) return;
+  const mode = triggerMode();
+  if (mode === 'hover') return;
+  if (mode === 'contextmenu') {
+    if (e.type !== 'contextmenu' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+  } else if (
+    e.type !== 'click' ||
+    e.button !== 0 ||
+    !e.shiftKey ||
+    e.ctrlKey ||
+    e.altKey ||
+    e.metaKey
+  ) {
+    return;
+  }
+  const hit = resolveCover(e.target);
+  if (!hit) return;
+  e.preventDefault();
+  e.stopPropagation();
+  window.clearTimeout(openTimer);
+  window.clearTimeout(closeTimer);
+  showForCover(hit.cover, hit);
+}
+
+function onOutsidePointerDown(e) {
+  if (triggerMode() === 'hover' || !popoverEl?.classList.contains('is-open')) return;
+  if (popoverEl.contains(e.target)) return;
+  hidePopover();
+}
+
+function onEscape(e) {
+  if (e.key !== 'Escape' || triggerMode() === 'hover') return;
+  if (!popoverEl?.classList.contains('is-open')) return;
+  hidePopover();
 }
 
 function onScrollOrResize() {
@@ -792,6 +840,10 @@ export function bindGameMiniProfiles() {
   bound = true;
   document.addEventListener('pointerover', onPointerOver, true);
   document.addEventListener('pointerout', onPointerOut, true);
+  document.addEventListener('contextmenu', onClickTrigger, true);
+  document.addEventListener('click', onClickTrigger, true);
+  document.addEventListener('pointerdown', onOutsidePointerDown, true);
+  document.addEventListener('keydown', onEscape, true);
   window.addEventListener('scroll', onScrollOrResize, true);
   window.addEventListener('resize', onScrollOrResize);
 }

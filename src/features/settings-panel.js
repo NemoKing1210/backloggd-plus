@@ -36,6 +36,7 @@ import { sitePackCodes } from './site-locale.js';
 import {
   buildSettingsExport,
   linkLabelKey,
+  normalizeMiniProfileTrigger,
   parseSettingsImport,
   resetSettings,
   saveSettings,
@@ -518,6 +519,20 @@ export function openSettings() {
     </select>
   `;
 
+  const miniProfileTriggerSelect = (id, value) => {
+    const current = normalizeMiniProfileTrigger(value);
+    const disabled = id === 'blp-user-mp-trigger'
+      ? draft.showUserMiniProfile === false
+      : draft.showGameMiniProfile === false;
+    return `
+    <select id="${id}" ${disabled ? 'disabled' : ''}>
+      <option value="hover" ${current === 'hover' ? 'selected' : ''}>${escapeHtml(t.miniTriggerHover)}</option>
+      <option value="contextmenu" ${current === 'contextmenu' ? 'selected' : ''}>${escapeHtml(t.miniTriggerContextMenu)}</option>
+      <option value="shiftclick" ${current === 'shiftclick' ? 'selected' : ''}>${escapeHtml(t.miniTriggerShiftClick)}</option>
+    </select>
+  `;
+  };
+
   const activeTab = 'general';
   const backdrop = document.createElement('div');
   backdrop.className = 'blp-settings-backdrop';
@@ -621,6 +636,12 @@ export function openSettings() {
             'showUserMiniProfile',
             draft.showUserMiniProfile !== false,
             'showUserMiniProfileHint'
+          ),
+          fieldHtml(
+            'blp-user-mp-trigger',
+            t.miniTrigger,
+            miniProfileTriggerSelect('blp-user-mp-trigger', draft.userMiniProfileTrigger),
+            t.userMiniTriggerHint
           ),
           toggleHtml(
             'preloadUserMiniProfile',
@@ -766,6 +787,12 @@ export function openSettings() {
             'showGameMiniProfile',
             draft.showGameMiniProfile !== false,
             'showGameMiniProfileHint'
+          ),
+          fieldHtml(
+            'blp-game-mp-trigger',
+            t.miniTrigger,
+            miniProfileTriggerSelect('blp-game-mp-trigger', draft.gameMiniProfileTrigger),
+            t.gameMiniTriggerHint
           ),
           toggleHtml(
             'preloadGameMiniProfile',
@@ -988,6 +1015,12 @@ export function openSettings() {
         const sel = backdrop.querySelector('#blp-convert-ccy');
         if (sel) sel.disabled = !draft.showPriceConvert;
       }
+      if (key === 'showUserMiniProfile' || key === 'showGameMiniProfile') {
+        const sel = backdrop.querySelector(
+          key === 'showUserMiniProfile' ? '#blp-user-mp-trigger' : '#blp-game-mp-trigger'
+        );
+        if (sel) sel.disabled = draft[key] === false;
+      }
       if (
         key === 'cacheGameData' ||
         key === 'cacheUserProfiles' ||
@@ -1036,6 +1069,8 @@ export function openSettings() {
       const translateLocaleVal = backdrop.querySelector('#blp-translate-locale')?.value;
       const translateModeVal = backdrop.querySelector('#blp-translate-mode')?.value;
       const convertCcy = backdrop.querySelector('#blp-convert-ccy')?.value;
+      const userTriggerVal = backdrop.querySelector('#blp-user-mp-trigger')?.value;
+      const gameTriggerVal = backdrop.querySelector('#blp-game-mp-trigger')?.value;
       const snapshot = {
         ...draft,
         links: { ...draft.links },
@@ -1045,6 +1080,8 @@ export function openSettings() {
       if (translateModeVal != null) snapshot.translateDisplayMode = translateModeVal;
       if (cc != null) snapshot.steamCountry = cc;
       if (convertCcy != null) snapshot.convertCurrency = convertCcy;
+      if (userTriggerVal != null) snapshot.userMiniProfileTrigger = userTriggerVal;
+      if (gameTriggerVal != null) snapshot.gameMiniProfileTrigger = gameTriggerVal;
       if (Number.isFinite(hours)) snapshot.cacheHours = hours;
 
       downloadJsonFile(settingsExportFilename(), buildSettingsExport(snapshot));
@@ -1145,6 +1182,12 @@ export function openSettings() {
     const translateModeVal = backdrop.querySelector('#blp-translate-mode')?.value || 'replace';
     draft.translateDisplayMode = translateModeVal === 'below' ? 'below' : 'replace';
     draft.steamCountry = String(cc).toUpperCase();
+    draft.userMiniProfileTrigger = normalizeMiniProfileTrigger(
+      backdrop.querySelector('#blp-user-mp-trigger')?.value ?? draft.userMiniProfileTrigger
+    );
+    draft.gameMiniProfileTrigger = normalizeMiniProfileTrigger(
+      backdrop.querySelector('#blp-game-mp-trigger')?.value ?? draft.gameMiniProfileTrigger
+    );
     const convertCcy = backdrop.querySelector('#blp-convert-ccy')?.value || 'RUB';
     draft.convertCurrency = String(convertCcy).toUpperCase();
     draft.showPriceConvert = Boolean(draft.showPriceConvert);

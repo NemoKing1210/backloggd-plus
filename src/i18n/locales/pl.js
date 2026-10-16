@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: 'Mini profil użytkownika',
   showUserMiniProfileHint:
     'Karta z krótkimi informacjami po najechaniu na awatar lub nick. Poziom rośnie wraz z liczbą gier (25+ brąz … 1000+ legenda).',
+  miniTrigger: 'Otwieraj kartę przez',
+  miniTriggerHover: 'Najechanie',
+  miniTriggerContextMenu: 'Prawy przycisk myszy',
+  miniTriggerShiftClick: 'Shift + klik',
+  userMiniTriggerHint:
+    'Jak otwiera się karta użytkownika. Prawy przycisk i Shift + klik zastępują natywną akcję na awatarach i nazwach; zamknij kliknięciem poza kartą lub Esc.',
   preloadUserMiniProfile: 'Wczytuj w obszarze widoczności',
   preloadUserMiniProfileHint:
     'Pobiera dane mini profilu dla linków profilu w polu widzenia, by karta otwierała się od razu.',
@@ -288,6 +294,8 @@ export default {
   showGameMiniProfile: 'Mini profile gier',
   showGameMiniProfileHint:
     'Najedź na okładkę, by zobaczyć tytuł, ocenę, platformy, cenę/recenzje Steam i szybkie linki.',
+  gameMiniTriggerHint:
+    'Jak otwiera się karta gry. Prawy przycisk i Shift + klik zastępują natywną akcję na okładkach; zamknij kliknięciem poza kartą lub Esc.',
   preloadGameMiniProfile: 'Wczytuj w obszarze widoczności',
   preloadGameMiniProfileHint:
     'Pobiera dane mini profilu, gdy okładki wchodzą w widok, by karty otwierały się od razu.',

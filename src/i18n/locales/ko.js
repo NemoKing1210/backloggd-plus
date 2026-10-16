@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: '사용자 미니 프로필',
   showUserMiniProfileHint:
     '아바타나 사용자 이름에 마우스를 올리면 요약 미니 카드를 표시합니다. 플레이 수에 따라 티어가 올라갑니다(25+ 브론즈 … 1000+ 레전드).',
+  miniTrigger: '카드 여는 방법',
+  miniTriggerHover: '마우스 오버',
+  miniTriggerContextMenu: '오른쪽 클릭',
+  miniTriggerShiftClick: 'Shift + 클릭',
+  userMiniTriggerHint:
+    '사용자 카드를 여는 방법입니다. 오른쪽 클릭과 Shift + 클릭은 아바타와 사용자명의 기본 동작을 대체하며, 카드 밖을 클릭하거나 Esc로 닫습니다.',
   preloadUserMiniProfile: '화면에 보이면 미리 불러오기',
   preloadUserMiniProfileHint:
     '프로필 링크가 화면에 들어오면 미니 프로필을 미리 받아 호버 시 바로 열리게 합니다.',
@@ -285,6 +291,8 @@ export default {
   showGameMiniProfile: '게임 미니 프로필',
   showGameMiniProfileHint:
     '커버에 마우스를 올리면 제목, 평점, 플랫폼, Steam 가격/리뷰, 바로가기 링크를 봅니다.',
+  gameMiniTriggerHint:
+    '게임 카드를 여는 방법입니다. 오른쪽 클릭과 Shift + 클릭은 커버의 기본 동작을 대체하며, 카드 밖을 클릭하거나 Esc로 닫습니다.',
   preloadGameMiniProfile: '화면에 보이면 미리 불러오기',
   preloadGameMiniProfileHint:
     '커버가 화면에 들어오면 미니 프로필을 미리 가져와 호버 시 바로 엽니다.',

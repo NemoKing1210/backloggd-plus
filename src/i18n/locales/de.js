@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: 'Mini-Profilkarten',
   showUserMiniProfileHint:
     'Minikarte mit Kurzinfos beim Hover über Avatare oder Nutzernamen. Stufe steigt mit gespielten Spielen (25+ Bronze … 1000+ Legende).',
+  miniTrigger: 'Karte öffnen per',
+  miniTriggerHover: 'Mauszeiger',
+  miniTriggerContextMenu: 'Rechtsklick',
+  miniTriggerShiftClick: 'Shift + Klick',
+  userMiniTriggerHint:
+    'Wie die Nutzerkarte geöffnet wird. Rechtsklick und Shift + Klick ersetzen die Standardaktion bei Avataren und Namen; Schließen per Klick daneben oder Esc.',
   preloadUserMiniProfile: 'Im Sichtbereich vorladen',
   preloadUserMiniProfileHint:
     'Lädt Miniprofil-Daten für Profil-Links im Sichtbereich vor, damit die Karte sofort öffnet.',
@@ -288,6 +294,8 @@ export default {
   showGameMiniProfile: 'Spiel-Mini-Profile',
   showGameMiniProfileHint:
     'Cover überfahren für Titel, Bewertung, Plattformen, Steam-Preis/Reviews und Schnelllinks.',
+  gameMiniTriggerHint:
+    'Wie die Spielkarte geöffnet wird. Rechtsklick und Shift + Klick ersetzen die Standardaktion bei Covern; Schließen per Klick daneben oder Esc.',
   preloadGameMiniProfile: 'Im Sichtbereich vorladen',
   preloadGameMiniProfileHint:
     'Lädt Mini-Profil-Daten für Covers im Sichtbereich, damit Hover-Karten sofort öffnen.',

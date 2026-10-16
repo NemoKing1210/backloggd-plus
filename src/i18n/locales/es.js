@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: 'Mini perfil de usuario',
   showUserMiniProfileHint:
     'Muestra una carta con información breve al pasar el cursor sobre avatares o nombres. El nivel sube con juegos jugados (25+ bronce … 1000+ leyenda).',
+  miniTrigger: 'Abrir la tarjeta con',
+  miniTriggerHover: 'Pasar el cursor',
+  miniTriggerContextMenu: 'Clic derecho',
+  miniTriggerShiftClick: 'Shift + clic',
+  userMiniTriggerHint:
+    'Cómo se abre la tarjeta de usuario. El clic derecho y Shift + clic sustituyen la acción nativa en avatares y nombres; se cierra con un clic fuera o con Esc.',
   preloadUserMiniProfile: 'Precargar en el viewport',
   preloadUserMiniProfileHint:
     'Obtiene los datos del miniperfil de los enlaces de perfil al entrar en el viewport para abrir la carta al instante.',
@@ -288,6 +294,8 @@ export default {
   showGameMiniProfile: 'Mini perfiles de juego',
   showGameMiniProfileHint:
     'Pasa el cursor sobre una portada para ver título, nota, plataformas, precio/reseñas de Steam y enlaces.',
+  gameMiniTriggerHint:
+    'Cómo se abre la tarjeta de juego. El clic derecho y Shift + clic sustituyen la acción nativa en las portadas; se cierra con un clic fuera o con Esc.',
   preloadGameMiniProfile: 'Precargar en el viewport',
   preloadGameMiniProfileHint:
     'Obtiene datos del mini perfil cuando las portadas entran en el viewport para abrir al instante.',

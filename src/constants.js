@@ -58,6 +58,8 @@ export const CARD_CONCURRENCY = 3;
 export const CARD_ROOT_MARGIN = '240px 0px';
 export const CARD_SKIP_ANCESTOR =
   '#game-profile, #game-body, #logging-sidebar-section, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop';
+/** Covers too small for badges (homepage Coming soon / Recently anticipated / Sleeper hits rows). Mini-profile still works there. */
+export const CARD_BADGE_SKIP_ANCESTOR = '.home-games-section';
 /** Mini-profile card tiers by Games Played count. */
 export const PROFILE_CARD_TIERS = [
   { id: 'rookie', min: 0 },
@@ -69,6 +71,8 @@ export const PROFILE_CARD_TIERS = [
   { id: 'master', min: 500 },
   { id: 'legend', min: 1000 },
 ];
+/** How a mini-profile card is summoned: pointer hover, right-click, or Shift+click. */
+export const MINI_PROFILE_TRIGGERS = ['hover', 'contextmenu', 'shiftclick'];
 export const PROFILE_HOVER_OPEN_MS = 280;
 export const PROFILE_HOVER_CLOSE_MS = 180;
 export const PROFILE_LEAVE_MS = 300;
@@ -209,6 +213,7 @@ export const DEFAULT_SETTINGS = {
   showCardBadgeWishlist: true,
   showCardBadgeGameStatus: false,
   showGameMiniProfile: true,
+  gameMiniProfileTrigger: 'hover',
   preloadGameMiniProfile: false,
   showExport: false,
   showGameId: false,
@@ -221,6 +226,7 @@ export const DEFAULT_SETTINGS = {
   hideHomepageFuse: true,
   enhanceHeader: false,
   showUserMiniProfile: true,
+  userMiniProfileTrigger: 'hover',
   preloadUserMiniProfile: false,
   showProfilePage: false,
   showProfileHeader: true,

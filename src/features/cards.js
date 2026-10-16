@@ -6,6 +6,7 @@ import {
   CARD_ATTR,
   CARD_CONCURRENCY,
   CARD_ROOT_MARGIN,
+  CARD_BADGE_SKIP_ANCESTOR,
   CARD_SKIP_ANCESTOR,
   CARD_SLUG_ATTR,
   CARD_STATE_ATTR,
@@ -321,7 +322,7 @@ export function collectCardCovers() {
     return covers;
   }
   document.querySelectorAll('.game-cover').forEach((cover) => {
-    if (cover.closest(CARD_SKIP_ANCESTOR)) return;
+    if (cover.closest(CARD_SKIP_ANCESTOR) || cover.closest(CARD_BADGE_SKIP_ANCESTOR)) return;
     covers.push(cover);
   });
   return covers;

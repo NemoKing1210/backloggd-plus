@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: 'User mini-profile cards',
   showUserMiniProfileHint:
     'Brief mini profile on avatar or username hover. Tier grows with games played (25+ bronze … 1000+ legend).',
+  miniTrigger: 'Open card by',
+  miniTriggerHover: 'Hover',
+  miniTriggerContextMenu: 'Right-click',
+  miniTriggerShiftClick: 'Shift + click',
+  userMiniTriggerHint:
+    'How the user card opens. Right-click and Shift + click replace the native action on avatars and usernames; close with a click outside or Esc.',
   preloadUserMiniProfile: 'Preload in viewport',
   preloadUserMiniProfileHint:
     'Fetch mini-profile data for profile links as they enter the viewport so hover cards open instantly.',
@@ -291,6 +297,8 @@ export default {
   showGameMiniProfile: 'Game mini-profile cards',
   showGameMiniProfileHint:
     'Hover a cover to preview title, rating, platforms, Steam price/reviews, and quick links.',
+  gameMiniTriggerHint:
+    'How the game card opens. Right-click and Shift + click replace the native action on covers; close with a click outside or Esc.',
   preloadGameMiniProfile: 'Preload in viewport',
   preloadGameMiniProfileHint:
     'Fetch game mini-profile data as covers enter the viewport so hover cards open instantly.',

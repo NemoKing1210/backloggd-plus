@@ -84,6 +84,12 @@ export default {
   showUserMiniProfile: '用户迷你资料卡',
   showUserMiniProfileHint:
     '悬停头像或用户名时显示简明资料。等级随游玩数量提升（25+ 青铜 … 1000+ 传奇）。',
+  miniTrigger: '打开卡片方式',
+  miniTriggerHover: '悬停',
+  miniTriggerContextMenu: '右键点击',
+  miniTriggerShiftClick: 'Shift + 点击',
+  userMiniTriggerHint:
+    '用户卡片的打开方式。右键和 Shift + 点击会替代头像与用户名上的原生操作；点击卡片外部或按 Esc 关闭。',
   preloadUserMiniProfile: '进入视口时预加载',
   preloadUserMiniProfileHint: '资料链接进入视口时预取迷你资料数据，悬停时可立即打开卡片。',
   showProfilePage: '美化资料页',
@@ -268,6 +274,8 @@ export default {
   showGameMiniProfile: '游戏迷你资料卡',
   showGameMiniProfileHint:
     '悬停封面可预览标题、评分、平台、Steam 价格/评价与快捷链接。',
+  gameMiniTriggerHint:
+    '游戏卡片的打开方式。右键和 Shift + 点击会替代封面上的原生操作；点击卡片外部或按 Esc 关闭。',
   preloadGameMiniProfile: '进入视口时预加载',
   preloadGameMiniProfileHint: '封面进入视口时预取迷你资料数据，悬停时可立即打开卡片。',
   miniGameRating: 'Backloggd 评分',

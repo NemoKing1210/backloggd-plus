@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.88] - 2026-10-17
+
+### Added
+
+- Settings → Profile / Game card: separate "Open card by" option for user and game mini-profile cards — hover (default), right-click, or Shift + click; click-opened cards stay until a click outside or Esc (included in settings export/import)
+
+### Fixed
+
+- Cover badges (price / reviews / owned / wishlist) are no longer drawn on the small homepage covers (Coming soon, Recently anticipated, Sleeper hits); mini-profile still works there
+
 ## [0.7.87] - 2026-10-17
 
 ### Changed

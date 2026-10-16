@@ -12,6 +12,7 @@ import {
   PROFILE_LEAVE_MS,
   PROFILE_PRELOAD_ROOT_MARGIN,
 } from '../constants.js';
+import { normalizeMiniProfileTrigger } from '../settings.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { debounce } from '../utils/debounce.js';
@@ -41,6 +42,10 @@ const preloadQueued = new Set();
 const loadingUsernames = new Set();
 /** Shared fetch promises keyed by lowercase username. */
 const profileFetches = new Map();
+
+function triggerMode() {
+  return normalizeMiniProfileTrigger(settings.userMiniProfileTrigger);
+}
 
 function tierLabel(tierId) {
   const map = {
@@ -89,7 +94,8 @@ function ensurePopover() {
     window.clearTimeout(closeTimer);
   });
   popoverEl.addEventListener('pointerleave', () => {
-    scheduleClose();
+    // Click-triggered cards stay until an outside click / Escape.
+    if (triggerMode() === 'hover') scheduleClose();
   });
   document.body.appendChild(popoverEl);
   return popoverEl;
@@ -105,6 +111,7 @@ function finishHidePopover() {
   popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready');
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
+  activeAnchor?.removeAttribute?.(HOVER_ATTR);
   activeAnchor = null;
   activeUsername = '';
 }
@@ -553,6 +560,8 @@ const decorateProfileAnchorsSoon = debounce(() => decorateProfileAnchors(), 120)
 
 async function showForAnchor(anchor, username) {
   const el = ensurePopover();
+  if (activeAnchor && activeAnchor !== anchor) activeAnchor.removeAttribute(HOVER_ATTR);
+  anchor.setAttribute(HOVER_ATTR, '1');
   activeAnchor = anchor;
   activeUsername = username;
   const seq = ++fetchSeq;
@@ -624,7 +633,7 @@ function resolveProfileAnchor(target) {
 }
 
 function onPointerOver(e) {
-  if (settings.showUserMiniProfile === false) return;
+  if (settings.showUserMiniProfile === false || triggerMode() !== 'hover') return;
   const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   markProfileAnchor(hit.anchor);
@@ -642,12 +651,52 @@ function onPointerOver(e) {
 }
 
 function onPointerOut(e) {
+  if (triggerMode() !== 'hover') return;
   const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   const related = e.relatedTarget;
   if (related && (hit.anchor.contains(related) || popoverEl?.contains(related))) return;
   hit.anchor.removeAttribute(HOVER_ATTR);
   scheduleClose();
+}
+
+/** Right-click / Shift+click modes: open the card instead of the native menu / navigation. */
+function onClickTrigger(e) {
+  if (settings.showUserMiniProfile === false) return;
+  const mode = triggerMode();
+  if (mode === 'hover') return;
+  if (mode === 'contextmenu') {
+    if (e.type !== 'contextmenu' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+  } else if (
+    e.type !== 'click' ||
+    e.button !== 0 ||
+    !e.shiftKey ||
+    e.ctrlKey ||
+    e.altKey ||
+    e.metaKey
+  ) {
+    return;
+  }
+  const hit = resolveProfileAnchor(e.target);
+  if (!hit) return;
+  markProfileAnchor(hit.anchor);
+  e.preventDefault();
+  e.stopPropagation();
+  window.clearTimeout(openTimer);
+  window.clearTimeout(closeTimer);
+  showForAnchor(hit.anchor, hit.username);
+}
+
+function onOutsidePointerDown(e) {
+  if (triggerMode() === 'hover' || !popoverEl?.classList.contains('is-open')) return;
+  if (popoverEl.contains(e.target)) return;
+  hidePopover();
+}
+
+function onEscape(e) {
+  if (e.key !== 'Escape' || triggerMode() === 'hover') return;
+  if (!popoverEl?.classList.contains('is-open')) return;
+  hidePopover();
 }
 
 function onScrollOrResize() {
@@ -670,6 +719,10 @@ export function bindUserMiniProfiles() {
   bound = true;
   document.addEventListener('pointerover', onPointerOver, true);
   document.addEventListener('pointerout', onPointerOut, true);
+  document.addEventListener('contextmenu', onClickTrigger, true);
+  document.addEventListener('click', onClickTrigger, true);
+  document.addEventListener('pointerdown', onOutsidePointerDown, true);
+  document.addEventListener('keydown', onEscape, true);
   window.addEventListener('scroll', onScrollOrResize, true);
   window.addEventListener('resize', onScrollOrResize);
 }

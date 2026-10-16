@@ -48,7 +48,7 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 **Lists / search / journal (cover grids):**
 
 - Compact badges on `.game-cover` cards — price, Steam review %, Owned, Wishlist, GameStatus (lazy-loaded in viewport; per-type toggles in Settings → Game card)
-- Hover mini-profile on covers — title, Backloggd rating, platforms, Steam price/reviews, GameStatus, quick links (optional viewport preload)
+- Mini-profile on covers (hover by default; or right-click / Shift + click) — title, Backloggd rating, platforms, Steam price/reviews, GameStatus, quick links (optional viewport preload)
 - Same cover badges / mini-profiles on Similar games cards (game page strip)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):
@@ -65,7 +65,7 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 
 - Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
 - Interface language (Auto or fixed locale)
-- User profile: mini-profile hover cards on avatars and usernames (optional viewport preload); profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
+- User profile: mini-profile cards on avatars and usernames (hover by default; or right-click / Shift + click; optional viewport preload); profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / game mini-profile hover cards / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump

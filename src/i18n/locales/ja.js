@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: 'ユーザーミニプロフィール',
   showUserMiniProfileHint:
     'アバターまたはユーザー名にホバーすると簡易カードを表示。プレイ数が増えるほどティアが上がります（25+ ブロンズ … 1000+ レジェンド）。',
+  miniTrigger: 'カードの開き方',
+  miniTriggerHover: 'ホバー',
+  miniTriggerContextMenu: '右クリック',
+  miniTriggerShiftClick: 'Shift + クリック',
+  userMiniTriggerHint:
+    'ユーザーカードの開き方。右クリックと Shift + クリックはアバターやユーザー名の標準動作の代わりになります。カード外クリックまたは Esc で閉じます。',
   preloadUserMiniProfile: '表示領域で事前読込',
   preloadUserMiniProfileHint:
     '表示領域に入ったプロフィールリンクのミニプロフィールを先読みし、ホバーですぐ開けます。',
@@ -286,6 +292,8 @@ export default {
   showGameMiniProfile: 'ゲームミニプロフィール',
   showGameMiniProfileHint:
     'カバーにホバーするとタイトル・評価・プラットフォーム・Steam価格/レビュー・クイックリンクを表示。',
+  gameMiniTriggerHint:
+    'ゲームカードの開き方。右クリックと Shift + クリックはカバーの標準動作の代わりになります。カード外クリックまたは Esc で閉じます。',
   preloadGameMiniProfile: '表示領域で事前読込',
   preloadGameMiniProfileHint:
     'カバーが表示領域に入るとミニプロフィールを先読みし、ホバーですぐ開けます。',

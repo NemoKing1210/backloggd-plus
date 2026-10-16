@@ -92,6 +92,12 @@ export default {
   showUserMiniProfile: 'Mini-profil utilisateur',
   showUserMiniProfileHint:
     'Carte avec un aperçu au survol des avatars ou des noms. Le palier monte avec les jeux joués (25+ bronze … 1000+ légende).',
+  miniTrigger: 'Ouvrir la carte par',
+  miniTriggerHover: 'Survol',
+  miniTriggerContextMenu: 'Clic droit',
+  miniTriggerShiftClick: 'Maj + clic',
+  userMiniTriggerHint:
+    'Comment s\'ouvre la carte utilisateur. Le clic droit et Maj + clic remplacent l\'action native sur les avatars et pseudos ; fermeture par un clic à l\'extérieur ou Échap.',
   preloadUserMiniProfile: 'Précharger dans le viewport',
   preloadUserMiniProfileHint:
     'Récupère les données du mini-profil pour les liens de profil visibles afin d’ouvrir la carte immédiatement.',
@@ -288,6 +294,8 @@ export default {
   showGameMiniProfile: 'Mini-profils de jeu',
   showGameMiniProfileHint:
     'Survolez une jaquette pour voir titre, note, plateformes, prix/avis Steam et liens rapides.',
+  gameMiniTriggerHint:
+    'Comment s\'ouvre la carte de jeu. Le clic droit et Maj + clic remplacent l\'action native sur les jaquettes ; fermeture par un clic à l\'extérieur ou Échap.',
   preloadGameMiniProfile: 'Précharger dans le viewport',
   preloadGameMiniProfileHint:
     'Charge les données du mini-profil quand les jaquettes entrent dans le viewport pour une ouverture instantanée.',

@@ -6,6 +6,7 @@ import {
   CACHE_HOURS_MAX,
   DEFAULT_SETTINGS,
   LINK_KEYS,
+  MINI_PROFILE_TRIGGERS,
   SCRIPT_VERSION,
   SETTINGS_KEY,
   STEAM_COUNTRY_CODES,
@@ -160,6 +161,14 @@ function coerceTranslateMode(value, fallback) {
   return fallback;
 }
 
+/** Unknown / legacy values fall back to hover so the cards never become unreachable. */
+export function normalizeMiniProfileTrigger(value) {
+  const mode = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  return MINI_PROFILE_TRIGGERS.includes(mode) ? mode : 'hover';
+}
+
 function sanitizeLinks(rawLinks, defaults) {
   const out = { ...defaults };
   if (!rawLinks || typeof rawLinks !== 'object' || Array.isArray(rawLinks)) {
@@ -243,6 +252,12 @@ export function sanitizeSettings(raw) {
       base.translateDisplayMode
     );
     appliedKeys.push('translateDisplayMode');
+  }
+
+  for (const key of ['gameMiniProfileTrigger', 'userMiniProfileTrigger']) {
+    if (!(key in raw)) continue;
+    next[key] = normalizeMiniProfileTrigger(raw[key]);
+    appliedKeys.push(key);
   }
 
   if ('links' in raw) {
