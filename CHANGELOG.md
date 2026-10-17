@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.99] - 2026-10-17
+
+### Added
+
+- **Settings → Game → Quick links → Custom links look**: show your own links in the Links row as plain text links (default) or as small accent-coloured buttons (all 10 languages; included in settings backups)
+
+## [0.7.98] - 2026-10-17
+
+### Added
+
+- **Settings → Game → Quick links → Show custom links in a separate row**: puts your own links in their own "My links" row under the Links row instead of mixing them with the built-in sites (their order among themselves still follows the list; off by default; all 10 languages)
+
 ## [0.7.97] - 2026-10-17
 
 ### Added

@@ -5,6 +5,7 @@ import {
 import {
   CACHE_HOURS_MAX,
   DEFAULT_SETTINGS,
+  CUSTOM_LINK_STYLES,
   LINK_KEYS,
   MINI_PROFILE_TRIGGERS,
   OPENCRITIC_SOURCES,
@@ -189,6 +190,14 @@ export function normalizeMiniProfileTrigger(value) {
   return MINI_PROFILE_TRIGGERS.includes(mode) ? mode : 'hover';
 }
 
+/** Unknown values fall back to plain links. */
+export function normalizeCustomLinksStyle(value) {
+  const style = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  return CUSTOM_LINK_STYLES.includes(style) ? style : 'link';
+}
+
 function sanitizeLinks(rawLinks, defaults) {
   const out = { ...defaults };
   if (!rawLinks || typeof rawLinks !== 'object' || Array.isArray(rawLinks)) {
@@ -265,6 +274,10 @@ export function sanitizeSettings(raw) {
   if ('convertCurrency' in raw) {
     next.convertCurrency = coerceConvertCurrency(raw.convertCurrency, base.convertCurrency);
     appliedKeys.push('convertCurrency');
+  }
+  if ('customLinksStyle' in raw) {
+    next.customLinksStyle = normalizeCustomLinksStyle(raw.customLinksStyle);
+    appliedKeys.push('customLinksStyle');
   }
   if ('openCriticSource' in raw) {
     const source = String(raw.openCriticSource ?? '').trim().toLowerCase();

@@ -534,13 +534,30 @@ function orderExternalLinks(builtin, { title, slug, steam, year }) {
       const custom = customById.get(id);
       if (!custom || !settings.showLinks || custom.enabled === false) continue;
       const url = resolveCustomLinkUrl(custom, ctx);
-      if (url) out.push({ key: id, label: custom.label, url, icon: resolveIconUrl(custom.icon, url) });
+      if (url) {
+        out.push({
+          key: id,
+          label: custom.label,
+          url,
+          icon: resolveIconUrl(custom.icon, url),
+          custom: true,
+        });
+      }
       continue;
     }
     const link = byKey.get(id);
     if (link && isLinkEnabled(link.key, settings)) out.push(link);
   }
   return out;
+}
+
+/** Custom links get their own row when the setting is on and at least one is enabled. */
+export function settingsHaveSeparateCustomLinks(cfg = settings) {
+  return Boolean(
+    cfg.showLinks &&
+      cfg.customLinksSeparate &&
+      (cfg.customLinks || []).some((l) => l.enabled !== false)
+  );
 }
 
 /** True when an enabled custom link needs the Steam App ID to build its URL. */
@@ -576,6 +593,11 @@ export function makeDetailRow(key, headerText) {
 }
 
 export function skeletonHtml(kind) {
+  if (kind === 'customlinks') {
+    return [0, 1]
+      .map(() => '<span class="blp-skeleton blp-skeleton--link"></span>')
+      .join('');
+  }
   if (kind === 'links') {
     return [0, 1, 2, 3, 4]
       .map(() => '<span class="blp-skeleton blp-skeleton--link"></span>')
@@ -638,6 +660,7 @@ export function ensureEnrichmentRows() {
       players: document.querySelector(`[${ENRICH_ATTR}="players"]`),
       gamestatus: document.querySelector(`[${ENRICH_ATTR}="gamestatus"]`),
       links: document.querySelector(`[${ENRICH_ATTR}="links"]`),
+      customlinks: document.querySelector(`[${ENRICH_ATTR}="customlinks"]`),
     };
   }
 
@@ -652,6 +675,7 @@ export function ensureEnrichmentRows() {
   if (settings.showSteamPlayers) plan.push(['players', t.players]);
   if (settings.showGameStatus) plan.push(['gamestatus', t.gameStatus]);
   if (settings.showLinks) plan.push(['links', t.links]);
+  if (settingsHaveSeparateCustomLinks(settings)) plan.push(['customlinks', t.customLinksRow]);
 
   for (const [key, label] of plan) {
     const row = makeDetailRow(key, label);
@@ -676,15 +700,16 @@ export function showRow(row) {
   if (row) row.hidden = false;
 }
 
-export function renderExtLink(link, { last = false } = {}) {
+export function renderExtLink(link, { last = false, button = false } = {}) {
   const icon = link.icon || faviconForUrl(link.url);
   const img = icon
     ? `<img class="blp-favicon" src="${escapeAttr(icon)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : '';
-  const sep = last ? '' : '<span class="separator">•</span>';
+  const sep = last || button ? '' : '<span class="separator">•</span>';
+  const cls = button ? 'blp-link-btn' : 'game-details-value';
   return `
     <span class="game-detail">
-      <a class="game-details-value blp-ext-link" href="${escapeAttr(link.url)}" target="_blank" rel="noopener noreferrer">
+      <a class="${cls} blp-ext-link" href="${escapeAttr(link.url)}" target="_blank" rel="noopener noreferrer">
         ${img}${escapeHtml(link.label)}
       </a>${sep}
     </span>
@@ -1222,17 +1247,30 @@ export function renderEnrichment(rows, { steam, links, error, owned = false, wis
     }
   }
 
-  if (rows.links) {
-    if (links?.length) {
-      const html = links
-        .map((l, i) => renderExtLink(l, { last: i === links.length - 1 }))
+  const paintLinkRow = (row, list) => {
+    if (!row) return;
+    if (list?.length) {
+      const asButton = (l) => Boolean(l?.custom) && settings.customLinksStyle === 'button';
+      const html = list
+        .map((l, i) =>
+          renderExtLink(l, {
+            // No dot next to a button: it already reads as its own item.
+            last: i === list.length - 1 || asButton(list[i + 1]),
+            button: asButton(l),
+          })
+        )
         .join('');
-      setRowValues(rows.links, html);
-      showRow(rows.links);
-      paintDebugCacheMark(rows.links, 'na');
+      setRowValues(row, html);
+      showRow(row);
+      paintDebugCacheMark(row, 'na');
     } else {
-      hideRow(rows.links);
+      hideRow(row);
     }
+  };
+  if (rows.links || rows.customlinks) {
+    const split = Boolean(rows.customlinks);
+    paintLinkRow(rows.links, split ? links?.filter((l) => !l.custom) : links);
+    paintLinkRow(rows.customlinks, links?.filter((l) => l.custom));
   }
 
   if (!skipDebug) {
@@ -1335,7 +1373,7 @@ export async function enrichGamePage() {
     if (!stillHere() || !rows.links) return;
     const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam, year: gameYear });
     renderEnrichment(
-      { links: rows.links },
+      { links: rows.links, customlinks: rows.customlinks },
       { steam, links, error: state.error, skipDebug: true }
     );
   };

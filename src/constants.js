@@ -145,6 +145,9 @@ export const TAG_MAP_TTL_MS = 7 * 24 * 3600 * 1000;
 export const GS_INVALID_SLUG_RE =
   /^(https?-)?(store-)?steam(powered|static)?(-[a-z0-9]+)*(-com)?$|steampowered|steamstatic|akamaihd|^(on-)?wishlist$|^gamestatus$|^(soon-)?on-game-pass$/;
 
+/** How custom quick links are drawn in the Links row. */
+export const CUSTOM_LINK_STYLES = ['link', 'button'];
+
 export const LINK_KEYS = [
   'igdb',
   'steam',
@@ -212,6 +215,8 @@ export const DEFAULT_SETTINGS = {
   showDeckProton: true,
   showGameStatus: false,
   showLinks: true,
+  customLinksSeparate: false,
+  customLinksStyle: 'link',
   showSteamOwned: true,
   showSteamWishlist: true,
   showSteamTags: true,

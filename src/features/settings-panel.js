@@ -38,6 +38,7 @@ import {
   buildSettingsExport,
   coerceApiKey,
   linkLabelKey,
+  normalizeCustomLinksStyle,
   normalizeMiniProfileTrigger,
   parseSettingsImport,
   resetSettings,
@@ -651,6 +652,14 @@ export function openSettings() {
   };
   draft.linkOrder = normalizeLinkOrder(settings.linkOrder, draft.customLinks);
 
+  const customLinksStyle = normalizeCustomLinksStyle(draft.customLinksStyle);
+  const customLinksStyleSelect = `
+    <select id="blp-custom-links-style">
+      <option value="link" ${customLinksStyle === 'link' ? 'selected' : ''}>${escapeHtml(t.customLinksStyleLink)}</option>
+      <option value="button" ${customLinksStyle === 'button' ? 'selected' : ''}>${escapeHtml(t.customLinksStyleButton)}</option>
+    </select>
+  `;
+
   const findCustomLink = (id) => draft.customLinks.find((l) => l.id === id) || null;
   const isLinkOn = (id) =>
     isCustomLinkId(id) ? findCustomLink(id)?.enabled !== false : draft.links[id] !== false;
@@ -686,6 +695,8 @@ export function openSettings() {
   const linksListHtml = `
     <div class="blp-settings-list" data-blp-links-list>
       ${toggleHtml('showLinks', draft.showLinks)}
+      ${toggleHtml('customLinksSeparate', draft.customLinksSeparate === true, 'customLinksSeparateHint')}
+      ${fieldHtml('blp-custom-links-style', t.customLinksStyle, customLinksStyleSelect, t.customLinksStyleHint)}
       ${draft.linkOrder.map(linkRowHtml).join('')}
       <div class="blp-link-add">
         <button type="button" class="blp-btn" data-blp-link-add>+ ${escapeHtml(t.linkAdd)}</button>
@@ -1520,6 +1531,8 @@ export function openSettings() {
       if (uiLocale != null) snapshot.uiLocale = uiLocale;
       if (translateLocaleVal != null) snapshot.translateTargetLocale = translateLocaleVal;
       if (translateModeVal != null) snapshot.translateDisplayMode = translateModeVal;
+      const linksStyleVal = backdrop.querySelector('#blp-custom-links-style')?.value;
+      if (linksStyleVal != null) snapshot.customLinksStyle = normalizeCustomLinksStyle(linksStyleVal);
       if (cc != null) snapshot.steamCountry = cc;
       if (convertCcy != null) snapshot.convertCurrency = convertCcy;
       if (userTriggerVal != null) snapshot.userMiniProfileTrigger = userTriggerVal;
@@ -1650,6 +1663,9 @@ export function openSettings() {
     draft.cacheTranslations = draft.cacheTranslations !== false;
     draft.cacheFx = draft.cacheFx !== false;
     syncLinkOrder();
+    draft.customLinksStyle = normalizeCustomLinksStyle(
+      backdrop.querySelector('#blp-custom-links-style')?.value ?? draft.customLinksStyle
+    );
     saveSettings(draft);
     reloadRuntimeSettings();
     pruneDisabledCacheCategories();
