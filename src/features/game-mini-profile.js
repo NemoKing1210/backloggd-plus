@@ -562,8 +562,10 @@ function ensureSteamEnrich({ slug, title, appId }) {
       fetchSteamUserdata().catch(() => null),
     ]);
 
+    // Same switches as the rest of the script: with both GameStatus toggles off, never query or show it.
+    const wantGameStatus = settings.showGameStatus || settings.showCardBadgeGameStatus !== false;
     let gamestatus = null;
-    if (steam?.found && steam.appId != null) {
+    if (wantGameStatus && steam?.found && steam.appId != null) {
       gamestatus = await fetchGameStatus({
         appId: steam.appId,
         storeUrl: steam.storeUrl,

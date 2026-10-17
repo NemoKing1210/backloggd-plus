@@ -701,9 +701,13 @@ export async function backfillSteamTags(cached, country) {
   };
 }
 
-export async function readSteamCacheOrBackfill(cacheKey, { includeTags, country, manualOverride }) {
+export async function readSteamCacheOrBackfill(
+  cacheKey,
+  { includeTags, country, manualOverride, accept }
+) {
   const cached = getCached(cacheKey);
   if (!cached) return null;
+  if (typeof accept === 'function' && !accept(cached)) return null;
   let result = {
     ...cached,
     manualOverride: Boolean(manualOverride || cached.manualOverride),
@@ -790,6 +794,17 @@ export function steamTitleCacheKey(country, title, year = null) {
   return `steam:${String(country || 'US').toUpperCase()}:${normalizeTitle(title)}${suffix}`;
 }
 
+/**
+ * Cache keys to try for a title lookup, best first. The year-keyed entry wins, but an entry stored
+ * before the Backloggd year was known (mini-profile / list card ran ahead of the game profile)
+ * is still a valid hit — otherwise the first hover would always refetch what it just stored.
+ */
+export function steamTitleCacheKeys(country, title, year = null) {
+  const exact = steamTitleCacheKey(country, title, year);
+  const base = steamTitleCacheKey(country, title, null);
+  return exact === base ? [exact] : [exact, base];
+}
+
 function steamYearMismatchResult(steam, year) {
   return {
     found: false,
@@ -860,12 +875,16 @@ export async function fetchSteamBundle(title, country, { onPartial, includeTags 
   const requestedCountry = String(country || 'US').toUpperCase();
   const cacheKey = steamTitleCacheKey(requestedCountry, title, year);
   const inflightKey = includeTags ? cacheKey : `${cacheKey}:lite`;
-  const cached = await readSteamCacheOrBackfill(cacheKey, {
-    includeTags,
-    country: requestedCountry,
-    manualOverride: false,
-  });
-  if (cached) return cached;
+  for (const key of steamTitleCacheKeys(requestedCountry, title, year)) {
+    const cached = await readSteamCacheOrBackfill(key, {
+      includeTags,
+      country: requestedCountry,
+      manualOverride: false,
+      // The yearless fallback may belong to a same-named remake/original.
+      accept: key === cacheKey ? undefined : (hit) => !isSteamYearMismatch(hit, year, title),
+    });
+    if (cached) return cached;
+  }
 
   if (inflight.has(inflightKey)) return inflight.get(inflightKey);
 

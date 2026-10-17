@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.92] - 2026-10-17
+
+### Fixed
+
+- Steam data is now reused on the first hover: a game's Steam lookup made before its Backloggd year was known (list card badges or the first mini-profile open) was stored under a key without the year, and the next open looked up the year-keyed entry and fetched Steam all over again. Title lookups now fall back to the yearless entry (still rejected when it belongs to a same-named remake), on game pages too
+- Game mini-profile card showed a GameStatus chip (and queried GameStatus.info) even with every GameStatus toggle off; it now follows "Show GameStatus" / the card-badge GameStatus toggle
+- Several open tabs no longer overwrite each other's cache: every save is merged onto the freshest stored value instead of writing the tab's own snapshot, and tabs pick up each other's entries live (value-change listener), so data cached in one tab is a hit in the rest
+
+### Changed
+
+- Cache saves are cheaper: writes are coalesced (one save per ~1.5 s instead of one per 0.4 s of quiet), reading an entry no longer triggers a save (its "last used" time is flushed lazily), tab switches only save when something actually changed, and entry sizes are measured once instead of re-serializing the whole cache on every save
+- GameStatus: a game it does not cover is remembered for the page session (10 min, never persisted), so list pages stop re-querying it for every cover
+
 ## [0.7.91] - 2026-10-17
 
 ### Added

@@ -8,7 +8,7 @@ import {
 } from '../cache.js';
 import { settings } from '../state.js';
 import { normalizeTitle } from '../utils/title.js';
-import { isSteamYearMismatch, steamCdnAsset, steamTitleCacheKey } from '../api/steam.js';
+import { isSteamYearMismatch, steamCdnAsset, steamTitleCacheKeys } from '../api/steam.js';
 import { getKnownGameYear } from '../api/game-profile.js';
 
 /**
@@ -32,12 +32,15 @@ export function peekGamePageCache({ title, slug, country, year = null } = {}) {
     }
   } else if (norm && !(slug && isSteamDisabled(slug))) {
     const gameYear = Number(year) || getKnownGameYear(slug);
-    const hit = getCached(steamTitleCacheKey(cc, q, gameYear));
-    if (hit?.found && !isSteamYearMismatch(hit, gameYear, title)) {
-      steam = asCacheHit({
-        ...hit,
-        manualOverride: Boolean(hit.manualOverride),
-      });
+    for (const key of steamTitleCacheKeys(cc, q, gameYear)) {
+      const hit = getCached(key);
+      if (hit?.found && !isSteamYearMismatch(hit, gameYear, title)) {
+        steam = asCacheHit({
+          ...hit,
+          manualOverride: Boolean(hit.manualOverride),
+        });
+        break;
+      }
     }
   }
 
