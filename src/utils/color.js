@@ -33,10 +33,18 @@ function contrastRatio(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** Text color with the higher WCAG contrast on `hex`; ties go to the dark ink the stylesheet already uses. */
+/** WCAG minimum for bold / UI text; solid buttons use it as the bar for white ink. */
+const LIGHT_INK_MIN_CONTRAST = 3;
+
+/**
+ * Text color for a solid button filled with `hex`. White wins whenever it is readable (≥ 3:1) —
+ * saturated mid-tones like pink look wrong with dark ink even if its raw ratio is slightly higher;
+ * otherwise whichever ink has the higher contrast (dark on light/pastel fills).
+ */
 export function readableInk(hex, dark = '#0b1210', light = '#ffffff') {
   const bg = relativeLuminance(hex);
-  const onDark = contrastRatio(bg, relativeLuminance(dark));
   const onLight = contrastRatio(bg, relativeLuminance(light));
+  if (onLight >= LIGHT_INK_MIN_CONTRAST) return light;
+  const onDark = contrastRatio(bg, relativeLuminance(dark));
   return onDark >= onLight ? dark : light;
 }

@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.95] - 2026-10-17
+
+### Fixed
+
+- Text on solid accent buttons (Plus, Export) now picks white whenever white is readable (contrast ≥ 3:1) instead of the strictly higher ratio, so saturated accents like pink get white text; light and pastel accents (teal default, yellow, lime, sky blue) keep dark text
+
 ## [0.7.94] - 2026-10-17
 
 ### Fixed
