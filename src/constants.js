@@ -71,6 +71,17 @@ export const PROFILE_CARD_TIERS = [
   { id: 'master', min: 500 },
   { id: 'legend', min: 1000 },
 ];
+/** Game mini-profile card tiers by Backloggd average rating (0–5 stars). Same ids/skins as user tiers. */
+export const GAME_CARD_TIERS = [
+  { id: 'rookie', min: 0 },
+  { id: 'bronze', min: 2.5 },
+  { id: 'silver', min: 3 },
+  { id: 'gold', min: 3.4 },
+  { id: 'platinum', min: 3.7 },
+  { id: 'diamond', min: 4 },
+  { id: 'master', min: 4.25 },
+  { id: 'legend', min: 4.5 },
+];
 /** How a mini-profile card is summoned: pointer hover, right-click, or Shift+click. */
 export const MINI_PROFILE_TRIGGERS = ['hover', 'contextmenu', 'shiftclick'];
 export const PROFILE_HOVER_OPEN_MS = 280;
@@ -214,6 +225,7 @@ export const DEFAULT_SETTINGS = {
   showCardBadgeGameStatus: false,
   showGameMiniProfile: true,
   gameMiniProfileTrigger: 'hover',
+  gameMiniProfileTiers: true,
   preloadGameMiniProfile: false,
   showExport: false,
   showGameId: false,

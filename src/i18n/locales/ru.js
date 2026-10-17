@@ -301,6 +301,9 @@ export default {
   preloadGameMiniProfile: 'Предзагрузка в зоне видимости',
   preloadGameMiniProfileHint:
     'Загружает данные мини-профиля для обложек в зоне видимости, чтобы карточка открывалась сразу.',
+  gameMiniProfileTiers: 'Уровни по рейтингу',
+  gameMiniProfileTiersHint:
+    'Окрашивает карточку по рейтингу Backloggd: от Новичка до Легенды (4.5★+) — те же скины, что у карточек пользователей. Игры без рейтинга остаются в обычном виде.',
   miniGameRating: 'Рейтинг Backloggd',
   miniGameOpen: 'Открыть игру',
   miniGameLoading: 'Загрузка игры…',

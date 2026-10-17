@@ -297,6 +297,9 @@ export default {
   preloadGameMiniProfile: '表示領域で事前読込',
   preloadGameMiniProfileHint:
     'カバーが表示領域に入るとミニプロフィールを先読みし、ホバーですぐ開けます。',
+  gameMiniProfileTiers: '評価ランク',
+  gameMiniProfileTiersHint:
+    'Backloggdの評価に応じてカードを色分けします（ルーキー〜レジェンド、4.5★以上）。ユーザーカードと同じデザインです。評価のないゲームは通常の見た目のままです。',
   miniGameRating: 'Backloggd評価',
   miniGameOpen: 'ゲームを開く',
   miniGameLoading: 'ゲームを読み込み中…',

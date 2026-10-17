@@ -795,6 +795,11 @@ export function openSettings() {
             t.gameMiniTriggerHint
           ),
           toggleHtml(
+            'gameMiniProfileTiers',
+            draft.gameMiniProfileTiers !== false,
+            'gameMiniProfileTiersHint'
+          ),
+          toggleHtml(
             'preloadGameMiniProfile',
             draft.preloadGameMiniProfile === true,
             'preloadGameMiniProfileHint'

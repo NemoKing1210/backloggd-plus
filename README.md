@@ -98,7 +98,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 **Lists / search / journal (cover grids):**
 
 - Compact badges on `.game-cover` cards — price, Steam review %, Owned, Wishlist, GameStatus (lazy-loaded in viewport; per-type toggles in Settings → Game card)
-- Mini-profile on covers (hover by default; or right-click / Shift + click) — title, Backloggd rating, platforms, Steam price/reviews, GameStatus, quick links (optional viewport preload)
+- Mini-profile on covers (hover by default; or right-click / Shift + click) — title, Backloggd rating, platforms, Steam price/reviews, GameStatus, quick links; card tier (Rookie → Legend) follows the Backloggd rating (optional viewport preload)
 - Same cover badges / mini-profiles on Similar games cards (game page strip)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):

@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.89] - 2026-10-17
+
+### Added
+
+- Game mini-profile cards now have rating tiers like user cards: Rookie, Bronze, Silver, Gold, Platinum, Diamond, Master, Legend (from 0 up to 4.5★+ Backloggd rating) with matching skins, tier pill and cover frame; games without a rating keep the default look
+- Settings → Game card → "Rating tiers" toggle (on by default; included in settings export/import)
+
+### Changed
+
+- Game mini-profile card now updates in place when data arrives: blocks fade in and expand/collapse smoothly instead of popping, unchanged elements (cover, title, buttons) stay untouched, and the card recolors smoothly to its rating tier; a pill placeholder holds the tier slot while loading
+
 ## [0.7.88] - 2026-10-17
 
 ### Added

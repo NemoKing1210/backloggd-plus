@@ -302,6 +302,9 @@ export default {
   preloadGameMiniProfile: 'Preload in viewport',
   preloadGameMiniProfileHint:
     'Fetch game mini-profile data as covers enter the viewport so hover cards open instantly.',
+  gameMiniProfileTiers: 'Rating tiers',
+  gameMiniProfileTiersHint:
+    'Color the card by Backloggd rating, Rookie to Legend (4.5★+) — same skins as user cards. Games without a rating keep the default look.',
   miniGameRating: 'Backloggd rating',
   miniGameOpen: 'Open game',
   miniGameLoading: 'Loading game…',

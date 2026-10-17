@@ -296,6 +296,9 @@ export default {
   preloadGameMiniProfile: '화면에 보이면 미리 불러오기',
   preloadGameMiniProfileHint:
     '커버가 화면에 들어오면 미니 프로필을 미리 가져와 호버 시 바로 엽니다.',
+  gameMiniProfileTiers: '평점 등급',
+  gameMiniProfileTiersHint:
+    'Backloggd 평점에 따라 카드 색을 바꿉니다(루키~레전드, 4.5★ 이상). 사용자 카드와 같은 스킨입니다. 평점이 없는 게임은 기본 모양을 유지합니다.',
   miniGameRating: 'Backloggd 평점',
   miniGameOpen: '게임 열기',
   miniGameLoading: '게임 불러오는 중…',

@@ -299,6 +299,9 @@ export default {
   preloadGameMiniProfile: 'Wczytuj w obszarze widoczności',
   preloadGameMiniProfileHint:
     'Pobiera dane mini profilu, gdy okładki wchodzą w widok, by karty otwierały się od razu.',
+  gameMiniProfileTiers: 'Poziomy wg oceny',
+  gameMiniProfileTiersHint:
+    'Koloruje kartę według oceny Backloggd, od Nowicjusza do Legendy (4.5★+) – te same skórki co karty użytkowników. Gry bez oceny zachowują domyślny wygląd.',
   miniGameRating: 'Ocena Backloggd',
   miniGameOpen: 'Otwórz grę',
   miniGameLoading: 'Ładowanie gry…',

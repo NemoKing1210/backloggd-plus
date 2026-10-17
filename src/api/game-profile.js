@@ -1,4 +1,5 @@
 import { asCacheHit, asCacheMiss, getCached, setCached } from '../cache.js';
+import { GAME_CARD_TIERS } from '../constants.js';
 import { gmRequest } from '../gm.js';
 import { inflight } from '../state.js';
 
@@ -9,6 +10,17 @@ const DEVS_MAX = 4;
 
 export function gameMiniCacheKey(slug) {
   return `game:mini:${String(slug || '').trim().toLowerCase()}`;
+}
+
+/** Tier id for a Backloggd average rating; null when the game has no rating yet. */
+export function gameTierIdFromRating(rating) {
+  const n = Number(rating);
+  if (rating == null || !Number.isFinite(n) || n <= 0) return null;
+  let tier = GAME_CARD_TIERS[0];
+  for (const row of GAME_CARD_TIERS) {
+    if (n >= row.min) tier = row;
+  }
+  return tier.id;
 }
 
 export function cacheGameMiniProfile(profile) {

@@ -278,6 +278,9 @@ export default {
     '游戏卡片的打开方式。右键和 Shift + 点击会替代封面上的原生操作；点击卡片外部或按 Esc 关闭。',
   preloadGameMiniProfile: '进入视口时预加载',
   preloadGameMiniProfileHint: '封面进入视口时预取迷你资料数据，悬停时可立即打开卡片。',
+  gameMiniProfileTiers: '评分等级',
+  gameMiniProfileTiersHint:
+    '按 Backloggd 评分为卡片着色，从新手到传奇（4.5★+），皮肤与用户卡片相同。暂无评分的游戏保持默认样式。',
   miniGameRating: 'Backloggd 评分',
   miniGameOpen: '打开游戏',
   miniGameLoading: '正在加载游戏…',

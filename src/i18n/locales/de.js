@@ -299,6 +299,9 @@ export default {
   preloadGameMiniProfile: 'Im Sichtbereich vorladen',
   preloadGameMiniProfileHint:
     'Lädt Mini-Profil-Daten für Covers im Sichtbereich, damit Hover-Karten sofort öffnen.',
+  gameMiniProfileTiers: 'Stufen nach Bewertung',
+  gameMiniProfileTiersHint:
+    'Färbt die Karte nach der Backloggd-Bewertung, von Anfänger bis Legende (4.5★+) – dieselben Designs wie bei Nutzerkarten. Spiele ohne Bewertung behalten den Standardlook.',
   miniGameRating: 'Backloggd-Bewertung',
   miniGameOpen: 'Spiel öffnen',
   miniGameLoading: 'Spiel wird geladen…',

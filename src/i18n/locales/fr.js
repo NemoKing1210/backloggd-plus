@@ -299,6 +299,9 @@ export default {
   preloadGameMiniProfile: 'Précharger dans le viewport',
   preloadGameMiniProfileHint:
     'Charge les données du mini-profil quand les jaquettes entrent dans le viewport pour une ouverture instantanée.',
+  gameMiniProfileTiers: 'Niveaux par note',
+  gameMiniProfileTiersHint:
+    'Colore la carte selon la note Backloggd, de Débutant à Légende (4.5★+), avec les mêmes styles que les cartes utilisateur. Les jeux sans note gardent l’apparence par défaut.',
   miniGameRating: 'Note Backloggd',
   miniGameOpen: 'Ouvrir le jeu',
   miniGameLoading: 'Chargement du jeu…',
