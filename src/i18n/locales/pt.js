@@ -91,7 +91,7 @@ export default {
     'Oculta linhas vazias Fuse / incontent (página inicial, análises do jogo, etc.).',
   showUserMiniProfile: 'Mini perfil do usuário',
   showUserMiniProfileHint:
-    'Mostra um card com informações resumidas ao passar o mouse sobre avatares ou nomes. O nível sobe com jogos jogados (25+ bronze … 1000+ lenda).',
+    'Card com um resumo do perfil em avatares ou nomes: estatísticas, gráfico de notas, bio, jogos favoritos e recentes (as capas abrem o card do jogo) e emblemas. A forma de abrir é definida abaixo.',
   miniTrigger: 'Abrir o cartão com',
   miniTriggerHover: 'Passar o cursor',
   miniTriggerContextMenu: 'Clique direito',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: 'Pré-carregar na viewport',
   preloadUserMiniProfileHint:
     'Busca os dados do mini perfil dos links de perfil ao entrarem na viewport para o card abrir na hora.',
+  userMiniProfileTiers: 'Níveis por jogos jogados',
+  userMiniProfileTiersHint:
+    'Colore o cartão pelo número de jogos jogados, de Novato a Lenda, e mostra a etiqueta de nível. Desativado: cartão neutro.',
   showProfilePage: 'Melhorar página de perfil',
   showProfilePageHint:
     'Aplica o visual por nível à página de perfil. Desative blocos abaixo se quiser.',

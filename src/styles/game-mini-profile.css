@@ -30,6 +30,11 @@
   will-change: transform, opacity, filter;
 }
 
+/* Opened from a cover inside the user mini-profile card — always stack above it. */
+.blp-gmp.is-nested {
+  z-index: 1000006;
+}
+
 .blp-gmp.is-open {
   pointer-events: auto;
   opacity: 1;

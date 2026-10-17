@@ -91,7 +91,7 @@ export default {
     'Hides empty Fuse / incontent ad rows (homepage, game reviews, etc.).',
   showUserMiniProfile: 'User mini-profile cards',
   showUserMiniProfileHint:
-    'Brief mini profile on avatar or username hover. Tier grows with games played (25+ bronze … 1000+ legend).',
+    'Card with a brief profile on an avatar or username: stats, rating chart, bio, favorite and recent games (their covers open the game card) and badges. How it opens is set below.',
   miniTrigger: 'Open card by',
   miniTriggerHover: 'Hover',
   miniTriggerContextMenu: 'Right-click',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: 'Preload in viewport',
   preloadUserMiniProfileHint:
     'Fetch mini-profile data for profile links as they enter the viewport so hover cards open instantly.',
+  userMiniProfileTiers: 'Played-games tiers',
+  userMiniProfileTiersHint:
+    'Color the card by games played, Rookie to Legend — and show the tier pill. Off keeps a neutral card.',
   showProfilePage: 'Enhance profile page',
   showProfilePageHint:
     'Applies tier styling to the profile page. Turn off individual blocks below as needed.',

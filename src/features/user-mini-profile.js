@@ -6,6 +6,8 @@ import {
   tierIdFromProfile,
 } from '../api/user-profile.js';
 import {
+  CARD_SLUG_ATTR,
+  CARD_TITLE_ATTR,
   PROFILE_FETCH_CONCURRENCY,
   PROFILE_HOVER_CLOSE_MS,
   PROFILE_HOVER_OPEN_MS,
@@ -16,6 +18,7 @@ import { normalizeMiniProfileTrigger } from '../settings.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { debounce } from '../utils/debounce.js';
+import { closeNestedGameMiniProfile, isInsideGameMiniProfile } from './game-mini-profile.js';
 
 const HOVER_ATTR = 'data-blp-profile-hover';
 const MARK_ATTR = 'data-blp-ump';
@@ -45,6 +48,10 @@ const profileFetches = new Map();
 
 function triggerMode() {
   return normalizeMiniProfileTrigger(settings.userMiniProfileTrigger);
+}
+
+function tiersEnabled() {
+  return settings.userMiniProfileTiers !== false;
 }
 
 function tierLabel(tierId) {
@@ -93,7 +100,9 @@ function ensurePopover() {
   popoverEl.addEventListener('pointerenter', () => {
     window.clearTimeout(closeTimer);
   });
-  popoverEl.addEventListener('pointerleave', () => {
+  popoverEl.addEventListener('pointerleave', (e) => {
+    // The nested game card belongs to this card — moving onto it is not leaving.
+    if (isInsideGameMiniProfile(e.relatedTarget)) return;
     // Click-triggered cards stay until an outside click / Escape.
     if (triggerMode() === 'hover') scheduleClose();
   });
@@ -118,6 +127,7 @@ function finishHidePopover() {
 
 function hidePopover({ immediate = false } = {}) {
   if (!popoverEl) return;
+  closeNestedGameMiniProfile({ immediate });
   window.clearTimeout(leaveTimer);
   if (leaveHandler) {
     popoverEl.removeEventListener('transitionend', leaveHandler);
@@ -205,7 +215,9 @@ function coversHtml(games, label, slots = 5) {
       const img = g.coverUrl
         ? `<img src="${escapeAttr(g.coverUrl)}" alt="" loading="lazy" decoding="async">`
         : `<span class="blp-ump__cover-ph"></span>`;
-      return `<a class="blp-ump__cover" href="${escapeAttr(g.href)}" title="${escapeAttr(g.title)}" data-turbo-frame="_top">${img}</a>`;
+      const slugAttr = g.slug ? ` ${CARD_SLUG_ATTR}="${escapeAttr(g.slug)}"` : '';
+      const titleAttr = g.title ? ` ${CARD_TITLE_ATTR}="${escapeAttr(g.title)}"` : '';
+      return `<a class="blp-ump__cover" href="${escapeAttr(g.href)}" title="${escapeAttr(g.title)}"${slugAttr}${titleAttr} data-turbo-frame="_top">${img}</a>`;
     })
     .join('');
   return `<div class="blp-ump__section"><div class="blp-ump__section-label">${escapeHtml(label)}</div><div class="blp-ump__covers" style="--ump-slots:${slots}">${items}</div></div>`;
@@ -231,7 +243,7 @@ function skelBone(extraClass = '') {
 
 function renderLoading(username) {
   const cached = peekCachedUserProfile(username);
-  const tierId = cached ? tierIdFromProfile(cached) : 'rookie';
+  const tierId = cached && tiersEnabled() ? tierIdFromProfile(cached) : 'rookie';
   return `
     <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)} is-skeleton" aria-busy="true">
       <div class="blp-ump__shine" aria-hidden="true"></div>
@@ -276,7 +288,9 @@ function renderError(username) {
 }
 
 function renderProfile(profile) {
-  const tierId = tierIdFromProfile(profile);
+  const tiers = tiersEnabled();
+  // Tiers off → the neutral (Rookie) skin without the tier pill.
+  const tierId = tiers ? tierIdFromProfile(profile) : 'rookie';
   const bio = profile.bio
     ? `<p class="blp-ump__bio">${escapeHtml(profile.bio)}</p>`
     : '';
@@ -285,11 +299,11 @@ function renderProfile(profile) {
       ? `<span class="blp-ump__avg" title="${escapeAttr(t.miniProfileAvgRating)}">${escapeHtml(String(profile.avgRating))}★</span>`
       : '';
   return `
-    <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)}">
+    <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)}${tiers ? '' : ' blp-ump__card--plain'}">
       <div class="blp-ump__shine" aria-hidden="true"></div>
       <div class="blp-ump__foil" aria-hidden="true"></div>
       <div class="blp-ump__top">
-        <span class="blp-ump__tier-pill">${escapeHtml(tierLabel(tierId))}</span>
+        ${tiers ? `<span class="blp-ump__tier-pill">${escapeHtml(tierLabel(tierId))}</span>` : ''}
         ${avg}
       </div>
       <a class="blp-ump__avatar-link" href="${escapeAttr(profile.profileUrl)}" data-turbo-frame="_top">
@@ -560,6 +574,8 @@ const decorateProfileAnchorsSoon = debounce(() => decorateProfileAnchors(), 120)
 
 async function showForAnchor(anchor, username) {
   const el = ensurePopover();
+  // Re-rendering the card replaces its covers, so a game card opened from them would be orphaned.
+  closeNestedGameMiniProfile({ immediate: true });
   if (activeAnchor && activeAnchor !== anchor) activeAnchor.removeAttribute(HOVER_ATTR);
   anchor.setAttribute(HOVER_ATTR, '1');
   activeAnchor = anchor;
@@ -634,6 +650,11 @@ function resolveProfileAnchor(target) {
 
 function onPointerOver(e) {
   if (settings.showUserMiniProfile === false || triggerMode() !== 'hover') return;
+  // Pointer reached the nested game card: keep this card open.
+  if (isInsideGameMiniProfile(e.target)) {
+    window.clearTimeout(closeTimer);
+    return;
+  }
   const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   markProfileAnchor(hit.anchor);
@@ -652,6 +673,12 @@ function onPointerOver(e) {
 
 function onPointerOut(e) {
   if (triggerMode() !== 'hover') return;
+  // Leaving the nested game card for somewhere other than this card closes this card too.
+  if (isInsideGameMiniProfile(e.target)) {
+    const to = e.relatedTarget;
+    if (!to || (!popoverEl?.contains(to) && !isInsideGameMiniProfile(to))) scheduleClose();
+    return;
+  }
   const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   const related = e.relatedTarget;
@@ -689,7 +716,7 @@ function onClickTrigger(e) {
 
 function onOutsidePointerDown(e) {
   if (triggerMode() === 'hover' || !popoverEl?.classList.contains('is-open')) return;
-  if (popoverEl.contains(e.target)) return;
+  if (popoverEl.contains(e.target) || isInsideGameMiniProfile(e.target)) return;
   hidePopover();
 }
 

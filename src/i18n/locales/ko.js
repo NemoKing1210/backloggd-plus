@@ -91,7 +91,7 @@ export default {
     '빈 Fuse / incontent 광고 행을 숨깁니다(홈, 게임 리뷰 등).',
   showUserMiniProfile: '사용자 미니 프로필',
   showUserMiniProfileHint:
-    '아바타나 사용자 이름에 마우스를 올리면 요약 미니 카드를 표시합니다. 플레이 수에 따라 티어가 올라갑니다(25+ 브론즈 … 1000+ 레전드).',
+    '아바타나 사용자 이름에 요약 프로필 카드를 표시합니다: 통계, 평점 차트, 소개, 즐겨찾기·최근 게임(커버를 누르면 게임 카드가 열림), 배지. 여는 방식은 아래에서 설정합니다.',
   miniTrigger: '카드 여는 방법',
   miniTriggerHover: '마우스 오버',
   miniTriggerContextMenu: '오른쪽 클릭',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: '화면에 보이면 미리 불러오기',
   preloadUserMiniProfileHint:
     '프로필 링크가 화면에 들어오면 미니 프로필을 미리 받아 호버 시 바로 열리게 합니다.',
+  userMiniProfileTiers: '플레이 수 등급',
+  userMiniProfileTiersHint:
+    '플레이한 게임 수에 따라 카드 색을 바꾸고(루키~레전드) 등급 라벨을 표시합니다. 끄면 기본 카드로 표시됩니다.',
   showProfilePage: '프로필 페이지 꾸미기',
   showProfilePageHint:
     '프로필 페이지에 티어 스타일을 적용합니다. 아래에서 구역별로 끌 수 있습니다.',

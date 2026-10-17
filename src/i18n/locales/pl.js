@@ -91,7 +91,7 @@ export default {
     'Ukrywa puste wiersze Fuse / incontent (strona główna, recenzje gry itd.).',
   showUserMiniProfile: 'Mini profil użytkownika',
   showUserMiniProfileHint:
-    'Karta z krótkimi informacjami po najechaniu na awatar lub nick. Poziom rośnie wraz z liczbą gier (25+ brąz … 1000+ legenda).',
+    'Karta z krótkim profilem przy awatarze lub nicku: statystyki, wykres ocen, bio, ulubione i ostatnie gry (ich okładki otwierają kartę gry) oraz odznaki. Sposób otwierania ustawisz poniżej.',
   miniTrigger: 'Otwieraj kartę przez',
   miniTriggerHover: 'Najechanie',
   miniTriggerContextMenu: 'Prawy przycisk myszy',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: 'Wczytuj w obszarze widoczności',
   preloadUserMiniProfileHint:
     'Pobiera dane mini profilu dla linków profilu w polu widzenia, by karta otwierała się od razu.',
+  userMiniProfileTiers: 'Poziomy wg zagranych gier',
+  userMiniProfileTiersHint:
+    'Koloruje kartę według liczby zagranych gier, od Nowicjusza do Legendy, i pokazuje etykietę poziomu. Wyłączone: neutralna karta.',
   showProfilePage: 'Ulepsz stronę profilu',
   showProfilePageHint:
     'Stosuje styl poziomu do strony profilu. Poszczególne bloki można wyłączyć poniżej.',

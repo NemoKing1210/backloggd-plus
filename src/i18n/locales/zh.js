@@ -83,7 +83,7 @@ export default {
   hideHomepageFuseHint: '隐藏空的 Fuse / incontent 广告行（首页、游戏评论区等）。',
   showUserMiniProfile: '用户迷你资料卡',
   showUserMiniProfileHint:
-    '悬停头像或用户名时显示简明资料。等级随游玩数量提升（25+ 青铜 … 1000+ 传奇）。',
+    '在头像或用户名上显示简明资料卡：统计、评分分布、简介、最爱和最近游戏（点开封面可打开游戏卡片）以及徽章。打开方式见下方设置。',
   miniTrigger: '打开卡片方式',
   miniTriggerHover: '悬停',
   miniTriggerContextMenu: '右键点击',
@@ -92,6 +92,9 @@ export default {
     '用户卡片的打开方式。右键和 Shift + 点击会替代头像与用户名上的原生操作；点击卡片外部或按 Esc 关闭。',
   preloadUserMiniProfile: '进入视口时预加载',
   preloadUserMiniProfileHint: '资料链接进入视口时预取迷你资料数据，悬停时可立即打开卡片。',
+  userMiniProfileTiers: '按已玩游戏数分级',
+  userMiniProfileTiersHint:
+    '按已玩游戏数为卡片着色（从新手到传奇）并显示等级标签。关闭后使用中性卡片。',
   showProfilePage: '美化资料页',
   showProfilePageHint: '为资料页应用等级样式。可在下方单独关闭各区块。',
   showProfileHeader: '顶部与头像',

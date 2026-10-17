@@ -42,6 +42,26 @@ const PRELOAD_ATTR = 'data-blp-gmp-preload';
 const POPOVER_ID = 'blp-game-mini-profile';
 const GMP_SKIP =
   `#${POPOVER_ID}, .blp-gmp, #blp-user-mini-profile, .blp-ump, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop`;
+/** Game covers inside the user mini-profile card (favorites / recent) open a nested game card. */
+const NESTED_COVER = 'a.blp-ump__cover';
+const NESTED_CLASS = 'is-nested';
+const USER_POPOVER = '#blp-user-mini-profile';
+
+function isNestedCover(cover) {
+  return Boolean(cover?.matches?.(NESTED_COVER) && cover.closest(USER_POPOVER));
+}
+
+/** True when `node` is inside the game card that was opened from the user mini-profile card. */
+export function isInsideGameMiniProfile(node) {
+  const pop = node?.closest?.(`#${POPOVER_ID}`);
+  return Boolean(pop?.classList.contains(NESTED_CLASS));
+}
+
+/** Close the game card if it was opened from the user mini-profile card. */
+export function closeNestedGameMiniProfile({ immediate = false } = {}) {
+  if (!popoverEl?.classList.contains(NESTED_CLASS)) return;
+  hidePopover({ immediate });
+}
 
 /** Covers allowed inside the game page skip zone: Plus Similar games and Backloggd's native Related Games. */
 const GMP_ALLOW_IN_GAME_PAGE =
@@ -146,7 +166,14 @@ function finishHidePopover() {
     leaveHandler = null;
   }
   if (!popoverEl) return;
-  popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready', 'is-updating');
+  popoverEl.classList.remove(
+    'is-open',
+    'is-leaving',
+    'is-loading',
+    'is-ready',
+    'is-updating',
+    NESTED_CLASS
+  );
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
   activeCover?.removeAttribute?.(HOVER_ATTR);
@@ -202,14 +229,16 @@ function openPopover(el) {
 function positionPopover(anchor) {
   const el = ensurePopover();
   const rect = anchor.getBoundingClientRect();
+  // A nested card sits beside the user card (not on top of it), level with the hovered cover.
+  const hostRect = anchor.closest?.(USER_POPOVER)?.getBoundingClientRect() || rect;
   const pad = 10;
   const cardW = el.offsetWidth || 312;
   const cardH = el.offsetHeight || 420;
-  let left = rect.right + pad;
+  let left = hostRect.right + pad;
   let top = rect.top + rect.height / 2 - cardH / 2;
 
   if (left + cardW > window.innerWidth - 12) {
-    left = rect.left - cardW - pad;
+    left = hostRect.left - cardW - pad;
   }
   if (left < 12) {
     left = Math.max(12, Math.min(window.innerWidth - cardW - 12, rect.left + rect.width / 2 - cardW / 2));
@@ -572,6 +601,7 @@ function clearCoverMark(cover) {
 
 function isEligibleCover(cover) {
   if (!cover || cover.nodeType !== 1) return false;
+  if (isNestedCover(cover)) return Boolean(parseCardSlug(cover));
   if (!cover.classList?.contains('game-cover') && !cover.classList?.contains('blp-similar__cover')) {
     return false;
   }
@@ -890,6 +920,7 @@ async function showForCover(cover, { slug, title, appId, coverHint }) {
   cover.setAttribute(HOVER_ATTR, '1');
   activeCover = cover;
   activeSlug = slug;
+  el.classList.toggle(NESTED_CLASS, isNestedCover(cover));
   const seq = ++fetchSeq;
 
   let profile = peekCachedGameMiniProfile(slug);
@@ -980,6 +1011,8 @@ function scheduleClose() {
 
 function resolveCover(target) {
   if (!target || target.nodeType !== 1) return null;
+  const nested = target.closest?.(NESTED_COVER);
+  if (nested && isEligibleCover(nested)) return markCover(nested);
   if (target.closest?.(GMP_SKIP)) return null;
   const cover = target.closest?.('.game-cover, .blp-similar__cover');
   if (!cover || !isEligibleCover(cover)) return null;

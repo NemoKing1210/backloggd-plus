@@ -264,6 +264,10 @@ a[data-blp-ump-loading] img {
   z-index: 1;
 }
 
+.blp-ump__card--plain .blp-ump__top {
+  justify-content: flex-end;
+}
+
 .blp-ump__tier-pill {
   display: inline-flex;
   align-items: center;
@@ -587,7 +591,8 @@ a[data-blp-ump-loading] img {
   transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
-.blp-ump__cover:hover {
+.blp-ump__cover:hover,
+.blp-ump__cover[data-blp-gmp-hover='1'] {
   transform: translateY(-2px);
   border-color: var(--ump-accent);
 }

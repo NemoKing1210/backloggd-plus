@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.90-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.91-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -115,7 +115,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 
 - Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
 - Interface language (Auto or fixed locale)
-- User profile: mini-profile cards on avatars and usernames (hover by default; or right-click / Shift + click; optional viewport preload); profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
+- User profile: mini-profile cards on avatars and usernames (hover by default; or right-click / Shift + click; optional viewport preload); game covers inside the card (favorites / recent) open the game mini-profile; tier skin by games played can be turned off; profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / game mini-profile hover cards / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump

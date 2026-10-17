@@ -91,7 +91,7 @@ export default {
     'Masque les rangées Fuse / incontent vides (accueil, avis de jeu, etc.).',
   showUserMiniProfile: 'Mini-profil utilisateur',
   showUserMiniProfileHint:
-    'Carte avec un aperçu au survol des avatars ou des noms. Le palier monte avec les jeux joués (25+ bronze … 1000+ légende).',
+    'Carte de profil résumé sur les avatars ou les noms : statistiques, graphique des notes, bio, jeux favoris et récents (leurs jaquettes ouvrent la carte du jeu) et badges. Le mode d’ouverture se règle ci-dessous.',
   miniTrigger: 'Ouvrir la carte par',
   miniTriggerHover: 'Survol',
   miniTriggerContextMenu: 'Clic droit',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: 'Précharger dans le viewport',
   preloadUserMiniProfileHint:
     'Récupère les données du mini-profil pour les liens de profil visibles afin d’ouvrir la carte immédiatement.',
+  userMiniProfileTiers: 'Niveaux par jeux joués',
+  userMiniProfileTiersHint:
+    'Colore la carte selon le nombre de jeux joués, de Novice à Légende, et affiche l’étiquette de niveau. Désactivé : carte neutre.',
   showProfilePage: 'Améliorer la page de profil',
   showProfilePageHint:
     'Applique le style par palier à la page de profil. Désactivez des blocs ci-dessous si besoin.',

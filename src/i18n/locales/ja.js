@@ -91,7 +91,7 @@ export default {
     '空の Fuse / incontent 広告行を非表示にします（ホーム、ゲームレビューなど）。',
   showUserMiniProfile: 'ユーザーミニプロフィール',
   showUserMiniProfileHint:
-    'アバターまたはユーザー名にホバーすると簡易カードを表示。プレイ数が増えるほどティアが上がります（25+ ブロンズ … 1000+ レジェンド）。',
+    'アバターやユーザー名に簡易プロフィールカードを表示：統計、評価グラフ、自己紹介、お気に入り／最近のゲーム（カバーからゲームカードを開けます）、バッジ。開き方は下の設定で選べます。',
   miniTrigger: 'カードの開き方',
   miniTriggerHover: 'ホバー',
   miniTriggerContextMenu: '右クリック',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: '表示領域で事前読込',
   preloadUserMiniProfileHint:
     '表示領域に入ったプロフィールリンクのミニプロフィールを先読みし、ホバーですぐ開けます。',
+  userMiniProfileTiers: 'プレイ数ランク',
+  userMiniProfileTiersHint:
+    'プレイしたゲーム数でカードを色分け（ルーキーからレジェンド）し、ランクのラベルを表示します。オフにすると標準のカードになります。',
   showProfilePage: 'プロフィールページを装飾',
   showProfilePageHint:
     'プロフィールページにティア装飾を適用。下でブロック単位にオフにできます。',

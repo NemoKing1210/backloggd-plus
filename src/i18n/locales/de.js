@@ -91,7 +91,7 @@ export default {
     'Blendet leere Fuse-/incontent-Werbezeilen aus (Startseite, Spielrezensionen usw.).',
   showUserMiniProfile: 'Mini-Profilkarten',
   showUserMiniProfileHint:
-    'Minikarte mit Kurzinfos beim Hover über Avatare oder Nutzernamen. Stufe steigt mit gespielten Spielen (25+ Bronze … 1000+ Legende).',
+    'Karte mit Kurzprofil bei Avataren oder Nutzernamen: Statistiken, Bewertungsdiagramm, Bio, Favoriten und zuletzt gespielte Spiele (deren Cover öffnen die Spielkarte) sowie Abzeichen. Wie sie sich öffnet, wird unten eingestellt.',
   miniTrigger: 'Karte öffnen per',
   miniTriggerHover: 'Mauszeiger',
   miniTriggerContextMenu: 'Rechtsklick',
@@ -101,6 +101,9 @@ export default {
   preloadUserMiniProfile: 'Im Sichtbereich vorladen',
   preloadUserMiniProfileHint:
     'Lädt Miniprofil-Daten für Profil-Links im Sichtbereich vor, damit die Karte sofort öffnet.',
+  userMiniProfileTiers: 'Stufen nach gespielten Spielen',
+  userMiniProfileTiersHint:
+    'Färbt die Karte nach der Anzahl gespielter Spiele, von Anfänger bis Legende, und zeigt das Stufen-Label. Aus: neutrale Karte.',
   showProfilePage: 'Profilseite aufwerten',
   showProfilePageHint:
     'Wendet Stufen-Styling auf die Profilseite an. Einzelne Blöcke unten abschaltbar.',

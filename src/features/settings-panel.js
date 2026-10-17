@@ -645,6 +645,11 @@ export function openSettings() {
             t.userMiniTriggerHint
           ),
           toggleHtml(
+            'userMiniProfileTiers',
+            draft.userMiniProfileTiers !== false,
+            'userMiniProfileTiersHint'
+          ),
+          toggleHtml(
             'preloadUserMiniProfile',
             draft.preloadUserMiniProfile === true,
             'preloadUserMiniProfileHint'

@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.91] - 2026-10-17
+
+### Added
+
+- Game mini-profile cards now open from the covers inside a user mini-profile card (favorites and recent games): the game card appears beside the user card, stays above it, and both cards stay open while the pointer moves between them (hover, right-click and Shift + click modes all work; follows the game card "Open card by" and "Mini-profile" settings)
+- Settings → Profile → "Played-games tiers" toggle (on by default; included in settings export/import): turn it off to get a neutral user mini-profile card without the tier skin and tier pill, like the game cards' "Rating tiers" option
+
+### Changed
+
+- Settings → Profile → "User mini-profile cards" description now lists what the card shows (stats, rating chart, favorites / recent games, badges) instead of the tier thresholds, and no longer implies hover is the only way to open it
+
 ## [0.7.90] - 2026-10-17
 
 ### Added

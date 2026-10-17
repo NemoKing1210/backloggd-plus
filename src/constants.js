@@ -240,6 +240,7 @@ export const DEFAULT_SETTINGS = {
   showUserMiniProfile: true,
   userMiniProfileTrigger: 'hover',
   preloadUserMiniProfile: false,
+  userMiniProfileTiers: true,
   showProfilePage: false,
   showProfileHeader: true,
   showProfileTierChip: true,
