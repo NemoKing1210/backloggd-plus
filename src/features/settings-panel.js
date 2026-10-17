@@ -26,7 +26,6 @@ import {
   DEFAULT_SETTINGS,
   FAVICON_URL,
   LINK_DOMAINS,
-  LINK_KEYS,
   OPENCRITIC_KEY_URL,
   REPO_URL,
   SCRIPT_VERSION,
@@ -46,6 +45,22 @@ import {
   settingsExportFilename,
 } from '../settings.js';
 import { reloadRuntimeSettings, settings, t } from '../state.js';
+import {
+  CUSTOM_LINK_LABEL_MAX,
+  CUSTOM_LINK_MAX,
+  CUSTOM_LINK_URL_MAX,
+  LINK_PLACEHOLDERS,
+  LINK_TITLE_FORMATS,
+  formatTitleForUrl,
+  isCustomLinkId,
+  isHttpUrl,
+  newCustomLinkId,
+  normalizeIconUrl,
+  normalizeLinkOrder,
+  normalizeTitleFormat,
+  resolveCustomLinkUrl,
+  resolveIconUrl,
+} from '../utils/custom-links.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { scheduleCardBadges } from './cards.js';
 import { enrichGamePage, getPageContext, removeEnrichment } from './enrichment.js';
@@ -188,6 +203,196 @@ function paintTranslateTabBadge(root, code) {
   wrap.innerHTML = buildTranslateTabBadgeHtml(code).trim();
   const next = wrap.firstElementChild;
   if (next) badge.replaceWith(next);
+}
+
+const LINK_PLACEHOLDER_LABEL_KEYS = {
+  title: 'linkPhTitle',
+  slug: 'linkPhSlug',
+  appid: 'linkPhAppid',
+  year: 'linkPhYear',
+  id: 'linkPhId',
+};
+const LINK_FORMAT_LABEL_KEYS = {
+  encoded: 'linkFormatEncoded',
+  plus: 'linkFormatPlus',
+  slug: 'linkFormatSlug',
+  underscore: 'linkFormatUnderscore',
+  compact: 'linkFormatCompact',
+};
+/** Sample game used by the live preview in the custom link editor. */
+const LINK_PREVIEW_GAME = {
+  title: 'Half-Life 2',
+  slug: 'half-life-2',
+  appId: 220,
+  year: 2004,
+  gameId: '1234',
+};
+
+const ICON_GRIP =
+  '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="3.5" r="1.3"/><circle cx="10.5" cy="3.5" r="1.3"/><circle cx="5.5" cy="8" r="1.3"/><circle cx="10.5" cy="8" r="1.3"/><circle cx="5.5" cy="12.5" r="1.3"/><circle cx="10.5" cy="12.5" r="1.3"/></svg>';
+const ICON_EDIT =
+  '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.8 2.7a1.5 1.5 0 0 1 2.1 2.1l-7.6 7.6-3 .9.9-3z"/></svg>';
+const ICON_REMOVE =
+  '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5M6.8 7v4M9.2 7v4"/></svg>';
+
+/** Favicon for a custom link: its own icon, else the favicon of the template's host. */
+function customLinkIconUrl(link) {
+  const own = resolveIconUrl(link?.icon, link?.url);
+  if (own) return own;
+  try {
+    const host = new URL(String(link?.url ?? '').replace(/\{[^}]*\}/g, 'x')).hostname.replace(
+      /^www\./,
+      ''
+    );
+    return host ? FAVICON_URL.replace('{domain}', encodeURIComponent(host)) : '';
+  } catch (_) {
+    return '';
+  }
+}
+
+/**
+ * Modal editor for one custom quick link.
+ * @param {{ link?: object|null, onSave: (data: {label:string,url:string,format:string,icon:string}) => void }} opts
+ */
+function openLinkEditor({ link = null, onSave }) {
+  if (document.querySelector('.blp-link-editor-backdrop')) return;
+  const opener = document.activeElement;
+  const title = link ? t.linkEditorEditTitle : t.linkEditorAddTitle;
+
+  const formatOptions = LINK_TITLE_FORMATS.map((fmtId) => {
+    const example = formatTitleForUrl(LINK_PREVIEW_GAME.title, fmtId);
+    const selected = normalizeTitleFormat(link?.format) === fmtId ? 'selected' : '';
+    return `<option value="${fmtId}" ${selected}>${escapeHtml(t[LINK_FORMAT_LABEL_KEYS[fmtId]])} — ${escapeHtml(example)}</option>`;
+  }).join('');
+  const chips = LINK_PLACEHOLDERS.map(
+    (ph) =>
+      `<button type="button" class="blp-chip" data-blp-le-ph="${ph}" title="${escapeAttr(t[LINK_PLACEHOLDER_LABEL_KEYS[ph]])}">{${ph}}</button>`
+  ).join('');
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'blp-confirm-backdrop blp-link-editor-backdrop';
+  backdrop.innerHTML = `
+    <form class="blp-confirm-dialog blp-link-editor" role="dialog" aria-modal="true" aria-label="${escapeAttr(title)}" novalidate>
+      <h3>${escapeHtml(title)}</h3>
+      <div class="blp-field">
+        <label for="blp-le-name">${escapeHtml(t.linkEditorName)}</label>
+        <input id="blp-le-name" type="text" maxlength="${CUSTOM_LINK_LABEL_MAX}" autocomplete="off"
+          placeholder="${escapeAttr(t.linkEditorNamePh)}" value="${escapeAttr(link?.label || '')}" />
+      </div>
+      <div class="blp-field">
+        <label for="blp-le-url">${escapeHtml(t.linkEditorUrl)}</label>
+        <input id="blp-le-url" type="text" inputmode="url" maxlength="${CUSTOM_LINK_URL_MAX}" autocomplete="off" spellcheck="false"
+          placeholder="https://example.com/search?q={title}" value="${escapeAttr(link?.url || '')}" />
+        <div class="blp-link-editor__chips" role="group" aria-label="${escapeAttr(t.linkEditorPlaceholders)}">${chips}</div>
+        <p class="blp-hint">${escapeHtml(t.linkEditorUrlHint)}</p>
+      </div>
+      <div class="blp-field">
+        <label for="blp-le-format">${escapeHtml(t.linkEditorFormat)}</label>
+        <select id="blp-le-format">${formatOptions}</select>
+        <p class="blp-hint">${escapeHtml(t.linkEditorFormatHint)}</p>
+      </div>
+      <div class="blp-field">
+        <label for="blp-le-icon">${escapeHtml(t.linkEditorIcon)}</label>
+        <input id="blp-le-icon" type="text" inputmode="url" maxlength="600" autocomplete="off" spellcheck="false"
+          placeholder="https://example.com/favicon.png  ·  /favicon.ico" value="${escapeAttr(link?.icon || '')}" />
+        <p class="blp-hint">${escapeHtml(t.linkEditorIconHint)}</p>
+      </div>
+      <div class="blp-link-editor__preview" aria-live="polite">
+        <span class="blp-link-editor__preview-label">${escapeHtml(t.linkEditorPreview)} · ${escapeHtml(LINK_PREVIEW_GAME.title)}</span>
+        <span class="blp-link-editor__preview-link"><img class="blp-favicon" alt="" width="14" height="14" referrerpolicy="no-referrer" data-blp-le-preview-icon hidden /><span data-blp-le-preview-name></span></span>
+        <code class="blp-link-editor__preview-url" data-blp-le-preview-url></code>
+      </div>
+      <p class="blp-link-editor__error" role="alert" data-blp-le-error hidden></p>
+      <div class="blp-actions">
+        <button type="button" class="blp-btn" data-blp-le-cancel>${escapeHtml(t.cancel)}</button>
+        <button type="submit" class="blp-btn blp-primary">${escapeHtml(t.linkEditorDone)}</button>
+      </div>
+    </form>
+  `;
+
+  const form = backdrop.querySelector('form');
+  const nameInput = backdrop.querySelector('#blp-le-name');
+  const urlInput = backdrop.querySelector('#blp-le-url');
+  const formatSelect = backdrop.querySelector('#blp-le-format');
+  const iconInput = backdrop.querySelector('#blp-le-icon');
+  const errorEl = backdrop.querySelector('[data-blp-le-error]');
+  const previewIcon = backdrop.querySelector('[data-blp-le-preview-icon]');
+  const previewName = backdrop.querySelector('[data-blp-le-preview-name]');
+  const previewUrl = backdrop.querySelector('[data-blp-le-preview-url]');
+
+  const current = () => ({
+    label: nameInput.value.replace(/\s+/g, ' ').trim(),
+    url: urlInput.value.trim(),
+    format: normalizeTitleFormat(formatSelect.value),
+    icon: iconInput.value.trim(),
+  });
+
+  const paintPreview = () => {
+    const data = current();
+    previewName.textContent = data.label || '—';
+    const resolved = resolveCustomLinkUrl(data, LINK_PREVIEW_GAME);
+    previewUrl.textContent = resolved || '—';
+    const iconUrl = customLinkIconUrl(data);
+    if (iconUrl) {
+      previewIcon.src = iconUrl;
+      previewIcon.hidden = false;
+    } else {
+      previewIcon.removeAttribute('src');
+      previewIcon.hidden = true;
+    }
+    errorEl.hidden = true;
+  };
+  [nameInput, urlInput, iconInput].forEach((el) => el.addEventListener('input', paintPreview));
+  formatSelect.addEventListener('change', paintPreview);
+
+  backdrop.querySelectorAll('[data-blp-le-ph]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const token = `{${btn.getAttribute('data-blp-le-ph')}}`;
+      const start = urlInput.selectionStart ?? urlInput.value.length;
+      const end = urlInput.selectionEnd ?? start;
+      urlInput.setRangeText(token, start, end, 'end');
+      urlInput.focus();
+      paintPreview();
+    });
+  });
+
+  const close = () => {
+    document.removeEventListener('keydown', onKeydown, true);
+    backdrop.remove();
+    if (opener && typeof opener.focus === 'function' && document.contains(opener)) opener.focus();
+  };
+  const onKeydown = (e) => {
+    if (e.key !== 'Escape') return;
+    e.preventDefault();
+    e.stopPropagation();
+    close();
+  };
+  const fail = (message, field) => {
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+    field?.focus();
+  };
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = current();
+    if (!data.label) return fail(t.linkEditorErrName, nameInput);
+    if (!isHttpUrl(data.url) || !resolveCustomLinkUrl(data, LINK_PREVIEW_GAME)) {
+      return fail(t.linkEditorErrUrl, urlInput);
+    }
+    if (data.icon && !normalizeIconUrl(data.icon)) return fail(t.linkEditorErrIcon, iconInput);
+    close();
+    onSave({ ...data, icon: normalizeIconUrl(data.icon) });
+  });
+  backdrop.querySelector('[data-blp-le-cancel]')?.addEventListener('click', close);
+  backdrop.addEventListener('mousedown', (e) => {
+    if (e.target === backdrop) close();
+  });
+
+  document.body.appendChild(backdrop);
+  document.addEventListener('keydown', onKeydown, true);
+  paintPreview();
+  nameInput.focus();
 }
 
 const CACHE_SOURCE_KEYS = [
@@ -442,24 +647,52 @@ export function openSettings() {
   const draft = {
     ...settings,
     links: { ...DEFAULT_SETTINGS.links, ...(settings.links || {}) },
+    customLinks: (settings.customLinks || []).map((l) => ({ ...l })),
   };
-  const linkToggles = LINK_KEYS.map((key) => {
-    const on = draft.links[key] !== false;
-    const label = t[linkLabelKey(key)] || key;
-    const domain = LINK_DOMAINS[key] || key;
-    const icon = FAVICON_URL.replace('{domain}', encodeURIComponent(domain));
+  draft.linkOrder = normalizeLinkOrder(settings.linkOrder, draft.customLinks);
+
+  const findCustomLink = (id) => draft.customLinks.find((l) => l.id === id) || null;
+  const isLinkOn = (id) =>
+    isCustomLinkId(id) ? findCustomLink(id)?.enabled !== false : draft.links[id] !== false;
+
+  const linkRowInnerHtml = (id) => {
+    const custom = isCustomLinkId(id);
+    const entry = custom ? findCustomLink(id) : null;
+    const label = custom ? entry?.label || '' : t[linkLabelKey(id)] || id;
+    const iconUrl = custom
+      ? customLinkIconUrl(entry)
+      : FAVICON_URL.replace('{domain}', encodeURIComponent(LINK_DOMAINS[id] || id));
+    const icon = iconUrl
+      ? `<img class="blp-favicon" src="${escapeAttr(iconUrl)}" alt="" width="14" height="14" referrerpolicy="no-referrer" />`
+      : '';
+    const tag = custom ? `<span class="blp-link-tag">${escapeHtml(t.linkCustomTag)}</span>` : '';
+    const actions = custom
+      ? `<span class="blp-link-row__actions">
+          <button type="button" class="blp-link-row__btn" data-blp-link-edit title="${escapeAttr(t.linkEdit)}" aria-label="${escapeAttr(t.linkEdit)}">${ICON_EDIT}</button>
+          <button type="button" class="blp-link-row__btn blp-link-row__btn--danger" data-blp-link-remove title="${escapeAttr(t.linkRemove)}" aria-label="${escapeAttr(t.linkRemove)}">${ICON_REMOVE}</button>
+        </span>`
+      : '';
     return `
-      <div class="blp-toggle">
-        <span class="blp-toggle__text">
-          <span class="blp-toggle__label">
-            <img class="blp-favicon" src="${escapeAttr(icon)}" alt="" width="14" height="14" />
-            ${escapeHtml(label)}
-          </span>
-        </span>
-        ${switchHtml(`data-blp-link="${escapeAttr(key)}"`, on)}
-      </div>
+      <button type="button" class="blp-link-row__grip" data-blp-link-grip title="${escapeAttr(t.linkDrag)}" aria-label="${escapeAttr(t.linkDrag)}">${ICON_GRIP}</button>
+      <span class="blp-toggle__text">
+        <span class="blp-toggle__label">${icon}${escapeHtml(label)}${tag}</span>
+      </span>
+      ${actions}
+      ${switchHtml(`data-blp-link="${escapeAttr(id)}"`, isLinkOn(id))}
     `;
-  });
+  };
+  const linkRowHtml = (id) =>
+    `<div class="blp-toggle blp-link-row" data-blp-link-id="${escapeAttr(id)}">${linkRowInnerHtml(id)}</div>`;
+  const linksListHtml = `
+    <div class="blp-settings-list" data-blp-links-list>
+      ${toggleHtml('showLinks', draft.showLinks)}
+      ${draft.linkOrder.map(linkRowHtml).join('')}
+      <div class="blp-link-add">
+        <button type="button" class="blp-btn" data-blp-link-add>+ ${escapeHtml(t.linkAdd)}</button>
+        <span class="blp-hint" data-blp-link-limit></span>
+      </div>
+    </div>
+  `;
 
   const localeSelect = `
     <select id="blp-ui-locale">
@@ -780,7 +1013,7 @@ export function openSettings() {
       ${groupHtml(
         'sectionLinks',
         'sectionLinksHint',
-        listHtml(toggleHtml('showLinks', draft.showLinks), ...linkToggles)
+        linksListHtml
       )}
       ${groupHtml(
         'gameGroupHosts',
@@ -1085,17 +1318,173 @@ export function openSettings() {
     });
   });
 
-  backdrop.querySelectorAll('[data-blp-link]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const key = btn.getAttribute('data-blp-link');
-      draft.links[key] = !draft.links[key];
-      setSwitchOn(btn, draft.links[key]);
+  const linksList = backdrop.querySelector('[data-blp-links-list]');
+  const linkRows = () => [...(linksList?.querySelectorAll('[data-blp-link-id]') || [])];
+  const syncLinkOrder = () => {
+    draft.linkOrder = linkRows().map((row) => row.getAttribute('data-blp-link-id'));
+  };
+  const syncLinkAddState = () => {
+    const full = draft.customLinks.length >= CUSTOM_LINK_MAX;
+    const addBtn = linksList?.querySelector('[data-blp-link-add]');
+    const limit = linksList?.querySelector('[data-blp-link-limit]');
+    if (addBtn) addBtn.disabled = full;
+    if (limit) limit.textContent = full ? fmt(t.linkLimit, { n: CUSTOM_LINK_MAX }) : '';
+  };
+  syncLinkAddState();
+
+  const toggleLinkRow = (row) => {
+    const id = row.getAttribute('data-blp-link-id');
+    if (isCustomLinkId(id)) {
+      const entry = findCustomLink(id);
+      if (entry) entry.enabled = entry.enabled === false;
+    } else {
+      draft.links[id] = draft.links[id] === false;
+    }
+    const sw = row.querySelector('.blp-switch');
+    if (sw) setSwitchOn(sw, isLinkOn(id));
+  };
+
+  /** Move `row` before `ref` (null = after the last link row), animating the rows it passes. */
+  const moveLinkRow = (row, ref) => {
+    const rows = linkRows();
+    const first = new Map(rows.map((r) => [r, r.getBoundingClientRect().top]));
+    const anchor = ref || linksList.querySelector('.blp-link-add');
+    if (row.nextElementSibling === anchor) return false;
+    linksList.insertBefore(row, anchor);
+    rows.forEach((r) => {
+      if (r === row) return;
+      const dy = first.get(r) - r.getBoundingClientRect().top;
+      if (!dy) return;
+      r.style.transition = 'none';
+      r.style.transform = `translateY(${dy}px)`;
+      void r.offsetHeight; // commit the start frame, then let it glide to its slot
+      r.style.transition = 'transform 0.16s ease';
+      r.style.transform = '';
     });
+    return true;
+  };
+
+  let linkDrag = null;
+  const placeDraggedRow = () => {
+    if (!linkDrag) return;
+    const { row, y } = linkDrag;
+    // offsetTop ignores the FLIP transforms still in flight, so the slots do not jitter.
+    const localY = y - linksList.getBoundingClientRect().top;
+    const others = linkRows().filter((r) => r !== row);
+    const before = others.find((r) => localY < r.offsetTop + r.offsetHeight / 2) || null;
+    moveLinkRow(row, before);
+  };
+  const dragTick = () => {
+    if (!linkDrag) return;
+    const body = backdrop.querySelector('.blp-settings__body');
+    if (body) {
+      const rect = body.getBoundingClientRect();
+      const edge = 48;
+      if (linkDrag.y < rect.top + edge) body.scrollTop -= Math.ceil((rect.top + edge - linkDrag.y) / 4);
+      else if (linkDrag.y > rect.bottom - edge) {
+        body.scrollTop += Math.ceil((linkDrag.y - (rect.bottom - edge)) / 4);
+      }
+    }
+    placeDraggedRow();
+    linkDrag.raf = requestAnimationFrame(dragTick);
+  };
+  const onLinkDragMove = (e) => {
+    if (!linkDrag || e.pointerId !== linkDrag.pointerId) return;
+    linkDrag.y = e.clientY;
+    placeDraggedRow();
+  };
+  const onLinkDragEnd = (e) => {
+    if (!linkDrag || e.pointerId !== linkDrag.pointerId) return;
+    cancelAnimationFrame(linkDrag.raf);
+    linkDrag.row.classList.remove('is-dragging');
+    document.documentElement.classList.remove('blp-link-dragging');
+    document.removeEventListener('pointermove', onLinkDragMove);
+    document.removeEventListener('pointerup', onLinkDragEnd);
+    document.removeEventListener('pointercancel', onLinkDragEnd);
+    linkDrag = null;
+    syncLinkOrder();
+  };
+
+  linksList?.addEventListener('pointerdown', (e) => {
+    const grip = e.target.closest?.('[data-blp-link-grip]');
+    const row = grip?.closest('[data-blp-link-id]');
+    if (!row || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    linkDrag = { row, pointerId: e.pointerId, y: e.clientY, raf: 0 };
+    row.classList.add('is-dragging');
+    document.documentElement.classList.add('blp-link-dragging');
+    document.addEventListener('pointermove', onLinkDragMove);
+    document.addEventListener('pointerup', onLinkDragEnd);
+    document.addEventListener('pointercancel', onLinkDragEnd);
+    linkDrag.raf = requestAnimationFrame(dragTick);
   });
 
-  backdrop.querySelectorAll('.blp-toggle').forEach((row) => {
+  linksList?.addEventListener('keydown', (e) => {
+    const grip = e.target.closest?.('[data-blp-link-grip]');
+    if (!grip || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault();
+    const row = grip.closest('[data-blp-link-id]');
+    const rows = linkRows();
+    const idx = rows.indexOf(row);
+    if (e.key === 'ArrowUp' && idx > 0) moveLinkRow(row, rows[idx - 1]);
+    else if (e.key === 'ArrowDown' && idx < rows.length - 1) moveLinkRow(row, rows[idx + 2] || null);
+    else return;
+    syncLinkOrder();
+    grip.focus();
+  });
+
+  const editLinkRow = (row) => {
+    const id = row.getAttribute('data-blp-link-id');
+    const entry = findCustomLink(id);
+    if (!entry) return;
+    openLinkEditor({
+      link: entry,
+      onSave: (data) => {
+        Object.assign(entry, data);
+        row.innerHTML = linkRowInnerHtml(id);
+      },
+    });
+  };
+
+  linksList?.addEventListener('click', (e) => {
+    const row = e.target.closest?.('[data-blp-link-id]');
+    if (e.target.closest?.('[data-blp-link-add]')) {
+      if (draft.customLinks.length >= CUSTOM_LINK_MAX) return;
+      openLinkEditor({
+        onSave: (data) => {
+          const entry = { id: newCustomLinkId(), enabled: true, ...data };
+          draft.customLinks.push(entry);
+          linksList
+            .querySelector('.blp-link-add')
+            ?.insertAdjacentHTML('beforebegin', linkRowHtml(entry.id));
+          syncLinkOrder();
+          syncLinkAddState();
+          const added = linksList.querySelector(`[data-blp-link-id="${entry.id}"]`);
+          added?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          added?.classList.add('is-flash');
+          window.setTimeout(() => added?.classList.remove('is-flash'), 1100);
+        },
+      });
+      return;
+    }
+    if (!row) return;
+    if (e.target.closest('[data-blp-link-grip], a, input, select')) return;
+    if (e.target.closest('[data-blp-link-edit]')) {
+      editLinkRow(row);
+      return;
+    }
+    if (e.target.closest('[data-blp-link-remove]')) {
+      const id = row.getAttribute('data-blp-link-id');
+      draft.customLinks = draft.customLinks.filter((l) => l.id !== id);
+      row.remove();
+      syncLinkOrder();
+      syncLinkAddState();
+      return;
+    }
+    toggleLinkRow(row);
+  });
+
+  backdrop.querySelectorAll('.blp-toggle:not([data-blp-link-id])').forEach((row) => {
     row.addEventListener('click', (e) => {
       if (e.target.closest('.blp-switch, a, select, input, button')) return;
       row.querySelector('.blp-switch')?.click();
@@ -1126,6 +1515,7 @@ export function openSettings() {
       const snapshot = {
         ...draft,
         links: { ...draft.links },
+        customLinks: draft.customLinks.map((l) => ({ ...l })),
       };
       if (uiLocale != null) snapshot.uiLocale = uiLocale;
       if (translateLocaleVal != null) snapshot.translateTargetLocale = translateLocaleVal;
@@ -1259,6 +1649,7 @@ export function openSettings() {
     draft.cacheUserProfiles = draft.cacheUserProfiles !== false;
     draft.cacheTranslations = draft.cacheTranslations !== false;
     draft.cacheFx = draft.cacheFx !== false;
+    syncLinkOrder();
     saveSettings(draft);
     reloadRuntimeSettings();
     pruneDisabledCacheCategories();

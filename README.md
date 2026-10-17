@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.96-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.97-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -90,7 +90,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 - Steam header / community icon on game pages; screenshot gallery after game stats
 - Similar games under screenshots (Steam More Like This) with tag match %; cards link to Backloggd and can show the same cover badges as list grids
 - Skeleton placeholders while Steam / GameStatus / score data loads
-- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike)
+- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike); reorder them by dragging, and add your own links from a URL template (`{title}` with a format of your choice, `{slug}`, `{appid}`, `{year}`, `{id}`) with an optional custom icon
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus status badges on game pages and cover grids
 - Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / ProtonDB public APIs; OpenCritic found via PCGamingWiki, optional own RapidAPI key in Settings)

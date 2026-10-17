@@ -27,6 +27,13 @@ import {
 import { fmt } from '../i18n/index.js';
 import { isLinkEnabled } from '../settings.js';
 import { settings, t } from '../state.js';
+import {
+  isCustomLinkId,
+  normalizeLinkOrder,
+  resolveCustomLinkUrl,
+  resolveIconUrl,
+  templatePlaceholders,
+} from '../utils/custom-links.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { metacriticGameUrl, slugifyForBackloggd } from '../utils/slug.js';
 import { bindGameCoverViewer, unbindGameCoverViewer } from './gallery.js';
@@ -41,7 +48,7 @@ import {
   removeSteamDbUi,
 } from './steamdb-ui.js';
 import { syncExportButton, removeExportUi } from './export-game.js';
-import { removeGameIdUi, syncGameIdUi } from './game-id.js';
+import { readBackloggdGameId, removeGameIdUi, syncGameIdUi } from './game-id.js';
 import { ensureUnifiedRatingWidget, updateUnifiedRatingWidget } from './unified-rating.js';
 import { getIgdbUrl, getPageContext, getGameTitle } from './page.js';
 import { cacheSourceLabel, paintDebugCacheMark } from './debug-cache.js';
@@ -427,7 +434,7 @@ export function formatDiscountEndDate(unixSeconds) {
   }
 }
 
-export function buildExternalLinks({ title, slug, igdbUrl, steam }) {
+export function buildExternalLinks({ title, slug, igdbUrl, steam, year = null }) {
   const q = encodeURIComponent(title || slug || '');
   const links = [];
   if (igdbUrl) links.push({ key: 'igdb', label: t.linkIgdb, url: igdbUrl });
@@ -506,7 +513,42 @@ export function buildExternalLinks({ title, slug, igdbUrl, steam }) {
         : `${GAMESLIKE_SITE}/app/${steam.appId}`,
     });
   }
-  return links.filter((l) => isLinkEnabled(l.key, settings));
+  return orderExternalLinks(links, { title, slug, steam, year });
+}
+
+/** Keep enabled built-ins, add the user's custom links, and apply the saved order. */
+function orderExternalLinks(builtin, { title, slug, steam, year }) {
+  const byKey = new Map(builtin.map((l) => [l.key, l]));
+  const customLinks = settings.customLinks || [];
+  const customById = new Map(customLinks.map((l) => [l.id, l]));
+  const ctx = {
+    title,
+    slug,
+    appId: steam?.appId ?? null,
+    year,
+    gameId: readBackloggdGameId(),
+  };
+  const out = [];
+  for (const id of normalizeLinkOrder(settings.linkOrder, customLinks)) {
+    if (isCustomLinkId(id)) {
+      const custom = customById.get(id);
+      if (!custom || !settings.showLinks || custom.enabled === false) continue;
+      const url = resolveCustomLinkUrl(custom, ctx);
+      if (url) out.push({ key: id, label: custom.label, url, icon: resolveIconUrl(custom.icon, url) });
+      continue;
+    }
+    const link = byKey.get(id);
+    if (link && isLinkEnabled(link.key, settings)) out.push(link);
+  }
+  return out;
+}
+
+/** True when an enabled custom link needs the Steam App ID to build its URL. */
+export function customLinksNeedSteam(cfg = settings) {
+  if (!cfg.showLinks) return false;
+  return (cfg.customLinks || []).some(
+    (l) => l.enabled !== false && templatePlaceholders(l.url).has('appid')
+  );
 }
 
 export function removeEnrichment() {
@@ -635,7 +677,7 @@ export function showRow(row) {
 }
 
 export function renderExtLink(link, { last = false } = {}) {
-  const icon = faviconForUrl(link.url);
+  const icon = link.icon || faviconForUrl(link.url);
   const img = icon
     ? `<img class="blp-favicon" src="${escapeAttr(icon)}" alt="" width="14" height="14" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : '';
@@ -1259,7 +1301,8 @@ export async function enrichGamePage() {
     (settings.showLinks &&
       (settings.links?.itad !== false ||
         settings.links?.steamdb !== false ||
-        settings.links?.gameslike !== false));
+        settings.links?.gameslike !== false)) ||
+    customLinksNeedSteam();
   const needUserdata =
     settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
 
@@ -1290,7 +1333,7 @@ export async function enrichGamePage() {
 
   const paintLinks = (steam) => {
     if (!stillHere() || !rows.links) return;
-    const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam });
+    const links = buildExternalLinks({ title, slug: ctx.slug, igdbUrl, steam, year: gameYear });
     renderEnrichment(
       { links: rows.links },
       { steam, links, error: state.error, skipDebug: true }
@@ -1409,6 +1452,7 @@ export async function enrichGamePage() {
       slug: ctx.slug,
       igdbUrl,
       steam: state.steam,
+      year: gameYear,
     });
     renderEnrichment(rows, {
       steam: state.steam,

@@ -14,6 +14,7 @@ import {
 } from './constants.js';
 import { SUPPORTED_LOCALES } from './i18n/index.js';
 import { normalizeHexColor } from './utils/color.js';
+import { normalizeLinkOrder, sanitizeCustomLinks } from './utils/custom-links.js';
 
 /** Envelope marker for exported JSON backups. */
 export const SETTINGS_EXPORT_KIND = 'backloggd-plus-settings';
@@ -42,6 +43,8 @@ const LINK_KEY_SET = new Set(LINK_KEYS);
 const BOOL_SETTING_KEYS = Object.keys(DEFAULT_SETTINGS).filter(
   (key) => key !== 'links' && typeof DEFAULT_SETTINGS[key] === 'boolean'
 );
+/** Handled by dedicated sanitizers (not simple scalars). */
+const LINK_LIST_KEYS = ['customLinks', 'linkOrder'];
 
 /** Keys that used to ride on showUserMiniProfile before the Profile settings tab. */
 const PROFILE_PAGE_SETTING_KEYS = [
@@ -63,11 +66,18 @@ function migrateProfilePageSettings(raw, merged) {
   return merged;
 }
 
+/** Normalize the quick-link list + order fields of a settings object in place. */
+function normalizeLinkLists(cfg) {
+  cfg.customLinks = sanitizeCustomLinks(cfg.customLinks);
+  cfg.linkOrder = normalizeLinkOrder(cfg.linkOrder, cfg.customLinks);
+  return cfg;
+}
+
 function cloneDefaults() {
-  return {
+  return normalizeLinkLists({
     ...DEFAULT_SETTINGS,
     links: { ...DEFAULT_SETTINGS.links },
-  };
+  });
 }
 
 export function loadSettings() {
@@ -81,6 +91,7 @@ export function loadSettings() {
       ...raw,
       links: { ...DEFAULT_SETTINGS.links, ...(raw.links || {}) },
     };
+    normalizeLinkLists(merged);
     return migrateProfilePageSettings(raw, merged);
   } catch (_) {
     return cloneDefaults();
@@ -93,6 +104,7 @@ export function saveSettings(next) {
     ...next,
     links: { ...DEFAULT_SETTINGS.links, ...(next.links || {}) },
   };
+  normalizeLinkLists(merged);
   GM_setValue(SETTINGS_KEY, merged);
 }
 
@@ -284,6 +296,14 @@ export function sanitizeSettings(raw) {
       appliedKeys.push('links');
     }
     if (ignored > 0) ignoredKeys.push('links.*');
+  }
+
+  if (LINK_LIST_KEYS.some((key) => key in raw)) {
+    const customLinks = 'customLinks' in raw ? sanitizeCustomLinks(raw.customLinks) : [];
+    next.customLinks = customLinks;
+    next.linkOrder = normalizeLinkOrder('linkOrder' in raw ? raw.linkOrder : [], customLinks);
+    if ('customLinks' in raw) appliedKeys.push('customLinks');
+    if ('linkOrder' in raw) appliedKeys.push('linkOrder');
   }
 
   migrateProfilePageSettings(raw, next);

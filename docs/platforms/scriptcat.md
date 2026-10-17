@@ -40,7 +40,7 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 - Steam header / community icon on game pages; screenshot gallery after game stats
 - Similar games under screenshots (Steam More Like This) with tag match %; cards link to Backloggd and can show the same cover badges as list grids
 - Skeleton placeholders while Steam / GameStatus / score data loads
-- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike)
+- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike); reorder them by dragging, and add your own links from a URL template (`{title}` with a format of your choice, `{slug}`, `{appid}`, `{year}`, `{id}`) with an optional custom icon
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus status badges on game pages and cover grids
 - Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / ProtonDB public APIs; OpenCritic found via PCGamingWiki, optional own RapidAPI key in Settings)

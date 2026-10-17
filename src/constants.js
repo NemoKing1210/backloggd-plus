@@ -269,4 +269,8 @@ export const DEFAULT_SETTINGS = {
     gogdb: true,
     gameslike: true,
   },
+  /** User-defined quick links (see utils/custom-links.js). */
+  customLinks: [],
+  /** Display order of built-in keys + custom ids; missing entries are appended. */
+  linkOrder: [],
 };

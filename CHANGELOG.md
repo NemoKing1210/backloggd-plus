@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.97] - 2026-10-17
+
+### Added
+
+- **Custom quick links** (Settings → Game → Quick links → **Add custom link**): your own entries in the game page's Links row. Each has a name, a URL template, an optional icon image URL — full or relative to the link's site, e.g. `/favicon.ico` (the site's favicon is used when blank), and a title format. Templates accept `{title}`, `{slug}` (Backloggd slug), `{appid}` (Steam App ID), `{year}` and `{id}` (Backloggd game ID). `{title}` can be written as percent-encoded, plus-separated, slug, underscores or without spaces, per link or per placeholder (`{title:plus}`). A link is hidden for games with no value for a placeholder it uses (e.g. `{appid}` off Steam). A live preview, placeholder chips and validation (http/https only) are in the editor; up to 30 custom links; each can be toggled, edited or removed
+- **Reorder quick links**: drag the grip next to any link (built-in or custom) to change the order of the Links row, or focus the grip and press ↑ / ↓. Works with mouse and touch; the list scrolls while dragging near the panel edge
+
+### Changed
+
+- Settings backups now include custom links and the link order (no secrets involved); imports are validated and capped
+- UI strings for the editor are available in all 10 languages
+
 ## [0.7.96] - 2026-10-17
 
 ### Added
