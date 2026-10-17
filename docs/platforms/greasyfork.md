@@ -71,6 +71,7 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
 - Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
+- Settings search: type in the box (or press `/` / `Ctrl+K`) to filter every tab at once — matches in labels and hints are highlighted, results are grouped by tab, `Esc` clears
 - Interface language (Auto or fixed locale)
 - User profile: mini-profile cards on avatars and usernames (hover by default; or right-click / Shift + click; optional viewport preload); game covers inside the card (favorites / recent) open the game mini-profile; tier skin by games played can be turned off; profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)

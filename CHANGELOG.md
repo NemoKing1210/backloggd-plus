@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.96] - 2026-10-17
+
+### Added
+
+- Settings search: a box in the panel header filters every tab at once (toggles, fields, group titles and hints). Words are matched in any order, ignoring case and accents; matches are highlighted and results are shown grouped under their tab with a hit count (click a heading to open that tab). Enter / ↓ jumps to the first result, `/` or `Ctrl+K` focuses the box, `Esc` clears it (a second `Esc` closes the panel). Works in all 10 UI languages
+
 ## [0.7.95] - 2026-10-17
 
 ### Fixed

@@ -49,6 +49,11 @@ import { reloadRuntimeSettings, settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { scheduleCardBadges } from './cards.js';
 import { enrichGamePage, getPageContext, removeEnrichment } from './enrichment.js';
+import {
+  buildSettingsSearchEmptyHtml,
+  buildSettingsSearchHtml,
+  initSettingsSearch,
+} from './settings-search.js';
 import { queueToast, showToast } from './toast.js';
 
 const SETTINGS_TABS = [
@@ -557,8 +562,11 @@ export function openSettings() {
   backdrop.innerHTML = `
     <div class="blp-settings" role="dialog" aria-modal="true" aria-label="${escapeAttr(t.panelTitle)}">
       <div class="blp-settings__head">
-        <h2>${escapeHtml(t.panelTitle)} <span class="blp-settings__ver">v${escapeHtml(SCRIPT_VERSION)}</span></h2>
-        <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
+        <div class="blp-settings__head-text">
+          <h2>${escapeHtml(t.panelTitle)} <span class="blp-settings__ver">v${escapeHtml(SCRIPT_VERSION)}</span></h2>
+          <p class="blp-settings__sub">${escapeHtml(t.panelSubtitle)}</p>
+        </div>
+        ${buildSettingsSearchHtml()}
       </div>
       <div class="blp-settings__tabs" role="tablist" aria-label="${escapeAttr(t.panelTitle)}">
         ${buildTabsHtml(activeTab, draft)}
@@ -923,6 +931,7 @@ export function openSettings() {
       <div ${panelAttrs('about', activeTab)}>
       ${buildAboutHtml()}
       </div>
+      ${buildSettingsSearchEmptyHtml()}
       </div>
       <div class="blp-settings__foot">
         <div class="blp-actions blp-actions--start">
@@ -945,6 +954,7 @@ export function openSettings() {
     backdrop.classList.remove('is-open');
     document.removeEventListener('keydown', onKeydown, true);
     window.removeEventListener('resize', onResize);
+    search?.destroy();
     let finished = false;
     const done = () => {
       if (finished) return;
@@ -963,9 +973,12 @@ export function openSettings() {
     if (e.key === 'Escape') {
       if (document.querySelector('.blp-confirm-backdrop')) return;
       e.preventDefault();
+      if (search?.handleEscape()) return;
       close();
     }
   };
+
+  const search = initSettingsSearch(dialog, { activateTab: activateSettingsTab });
 
   const onResize = () => syncTabInk(dialog);
   window.addEventListener('resize', onResize);
