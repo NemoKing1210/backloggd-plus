@@ -4,10 +4,16 @@ import {
   getCached,
   setCached,
 } from '../cache.js';
-import { DDG_HTML_SEARCH, OPENCRITIC_API_BASE, OPENCRITIC_SITE } from '../constants.js';
+import {
+  DDG_HTML_SEARCH,
+  OPENCRITIC_API_BASE,
+  OPENCRITIC_RAPIDAPI_HOST,
+  OPENCRITIC_SITE,
+  PCGW_API,
+} from '../constants.js';
 import { gmRequest } from '../gm.js';
-import { inflight } from '../state.js';
-import { normalizeTitle, scoreSteamTitleMatch } from '../utils/title.js';
+import { inflight, settings } from '../state.js';
+import { normalizeTitle, scoreSteamTitleMatch, TITLE_MATCH_MIN_SCORE } from '../utils/title.js';
 
 export async function fetchOpenCritic(title) {
   const q = String(title || '').trim();
@@ -21,15 +27,19 @@ export async function fetchOpenCritic(title) {
   if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
   const task = (async () => {
-    const fromApi = await fetchOpenCriticViaApi(q).catch(() => null);
-    if (fromApi) {
-      setCached(cacheKey, fromApi);
-      return asCacheMiss(fromApi);
-    }
-    const fromHtml = await fetchOpenCriticViaHtml(q).catch(() => null);
-    if (fromHtml) {
-      setCached(cacheKey, fromHtml);
-      return asCacheMiss(fromHtml);
+    // Search by name needs a key; without one the wiki/search routes below still work.
+    const apiKey = settings.openCriticSource === 'api' ? String(settings.openCriticApiKey || '').trim() : '';
+    const routes = [
+      apiKey ? () => fetchOpenCriticViaApi(q, apiKey) : null,
+      () => fetchOpenCriticViaPcgw(q),
+      () => fetchOpenCriticViaHtml(q),
+    ].filter(Boolean);
+    for (const route of routes) {
+      const hit = await route().catch(() => null);
+      if (hit) {
+        setCached(cacheKey, hit);
+        return asCacheMiss(hit);
+      }
     }
     return null;
   })().catch(() => null);
@@ -71,15 +81,19 @@ export function pickOpenCriticSearchMatch(list, title) {
   return null;
 }
 
-export async function fetchOpenCriticViaApi(title) {
-  const searchUrl = `${OPENCRITIC_API_BASE}/game/search?criteria=${encodeURIComponent(title)}`;
+function openCriticApiHeaders(apiKey) {
+  return {
+    Accept: 'application/json',
+    'X-RapidAPI-Key': apiKey,
+    'X-RapidAPI-Host': OPENCRITIC_RAPIDAPI_HOST,
+  };
+}
+
+export async function fetchOpenCriticViaApi(title, apiKey) {
+  if (!apiKey) return null;
   const results = await gmRequest({
-    url: searchUrl,
-    headers: {
-      Accept: 'application/json',
-      Origin: OPENCRITIC_SITE,
-      Referer: `${OPENCRITIC_SITE}/`,
-    },
+    url: `${OPENCRITIC_API_BASE}/game/search?criteria=${encodeURIComponent(title)}`,
+    headers: openCriticApiHeaders(apiKey),
     timeout: 15000,
   });
   const list = Array.isArray(results) ? results : [];
@@ -90,11 +104,7 @@ export async function fetchOpenCriticViaApi(title) {
   try {
     detail = await gmRequest({
       url: `${OPENCRITIC_API_BASE}/game/${id}`,
-      headers: {
-        Accept: 'application/json',
-        Origin: OPENCRITIC_SITE,
-        Referer: `${OPENCRITIC_SITE}/`,
-      },
+      headers: openCriticApiHeaders(apiKey),
       timeout: 15000,
     });
   } catch (_) {
@@ -221,36 +231,42 @@ export function parseOpenCriticScoreFromHtml(text) {
   return null;
 }
 
+/** Angular SSR ships page state with `&q;` for quotes (and `&s;` for apostrophes). */
+function decodeOpenCriticState(html) {
+  return html.replace(/&q;/g, '"').replace(/&s;/g, "'").replace(/&a;/g, '&');
+}
+
 export function parseOpenCriticGameHtml(html, fallbackUrl) {
-  const text = String(html || '');
+  const text = decodeOpenCriticState(String(html || ''));
   if (!text) return null;
   let tier = null;
   let name = null;
   let id = null;
   let slug = null;
 
-  const score = parseOpenCriticScoreFromHtml(text);
-  const tierJson = text.match(/"tier"\s*:\s*"(Mighty|Strong|Fair|Weak)"/i);
-  if (tierJson) tier = tierJson[1];
-  const nameJson = text.match(/"name"\s*:\s*"([^"\\]+)"/);
-  if (nameJson) name = nameJson[1];
+  // The page's own game object: score, percentile and tier sit side by side (name usually follows).
+  const own = text.match(
+    /"topCriticScore"\s*:\s*(-?[0-9]+(?:\.[0-9]+)?)\s*,\s*"percentile"\s*:\s*[0-9.]+\s*,\s*"tier"\s*:\s*"(Mighty|Strong|Fair|Weak)"(?:\s*,\s*"name"\s*:\s*"([^"]+)")?/i
+  );
+  const score = coerceOpenCriticScore(own?.[1]) ?? parseOpenCriticScoreFromHtml(text);
+  if (own) {
+    tier = own[2];
+    name = own[3];
+  }
   const idJson = text.match(/"id"\s*:\s*(\d+)/);
   if (idJson) id = Number(idJson[1]);
   const slugJson = text.match(/"slug"\s*:\s*"([a-z0-9-]+)"/i);
   if (slugJson) slug = slugJson[1];
 
-  if (!tier) {
-    const tierText = text.match(/\b(Mighty|Strong|Fair|Weak)\b/);
-    if (tierText) tier = tierText[1];
-  }
   if (!name) {
     const titleTag = text.match(/<title[^>]*>\s*([^|<]+?)\s*(?:Reviews)?\s*[-–|]/i);
     if (titleTag) name = titleTag[1].trim();
   }
   const path = String(fallbackUrl || '').match(/opencritic\.com\/game\/(\d+)\/([a-z0-9-]+)/i);
   if (path) {
-    if (!id) id = Number(path[1]);
-    if (!slug) slug = path[2];
+    // The URL we fetched is authoritative; the first "id"/"slug" in page state may belong to a related game.
+    id = Number(path[1]);
+    slug = path[2];
   }
 
   if (!tier) return null;
@@ -268,11 +284,9 @@ export function parseOpenCriticGameHtml(html, fallbackUrl) {
   };
 }
 
-export async function fetchOpenCriticViaHtml(title) {
-  const hit = await resolveOpenCriticUrlViaDdg(title);
-  if (!hit?.url) return null;
+async function loadOpenCriticPage(url) {
   const html = await gmRequest({
-    url: hit.url,
+    url,
     responseType: 'text',
     headers: {
       Accept: 'text/html',
@@ -280,7 +294,13 @@ export async function fetchOpenCriticViaHtml(title) {
     },
     timeout: 20000,
   });
-  const parsed = parseOpenCriticGameHtml(html, hit.url);
+  return parseOpenCriticGameHtml(html, url);
+}
+
+export async function fetchOpenCriticViaHtml(title) {
+  const hit = await resolveOpenCriticUrlViaDdg(title);
+  if (!hit?.url) return null;
+  const parsed = await loadOpenCriticPage(hit.url);
   if (!parsed) return null;
   if (parsed.name) {
     const score = scoreSteamTitleMatch(parsed.name, title);
@@ -288,4 +308,61 @@ export async function fetchOpenCriticViaHtml(title) {
     if (score > 0 && score < 50) return null;
   }
   return parsed;
+}
+
+/** `{{Infobox game/row/reception|OpenCritic|10181/hades|94}}` on a PCGamingWiki article. */
+export function parsePcgwOpenCriticRef(wikitext) {
+  const m = String(wikitext || '').match(
+    /\{\{\s*Infobox game\/row\/reception\s*\|\s*OpenCritic\s*\|\s*(\d+)(?:\/([a-z0-9-]+))?/i
+  );
+  if (!m) return null;
+  const id = Number(m[1]);
+  return id > 0 ? { id, slug: m[2] || null } : null;
+}
+
+/** PCGamingWiki lists every PC game's OpenCritic id — a keyless way to search by title. */
+export async function resolveOpenCriticViaPcgw(title) {
+  const found = await gmRequest({
+    url: `${PCGW_API}?action=opensearch&limit=8&format=json&search=${encodeURIComponent(title)}`,
+    headers: { Accept: 'application/json' },
+    timeout: 15000,
+  });
+  const names = Array.isArray(found?.[1]) ? found[1] : [];
+  let best = null;
+  let bestScore = 0;
+  for (const name of names) {
+    const score = scoreSteamTitleMatch(name, title);
+    if (score > bestScore) {
+      bestScore = score;
+      best = name;
+    }
+  }
+  if (!best || bestScore < TITLE_MATCH_MIN_SCORE) return null;
+
+  const page = await gmRequest({
+    url:
+      `${PCGW_API}?action=query&prop=revisions&rvprop=content&rvslots=main&redirects=1` +
+      `&format=json&formatversion=2&titles=${encodeURIComponent(best)}`,
+    headers: { Accept: 'application/json' },
+    timeout: 15000,
+  });
+  const wikitext = page?.query?.pages?.[0]?.revisions?.[0]?.slots?.main?.content;
+  const ref = parsePcgwOpenCriticRef(wikitext);
+  if (!ref) return null;
+  const slug = ref.slug || normalizeTitle(best).replace(/\s+/g, '-') || 'game';
+  return {
+    id: ref.id,
+    slug,
+    name: best,
+    url: `${OPENCRITIC_SITE}/game/${ref.id}/${slug}`,
+    matchScore: bestScore,
+  };
+}
+
+export async function fetchOpenCriticViaPcgw(title) {
+  const hit = await resolveOpenCriticViaPcgw(title);
+  if (!hit) return null;
+  const parsed = await loadOpenCriticPage(hit.url);
+  if (!parsed) return null;
+  return { ...parsed, matchScore: hit.matchScore, source: 'pcgw' };
 }

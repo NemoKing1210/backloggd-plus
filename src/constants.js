@@ -112,7 +112,13 @@ export const SIMILAR_GAMES_SHOW = 10;
 export const STEAM_DECK_REPORT_URL =
   'https://store.steampowered.com/saleaction/ajaxgetdeckappcompatibilityreport';
 export const PROTONDB_SUMMARY_URL = 'https://www.protondb.com/api/v1/reports/summaries';
-export const OPENCRITIC_API_BASE = 'https://api.opencritic.com/api';
+/** OpenCritic's public API now needs a RapidAPI key (user-supplied in Settings → Game). */
+export const OPENCRITIC_RAPIDAPI_HOST = 'opencritic-api.p.rapidapi.com';
+export const OPENCRITIC_API_BASE = `https://${OPENCRITIC_RAPIDAPI_HOST}`;
+export const OPENCRITIC_KEY_URL =
+  'https://rapidapi.com/opencritic-opencritic-default/api/opencritic-api';
+export const PCGW_API = 'https://www.pcgamingwiki.com/w/api.php';
+export const OPENCRITIC_SOURCES = ['auto', 'api'];
 export const OPENCRITIC_SITE = 'https://opencritic.com';
 export const DDG_HTML_SEARCH = 'https://html.duckduckgo.com/html/';
 export const HLTB_SITE = 'https://howlongtobeat.com';
@@ -200,6 +206,8 @@ export const DEFAULT_SETTINGS = {
   showSteam: true,
   showMetacritic: true,
   showOpenCritic: true,
+  openCriticSource: 'auto',
+  openCriticApiKey: '',
   showHltb: true,
   showDeckProton: true,
   showGameStatus: false,

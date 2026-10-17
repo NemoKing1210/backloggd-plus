@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.93-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.94-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -93,7 +93,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 - Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike)
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus status badges on game pages and cover grids
-- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / OpenCritic / ProtonDB public APIs)
+- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / ProtonDB public APIs; OpenCritic found via PCGamingWiki, optional own RapidAPI key in Settings)
 
 **Lists / search / journal (cover grids):**
 

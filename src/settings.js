@@ -7,6 +7,7 @@ import {
   DEFAULT_SETTINGS,
   LINK_KEYS,
   MINI_PROFILE_TRIGGERS,
+  OPENCRITIC_SOURCES,
   SCRIPT_VERSION,
   SETTINGS_KEY,
   STEAM_COUNTRY_CODES,
@@ -147,6 +148,13 @@ function coerceConvertCurrency(value, fallback) {
   return CONVERT_CURRENCY_CODES.has(ccy) ? ccy : fallback;
 }
 
+/** Secret keys: single-line, no whitespace, capped so a bad paste can't bloat storage. */
+export function coerceApiKey(value) {
+  return String(value ?? '')
+    .replace(/\s+/g, '')
+    .slice(0, 200);
+}
+
 function coerceCacheHours(value, fallback) {
   const n = typeof value === 'number' ? value : Number(String(value ?? '').trim());
   if (!Number.isFinite(n)) return fallback;
@@ -246,6 +254,15 @@ export function sanitizeSettings(raw) {
     next.convertCurrency = coerceConvertCurrency(raw.convertCurrency, base.convertCurrency);
     appliedKeys.push('convertCurrency');
   }
+  if ('openCriticSource' in raw) {
+    const source = String(raw.openCriticSource ?? '').trim().toLowerCase();
+    next.openCriticSource = OPENCRITIC_SOURCES.includes(source) ? source : base.openCriticSource;
+    appliedKeys.push('openCriticSource');
+  }
+  if ('openCriticApiKey' in raw) {
+    next.openCriticApiKey = coerceApiKey(raw.openCriticApiKey);
+    appliedKeys.push('openCriticApiKey');
+  }
   if ('translateDisplayMode' in raw) {
     next.translateDisplayMode = coerceTranslateMode(
       raw.translateDisplayMode,
@@ -332,6 +349,8 @@ function looksLikeSettingsObject(raw) {
  */
 export function buildSettingsExport(cfg = loadSettings()) {
   const { settings: clean } = sanitizeSettings(cfg);
+  // Backups get shared; never write secrets into them.
+  clean.openCriticApiKey = '';
   return {
     kind: SETTINGS_EXPORT_KIND,
     version: SETTINGS_EXPORT_FORMAT_VERSION,

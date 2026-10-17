@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.94] - 2026-10-17
+
+### Fixed
+
+- OpenCritic was missing for every game: its public API now answers "API key is required", and the fallback lookups crashed on an undefined title-match threshold (`TITLE_MATCH_MIN_SCORE`, also used by HowLongToBeat title matching). The threshold is now shared from `utils/title.js`
+- OpenCritic game pages are read from the page state the site now ships (`&q;`-escaped), taking the tier and score of the page's own game instead of the first tier word found anywhere on the page
+
+### Changed
+
+- OpenCritic lookup no longer needs a key: the game is found through PCGamingWiki (its articles list the OpenCritic ID), with DuckDuckGo search as a fallback, and the OpenCritic page is read for tier and score
+- New **Settings → Game → OpenCritic source**: "Automatic (no key)" or "My RapidAPI key" with a key field (kept only on this device and left out of settings backups; an import keeps the key already saved). With a key, the OpenCritic API is tried first and the keyless routes remain as fallback
+- The OpenCritic key field has a "Get a key on RapidAPI" link
+- Plus rating block hides the OpenCritic cell (and its name in the title) when "Show OpenCritic score" is off; the grid goes to three columns
+- Steam, Metacritic and OpenCritic cells in the Plus rating block are links (Steam reviews, Metacritic page, OpenCritic page); Backloggd's stays plain
+- Plus rating bar colour follows the rating (red at 1★ through amber to green at 5★) instead of one fixed blue-to-lime gradient
+- `@connect`: added `www.pcgamingwiki.com` and `opencritic-api.p.rapidapi.com`, dropped `api.opencritic.com`
+
 ## [0.7.93] - 2026-10-17
 
 ### Changed

@@ -175,7 +175,8 @@ export function scoreSteamTitleMatch(steamName, targetTitle, year = null) {
   return 0;
 }
 
-const STEAM_TITLE_MATCH_MIN_SCORE = 85;
+/** Minimum `scoreSteamTitleMatch` result accepted as "same game" across Steam / HLTB / OpenCritic. */
+export const TITLE_MATCH_MIN_SCORE = 85;
 
 export function pickSteamSearchItem(items, title, year = null) {
   const list = (items || []).filter((i) => i && i.type === 'app' && i.id);
@@ -194,5 +195,5 @@ export function pickSteamSearchItem(items, title, year = null) {
     }
   }
 
-  return bestScore >= STEAM_TITLE_MATCH_MIN_SCORE ? best : null;
+  return bestScore >= TITLE_MATCH_MIN_SCORE ? best : null;
 }

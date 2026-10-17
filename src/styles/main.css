@@ -2735,7 +2735,8 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-field select,
-.blp-field input[type="number"] {
+.blp-field input[type="number"],
+.blp-field input[type="password"] {
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
@@ -2750,15 +2751,36 @@ img.blp-cover-zoomable:focus-visible {
 }
 
 .blp-field select:hover,
-.blp-field input[type="number"]:hover {
+.blp-field input[type="number"]:hover,
+.blp-field input[type="password"]:hover {
   border-color: rgba(255, 255, 255, 0.16);
 }
 
 .blp-field select:focus,
-.blp-field input[type="number"]:focus {
+.blp-field input[type="number"]:focus,
+.blp-field input[type="password"]:focus {
   outline: none;
   border-color: rgba(var(--blp-accent-rgb, 61, 184, 154), 0.55);
   box-shadow: 0 0 0 3px rgba(var(--blp-accent-rgb, 61, 184, 154), 0.16);
+}
+
+.blp-hint-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blp-accent, #3db89a);
+  text-decoration: none;
+}
+
+.blp-hint-link:hover {
+  text-decoration: underline;
+}
+
+.blp-field select:disabled,
+.blp-field input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .blp-hint {

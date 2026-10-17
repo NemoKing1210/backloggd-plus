@@ -7,7 +7,7 @@ import {
 import { HLTB_INIT_URL, HLTB_SEARCH_URL, HLTB_SITE } from '../constants.js';
 import { gmRequest } from '../gm.js';
 import { inflight } from '../state.js';
-import { normalizeTitle, scoreSteamTitleMatch } from '../utils/title.js';
+import { normalizeTitle, scoreSteamTitleMatch, TITLE_MATCH_MIN_SCORE } from '../utils/title.js';
 
 const HLTB_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';

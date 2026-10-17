@@ -1,8 +1,20 @@
 import { ENRICH_ATTR } from '../constants.js';
 import { fmt } from '../i18n/index.js';
 import { settings, t } from '../state.js';
-import { escapeHtml } from '../utils/html.js';
+import { escapeAttr, escapeHtml } from '../utils/html.js';
+import { metacriticGameUrl } from '../utils/slug.js';
+import { getGameTitle, getPageContext } from './page.js';
 import { gameStatsMountAnchor } from './steamdb-ui.js';
+
+/** OpenCritic off in Settings → drop its cell and name from the title; grid goes 4 → 3 columns. */
+function applyUnifiedRatingSources(tile, ocEnabled) {
+  const cell = tile.querySelector('.blp-unified-rating__cell[data-blp-provider="opencritic"]');
+  if (cell) cell.hidden = !ocEnabled;
+  tile.querySelector('.blp-unified-rating__grid')?.classList.toggle('blp-unified-rating__grid--3', !ocEnabled);
+  const title = tile.querySelector('.blp-unified-rating__title');
+  const text = ocEnabled ? t.unifiedRatingHint : t.unifiedRatingHintNoOpenCritic;
+  if (title && title.textContent !== text) title.textContent = text;
+}
 
 export function ensureUnifiedRatingWidget(token = '') {
   document.querySelectorAll(`#game-rating [${ENRICH_ATTR}="unified-rating"]`).forEach((el) => el.remove());
@@ -13,6 +25,8 @@ export function ensureUnifiedRatingWidget(token = '') {
   let row = document.querySelector(`.blp-unified-rating-row[${ENRICH_ATTR}="unified-rating"]`);
   if (row) {
     if (token) row.setAttribute('data-blp-token', token);
+    const tile = row.querySelector('.blp-unified-rating');
+    if (tile) applyUnifiedRatingSources(tile, settings.showOpenCritic !== false);
     if (row.nextElementSibling !== anchor) {
       anchor.insertAdjacentElement('beforebegin', row);
     }
@@ -61,6 +75,8 @@ export function ensureUnifiedRatingWidget(token = '') {
       </div>
     </div>
   `;
+  const freshTile = row.querySelector('.blp-unified-rating');
+  if (freshTile) applyUnifiedRatingSources(freshTile, settings.showOpenCritic !== false);
   anchor.insertAdjacentElement('beforebegin', row);
   return row;
 }
@@ -147,8 +163,18 @@ export function animateUnifiedRatingNum(el, nextValue) {
   requestAnimationFrame(frame);
 }
 
-export function setUnifiedRatingMeter(meter, fill, barWidth, { indeterminate }) {
+/** Red (1★) → amber → green (5★); the bar colour follows the rating itself. */
+export function unifiedRatingHue(avg5) {
+  const n = Math.max(1, Math.min(5, Number(avg5) || 1));
+  return Math.round(((n - 1) / 4) * 118);
+}
+
+export function setUnifiedRatingMeter(meter, fill, barWidth, { indeterminate, avg5 = null }) {
   if (!meter || !fill) return;
+  fill.classList.toggle('is-graded', !indeterminate && avg5 != null);
+  if (!indeterminate && avg5 != null) {
+    fill.style.setProperty('--blp-ur-hue', String(unifiedRatingHue(avg5)));
+  }
   if (indeterminate) {
     meter.classList.add('blp-unified-rating__meter--loading');
     fill.style.width = '36%';
@@ -177,6 +203,7 @@ export function paintUnifiedRatingCell(cell, provider) {
 
   if (status === 'loading') {
     if (prevStatus !== 'loading') {
+      cell.classList.remove('has-link');
       cell.dataset.blpStatus = status;
       cell.innerHTML = `
         <span class="blp-unified-rating__cell-label">${escapeHtml(provider.label)}</span>
@@ -187,7 +214,8 @@ export function paintUnifiedRatingCell(cell, provider) {
     return;
   }
 
-  const displayKey = `${status}|${provider.display || ''}|${provider.score5 ?? ''}`;
+  const url = status === 'ready' ? provider.url || '' : '';
+  const displayKey = `${status}|${provider.display || ''}|${provider.score5 ?? ''}|${url}`;
   if (prevStatus === status && cell.dataset.blpDisplay === displayKey) return;
   cell.dataset.blpStatus = status;
   cell.dataset.blpDisplay = displayKey;
@@ -197,10 +225,15 @@ export function paintUnifiedRatingCell(cell, provider) {
     status === 'missing'
       ? ''
       : `<span class="blp-unified-rating__cell-sub">${escapeHtml(formatUnifiedScore5(provider.score5))} ★</span>`;
+  const link = url
+    ? `<a class="blp-unified-rating__cell-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(provider.label)}"></a>`
+    : '';
+  cell.classList.toggle('has-link', Boolean(url));
   cell.innerHTML = `
     <span class="blp-unified-rating__cell-label">${escapeHtml(provider.label)}</span>
     <span class="blp-unified-rating__cell-value">${value}</span>
     ${sub}
+    ${link}
   `;
 
   if (status === 'ready' && prevStatus === 'loading' && !prefersReducedMotion()) {
@@ -227,6 +260,15 @@ export function updateUnifiedRatingWidget(state) {
   const opencritic100 =
     state?.opencritic?.score != null ? sanitize0to100Score(state.opencritic.score) : null;
 
+  applyUnifiedRatingSources(tile, ocEnabled);
+
+  const { slug } = getPageContext();
+  const steamUrl = state?.steam?.appId
+    ? `https://store.steampowered.com/app/${state.steam.appId}/#app_reviews_hash`
+    : '';
+  const metacriticUrl = metacriticGameUrl(getGameTitle(), slug);
+  const opencriticUrl = state?.opencritic?.url || '';
+
   const providers = [
     {
       key: 'steam',
@@ -234,6 +276,7 @@ export function updateUnifiedRatingWidget(state) {
       display: steamPct100 != null ? `${steamPct100}%` : null,
       score5: steamPct100 != null ? steamPct100 / 20 : null,
       status: !steamSettled ? 'loading' : steamPct100 != null ? 'ready' : 'missing',
+      url: steamUrl,
     },
     {
       key: 'metacritic',
@@ -241,6 +284,7 @@ export function updateUnifiedRatingWidget(state) {
       display: metacritic100 != null ? String(metacritic100) : null,
       score5: metacritic100 != null ? metacritic100 / 20 : null,
       status: !steamSettled ? 'loading' : metacritic100 != null ? 'ready' : 'missing',
+      url: metacriticUrl,
     },
     {
       key: 'opencritic',
@@ -248,6 +292,7 @@ export function updateUnifiedRatingWidget(state) {
       display: opencritic100 != null ? String(opencritic100) : null,
       score5: opencritic100 != null ? opencritic100 / 20 : null,
       status: !ocSettled ? 'loading' : opencritic100 != null ? 'ready' : 'missing',
+      url: opencriticUrl,
     },
     {
       key: 'backloggd',
@@ -256,7 +301,7 @@ export function updateUnifiedRatingWidget(state) {
       score5: backloggd5,
       status: backloggd5 != null ? 'ready' : 'missing',
     },
-  ];
+  ].filter((p) => ocEnabled || p.key !== 'opencritic');
 
   const present = providers.filter((p) => p.status === 'ready');
   const externalPresent = present.filter((p) => p.key !== 'backloggd');
@@ -298,7 +343,7 @@ export function updateUnifiedRatingWidget(state) {
         ? t.unifiedRatingLoading
         : fmt(t.unifiedRatingSources, { n: present.length });
     }
-    setUnifiedRatingMeter(meter, fill, barWidth, { indeterminate: false });
+    setUnifiedRatingMeter(meter, fill, barWidth, { indeterminate: false, avg5: avg5Rounded });
   } else {
     if (numEl) {
       numEl.classList.add('is-skel');

@@ -50,7 +50,7 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 - Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike)
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus status badges on game pages and cover grids
-- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / OpenCritic / ProtonDB public APIs)
+- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / ProtonDB public APIs; OpenCritic found via PCGamingWiki, optional own RapidAPI key in Settings)
 
 **Lists / search / journal (cover grids):**
 

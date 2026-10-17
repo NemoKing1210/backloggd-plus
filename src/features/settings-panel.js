@@ -27,6 +27,7 @@ import {
   FAVICON_URL,
   LINK_DOMAINS,
   LINK_KEYS,
+  OPENCRITIC_KEY_URL,
   REPO_URL,
   SCRIPT_VERSION,
   STEAM_COUNTRY_CODES,
@@ -36,6 +37,7 @@ import { applyAccentColor, normalizeAccentColor } from './accent.js';
 import { sitePackCodes } from './site-locale.js';
 import {
   buildSettingsExport,
+  coerceApiKey,
   linkLabelKey,
   normalizeMiniProfileTrigger,
   parseSettingsImport,
@@ -520,6 +522,21 @@ export function openSettings() {
     </select>
   `;
 
+  const openCriticSource = draft.openCriticSource === 'api' ? 'api' : 'auto';
+  const openCriticSourceSelect = `
+    <select id="blp-oc-source" ${draft.showOpenCritic ? '' : 'disabled'}>
+      <option value="auto" ${openCriticSource === 'auto' ? 'selected' : ''}>${escapeHtml(t.openCriticSourceAuto)}</option>
+      <option value="api" ${openCriticSource === 'api' ? 'selected' : ''}>${escapeHtml(t.openCriticSourceApi)}</option>
+    </select>
+  `;
+  const openCriticKeyInput = `
+    <input id="blp-oc-key" type="password" autocomplete="off" spellcheck="false" maxlength="200"
+      placeholder="${escapeAttr(t.openCriticApiKeyPlaceholder)}"
+      value="${escapeAttr(draft.openCriticApiKey || '')}"
+      ${draft.showOpenCritic && openCriticSource === 'api' ? '' : 'disabled'} />
+    <a class="blp-hint-link" href="${escapeAttr(OPENCRITIC_KEY_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.openCriticApiKeyLink)} ↗</a>
+  `;
+
   const miniProfileTriggerSelect = (id, value) => {
     const current = normalizeMiniProfileTrigger(value);
     const disabled = id === 'blp-user-mp-trigger'
@@ -718,6 +735,8 @@ export function openSettings() {
         listHtml(
           toggleHtml('showMetacritic', draft.showMetacritic),
           toggleHtml('showOpenCritic', draft.showOpenCritic, 'showOpenCriticHint'),
+          fieldHtml('blp-oc-source', t.openCriticSource, openCriticSourceSelect, t.openCriticSourceHint),
+          fieldHtml('blp-oc-key', t.openCriticApiKey, openCriticKeyInput, t.openCriticApiKeyHint),
           toggleHtml('showHltb', draft.showHltb, 'showHltbHint')
         )
       )}
@@ -1015,6 +1034,14 @@ export function openSettings() {
     { passive: true }
   );
 
+  const syncOpenCriticFields = () => {
+    const src = backdrop.querySelector('#blp-oc-source');
+    const key = backdrop.querySelector('#blp-oc-key');
+    if (src) src.disabled = !draft.showOpenCritic;
+    if (key) key.disabled = !draft.showOpenCritic || src?.value !== 'api';
+  };
+  backdrop.querySelector('#blp-oc-source')?.addEventListener('change', syncOpenCriticFields);
+
   backdrop.querySelectorAll('[data-blp-toggle]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1026,6 +1053,7 @@ export function openSettings() {
         const sel = backdrop.querySelector('#blp-convert-ccy');
         if (sel) sel.disabled = !draft.showPriceConvert;
       }
+      if (key === 'showOpenCritic') syncOpenCriticFields();
       if (key === 'showUserMiniProfile' || key === 'showGameMiniProfile') {
         const sel = backdrop.querySelector(
           key === 'showUserMiniProfile' ? '#blp-user-mp-trigger' : '#blp-game-mp-trigger'
@@ -1110,6 +1138,10 @@ export function openSettings() {
 
   const importFileInput = backdrop.querySelector('[data-blp-settings-import-file]');
   const applyImportedSettings = (parsed) => {
+    // Backups never carry the API key; keep the one already saved on this device.
+    if (!parsed.settings.openCriticApiKey) {
+      parsed.settings.openCriticApiKey = settings.openCriticApiKey || '';
+    }
     saveSettings(parsed.settings);
     reloadRuntimeSettings();
     pruneDisabledCacheCategories();
@@ -1201,6 +1233,11 @@ export function openSettings() {
     );
     const convertCcy = backdrop.querySelector('#blp-convert-ccy')?.value || 'RUB';
     draft.convertCurrency = String(convertCcy).toUpperCase();
+    draft.openCriticSource =
+      backdrop.querySelector('#blp-oc-source')?.value === 'api' ? 'api' : 'auto';
+    draft.openCriticApiKey = coerceApiKey(
+      backdrop.querySelector('#blp-oc-key')?.value ?? draft.openCriticApiKey
+    );
     draft.showPriceConvert = Boolean(draft.showPriceConvert);
     draft.cacheHours = Number.isFinite(hours)
       ? Math.max(0, Math.min(CACHE_HOURS_MAX, hours))
