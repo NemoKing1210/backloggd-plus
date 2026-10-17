@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.93] - 2026-10-17
+
+### Changed
+
+- User mini-profile card now works like the game card: the skeleton and the loaded profile are the same set of blocks, and when the profile arrives the card is updated in place instead of being replaced — unchanged parts (labels, the profile button, the name) stay put, new blocks fade in and expand, empty ones collapse, and the card's tier colors blend smoothly into the tier skin instead of snapping. A failed load collapses into the error card the same way
+- The open card now follows its own height changes while blocks animate, so it stays beside the avatar / on screen
+- A card that finishes loading after it was closed (while it is still fading out) no longer pops back open
+- The soft-update engine is shared between the game and user cards (`utils/card-morph.js`) instead of living in the game card only
+
 ## [0.7.92] - 2026-10-17
 
 ### Fixed

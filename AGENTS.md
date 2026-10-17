@@ -36,7 +36,7 @@ backloggd-plus/
 │   ├── cache.js             # GM lookup cache + overrides
 │   ├── gm.js                # GM_xmlhttpRequest wrapper
 │   ├── i18n/                # TRANSLATIONS (locales/*.js) + locale helpers
-│   ├── utils/               # html, title match, debounce, slug
+│   ├── utils/               # html, title match, debounce, slug, card-morph (shared mini-profile soft update)
 │   ├── styles/              # CSS (injected via vite-plugin-monkey)
 │   ├── api/                 # Steam, SteamDB meta, HLTB, OpenCritic, ProtonDB, GameStatus
 │   └── features/            # Enrichment, gallery, cards, settings UI, toasts, host pages
