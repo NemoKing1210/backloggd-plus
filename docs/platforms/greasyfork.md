@@ -38,7 +38,7 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 **Game pages (`/games/{slug}/`):**
 
 - Native detail rows under Platforms — **Steam** (owned · wishlist · price · sale end / recent low · reviews · tags), **SteamDB** (franchise · systems · technologies · last record update), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Players**, **GameStatus**, **Links**
-- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug)
+- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug); leave the App ID blank to mark a game as not on Steam
 - SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
 - SteamDB details row: franchise / OS from Steam store APIs; technologies & last record update from SteamDB when reachable
 - Export button under the Steam header and in the log editor (optional; Settings → Game; Notion CSV / Markdown / JSON)

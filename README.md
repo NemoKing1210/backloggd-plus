@@ -5,7 +5,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.88-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.90-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -81,7 +81,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 **Game pages (`/games/{slug}/`):**
 
 - Native detail rows under Platforms — **Steam** (owned · wishlist · price · sale end / recent low · reviews · tags), **SteamDB** (franchise · systems · technologies · last record update), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Players**, **GameStatus**, **Links**
-- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug)
+- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug); leave the App ID blank to mark a game as not on Steam
 - SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
 - SteamDB details row: franchise / OS from Steam store APIs; technologies & last record update from SteamDB when reachable
 - Export button under the Steam header and in the log editor (optional; Settings → Game; Notion CSV / Markdown / JSON)

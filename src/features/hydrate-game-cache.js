@@ -2,18 +2,20 @@ import {
   asCacheHit,
   getCached,
   getSteamOverride,
+  isSteamDisabled,
   getUserdataCached,
   mergeCacheSources,
 } from '../cache.js';
 import { settings } from '../state.js';
 import { normalizeTitle } from '../utils/title.js';
-import { steamCdnAsset } from '../api/steam.js';
+import { isSteamYearMismatch, steamCdnAsset, steamTitleCacheKey } from '../api/steam.js';
+import { getKnownGameYear } from '../api/game-profile.js';
 
 /**
  * Sync peek of GM lookup cache for a game page remount.
  * Returns payloads marked as cache hits so UI can paint before async fetch*.
  */
-export function peekGamePageCache({ title, slug, country } = {}) {
+export function peekGamePageCache({ title, slug, country, year = null } = {}) {
   const cc = String(country || settings.steamCountry || 'US').toUpperCase() || 'US';
   const q = String(title || '').trim();
   const norm = q ? normalizeTitle(q) : '';
@@ -28,9 +30,10 @@ export function peekGamePageCache({ title, slug, country } = {}) {
         steam = asCacheHit({ ...hit, manualOverride: true });
       }
     }
-  } else if (norm) {
-    const hit = getCached(`steam:${cc}:${norm}`);
-    if (hit?.found) {
+  } else if (norm && !(slug && isSteamDisabled(slug))) {
+    const gameYear = Number(year) || getKnownGameYear(slug);
+    const hit = getCached(steamTitleCacheKey(cc, q, gameYear));
+    if (hit?.found && !isSteamYearMismatch(hit, gameYear, title)) {
       steam = asCacheHit({
         ...hit,
         manualOverride: Boolean(hit.manualOverride),

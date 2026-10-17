@@ -6,6 +6,7 @@ import {
   getSteamOverride,
   paintCacheMeter,
   pruneDisabledCacheCategories,
+  setSteamDisabled,
   setSteamOverride,
 } from '../cache.js';
 import { CONVERT_CURRENCIES } from '../api/fx.js';
@@ -1326,7 +1327,7 @@ export function openFixMatchDialog(slug, currentAppId) {
   backdrop.innerHTML = `
     <div class="blp-fix-match-dialog" role="dialog" aria-modal="true" aria-label="${escapeAttr(t.steamFixMatchTitle)}">
       <h3>${escapeHtml(t.steamFixMatchTitle)}</h3>
-      <p class="blp-hint">${escapeHtml(t.steamFixMatchHint)}</p>
+      <p class="blp-hint">${escapeHtml(t.steamFixMatchHint)} ${escapeHtml(t.steamFixMatchBlankHint)}</p>
       <div class="blp-error" data-blp-fix-error hidden></div>
       <input id="blp-fix-appid" type="text" inputmode="numeric" placeholder="${escapeAttr(t.steamFixMatchPlaceholder)}" value="${escapeAttr(currentAppId || getSteamOverride(slug) || '')}" />
       <div class="blp-actions">
@@ -1358,6 +1359,18 @@ export function openFixMatchDialog(slug, currentAppId) {
   });
   backdrop.querySelector('[data-blp-fix-save]')?.addEventListener('click', () => {
     const raw = String(input()?.value || '').trim();
+    if (!raw) {
+      setSteamDisabled(slug);
+      close();
+      removeEnrichment();
+      enrichGamePage();
+      scheduleCardBadges(true);
+      showToast(t.toastSteamMatchNone, {
+        type: 'info',
+        title: t.toastSteamMatchNoneTitle,
+      });
+      return;
+    }
     const id = Number(raw.replace(/[^\d]/g, ''));
     if (!Number.isFinite(id) || id <= 0) {
       const box = errEl();

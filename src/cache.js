@@ -285,6 +285,16 @@ export function getSteamOverride(slug) {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
+/** Override value `0` = user marked the game as not on Steam (skip search + enrichment). */
+export function isSteamDisabled(slug) {
+  const key = String(slug || '')
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, '');
+  if (!key) return false;
+  const map = loadSteamOverrides();
+  return Object.prototype.hasOwnProperty.call(map, key) && Number(map[key]) === 0;
+}
+
 export function setSteamOverride(slug, appId) {
   const key = String(slug || '')
     .toLowerCase()
@@ -294,6 +304,17 @@ export function setSteamOverride(slug, appId) {
   const map = loadSteamOverrides();
   if (Number.isFinite(id) && id > 0) map[key] = id;
   else delete map[key];
+  saveSteamOverrides(map);
+  steamResolveMissMemory.clear();
+}
+
+export function setSteamDisabled(slug) {
+  const key = String(slug || '')
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, '');
+  if (!key) return;
+  const map = loadSteamOverrides();
+  map[key] = 0;
   saveSteamOverrides(map);
   steamResolveMissMemory.clear();
 }

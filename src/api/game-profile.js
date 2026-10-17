@@ -28,6 +28,12 @@ export function cacheGameMiniProfile(profile) {
   setCached(gameMiniCacheKey(profile.slug), profile, { ttlMs: GAME_MINI_TTL_MS });
 }
 
+/** Release year (number) from a cached mini-profile, or null when unknown. */
+export function getKnownGameYear(slug) {
+  const year = Number(peekCachedGameMiniProfile(slug)?.year);
+  return Number.isFinite(year) && year > 0 ? year : null;
+}
+
 /** Synchronous cache peek (no network). */
 export function peekCachedGameMiniProfile(slug) {
   const key = String(slug || '').trim().toLowerCase();
@@ -97,7 +103,7 @@ function parseCoverUrl(doc) {
   );
 }
 
-function parseYear(doc) {
+export function parseYear(doc) {
   const links = [
     ...doc.querySelectorAll(
       '#game-body a[href*="release_year:"], #game_detail_section a[href*="release_year:"], a.game-year'

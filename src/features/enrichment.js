@@ -11,7 +11,7 @@ import {
   steamCategoryUrl,
   steamTagUrl,
 } from '../api/steam.js';
-import { getCacheSource, getSteamOverride, mergeCacheSources } from '../cache.js';
+import { getCacheSource, getSteamOverride, isSteamDisabled, mergeCacheSources } from '../cache.js';
 import {
   ENRICH_ATTR,
   FAVICON_URL,
@@ -30,6 +30,7 @@ import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { metacriticGameUrl, slugifyForBackloggd } from '../utils/slug.js';
 import { bindGameCoverViewer, unbindGameCoverViewer } from './gallery.js';
+import { parseYear } from '../api/game-profile.js';
 import { peekGamePageCache } from './hydrate-game-cache.js';
 import { applySimilarGames, ensureSimilarMount, removeSimilarGamesUi } from './similar.js';
 import {
@@ -661,12 +662,15 @@ export function renderLibraryBadge(kind) {
 export function renderSteamMatchControl(steam, slug) {
   if (!slug) return '';
   const overrideId = getSteamOverride(slug);
+  const disabled = isSteamDisabled(slug);
   const appId = steam?.appId || overrideId || '';
-  if (!appId && !settings.showSteam) return '';
+  if (!appId && !disabled && !settings.showSteam) return '';
   const source = overrideId || steam?.manualOverride ? t.steamMatchManual : t.steamMatchAuto;
-  const label = appId
-    ? fmt(t.steamMatchLabel, { id: appId, source })
-    : t.steamFixMatch;
+  const label = disabled
+    ? t.steamMatchNone
+    : appId
+      ? fmt(t.steamMatchLabel, { id: appId, source })
+      : t.steamFixMatch;
   return `<span class="blp-steam-match">
     <span class="blp-steam-match__label">${escapeHtml(label)}</span>
     <button type="button" class="blp-steam-match__btn" data-blp-fix-match data-blp-slug="${escapeAttr(slug)}" data-blp-appid="${escapeAttr(appId || '')}">${escapeHtml(t.steamFixMatch)}</button>
@@ -955,6 +959,7 @@ export function renderUnifiedDebugPanel({
       showLinks: settings.showLinks,
       links: settings.links,
       steamOverride: getSteamOverride(slug),
+      steamDisabled: isSteamDisabled(slug),
     },
     owned,
     wishlist,
@@ -1038,7 +1043,7 @@ export function renderEnrichment(rows, { steam, links, error, owned = false, wis
       showRow(rows.steam);
       paintDebugCacheMark(rows.steam, getCacheSource(steam) || 'miss');
     } else if (!steam?.found) {
-      const missHtml = debugOn
+      const missHtml = debugOn && !steam?.disabled
         ? `<span class="game-details-value blp-empty">${escapeHtml(t.notOnSteam)}</span>`
         : '';
       const matchHtml = renderSteamMatchControl(steam, slug);
@@ -1259,10 +1264,12 @@ export async function enrichGamePage() {
     settings.showSteam && (settings.showSteamOwned || settings.showSteamWishlist);
 
   // Sync hydrate before any await so remounts paint from cache without a skeleton flash.
+  const gameYear = Number(parseYear(document)) || null;
   const cachedPage = peekGamePageCache({
     title,
     slug: ctx.slug,
     country: settings.steamCountry || 'US',
+    year: gameYear,
   });
   if (needSteamDbMedia) mountSteamDbSkeletons(token);
   else syncExportButton(token);
@@ -1606,6 +1613,7 @@ export async function enrichGamePage() {
       ? resolveSteamForGame({
           title,
           slug: ctx.slug,
+          year: gameYear,
           country: settings.steamCountry || 'US',
           onPartial: (partial) => {
             if (!stillHere()) return;

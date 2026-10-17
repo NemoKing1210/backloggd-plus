@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.90] - 2026-10-17
+
+### Added
+
+- Fix match: saving an empty Steam App ID now marks the game as not on Steam — the automatic search is skipped and no Steam data, badges or Steam-based extras are shown for that page (the Steam row keeps a "Not on Steam · manual" control; "Use automatic match" reverts it) ([#6](https://github.com/NemoKing1210/backloggd-plus/issues/6))
+
+### Fixed
+
+- Steam/OpenCritic/HLTB title matching no longer drops non-Latin characters: a Steam app like "マイ・プラネット─MOON CHILD─" was reduced to "moon child" and wrongly matched Backloggd's "Moon Child" (1997). Titles now keep kana/CJK/Cyrillic letters, fold fullwidth forms and strip Latin accents (so "Pokémon" ≈ "Pokemon"); all-non-Latin titles no longer collapse to an empty cache key ([#6](https://github.com/NemoKing1210/backloggd-plus/issues/6))
+- Same-named remakes no longer hijack the original: Steam matching now uses the Backloggd release year. A "(YYYY)" tag on the Steam name ("Resident Evil 2 (1998)") is matched to the game's year, Steam results are cached per title+year, and an automatic exact-title match released 10+ years after the Backloggd entry (Resident Evil 2 1998 → 2019 remake) is skipped; manual App IDs are never filtered. Lists/cards use the year once the game's mini-profile is cached
+
 ## [0.7.89] - 2026-10-17
 
 ### Added
