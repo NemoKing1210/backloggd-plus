@@ -34,6 +34,86 @@ export function getKnownGameYear(slug) {
   return Number.isFinite(year) && year > 0 ? year : null;
 }
 
+/** Remake/remaster slugs Backloggd lists for a game (server-rendered related page). */
+export async function fetchBackloggdRemakeSlugs(slug) {
+  const key = String(slug || '').trim().toLowerCase();
+  if (!key) return [];
+  const cacheKey = `game:remakes:${key}`;
+  const cached = getCached(cacheKey);
+  if (Array.isArray(cached)) return cached;
+  const inflightKey = `remakes:${key}`;
+  if (inflight.has(inflightKey)) return inflight.get(inflightKey);
+
+  const task = (async () => {
+    const html = await gmRequest({
+      url: `https://www.backloggd.com/games/${encodeURIComponent(key)}/related/associated/popular:desc/category:remake,remaster/`,
+      method: 'GET',
+      responseType: 'text',
+      anonymous: false,
+      headers: { Accept: 'text/html' },
+    });
+    const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    const slugs = [];
+    for (const a of doc.querySelectorAll('a[href^="/games/"]')) {
+      const m = (a.getAttribute('href') || '').match(/^\/games\/([a-z0-9][a-z0-9-]*)\/$/i);
+      const s = m?.[1]?.toLowerCase();
+      if (s && s !== 'lib' && s !== key && !slugs.includes(s)) slugs.push(s);
+    }
+    if (slugs.length) setCached(cacheKey, slugs, { ttlMs: GAME_MINI_TTL_MS });
+    return slugs;
+  })().catch(() => []);
+
+  inflight.set(inflightKey, task);
+  try {
+    return await task;
+  } finally {
+    inflight.delete(inflightKey);
+  }
+}
+
+const SLUG_YEAR_MAX_GAP = 1;
+
+function profileYear(profile) {
+  const y = Number(profile?.year);
+  return Number.isFinite(y) && y > 0 ? y : null;
+}
+
+/**
+ * Steam app → Backloggd slug when several games share a name (RE4 2005 vs the 2023 remake).
+ * Keeps the name-derived slug unless its release year disagrees with Steam's; then looks for a
+ * same-stem remake/remaster whose year matches. Falls back to the base slug.
+ */
+export async function resolveBackloggdSlugByYear(baseSlug, steamYear) {
+  const base = String(baseSlug || '').trim().toLowerCase();
+  const year = Number(steamYear);
+  if (!base || !Number.isFinite(year) || year <= 0) return base;
+
+  const cacheKey = `game:slug:${base}@${year}`;
+  const cached = getCached(cacheKey);
+  if (typeof cached === 'string' && cached) return cached;
+
+  const baseProfile = await fetchGameMiniProfile(base).catch(() => null);
+  const baseYear = profileYear(baseProfile);
+  if (baseYear == null || Math.abs(baseYear - year) <= SLUG_YEAR_MAX_GAP) return base;
+
+  const siblings = (await fetchBackloggdRemakeSlugs(base)).filter((s) => s.startsWith(base));
+  let best = base;
+  let bestGap = Math.abs(baseYear - year);
+  for (const slug of siblings.slice(0, 4)) {
+    const py = profileYear(await fetchGameMiniProfile(slug).catch(() => null));
+    if (py == null) continue;
+    const gap = Math.abs(py - year);
+    if (gap < bestGap) {
+      best = slug;
+      bestGap = gap;
+      if (gap === 0) break;
+    }
+  }
+  if (bestGap > SLUG_YEAR_MAX_GAP) return base;
+  if (best !== base) setCached(cacheKey, best, { ttlMs: GAME_MINI_TTL_MS });
+  return best;
+}
+
 /** Synchronous cache peek (no network). */
 export function peekCachedGameMiniProfile(slug) {
   const key = String(slug || '').trim().toLowerCase();

@@ -1,3 +1,4 @@
+import { resolveBackloggdSlugByYear } from '../api/game-profile.js';
 import { getCacheSource } from '../cache.js';
 import {
   CARD_APPID_ATTR,
@@ -118,12 +119,14 @@ export function applySimilarGames(games, appId, token = '', { final = false } = 
         slugifyForBackloggd(game.name) ||
         '';
       const slugAttr = slug ? ` ${CARD_SLUG_ATTR}="${escapeAttr(slug)}"` : '';
+      const year = Number(game.year);
+      const yearAttr = slug && year > 0 ? ` data-blp-year="${year}"` : '';
       const titleAttr = game.name
         ? ` ${CARD_TITLE_ATTR}="${escapeAttr(game.name)}"`
         : '';
       return `
         <div class="blp-similar__card">
-          <div class="blp-similar__cover"${appIdAttr}${slugAttr}${titleAttr}>
+          <div class="blp-similar__cover"${appIdAttr}${slugAttr}${titleAttr}${yearAttr}>
             <span class="blp-similar__badge">
               <span class="blp-similar__pct">${pct}%</span>
               <span class="blp-similar__match">${escapeHtml(t.similarGamesMatch)}</span>
@@ -160,4 +163,29 @@ export function applySimilarGames(games, appId, token = '', { final = false } = 
     }
   });
   bindHorizontalTrack(host.querySelector('[data-blp-similar-track]'));
+  void resolveSimilarBackloggdLinks(host);
+}
+
+/** Same-named remakes: repoint cards whose Backloggd slug has the wrong release year. */
+async function resolveSimilarBackloggdLinks(host) {
+  const covers = [...host.querySelectorAll('.blp-similar__cover[data-blp-year]')];
+  let next = 0;
+  const worker = async () => {
+    while (next < covers.length) {
+      const cover = covers[next];
+      next += 1;
+      const slug = cover.getAttribute(CARD_SLUG_ATTR) || '';
+      const resolved = await resolveBackloggdSlugByYear(slug, cover.dataset.blpYear).catch(
+        () => slug
+      );
+      if (!resolved || resolved === slug || !cover.isConnected) continue;
+      cover.setAttribute(CARD_SLUG_ATTR, resolved);
+      const url = `https://www.backloggd.com/games/${encodeURIComponent(resolved)}/`;
+      cover
+        .closest('.blp-similar__card')
+        ?.querySelectorAll('a.blp-similar__hit, a.blp-similar__meta')
+        .forEach((a) => a.setAttribute('href', url));
+    }
+  };
+  await Promise.all([worker(), worker()]);
 }

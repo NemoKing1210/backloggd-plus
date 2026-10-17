@@ -339,9 +339,13 @@ export function normalizeSimilarStoreItem(item, sourceTags, tagMap, apiIndex) {
     .slice(0, 2);
   const coverUrl = parseSimilarCoverUrl(appId, item?.assets);
   const slug = slugifyForBackloggd(name);
+  const releaseSec =
+    Number(item?.release?.original_release_date) || Number(item?.release?.steam_release_date) || 0;
+  const year = releaseSec > 0 ? new Date(releaseSec * 1000).getUTCFullYear() : null;
   return {
     appId,
     name,
+    year,
     coverUrl,
     matchPct,
     sharedTags,
@@ -380,6 +384,7 @@ export async function fetchSteamSimilarGames(appId, sourceTags, country) {
         data_request: {
           include_assets: true,
           include_basic_info: true,
+          include_release: true,
           include_tag_count: STEAM_TAGS_MAX,
         },
         filters: {

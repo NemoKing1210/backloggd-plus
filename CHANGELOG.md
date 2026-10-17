@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Steam/OpenCritic/HLTB title matching no longer drops non-Latin characters: a Steam app like "マイ・プラネット─MOON CHILD─" was reduced to "moon child" and wrongly matched Backloggd's "Moon Child" (1997). Titles now keep kana/CJK/Cyrillic letters, fold fullwidth forms and strip Latin accents (so "Pokémon" ≈ "Pokemon"); all-non-Latin titles no longer collapse to an empty cache key ([#6](https://github.com/NemoKing1210/backloggd-plus/issues/6))
 - Same-named remakes no longer hijack the original: Steam matching now uses the Backloggd release year. A "(YYYY)" tag on the Steam name ("Resident Evil 2 (1998)") is matched to the game's year, Steam results are cached per title+year, and an automatic exact-title match released 10+ years after the Backloggd entry (Resident Evil 2 1998 → 2019 remake) is skipped; manual App IDs are never filtered. Lists/cards use the year once the game's mini-profile is cached
+- Similar games: cards for same-named remakes now link to the right Backloggd entry (Steam's Resident Evil 4 from 2023 used to open the 2005 original). The Steam release year is compared with the Backloggd year and, on a mismatch, the game's remake/remaster list is searched for the entry with a matching year (links and hover cards update in place; resolved slugs are cached)
 
 ## [0.7.89] - 2026-10-17
 
