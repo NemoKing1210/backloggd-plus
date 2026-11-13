@@ -29,13 +29,13 @@ import {
   parseCardTitle,
 } from './cards.js';
 import {
-  faviconForUrl,
   formatPriceText,
   formatReviewPercent,
   formatReviewPercentCompact,
   mcScoreTier,
   reviewScoreClass,
-} from './enrichment.js';
+} from '../utils/card-format.js';
+import { faviconForUrl } from './enrichment.js';
 
 const HOVER_ATTR = 'data-blp-gmp-hover';
 const MARK_ATTR = 'data-blp-gmp';
