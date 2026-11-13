@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.99-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.100-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 一个扩展 [Backloggd](https://www.backloggd.com) 的用户脚本：添加额外的游戏信息、更丰富的界面和体验改进——无需离开网站。
 
@@ -17,7 +17,7 @@
 
 > **注意：** Greasy Fork / ScriptCat 上的目录页面可能落后于本仓库——并非每次发布都能立刻同步过去，抱歉。要获取最新版本，请优先使用 [GitHub raw 安装地址](#快速安装)（或克隆仓库后运行 `npm run build`）。脚本的 `@updateURL` / `@downloadURL` 也指向 GitHub 的 `main` 分支。
 
-> **状态：** 早期（`0.7.99`）。Backloggd 信息增强 + 列表徽章 + Steam / SteamDB → Backloggd 按钮。
+> **状态：** 早期（`0.7.100`）。Backloggd 信息增强 + 列表徽章 + Steam / SteamDB → Backloggd 按钮。
 
 ## 截图
 

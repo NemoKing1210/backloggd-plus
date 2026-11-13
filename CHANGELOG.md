@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.100] - 2026-11-13
+
+### Changed
+
+- **Settings → General → Site language** (Russian): the dictionary now covers the whole site — short and relative times, "just now", rating tooltips and collection stats, playtime spans, earned-badge lines, the log / review buttons, journal and library labels, and the settings, account, Patreon, archive, infractions and contact pages (contributed by [Nikitamce](https://github.com/Nikitamce) / [MaksVolkov7863](https://github.com/MaksVolkov7863))
+
+### Fixed
+
+- Long Russian log / review buttons wrap instead of overlapping; the adjustment is applied once per button and only when the site language is Russian
+
 ## [0.7.99] - 2026-10-17
 
 ### Added

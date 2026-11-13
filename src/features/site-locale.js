@@ -413,6 +413,7 @@ function bindExpandFix() {
 
 function fixTightButtons() {
   document.querySelectorAll('a, button').forEach((el) => {
+    if (el.hasAttribute('data-blp-tight')) return;
     if (el.closest('.blp-settings, .blp-toast')) return;
     const text = (el.innerText || '').replace(/\s+/g, ' ').trim();
     if (!text) return;
@@ -425,6 +426,7 @@ function fixTightButtons() {
     const next = (el.innerText || '').replace(/\s+/g, ' ').trim();
     if (next.length < 16 && el.scrollWidth <= el.clientWidth + 1) return;
     if (!/запис|реценз|измен|log or review/i.test(next)) return;
+    el.setAttribute('data-blp-tight', '1');
     el.style.setProperty('white-space', 'normal', 'important');
     el.style.setProperty('height', 'auto', 'important');
     el.style.setProperty('line-height', '1.2', 'important');
@@ -470,7 +472,7 @@ export function startSiteLocale() {
     engine.fixSplitOver(document.body);
     engine.translatePseudos(document.body);
     fixWelcomeWrap();
-    fixTightButtons();
+    if (code === 'ru') fixTightButtons();
   };
   const schedule = () => {
     if (scheduled) return;

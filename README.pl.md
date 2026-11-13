@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.99-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.100-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Skrypt użytkownika, który rozszerza [Backloggd](https://www.backloggd.com) o dodatkowe informacje o grach, bogatszy interfejs i usprawnienia — bez opuszczania strony.
 
@@ -17,7 +17,7 @@ Dostępny także na [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backl
 
 > **Uwaga:** strony katalogów Greasy Fork / ScriptCat mogą być opóźnione względem tego repozytorium — nie zawsze udaje się tam od razu opublikować każde wydanie. Przepraszam. Aby mieć najnowszą wersję, użyj [adresu instalacji raw z GitHub](#szybka-instalacja) (albo sklonuj repozytorium i uruchom `npm run build`). `@updateURL` / `@downloadURL` skryptu również wskazują na `main` w GitHub.
 
-> **Status:** wczesny (`0.7.99`). Wzbogacanie Backloggd + odznaki na listach + przyciski Steam / SteamDB → Backloggd.
+> **Status:** wczesny (`0.7.100`). Wzbogacanie Backloggd + odznaki na listach + przyciski Steam / SteamDB → Backloggd.
 
 ## Zrzuty ekranu
 
