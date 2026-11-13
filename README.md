@@ -138,6 +138,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 - [DEVELOPMENT.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/DEVELOPMENT.md) — local setup, repo layout, metadata, permissions, releases
 - [CONTRIBUTING.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/CONTRIBUTING.md) — PR guidelines, conventions, localization, contributors
 - [AGENTS.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/AGENTS.md) — architecture notes for AI coding agents
+- [SECURITY.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/SECURITY.md) — how to report a vulnerability privately, scope, and how the script handles your data
 
 ```bash
 npm install

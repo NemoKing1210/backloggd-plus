@@ -58,6 +58,7 @@ backloggd-plus/
 ├── README.md                # User-facing install + features
 ├── DEVELOPMENT.md           # Local setup, layout, releases
 ├── CONTRIBUTING.md          # PR guidelines + contributors
+├── SECURITY.md              # Vulnerability reporting + security model
 ├── CHANGELOG.md
 ├── LICENSE
 ├── AGENTS.md                # This file (cross-tool agent instructions)

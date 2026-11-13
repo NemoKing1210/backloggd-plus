@@ -8,6 +8,8 @@ Thanks for your interest in improving Backloggd Plus.
 - Open pull requests for fixes, features, docs, or translations
 - Test on different userscript managers and browsers
 
+> **Security issues:** please report them privately — see [SECURITY.md](SECURITY.md). Do not open a public issue for an unfixed vulnerability.
+
 ## Before you start
 
 1. Read [DEVELOPMENT.md](DEVELOPMENT.md) for setup, scripts, and release notes.
