@@ -21,11 +21,16 @@ export function romanTokenToArabic(token, { allowLoneI = false } = {}) {
 
 export function normalizeTitle(name) {
   const base = String(name || '')
-    .toLowerCase()
     .replace(/[™®©]/g, '')
+    // Fold fullwidth forms and strip Latin accents (Pokémon → pokemon); keeps kana/CJK/Cyrillic intact.
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .normalize('NFC')
+    .toLowerCase()
     // S.T.A.L.K.E.R. → stalker (keep decimals like 1.5)
     .replace(/(?<=[a-z])\.(?=[a-z])/g, '')
-    .replace(/[^a-z0-9]+/g, ' ')
+    // Keep letters/digits of any script so "マイ・プラネット─MOON CHILD─" ≠ "Moon Child".
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
   if (!base) return '';
   const parts = base.split(/\s+/).filter(Boolean);
@@ -109,11 +114,28 @@ export function indexOfTokenSequence(haystack, needle) {
   return -1;
 }
 
+const YEAR_SUFFIX_RE = /\s*[([]\s*((?:19|20)\d{2})\s*[)\]]\s*$/;
+
+/** Trailing "(1998)" tag some Steam apps use to tell an original from its remake. */
+export function steamNameYearTag(name) {
+  const m = String(name || '').match(YEAR_SUFFIX_RE);
+  return m ? Number(m[1]) : null;
+}
+
 /**
  * Score how well a Steam app title matches the Backloggd title.
  * Rejects spin-offs that merely start with the name (Minecraft → Minecraft Dungeons).
+ * With `year`, a "(YYYY)" tag on the Steam name must agree (and an exact agreement wins ties).
  */
-export function scoreSteamTitleMatch(steamName, targetTitle) {
+export function scoreSteamTitleMatch(steamName, targetTitle, year = null) {
+  const tag = steamNameYearTag(steamName);
+  if (tag != null) {
+    const y = Number(year);
+    const known = Number.isFinite(y) && y > 0;
+    if (known && tag !== y) return 0;
+    const base = scoreSteamTitleMatch(String(steamName).replace(YEAR_SUFFIX_RE, ''), targetTitle);
+    return known && base >= 100 ? 101 : base;
+  }
   const steam = normalizeTitle(steamName);
   const target = normalizeTitle(targetTitle);
   if (!steam || !target) return 0;
@@ -153,9 +175,10 @@ export function scoreSteamTitleMatch(steamName, targetTitle) {
   return 0;
 }
 
-const STEAM_TITLE_MATCH_MIN_SCORE = 85;
+/** Minimum `scoreSteamTitleMatch` result accepted as "same game" across Steam / HLTB / OpenCritic. */
+export const TITLE_MATCH_MIN_SCORE = 85;
 
-export function pickSteamSearchItem(items, title) {
+export function pickSteamSearchItem(items, title, year = null) {
   const list = (items || []).filter((i) => i && i.type === 'app' && i.id);
   if (!list.length) return null;
 
@@ -165,12 +188,12 @@ export function pickSteamSearchItem(items, title) {
   let best = null;
   let bestScore = 0;
   for (const item of pool) {
-    const score = scoreSteamTitleMatch(item.name, title);
+    const score = scoreSteamTitleMatch(item.name, title, year);
     if (score > bestScore) {
       bestScore = score;
       best = item;
     }
   }
 
-  return bestScore >= STEAM_TITLE_MATCH_MIN_SCORE ? best : null;
+  return bestScore >= TITLE_MATCH_MIN_SCORE ? best : null;
 }

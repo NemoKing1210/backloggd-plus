@@ -1,4 +1,5 @@
 import {
+  GM_addValueChangeListener,
   GM_getValue,
   GM_setValue,
 } from '$';
@@ -43,9 +44,34 @@ export const CACHE_CATEGORIES = [
   { id: 'system', settingKey: null, labelKey: 'cacheCatSystem', swatch: 'system' },
 ];
 
-const CACHE_TOUCH_PERSIST_THROTTLE_MS = 5000;
-let cacheTouchPersistAt = 0;
+/** Writes coalesce into one GM_setValue per window (the whole store is one serialized value). */
+const CACHE_PERSIST_DELAY_MS = 1500;
+/** LRU-only changes (`at` bumps on reads) are cheap to lose, so they wait much longer. */
+const CACHE_TOUCH_PERSIST_DELAY_MS = 30000;
+
 let cachePersistFlushBound = false;
+let cachePersistDueAt = 0;
+
+/** Keys written / removed / read since the last flush — merged onto fresh storage so tabs don't clobber each other. */
+const dirtyKeys = new Set();
+const removedKeys = new Set();
+const touchedAt = new Map();
+
+/** JSON size per entry object (entries are replaced on write, so the memo never goes stale). */
+const entrySizeMemo = new WeakMap();
+const keyEncoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
+
+function markDirty(key) {
+  dirtyKeys.add(key);
+  removedKeys.delete(key);
+  touchedAt.delete(key);
+}
+
+function markRemoved(key) {
+  removedKeys.add(key);
+  dirtyKeys.delete(key);
+  touchedAt.delete(key);
+}
 
 export function cacheCategoryForKey(key) {
   const k = String(key || '');
@@ -65,55 +91,101 @@ export function isCacheCategoryEnabled(category) {
   return true;
 }
 
-export function readCacheStore() {
-  if (cacheStore) return cacheStore;
+function readStoredCache() {
   try {
     const raw = GM_getValue(CACHE_KEY, null);
-    setCacheStore(raw && typeof raw === 'object' ? raw : {});
+    return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
   } catch (_) {
-    setCacheStore({});
+    return {};
   }
+}
+
+export function readCacheStore() {
+  if (cacheStore) return cacheStore;
+  setCacheStore(readStoredCache());
   return cacheStore;
 }
 
-export function flushCachePersist() {
-  if (!cachePersistTimer) return;
-  clearTimeout(cachePersistTimer);
-  setCachePersistTimer(0);
+function hasPendingCacheWrites() {
+  return dirtyKeys.size > 0 || removedKeys.size > 0 || touchedAt.size > 0;
+}
+
+/**
+ * Merge this tab's pending changes onto the freshest stored value, then write once.
+ * Writing the in-memory snapshot blindly would drop whatever other tabs cached meanwhile.
+ */
+function writeCacheStore() {
+  if (!hasPendingCacheWrites()) return;
   try {
+    const mem = readCacheStore();
+    const next = readStoredCache();
+    for (const key of dirtyKeys) {
+      if (mem[key]) next[key] = mem[key];
+    }
+    for (const key of removedKeys) delete next[key];
+    for (const [key, at] of touchedAt) {
+      const entry = next[key];
+      if (entry && (Number(entry.at) || 0) < at) entry.at = at;
+    }
+    dirtyKeys.clear();
+    removedKeys.clear();
+    touchedAt.clear();
+    setCacheStore(next);
     pruneExpiredCache();
     evictCacheToBudget();
-    GM_setValue(CACHE_KEY, readCacheStore());
+    removedKeys.clear();
+    GM_setValue(CACHE_KEY, next);
   } catch (_) {
     /* ignore */
   }
 }
 
-export function persistCacheSoon() {
+export function flushCachePersist() {
   clearTimeout(cachePersistTimer);
-  setCachePersistTimer(
-    setTimeout(() => {
-      setCachePersistTimer(0);
-      try {
-        pruneExpiredCache();
-        evictCacheToBudget();
-        GM_setValue(CACHE_KEY, readCacheStore());
-      } catch (_) {
-        /* ignore */
-      }
-    }, 400)
-  );
+  setCachePersistTimer(0);
+  cachePersistDueAt = 0;
+  writeCacheStore();
 }
 
-/** Flush pending cache writes on tab hide / unload so remounts keep warm hits. */
+/** Schedule a write; a later, slower request never postpones an earlier pending one. */
+export function persistCacheSoon(delayMs = CACHE_PERSIST_DELAY_MS) {
+  const due = Date.now() + delayMs;
+  if (cachePersistTimer && cachePersistDueAt <= due) return;
+  clearTimeout(cachePersistTimer);
+  cachePersistDueAt = due;
+  setCachePersistTimer(setTimeout(flushCachePersist, delayMs));
+}
+
+/** Another tab wrote the cache: adopt its entries, keep our unflushed changes on top. */
+function applyRemoteCache(raw) {
+  const next = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const mem = cacheStore;
+  if (mem) {
+    for (const key of dirtyKeys) {
+      if (mem[key]) next[key] = mem[key];
+    }
+  }
+  for (const key of removedKeys) delete next[key];
+  setCacheStore(next);
+}
+
+/** Flush pending cache writes on tab hide / unload; follow cache writes from other tabs. */
 export function bindCachePersistFlush() {
   if (cachePersistFlushBound || typeof window === 'undefined') return;
   cachePersistFlushBound = true;
   const flush = () => flushCachePersist();
   window.addEventListener('pagehide', flush);
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') flush();
+    // LRU-only touches are not worth rewriting the whole store on every tab switch.
+    if (document.visibilityState === 'hidden' && (dirtyKeys.size || removedKeys.size)) flush();
   });
+  try {
+    GM_addValueChangeListener?.(CACHE_KEY, (_name, _old, value, remote) => {
+      if (remote) applyRemoteCache(value);
+    });
+  } catch (_) {
+    /* manager without value-change events: tabs still merge on write */
+  }
 }
 
 export function cacheTtlMs() {
@@ -159,13 +231,13 @@ export function isCacheEntryExpired(key, entry) {
   return Date.now() - entry.ts > ttl;
 }
 
-export function touchCacheEntry(entry) {
+/** Bump LRU access time. Memory-only until the next write or tab hide — reads never force a save. */
+export function touchCacheEntry(key, entry) {
   if (!entry || typeof entry !== 'object') return;
-  entry.at = Date.now();
   const now = Date.now();
-  if (now - cacheTouchPersistAt < CACHE_TOUCH_PERSIST_THROTTLE_MS) return;
-  cacheTouchPersistAt = now;
-  persistCacheSoon();
+  entry.at = now;
+  if (!dirtyKeys.has(key)) touchedAt.set(key, now);
+  persistCacheSoon(CACHE_TOUCH_PERSIST_DELAY_MS);
 }
 
 export function getCached(key) {
@@ -179,7 +251,7 @@ export function getCached(key) {
     if (!hasOwnTtl && !cacheTtlMs()) return null;
   }
   if (isCacheEntryExpired(key, entry)) return null;
-  touchCacheEntry(entry);
+  touchCacheEntry(key, entry);
   return entry.data;
 }
 
@@ -197,6 +269,7 @@ export function setCached(key, data, opts) {
     entry.ttlMs = TAG_MAP_TTL_MS;
   }
   readCacheStore()[key] = entry;
+  markDirty(key);
   persistCacheSoon();
 }
 
@@ -249,13 +322,14 @@ export function getUserdataCached() {
     return null;
   }
   if (isCacheEntryExpired(USERDATA_CACHE_KEY, entry)) return null;
-  touchCacheEntry(entry);
+  touchCacheEntry(USERDATA_CACHE_KEY, entry);
   return entry.data;
 }
 
 export function setUserdataCached(data) {
   const now = Date.now();
   readCacheStore()[USERDATA_CACHE_KEY] = { ts: now, at: now, data };
+  markDirty(USERDATA_CACHE_KEY);
   persistCacheSoon();
 }
 
@@ -285,6 +359,16 @@ export function getSteamOverride(slug) {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
+/** Override value `0` = user marked the game as not on Steam (skip search + enrichment). */
+export function isSteamDisabled(slug) {
+  const key = String(slug || '')
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, '');
+  if (!key) return false;
+  const map = loadSteamOverrides();
+  return Object.prototype.hasOwnProperty.call(map, key) && Number(map[key]) === 0;
+}
+
 export function setSteamOverride(slug, appId) {
   const key = String(slug || '')
     .toLowerCase()
@@ -294,6 +378,17 @@ export function setSteamOverride(slug, appId) {
   const map = loadSteamOverrides();
   if (Number.isFinite(id) && id > 0) map[key] = id;
   else delete map[key];
+  saveSteamOverrides(map);
+  steamResolveMissMemory.clear();
+}
+
+export function setSteamDisabled(slug) {
+  const key = String(slug || '')
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, '');
+  if (!key) return;
+  const map = loadSteamOverrides();
+  map[key] = 0;
   saveSteamOverrides(map);
   steamResolveMissMemory.clear();
 }
@@ -312,13 +407,17 @@ export function isCacheEntryPartial(key, entry) {
 }
 
 export function cacheEntryByteSize(key, entry) {
+  const k = String(key);
+  const keyBytes = keyEncoder ? keyEncoder.encode(k).length : k.length;
+  const isObj = entry && typeof entry === 'object';
+  const memo = isObj ? entrySizeMemo.get(entry) : undefined;
+  if (memo != null) return keyBytes + memo;
   try {
-    const raw = JSON.stringify(entry);
-    if (typeof TextEncoder !== 'undefined') {
-      const enc = new TextEncoder();
-      return enc.encode(String(key)).length + enc.encode(raw).length;
-    }
-    return String(key).length + String(raw).length;
+    const raw = JSON.stringify(entry) || '';
+    // Payloads are mostly ASCII; counting UTF-16 units avoids re-encoding megabytes each flush.
+    const bytes = raw.length;
+    if (isObj) entrySizeMemo.set(entry, bytes);
+    return keyBytes + bytes;
   } catch (_) {
     return 0;
   }
@@ -330,6 +429,7 @@ export function pruneExpiredCache() {
   for (const key of Object.keys(store)) {
     if (isCacheEntryExpired(key, store[key])) {
       delete store[key];
+      markRemoved(key);
       removed += 1;
     }
   }
@@ -359,6 +459,7 @@ export function evictCacheToBudget() {
   for (const item of candidates) {
     if (usedBytes <= CACHE_SOFT_LIMIT_BYTES) break;
     delete store[item.key];
+    markRemoved(item.key);
     usedBytes -= item.bytes;
     removed += 1;
   }
@@ -436,6 +537,7 @@ export function pruneDisabledCacheCategories() {
   for (const key of Object.keys(store)) {
     if (isCacheCategoryEnabled(cacheCategoryForKey(key))) continue;
     delete store[key];
+    markRemoved(key);
     removed += 1;
   }
   if (removed) persistCacheSoon();
@@ -588,6 +690,10 @@ export function clearCache() {
   const count = getCacheEntryCount();
   clearTimeout(cachePersistTimer);
   setCachePersistTimer(0);
+  cachePersistDueAt = 0;
+  dirtyKeys.clear();
+  removedKeys.clear();
+  touchedAt.clear();
   setCacheStore({});
   try {
     GM_setValue(CACHE_KEY, {});
@@ -608,13 +714,7 @@ export function migrateCacheForScriptVersion() {
   if (stored === SCRIPT_VERSION) {
     const pruned = pruneExpiredCache();
     const evicted = evictCacheToBudget();
-    if (pruned > 0 || evicted > 0) {
-      try {
-        GM_setValue(CACHE_KEY, readCacheStore());
-      } catch (_) {
-        /* ignore */
-      }
-    }
+    if (pruned > 0 || evicted > 0) flushCachePersist();
     return null;
   }
   clearCache();

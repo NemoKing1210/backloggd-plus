@@ -6,6 +6,7 @@ import {
   getCacheSource,
   getCached,
   getSteamOverride,
+  isSteamDisabled,
   getUserdataCached,
   isCacheEntryExpired,
   mergeCacheSources,
@@ -37,7 +38,13 @@ import {
 import { gmRequest } from '../gm.js';
 import { inflight, settings, steamResolveMissMemory } from '../state.js';
 import { slugifyForBackloggd } from '../utils/slug.js';
-import { normalizeTitle, pickSteamSearchItem } from '../utils/title.js';
+import {
+  normalizeTitle,
+  pickSteamSearchItem,
+  scoreSteamTitleMatch,
+  steamNameYearTag,
+} from '../utils/title.js';
+import { getKnownGameYear } from './game-profile.js';
 import { fetchSteamDbAppMeta } from './steamdb.js';
 
 export async function fetchSteamPopularTagMap() {
@@ -332,9 +339,13 @@ export function normalizeSimilarStoreItem(item, sourceTags, tagMap, apiIndex) {
     .slice(0, 2);
   const coverUrl = parseSimilarCoverUrl(appId, item?.assets);
   const slug = slugifyForBackloggd(name);
+  const releaseSec =
+    Number(item?.release?.original_release_date) || Number(item?.release?.steam_release_date) || 0;
+  const year = releaseSec > 0 ? new Date(releaseSec * 1000).getUTCFullYear() : null;
   return {
     appId,
     name,
+    year,
     coverUrl,
     matchPct,
     sharedTags,
@@ -373,6 +384,7 @@ export async function fetchSteamSimilarGames(appId, sourceTags, country) {
         data_request: {
           include_assets: true,
           include_basic_info: true,
+          include_release: true,
           include_tag_count: STEAM_TAGS_MAX,
         },
         filters: {
@@ -609,6 +621,7 @@ export async function hydrateSteamApp({
       franchise,
       systems,
       discountEndDate: extras?.discountEndDate ?? null,
+      releaseYear: parseSteamReleaseYear(details),
       tinyImage: hit?.tiny_image || hit?.small_capsule || null,
       headerImage: details?.header_image || null,
       usedUsFallback: Boolean(usedUsFallback),
@@ -688,9 +701,13 @@ export async function backfillSteamTags(cached, country) {
   };
 }
 
-export async function readSteamCacheOrBackfill(cacheKey, { includeTags, country, manualOverride }) {
+export async function readSteamCacheOrBackfill(
+  cacheKey,
+  { includeTags, country, manualOverride, accept }
+) {
   const cached = getCached(cacheKey);
   if (!cached) return null;
+  if (typeof accept === 'function' && !accept(cached)) return null;
   let result = {
     ...cached,
     manualOverride: Boolean(manualOverride || cached.manualOverride),
@@ -747,15 +764,76 @@ export async function fetchSteamByAppId(appId, country, { onPartial, includeTags
   }
 }
 
-export function steamMissKey(title, slug, country) {
+/**
+ * Same-title remakes/reboots (Resident Evil 2: 1998 vs 2019) share a name, so title scoring cannot
+ * tell them apart. For automatic matches only: an exact-title Steam app released this many years
+ * after the Backloggd entry is treated as a different game. Manual App IDs are never filtered.
+ */
+const STEAM_YEAR_MISMATCH_MIN_GAP = 10;
+
+export function parseSteamReleaseYear(details) {
+  const m = String(details?.release_date?.date || '').match(/(19|20)\d{2}/);
+  return m ? Number(m[0]) : null;
+}
+
+export function isSteamYearMismatch(steam, year, title) {
+  const bl = Number(year);
+  const st = Number(steam?.releaseYear);
+  if (!steam?.found || steam.manualOverride) return false;
+  if (!Number.isFinite(bl) || bl <= 0 || !Number.isFinite(st) || st <= 0) return false;
+  if (st - bl < STEAM_YEAR_MISMATCH_MIN_GAP) return false;
+  // "Resident Evil 2 (1998)" is explicitly the original, whatever its Steam release date.
+  if (steamNameYearTag(steam.name) === bl) return false;
+  return scoreSteamTitleMatch(steam.name, title) >= 100;
+}
+
+/** Title-keyed Steam cache key; the year keeps same-named games (original vs remake) apart. */
+export function steamTitleCacheKey(country, title, year = null) {
+  const y = Number(year);
+  const suffix = Number.isFinite(y) && y > 0 ? `@${y}` : '';
+  return `steam:${String(country || 'US').toUpperCase()}:${normalizeTitle(title)}${suffix}`;
+}
+
+/**
+ * Cache keys to try for a title lookup, best first. The year-keyed entry wins, but an entry stored
+ * before the Backloggd year was known (mini-profile / list card ran ahead of the game profile)
+ * is still a valid hit — otherwise the first hover would always refetch what it just stored.
+ */
+export function steamTitleCacheKeys(country, title, year = null) {
+  const exact = steamTitleCacheKey(country, title, year);
+  const base = steamTitleCacheKey(country, title, null);
+  return exact === base ? [exact] : [exact, base];
+}
+
+function steamYearMismatchResult(steam, year) {
+  return {
+    found: false,
+    yearMismatch: true,
+    _debug: {
+      ...(steam?._debug || {}),
+      reason: `Skipped Steam app ${steam?.appId} "${steam?.name}": released ${steam?.releaseYear}, Backloggd entry is ${year} (likely a remake/reboot)`,
+    },
+  };
+}
+
+export function steamMissKey(title, slug, country, year = null) {
   const cc = String(country || 'US').toUpperCase();
   const overrideId = getSteamOverride(slug);
   if (overrideId) return `id:${cc}:${overrideId}`;
-  return `title:${cc}:${normalizeTitle(title)}`;
+  return `title:${cc}:${normalizeTitle(title)}${Number(year) > 0 ? `@${Number(year)}` : ''}`;
 }
 
-export async function resolveSteamForGame({ title, slug, country, onPartial, includeTags = true }) {
-  const missKey = steamMissKey(title, slug, country);
+export async function resolveSteamForGame({ title, slug, country, onPartial, includeTags = true, year = null }) {
+  if (isSteamDisabled(slug)) {
+    return {
+      found: false,
+      manualOverride: true,
+      disabled: true,
+      _debug: { reason: 'Marked as not on Steam (manual)', slug },
+    };
+  }
+  const gameYear = getSteamOverride(slug) ? null : Number(year) || getKnownGameYear(slug);
+  const missKey = steamMissKey(title, slug, country, gameYear);
   if (steamResolveMissMemory.has(missKey)) {
     return {
       found: false,
@@ -772,7 +850,20 @@ export async function resolveSteamForGame({ title, slug, country, onPartial, inc
       manualOverride: true,
     });
   } else {
-    result = await fetchSteamBundle(title, country, { onPartial, includeTags });
+    result = await fetchSteamBundle(title, country, {
+      onPartial:
+        typeof onPartial === 'function'
+          ? (partial) => {
+              if (!isSteamYearMismatch(partial, gameYear, title)) onPartial(partial);
+            }
+          : undefined,
+      includeTags,
+      year: gameYear,
+    });
+    // Title-keyed Steam cache is shared with same-named games, so reject per slug (never cached).
+    if (isSteamYearMismatch(result, gameYear, title)) {
+      return steamYearMismatchResult(result, gameYear);
+    }
   }
 
   if (!result?.found) steamResolveMissMemory.add(missKey);
@@ -780,16 +871,20 @@ export async function resolveSteamForGame({ title, slug, country, onPartial, inc
   return result;
 }
 
-export async function fetchSteamBundle(title, country, { onPartial, includeTags = true } = {}) {
+export async function fetchSteamBundle(title, country, { onPartial, includeTags = true, year = null } = {}) {
   const requestedCountry = String(country || 'US').toUpperCase();
-  const cacheKey = `steam:${requestedCountry}:${normalizeTitle(title)}`;
+  const cacheKey = steamTitleCacheKey(requestedCountry, title, year);
   const inflightKey = includeTags ? cacheKey : `${cacheKey}:lite`;
-  const cached = await readSteamCacheOrBackfill(cacheKey, {
-    includeTags,
-    country: requestedCountry,
-    manualOverride: false,
-  });
-  if (cached) return cached;
+  for (const key of steamTitleCacheKeys(requestedCountry, title, year)) {
+    const cached = await readSteamCacheOrBackfill(key, {
+      includeTags,
+      country: requestedCountry,
+      manualOverride: false,
+      // The yearless fallback may belong to a same-named remake/original.
+      accept: key === cacheKey ? undefined : (hit) => !isSteamYearMismatch(hit, year, title),
+    });
+    if (cached) return cached;
+  }
 
   if (inflight.has(inflightKey)) return inflight.get(inflightKey);
 
@@ -854,7 +949,7 @@ export async function fetchSteamBundle(title, country, { onPartial, includeTags 
         if (!byId.has(item.id)) byId.set(item.id, item);
       }
       const mergedItems = [...byId.values()];
-      const hit = pickSteamSearchItem(mergedItems, title) || null;
+      const hit = pickSteamSearchItem(mergedItems, title, year) || null;
       const sessionIds = new Set(
         (sessionResult.items || []).map((i) => i?.id).filter(Boolean)
       );

@@ -5,12 +5,17 @@ import {
 import {
   CACHE_HOURS_MAX,
   DEFAULT_SETTINGS,
+  CUSTOM_LINK_STYLES,
   LINK_KEYS,
+  MINI_PROFILE_TRIGGERS,
+  OPENCRITIC_SOURCES,
   SCRIPT_VERSION,
   SETTINGS_KEY,
   STEAM_COUNTRY_CODES,
 } from './constants.js';
 import { SUPPORTED_LOCALES } from './i18n/index.js';
+import { normalizeHexColor } from './utils/color.js';
+import { normalizeLinkOrder, sanitizeCustomLinks } from './utils/custom-links.js';
 
 /** Envelope marker for exported JSON backups. */
 export const SETTINGS_EXPORT_KIND = 'backloggd-plus-settings';
@@ -39,6 +44,8 @@ const LINK_KEY_SET = new Set(LINK_KEYS);
 const BOOL_SETTING_KEYS = Object.keys(DEFAULT_SETTINGS).filter(
   (key) => key !== 'links' && typeof DEFAULT_SETTINGS[key] === 'boolean'
 );
+/** Handled by dedicated sanitizers (not simple scalars). */
+const LINK_LIST_KEYS = ['customLinks', 'linkOrder'];
 
 /** Keys that used to ride on showUserMiniProfile before the Profile settings tab. */
 const PROFILE_PAGE_SETTING_KEYS = [
@@ -60,11 +67,18 @@ function migrateProfilePageSettings(raw, merged) {
   return merged;
 }
 
+/** Normalize the quick-link list + order fields of a settings object in place. */
+function normalizeLinkLists(cfg) {
+  cfg.customLinks = sanitizeCustomLinks(cfg.customLinks);
+  cfg.linkOrder = normalizeLinkOrder(cfg.linkOrder, cfg.customLinks);
+  return cfg;
+}
+
 function cloneDefaults() {
-  return {
+  return normalizeLinkLists({
     ...DEFAULT_SETTINGS,
     links: { ...DEFAULT_SETTINGS.links },
-  };
+  });
 }
 
 export function loadSettings() {
@@ -78,6 +92,7 @@ export function loadSettings() {
       ...raw,
       links: { ...DEFAULT_SETTINGS.links, ...(raw.links || {}) },
     };
+    normalizeLinkLists(merged);
     return migrateProfilePageSettings(raw, merged);
   } catch (_) {
     return cloneDefaults();
@@ -90,6 +105,7 @@ export function saveSettings(next) {
     ...next,
     links: { ...DEFAULT_SETTINGS.links, ...(next.links || {}) },
   };
+  normalizeLinkLists(merged);
   GM_setValue(SETTINGS_KEY, merged);
 }
 
@@ -145,6 +161,13 @@ function coerceConvertCurrency(value, fallback) {
   return CONVERT_CURRENCY_CODES.has(ccy) ? ccy : fallback;
 }
 
+/** Secret keys: single-line, no whitespace, capped so a bad paste can't bloat storage. */
+export function coerceApiKey(value) {
+  return String(value ?? '')
+    .replace(/\s+/g, '')
+    .slice(0, 200);
+}
+
 function coerceCacheHours(value, fallback) {
   const n = typeof value === 'number' ? value : Number(String(value ?? '').trim());
   if (!Number.isFinite(n)) return fallback;
@@ -157,6 +180,22 @@ function coerceTranslateMode(value, fallback) {
     .toLowerCase();
   if (mode === 'replace' || mode === 'below') return mode;
   return fallback;
+}
+
+/** Unknown / legacy values fall back to hover so the cards never become unreachable. */
+export function normalizeMiniProfileTrigger(value) {
+  const mode = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  return MINI_PROFILE_TRIGGERS.includes(mode) ? mode : 'hover';
+}
+
+/** Unknown values fall back to plain links. */
+export function normalizeCustomLinksStyle(value) {
+  const style = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  return CUSTOM_LINK_STYLES.includes(style) ? style : 'link';
 }
 
 function sanitizeLinks(rawLinks, defaults) {
@@ -212,6 +251,15 @@ export function sanitizeSettings(raw) {
     next.uiLocale = coerceLocale(raw.uiLocale, base.uiLocale);
     appliedKeys.push('uiLocale');
   }
+  if ('siteLocale' in raw) {
+    const value = String(raw.siteLocale ?? '').trim().toLowerCase();
+    next.siteLocale = value === 'off' || /^[a-z]{2}$/.test(value) ? value : 'off';
+    appliedKeys.push('siteLocale');
+  }
+  if ('accentColor' in raw) {
+    next.accentColor = normalizeHexColor(raw.accentColor, base.accentColor);
+    appliedKeys.push('accentColor');
+  }
   if ('translateTargetLocale' in raw) {
     next.translateTargetLocale = coerceLocale(
       raw.translateTargetLocale,
@@ -227,12 +275,31 @@ export function sanitizeSettings(raw) {
     next.convertCurrency = coerceConvertCurrency(raw.convertCurrency, base.convertCurrency);
     appliedKeys.push('convertCurrency');
   }
+  if ('customLinksStyle' in raw) {
+    next.customLinksStyle = normalizeCustomLinksStyle(raw.customLinksStyle);
+    appliedKeys.push('customLinksStyle');
+  }
+  if ('openCriticSource' in raw) {
+    const source = String(raw.openCriticSource ?? '').trim().toLowerCase();
+    next.openCriticSource = OPENCRITIC_SOURCES.includes(source) ? source : base.openCriticSource;
+    appliedKeys.push('openCriticSource');
+  }
+  if ('openCriticApiKey' in raw) {
+    next.openCriticApiKey = coerceApiKey(raw.openCriticApiKey);
+    appliedKeys.push('openCriticApiKey');
+  }
   if ('translateDisplayMode' in raw) {
     next.translateDisplayMode = coerceTranslateMode(
       raw.translateDisplayMode,
       base.translateDisplayMode
     );
     appliedKeys.push('translateDisplayMode');
+  }
+
+  for (const key of ['gameMiniProfileTrigger', 'userMiniProfileTrigger']) {
+    if (!(key in raw)) continue;
+    next[key] = normalizeMiniProfileTrigger(raw[key]);
+    appliedKeys.push(key);
   }
 
   if ('links' in raw) {
@@ -242,6 +309,14 @@ export function sanitizeSettings(raw) {
       appliedKeys.push('links');
     }
     if (ignored > 0) ignoredKeys.push('links.*');
+  }
+
+  if (LINK_LIST_KEYS.some((key) => key in raw)) {
+    const customLinks = 'customLinks' in raw ? sanitizeCustomLinks(raw.customLinks) : [];
+    next.customLinks = customLinks;
+    next.linkOrder = normalizeLinkOrder('linkOrder' in raw ? raw.linkOrder : [], customLinks);
+    if ('customLinks' in raw) appliedKeys.push('customLinks');
+    if ('linkOrder' in raw) appliedKeys.push('linkOrder');
   }
 
   migrateProfilePageSettings(raw, next);
@@ -307,6 +382,8 @@ function looksLikeSettingsObject(raw) {
  */
 export function buildSettingsExport(cfg = loadSettings()) {
   const { settings: clean } = sanitizeSettings(cfg);
+  // Backups get shared; never write secrets into them.
+  clean.openCriticApiKey = '';
   return {
     kind: SETTINGS_EXPORT_KIND,
     version: SETTINGS_EXPORT_FORMAT_VERSION,

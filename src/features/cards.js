@@ -6,6 +6,7 @@ import {
   CARD_ATTR,
   CARD_CONCURRENCY,
   CARD_ROOT_MARGIN,
+  CARD_BADGE_SKIP_ANCESTOR,
   CARD_SKIP_ANCESTOR,
   CARD_SLUG_ATTR,
   CARD_STATE_ATTR,
@@ -66,7 +67,10 @@ export function parseCardSlug(cover) {
     const m = href.match(/\/games\/([^/?#]+)/i);
     if (m) return m[1].toLowerCase();
   }
-  return '';
+  // Activity feeds (e.g. "Latest from friends") link the cover to a log: /u/{user}/logs/{game-slug}/
+  const logHref = cover.querySelector?.('a.cover-link')?.getAttribute('href') || '';
+  const log = logHref.match(/\/u\/[^/?#]+\/logs\/([^/?#]+)/i);
+  return log ? log[1].toLowerCase() : '';
 }
 
 export function parseCardTitle(cover, slug) {
@@ -318,7 +322,7 @@ export function collectCardCovers() {
     return covers;
   }
   document.querySelectorAll('.game-cover').forEach((cover) => {
-    if (cover.closest(CARD_SKIP_ANCESTOR)) return;
+    if (cover.closest(CARD_SKIP_ANCESTOR) || cover.closest(CARD_BADGE_SKIP_ANCESTOR)) return;
     covers.push(cover);
   });
   return covers;

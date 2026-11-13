@@ -1,11 +1,13 @@
 # Backloggd Plus
 
+[English](README.md) · [Русский](README.ru.md) · [中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Polski](README.pl.md)
+
 [![CI](https://github.com/NemoKing1210/backloggd-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/backloggd-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.85-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.99-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 A userscript that extends [Backloggd](https://www.backloggd.com) with extra game information, richer UI, and quality-of-life improvements — without leaving the site.
 
@@ -15,27 +17,20 @@ Also listed on [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-
 
 > **Note:** Catalog pages on Greasy Fork / ScriptCat may lag behind this repository — I don’t always manage to push every release there right away. Sorry about that. For the newest build, prefer the [GitHub raw install URL](#quick-install) (or clone and `npm run build`). The script’s `@updateURL` / `@downloadURL` also point at GitHub `main`.
 
-> **Status:** early (`0.7.55`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.99`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Screenshots
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
-  <br />
-  <em>Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links</em>
-</p>
+The real userscript running on a live Backloggd game page.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png" alt="Game page — Plus rating, screenshots gallery, and similar games" width="900" />
-  <br />
-  <em>Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges</em>
-</p>
+![Backloggd Plus settings panel with General, Profile, Game page, Game card, Translation, Cache, Debug and About tabs](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-panel.png)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
-  <br />
-  <em>Settings — Game page toggles</em>
-</p>
+| | |
+|---|---|
+| ![Steam rows on a Backloggd game page](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png)<br>**Game page rows** — Steam owned · price · reviews · tags and categories, SteamDB details, Metacritic, Deck/Proton, players, GameStatus | ![Plus rating, screenshots gallery and similar games](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png)<br>**Scores & extras** — Plus rating average, Steam screenshots gallery, similar games with cover badges |
+| ![Settings search filtering every tab](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-search.png)<br>**Settings search** — filters every tab at once; matches highlighted, results grouped by tab | ![Quick links row with built-in and custom links](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/quick-links.png)<br>**Quick links** — built-in sites plus your own URL templates, shown as links or buttons |
+
+Also on game pages: skeletons while data loads, translate buttons, Fix match, game ID, SteamDB icon and cover, export (Notion CSV / Markdown / JSON), and hover mini-profiles on covers.
 
 ## Quick install
 
@@ -81,7 +76,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 **Game pages (`/games/{slug}/`):**
 
 - Native detail rows under Platforms — **Steam** (owned · wishlist · price · sale end / recent low · reviews · tags), **SteamDB** (franchise · systems · technologies · last record update), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Players**, **GameStatus**, **Links**
-- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug)
+- **Fix match** — override the automatic Steam App ID when store search is wrong (saved per slug); leave the App ID blank to mark a game as not on Steam
 - SteamDB visuals: app icon before the title, logo under **Change cover**, online player count
 - SteamDB details row: franchise / OS from Steam store APIs; technologies & last record update from SteamDB when reachable
 - Export button under the Steam header and in the log editor (optional; Settings → Game; Notion CSV / Markdown / JSON)
@@ -90,15 +85,15 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 - Steam header / community icon on game pages; screenshot gallery after game stats
 - Similar games under screenshots (Steam More Like This) with tag match %; cards link to Backloggd and can show the same cover badges as list grids
 - Skeleton placeholders while Steam / GameStatus / score data loads
-- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike)
+- Quick links with favicons (IGDB, Steam, SteamDB, Metacritic, OpenCritic, HLTB, PCGamingWiki, IsThereAnyDeal, GOG DB, GamesLike); reorder them by dragging, and add your own links from a URL template (`{title}` with a format of your choice, `{slug}`, `{appid}`, `{year}`, `{id}`) with an optional custom icon
 - Steam **Owned** / **Wishlist** badges when you are logged into Steam in the same browser (no API key)
 - GameStatus status badges on game pages and cover grids
-- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / OpenCritic / ProtonDB public APIs)
+- Works without API keys (Steam Store public endpoints + session userdata + GameStatus / HLTB / ProtonDB public APIs; OpenCritic found via PCGamingWiki, optional own RapidAPI key in Settings)
 
 **Lists / search / journal (cover grids):**
 
 - Compact badges on `.game-cover` cards — price, Steam review %, Owned, Wishlist, GameStatus (lazy-loaded in viewport; per-type toggles in Settings → Game card)
-- Hover mini-profile on covers — title, Backloggd rating, platforms, Steam price/reviews, GameStatus, quick links (optional viewport preload)
+- Mini-profile on covers (hover by default; or right-click / Shift + click) — title, Backloggd rating, platforms, Steam price/reviews, GameStatus, quick links; card tier (Rookie → Legend) follows the Backloggd rating (optional viewport preload)
 - Same cover badges / mini-profiles on Similar games cards (game page strip)
 
 **Steam app pages** (`store.steampowered.com/app/*`, `steamcommunity.com/app/*`):
@@ -114,8 +109,9 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
 - Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
+- Settings search: type in the box (or press `/` / `Ctrl+K`) to filter every tab at once — matches in labels and hints are highlighted, results are grouped by tab, `Esc` clears
 - Interface language (Auto or fixed locale)
-- User profile: mini-profile hover cards on avatars and usernames (optional viewport preload); profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
+- User profile: mini-profile cards on avatars and usernames (hover by default; or right-click / Shift + click; optional viewport preload); game covers inside the card (favorites / recent) open the game mini-profile; tier skin by games played can be turned off; profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / game mini-profile hover cards / links / Steam & SteamDB Backloggd buttons
 - Debug mode: one panel with clickable source links and a full response dump
@@ -137,6 +133,7 @@ Release steps for maintainers: see [DEVELOPMENT.md § Releases](https://github.c
 - [DEVELOPMENT.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/DEVELOPMENT.md) — local setup, repo layout, metadata, permissions, releases
 - [CONTRIBUTING.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/CONTRIBUTING.md) — PR guidelines, conventions, localization, contributors
 - [AGENTS.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/AGENTS.md) — architecture notes for AI coding agents
+- [SECURITY.md](https://github.com/NemoKing1210/backloggd-plus/blob/main/SECURITY.md) — how to report a vulnerability privately, scope, and how the script handles your data
 
 ```bash
 npm install

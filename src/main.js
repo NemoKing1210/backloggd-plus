@@ -7,7 +7,9 @@ import './styles/user-mini-profile.css';
 import './styles/game-mini-profile.css';
 import { bindCachePersistFlush, migrateCacheForScriptVersion } from './cache.js';
 import { ROOT_ATTR, SCRIPT_VERSION } from './constants.js';
+import { applyAccentColor } from './features/accent.js';
 import { ensureNavSettingsButton, openSettings } from './features/settings-panel.js';
+import { startSiteLocale } from './features/site-locale.js';
 import {
   bindSpaNavigation,
   isBackloggdHost,
@@ -27,6 +29,7 @@ function init() {
   document.documentElement.setAttribute(ROOT_ATTR, '1');
 
   reloadRuntimeSettings();
+  applyAccentColor();
   bindCachePersistFlush();
   const migrate = migrateCacheForScriptVersion();
   flushQueuedToasts();
@@ -55,6 +58,7 @@ function init() {
   }
 
   if (isBackloggdHost()) {
+    startSiteLocale();
     ensureNavSettingsButton();
     scanPage();
     observeDom(scanPage);

@@ -1,4 +1,8 @@
-import { fetchGameMiniProfile, peekCachedGameMiniProfile } from '../api/game-profile.js';
+import {
+  fetchGameMiniProfile,
+  gameTierIdFromRating,
+  peekCachedGameMiniProfile,
+} from '../api/game-profile.js';
 import { formatConvertedSalePair } from '../api/fx.js';
 import { fetchGameStatus, getGsStatusLabel, getGsStatusType } from '../api/gamestatus.js';
 import { fetchSteamByAppId, fetchSteamUserdata, resolveSteamForGame } from '../api/steam.js';
@@ -14,8 +18,10 @@ import {
   STEAMDB_APP_URL,
 } from '../constants.js';
 import { fmt } from '../i18n/index.js';
+import { normalizeMiniProfileTrigger } from '../settings.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
+import { morphCard } from '../utils/card-morph.js';
 import { debounce } from '../utils/debounce.js';
 import {
   parseCardAppId,
@@ -37,6 +43,30 @@ const PRELOAD_ATTR = 'data-blp-gmp-preload';
 const POPOVER_ID = 'blp-game-mini-profile';
 const GMP_SKIP =
   `#${POPOVER_ID}, .blp-gmp, #blp-user-mini-profile, .blp-ump, .blp-settings-backdrop, .blp-fix-match-backdrop, .blp-export-backdrop`;
+/** Game covers inside the user mini-profile card (favorites / recent) open a nested game card. */
+const NESTED_COVER = 'a.blp-ump__cover';
+const NESTED_CLASS = 'is-nested';
+const USER_POPOVER = '#blp-user-mini-profile';
+
+function isNestedCover(cover) {
+  return Boolean(cover?.matches?.(NESTED_COVER) && cover.closest(USER_POPOVER));
+}
+
+/** True when `node` is inside the game card that was opened from the user mini-profile card. */
+export function isInsideGameMiniProfile(node) {
+  const pop = node?.closest?.(`#${POPOVER_ID}`);
+  return Boolean(pop?.classList.contains(NESTED_CLASS));
+}
+
+/** Close the game card if it was opened from the user mini-profile card. */
+export function closeNestedGameMiniProfile({ immediate = false } = {}) {
+  if (!popoverEl?.classList.contains(NESTED_CLASS)) return;
+  hidePopover({ immediate });
+}
+
+/** Covers allowed inside the game page skip zone: Plus Similar games and Backloggd's native Related Games. */
+const GMP_ALLOW_IN_GAME_PAGE =
+  '.blp-similar__cover, turbo-frame#game_detail_section .game-cover';
 
 let bound = false;
 let openTimer = 0;
@@ -47,6 +77,8 @@ let activeCover = null;
 let activeSlug = '';
 let popoverEl = null;
 let fetchSeq = 0;
+/** Bumped on every paint / close so an older async render never overwrites a newer card. */
+let paintSeq = 0;
 let inFlightFetches = 0;
 const fetchQueue = [];
 let preloadObserver = null;
@@ -55,6 +87,30 @@ const preloadQueued = new Set();
 const profileFetches = new Map();
 /** Shared Steam+GS enrich promises keyed by lowercase slug. */
 const enrichFetches = new Map();
+
+function triggerMode() {
+  return normalizeMiniProfileTrigger(settings.gameMiniProfileTrigger);
+}
+
+/** Rating tier of the card, or null (tiers off / game not rated yet / still loading). */
+function cardTierId(ctx) {
+  if (settings.gameMiniProfileTiers === false) return null;
+  return gameTierIdFromRating(ctx?.profile?.rating);
+}
+
+function tierLabel(tierId) {
+  const map = {
+    rookie: t.miniProfileTierRookie,
+    bronze: t.miniProfileTierBronze,
+    silver: t.miniProfileTierSilver,
+    gold: t.miniProfileTierGold,
+    platinum: t.miniProfileTierPlatinum,
+    diamond: t.miniProfileTierDiamond,
+    master: t.miniProfileTierMaster,
+    legend: t.miniProfileTierLegend,
+  };
+  return map[tierId] || t.miniProfileTierRookie;
+}
 
 function enqueueFetch(fn) {
   return new Promise((resolve) => {
@@ -97,7 +153,8 @@ function ensurePopover() {
     window.clearTimeout(closeTimer);
   });
   popoverEl.addEventListener('pointerleave', () => {
-    scheduleClose();
+    // Click-triggered cards stay until an outside click / Escape.
+    if (triggerMode() === 'hover') scheduleClose();
   });
   document.body.appendChild(popoverEl);
   return popoverEl;
@@ -110,15 +167,24 @@ function finishHidePopover() {
     leaveHandler = null;
   }
   if (!popoverEl) return;
-  popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready');
+  popoverEl.classList.remove(
+    'is-open',
+    'is-leaving',
+    'is-loading',
+    'is-ready',
+    'is-updating',
+    NESTED_CLASS
+  );
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
+  activeCover?.removeAttribute?.(HOVER_ATTR);
   activeCover = null;
   activeSlug = '';
 }
 
 function hidePopover({ immediate = false } = {}) {
   if (!popoverEl) return;
+  paintSeq += 1;
   window.clearTimeout(leaveTimer);
   if (leaveHandler) {
     popoverEl.removeEventListener('transitionend', leaveHandler);
@@ -164,14 +230,16 @@ function openPopover(el) {
 function positionPopover(anchor) {
   const el = ensurePopover();
   const rect = anchor.getBoundingClientRect();
+  // A nested card sits beside the user card (not on top of it), level with the hovered cover.
+  const hostRect = anchor.closest?.(USER_POPOVER)?.getBoundingClientRect() || rect;
   const pad = 10;
   const cardW = el.offsetWidth || 312;
   const cardH = el.offsetHeight || 420;
-  let left = rect.right + pad;
+  let left = hostRect.right + pad;
   let top = rect.top + rect.height / 2 - cardH / 2;
 
   if (left + cardW > window.innerWidth - 12) {
-    left = rect.left - cardW - pad;
+    left = hostRect.left - cardW - pad;
   }
   if (left < 12) {
     left = Math.max(12, Math.min(window.innerWidth - cardW - 12, rect.left + rect.width / 2 - cardW / 2));
@@ -208,6 +276,13 @@ function renderHero(ctx) {
   const yearHtml = year
     ? `<span class="blp-gmp__year">${escapeHtml(year)}</span>`
     : '';
+  const tierId = cardTierId(ctx);
+  // Reserve the pill's slot while the rating loads so the title doesn't jump when the tier appears.
+  const tierHtml = tierId
+    ? `<span class="blp-gmp__tier-pill">${escapeHtml(tierLabel(tierId))}</span>`
+    : ctx.loadingProfile && !profile && settings.gameMiniProfileTiers !== false
+      ? skelBone('blp-gmp__bone--pill')
+      : '';
 
   return `
     <div class="blp-gmp__hero">
@@ -215,6 +290,7 @@ function renderHero(ctx) {
         <div class="blp-gmp__cover">${img}</div>
       </a>
       <div class="blp-gmp__hero-meta">
+        ${tierHtml}
         <a class="blp-gmp__title" href="${escapeAttr(gameUrl)}" data-turbo-frame="_top">${escapeHtml(title)}</a>
         <div class="blp-gmp__sub">
           ${yearHtml}
@@ -418,10 +494,13 @@ async function renderCard(ctx) {
   const parts = [];
   for (const section of SECTIONS) {
     const html = await section.render(ctx);
-    if (html) parts.push(html);
+    // Wrapper gives each block a stable identity so soft updates can morph it in place.
+    if (html) parts.push(`<div class="blp-gmp__sec" data-sec="${section.id}">${html}</div>`);
   }
+  const tierId = cardTierId(ctx);
+  const tierClass = tierId ? ` blp-gmp__card--tier blp-gmp__card--${escapeAttr(tierId)}` : '';
   return `
-    <div class="blp-gmp__card">
+    <div class="blp-gmp__card${tierClass}">
       <div class="blp-gmp__shine" aria-hidden="true"></div>
       ${parts.join('')}
     </div>
@@ -484,8 +563,10 @@ function ensureSteamEnrich({ slug, title, appId }) {
       fetchSteamUserdata().catch(() => null),
     ]);
 
+    // Same switches as the rest of the script: with both GameStatus toggles off, never query or show it.
+    const wantGameStatus = settings.showGameStatus || settings.showCardBadgeGameStatus !== false;
     let gamestatus = null;
-    if (steam?.found && steam.appId != null) {
+    if (wantGameStatus && steam?.found && steam.appId != null) {
       gamestatus = await fetchGameStatus({
         appId: steam.appId,
         storeUrl: steam.storeUrl,
@@ -523,11 +604,12 @@ function clearCoverMark(cover) {
 
 function isEligibleCover(cover) {
   if (!cover || cover.nodeType !== 1) return false;
+  if (isNestedCover(cover)) return Boolean(parseCardSlug(cover));
   if (!cover.classList?.contains('game-cover') && !cover.classList?.contains('blp-similar__cover')) {
     return false;
   }
   if (cover.closest(GMP_SKIP)) return false;
-  if (cover.closest(CARD_SKIP_ANCESTOR) && !cover.classList.contains('blp-similar__cover')) {
+  if (cover.closest(CARD_SKIP_ANCESTOR) && !cover.matches(GMP_ALLOW_IN_GAME_PAGE)) {
     return false;
   }
   const slug = parseCardSlug(cover);
@@ -634,28 +716,45 @@ function decorateCovers(root = document) {
 
 const decorateCoversSoon = debounce(() => decorateCovers(), 120);
 
+let trackSeq = 0;
+
+/** Follow the card's height changes (animated blocks) so it stays centered / on screen. */
+function trackPosition(cover, ms = 520) {
+  const seq = ++trackSeq;
+  const end = performance.now() + ms;
+  const step = () => {
+    if (seq !== trackSeq || activeCover !== cover || !popoverEl?.classList.contains('is-open')) {
+      return;
+    }
+    positionPopover(cover);
+    if (performance.now() < end) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
 async function paintCard(cover, ctx, { soft = false } = {}) {
   const el = ensurePopover();
+  const seq = ++paintSeq;
+  const html = await renderCard(ctx);
+  // A newer paint started while this one was rendering — it carries fresher data.
+  if (seq !== paintSeq) return;
   el.classList.toggle('is-loading', Boolean(ctx.loadingProfile && !ctx.profile));
-  if (soft) el.classList.remove('is-ready');
-  el.innerHTML = await renderCard(ctx);
+  // Soft = patch the already-open card in place (skeleton → data); no entrance replay.
+  el.classList.toggle('is-updating', soft);
+  if (soft) morphCard(el, html, '.blp-gmp__card');
+  else el.innerHTML = html;
   openPopover(el);
-  if (soft) {
-    void el.offsetWidth;
-    requestAnimationFrame(() => {
-      el.classList.add('is-ready');
-      positionPopover(cover);
-    });
-  } else {
-    positionPopover(cover);
-    requestAnimationFrame(() => positionPopover(cover));
-  }
+  positionPopover(cover);
+  trackPosition(cover);
 }
 
 async function showForCover(cover, { slug, title, appId, coverHint }) {
   const el = ensurePopover();
+  if (activeCover && activeCover !== cover) activeCover.removeAttribute(HOVER_ATTR);
+  cover.setAttribute(HOVER_ATTR, '1');
   activeCover = cover;
   activeSlug = slug;
+  el.classList.toggle(NESTED_CLASS, isNestedCover(cover));
   const seq = ++fetchSeq;
 
   let profile = peekCachedGameMiniProfile(slug);
@@ -695,13 +794,11 @@ async function showForCover(cover, { slug, title, appId, coverHint }) {
 
   el.classList.remove('is-loading');
   if (!profile) {
-    el.classList.remove('is-ready');
+    paintSeq += 1;
+    el.classList.add('is-updating');
     el.innerHTML = renderError(slug, title);
-    void el.offsetWidth;
-    requestAnimationFrame(() => {
-      el.classList.add('is-ready');
-      positionPopover(cover);
-    });
+    positionPopover(cover);
+    requestAnimationFrame(() => positionPopover(cover));
     const result = await enrichPromise;
     if (seq !== fetchSeq || activeSlug !== slug) return;
     enrichState = result;
@@ -748,6 +845,8 @@ function scheduleClose() {
 
 function resolveCover(target) {
   if (!target || target.nodeType !== 1) return null;
+  const nested = target.closest?.(NESTED_COVER);
+  if (nested && isEligibleCover(nested)) return markCover(nested);
   if (target.closest?.(GMP_SKIP)) return null;
   const cover = target.closest?.('.game-cover, .blp-similar__cover');
   if (!cover || !isEligibleCover(cover)) return null;
@@ -755,7 +854,7 @@ function resolveCover(target) {
 }
 
 function onPointerOver(e) {
-  if (settings.showGameMiniProfile === false) return;
+  if (settings.showGameMiniProfile === false || triggerMode() !== 'hover') return;
   const hit = resolveCover(e.target);
   if (!hit) return;
   if (!peekCachedGameMiniProfile(hit.slug)) {
@@ -770,12 +869,51 @@ function onPointerOver(e) {
 }
 
 function onPointerOut(e) {
+  if (triggerMode() !== 'hover') return;
   const hit = resolveCover(e.target);
   if (!hit) return;
   const related = e.relatedTarget;
   if (related && (hit.cover.contains(related) || popoverEl?.contains(related))) return;
   hit.cover.removeAttribute(HOVER_ATTR);
   scheduleClose();
+}
+
+/** Right-click / Shift+click modes: open the card instead of the native menu / navigation. */
+function onClickTrigger(e) {
+  if (settings.showGameMiniProfile === false) return;
+  const mode = triggerMode();
+  if (mode === 'hover') return;
+  if (mode === 'contextmenu') {
+    if (e.type !== 'contextmenu' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+  } else if (
+    e.type !== 'click' ||
+    e.button !== 0 ||
+    !e.shiftKey ||
+    e.ctrlKey ||
+    e.altKey ||
+    e.metaKey
+  ) {
+    return;
+  }
+  const hit = resolveCover(e.target);
+  if (!hit) return;
+  e.preventDefault();
+  e.stopPropagation();
+  window.clearTimeout(openTimer);
+  window.clearTimeout(closeTimer);
+  showForCover(hit.cover, hit);
+}
+
+function onOutsidePointerDown(e) {
+  if (triggerMode() === 'hover' || !popoverEl?.classList.contains('is-open')) return;
+  if (popoverEl.contains(e.target)) return;
+  hidePopover();
+}
+
+function onEscape(e) {
+  if (e.key !== 'Escape' || triggerMode() === 'hover') return;
+  if (!popoverEl?.classList.contains('is-open')) return;
+  hidePopover();
 }
 
 function onScrollOrResize() {
@@ -798,6 +936,10 @@ export function bindGameMiniProfiles() {
   bound = true;
   document.addEventListener('pointerover', onPointerOver, true);
   document.addEventListener('pointerout', onPointerOut, true);
+  document.addEventListener('contextmenu', onClickTrigger, true);
+  document.addEventListener('click', onClickTrigger, true);
+  document.addEventListener('pointerdown', onOutsidePointerDown, true);
+  document.addEventListener('keydown', onEscape, true);
   window.addEventListener('scroll', onScrollOrResize, true);
   window.addEventListener('resize', onScrollOrResize);
 }

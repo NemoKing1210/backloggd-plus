@@ -6,15 +6,20 @@ import {
   tierIdFromProfile,
 } from '../api/user-profile.js';
 import {
+  CARD_SLUG_ATTR,
+  CARD_TITLE_ATTR,
   PROFILE_FETCH_CONCURRENCY,
   PROFILE_HOVER_CLOSE_MS,
   PROFILE_HOVER_OPEN_MS,
   PROFILE_LEAVE_MS,
   PROFILE_PRELOAD_ROOT_MARGIN,
 } from '../constants.js';
+import { normalizeMiniProfileTrigger } from '../settings.js';
 import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
+import { morphCard } from '../utils/card-morph.js';
 import { debounce } from '../utils/debounce.js';
+import { closeNestedGameMiniProfile, isInsideGameMiniProfile } from './game-mini-profile.js';
 
 const HOVER_ATTR = 'data-blp-profile-hover';
 const MARK_ATTR = 'data-blp-ump';
@@ -33,6 +38,7 @@ let activeAnchor = null;
 let activeUsername = '';
 let popoverEl = null;
 let fetchSeq = 0;
+let trackSeq = 0;
 let inFlightFetches = 0;
 const fetchQueue = [];
 let preloadObserver = null;
@@ -41,6 +47,14 @@ const preloadQueued = new Set();
 const loadingUsernames = new Set();
 /** Shared fetch promises keyed by lowercase username. */
 const profileFetches = new Map();
+
+function triggerMode() {
+  return normalizeMiniProfileTrigger(settings.userMiniProfileTrigger);
+}
+
+function tiersEnabled() {
+  return settings.userMiniProfileTiers !== false;
+}
 
 function tierLabel(tierId) {
   const map = {
@@ -88,8 +102,11 @@ function ensurePopover() {
   popoverEl.addEventListener('pointerenter', () => {
     window.clearTimeout(closeTimer);
   });
-  popoverEl.addEventListener('pointerleave', () => {
-    scheduleClose();
+  popoverEl.addEventListener('pointerleave', (e) => {
+    // The nested game card belongs to this card — moving onto it is not leaving.
+    if (isInsideGameMiniProfile(e.relatedTarget)) return;
+    // Click-triggered cards stay until an outside click / Escape.
+    if (triggerMode() === 'hover') scheduleClose();
   });
   document.body.appendChild(popoverEl);
   return popoverEl;
@@ -102,15 +119,17 @@ function finishHidePopover() {
     leaveHandler = null;
   }
   if (!popoverEl) return;
-  popoverEl.classList.remove('is-open', 'is-leaving', 'is-loading', 'is-ready');
+  popoverEl.classList.remove('is-open', 'is-leaving', 'is-ready', 'is-updating');
   popoverEl.setAttribute('aria-hidden', 'true');
   popoverEl.innerHTML = '';
+  activeAnchor?.removeAttribute?.(HOVER_ATTR);
   activeAnchor = null;
   activeUsername = '';
 }
 
 function hidePopover({ immediate = false } = {}) {
   if (!popoverEl) return;
+  closeNestedGameMiniProfile({ immediate });
   window.clearTimeout(leaveTimer);
   if (leaveHandler) {
     popoverEl.removeEventListener('transitionend', leaveHandler);
@@ -124,7 +143,7 @@ function hidePopover({ immediate = false } = {}) {
   }
 
   popoverEl.classList.add('is-leaving');
-  popoverEl.classList.remove('is-open', 'is-loading', 'is-ready');
+  popoverEl.classList.remove('is-open', 'is-ready');
   popoverEl.setAttribute('aria-hidden', 'true');
 
   leaveHandler = (e) => {
@@ -198,7 +217,9 @@ function coversHtml(games, label, slots = 5) {
       const img = g.coverUrl
         ? `<img src="${escapeAttr(g.coverUrl)}" alt="" loading="lazy" decoding="async">`
         : `<span class="blp-ump__cover-ph"></span>`;
-      return `<a class="blp-ump__cover" href="${escapeAttr(g.href)}" title="${escapeAttr(g.title)}" data-turbo-frame="_top">${img}</a>`;
+      const slugAttr = g.slug ? ` ${CARD_SLUG_ATTR}="${escapeAttr(g.slug)}"` : '';
+      const titleAttr = g.title ? ` ${CARD_TITLE_ATTR}="${escapeAttr(g.title)}"` : '';
+      return `<a class="blp-ump__cover" href="${escapeAttr(g.href)}" title="${escapeAttr(g.title)}"${slugAttr}${titleAttr} data-turbo-frame="_top">${img}</a>`;
     })
     .join('');
   return `<div class="blp-ump__section"><div class="blp-ump__section-label">${escapeHtml(label)}</div><div class="blp-ump__covers" style="--ump-slots:${slots}">${items}</div></div>`;
@@ -222,102 +243,151 @@ function skelBone(extraClass = '') {
   return `<span class="blp-ump__bone ${extraClass}" aria-hidden="true"></span>`;
 }
 
-function renderLoading(username) {
-  const cached = peekCachedUserProfile(username);
-  const tierId = cached ? tierIdFromProfile(cached) : 'rookie';
-  return `
-    <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)} is-skeleton" aria-busy="true">
-      <div class="blp-ump__shine" aria-hidden="true"></div>
-      <div class="blp-ump__foil" aria-hidden="true"></div>
-      <div class="blp-ump__top">
-        ${skelBone('blp-ump__bone--pill')}
-        ${skelBone('blp-ump__bone--avg')}
-      </div>
-      <div class="blp-ump__avatar blp-ump__avatar--skel" aria-hidden="true">
-        <span class="blp-ump__spinner blp-ump__spinner--avatar" aria-hidden="true"></span>
-      </div>
-      <div class="blp-ump__name blp-ump__name--skel">${escapeHtml(username)}</div>
-      ${skelBone('blp-ump__bone--sub')}
-      <div class="blp-ump__stats" aria-hidden="true">
-        <div class="blp-ump__stat blp-ump__stat--skel">${skelBone('blp-ump__bone--stat-n')}${skelBone('blp-ump__bone--stat-l')}</div>
-        <div class="blp-ump__stat blp-ump__stat--skel">${skelBone('blp-ump__bone--stat-n')}${skelBone('blp-ump__bone--stat-l')}</div>
-        <div class="blp-ump__stat blp-ump__stat--skel">${skelBone('blp-ump__bone--stat-n')}${skelBone('blp-ump__bone--stat-l')}</div>
-      </div>
-      <div class="blp-ump__ratings blp-ump__ratings--skel" aria-hidden="true">
-        ${Array.from({ length: 10 }, (_, i) => `<span class="blp-ump__bar blp-ump__bar--skel" style="--h:${18 + ((i * 17) % 70)}%; --d:${i * 0.05}s"></span>`).join('')}
-      </div>
-      <div class="blp-ump__section" aria-hidden="true">
-        ${skelBone('blp-ump__bone--label')}
-        <div class="blp-ump__covers" style="--ump-slots:5">
-          ${Array.from({ length: 5 }, (_, i) => `<span class="blp-ump__cover blp-ump__cover--skel" style="--d:${0.12 + i * 0.06}s"></span>`).join('')}
-        </div>
-      </div>
-      <div class="blp-ump__status">${escapeHtml(t.miniProfileLoading)}</div>
-    </div>
-  `;
+function coversSkeleton(label, slots) {
+  const covers = Array.from(
+    { length: slots },
+    (_, i) => `<span class="blp-ump__cover blp-ump__cover--skel" style="--d:${0.12 + i * 0.06}s"></span>`
+  ).join('');
+  return `<div class="blp-ump__section" aria-hidden="true"><div class="blp-ump__section-label">${escapeHtml(label)}</div><div class="blp-ump__covers" style="--ump-slots:${slots}">${covers}</div></div>`;
 }
 
-function renderError(username) {
-  return `
-    <div class="blp-ump__card blp-ump__card--rookie">
-      <div class="blp-ump__shine" aria-hidden="true"></div>
-      <div class="blp-ump__name">${escapeHtml(username)}</div>
-      <div class="blp-ump__status">${escapeHtml(t.miniProfileError)}</div>
-      <a class="blp-ump__cta" href="/u/${escapeAttr(encodeURIComponent(username))}/" data-turbo-frame="_top">${escapeHtml(t.miniProfileViewProfile)}</a>
-    </div>
-  `;
+function profileUrlFor(ctx) {
+  return ctx.profile?.profileUrl || `/u/${encodeURIComponent(ctx.username)}/`;
 }
 
-function renderProfile(profile) {
-  const tierId = tierIdFromProfile(profile);
-  const bio = profile.bio
-    ? `<p class="blp-ump__bio">${escapeHtml(profile.bio)}</p>`
+function renderTop(ctx) {
+  const { profile, loading } = ctx;
+  const tiers = tiersEnabled();
+  if (loading) {
+    return `<div class="blp-ump__top">${tiers ? skelBone('blp-ump__bone--pill') : ''}${skelBone('blp-ump__bone--avg')}</div>`;
+  }
+  if (!profile) return '';
+  const pill = tiers
+    ? `<span class="blp-ump__tier-pill">${escapeHtml(tierLabel(tierIdFromProfile(profile)))}</span>`
     : '';
   const avg =
     profile.avgRating != null
       ? `<span class="blp-ump__avg" title="${escapeAttr(t.miniProfileAvgRating)}">${escapeHtml(String(profile.avgRating))}★</span>`
       : '';
+  if (!pill && !avg) return '';
+  return `<div class="blp-ump__top">${pill}${avg}</div>`;
+}
+
+function renderIdentity(ctx) {
+  const { profile, loading } = ctx;
+  const name = escapeHtml(profile?.username || ctx.username);
+  const url = escapeAttr(profileUrlFor(ctx));
+  const nameLink = `<a class="blp-ump__name" href="${url}" data-turbo-frame="_top">${name}</a>`;
+  if (!loading && !profile) return `<div class="blp-ump__identity">${nameLink}</div>`;
+
+  const avatar = loading
+    ? `<div class="blp-ump__avatar blp-ump__avatar--skel" aria-hidden="true"><span class="blp-ump__spinner blp-ump__spinner--avatar"></span></div>`
+    : `<div class="blp-ump__avatar">${
+        profile.avatarUrl
+          ? `<img src="${escapeAttr(profile.avatarUrl)}" alt="" loading="lazy" decoding="async">`
+          : ''
+      }</div>`;
+  const sub = loading
+    ? skelBone('blp-ump__bone--sub')
+    : escapeHtml(String(t.miniProfileTierSub || '').replace('{count}', formatCount(profile.gamesPlayed)));
   return `
-    <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)}">
+    <div class="blp-ump__identity">
+      <a class="blp-ump__avatar-link" href="${url}" data-turbo-frame="_top">${avatar}</a>
+      ${nameLink}
+      <div class="blp-ump__tier-sub">${sub}</div>
+    </div>
+  `;
+}
+
+function renderStats(ctx) {
+  const { profile, loading } = ctx;
+  if (!loading && !profile) return '';
+  const rows = [
+    [profile?.gamesPlayed, t.miniProfilePlayed],
+    [profile?.playedYear, t.miniProfileThisYear],
+    [profile?.backlog, t.miniProfileBacklog],
+  ];
+  // Labels are known up front, so only the numbers are skeletons (and the labels never re-render).
+  const stats = rows
+    .map(([value, label]) => {
+      const num = loading ? skelBone('blp-ump__bone--stat-n') : escapeHtml(formatCount(value));
+      return `<div class="blp-ump__stat"><strong>${num}</strong><span>${escapeHtml(label)}</span></div>`;
+    })
+    .join('');
+  return `<div class="blp-ump__stats">${stats}</div>`;
+}
+
+function renderRatings(ctx) {
+  if (ctx.loading) {
+    const bars = Array.from(
+      { length: 10 },
+      (_, i) => `<span class="blp-ump__bar blp-ump__bar--skel" style="--h:${18 + ((i * 17) % 70)}%; --d:${i * 0.05}s"></span>`
+    ).join('');
+    return `<div class="blp-ump__ratings" aria-hidden="true">${bars}</div>`;
+  }
+  return ratingBarsHtml(ctx.profile?.ratings);
+}
+
+function renderBio(ctx) {
+  const bio = ctx.profile?.bio;
+  return bio ? `<p class="blp-ump__bio">${escapeHtml(bio)}</p>` : '';
+}
+
+function renderFavorites(ctx) {
+  if (ctx.loading) return coversSkeleton(t.miniProfileFavorites, 5);
+  return coversHtml(ctx.profile?.favorites, t.miniProfileFavorites, 5);
+}
+
+function renderRecent(ctx) {
+  return coversHtml(ctx.profile?.recent, t.miniProfileRecent, 4);
+}
+
+function renderBadges(ctx) {
+  return badgesHtml(ctx.profile?.badges);
+}
+
+function renderStatus(ctx) {
+  if (ctx.loading || ctx.profile) return '';
+  return `<div class="blp-ump__status">${escapeHtml(t.miniProfileError)}</div>`;
+}
+
+function renderCta(ctx) {
+  return `<a class="blp-ump__cta" href="${escapeAttr(profileUrlFor(ctx))}" data-turbo-frame="_top">${escapeHtml(t.miniProfileViewProfile)}</a>`;
+}
+
+/** Ordered section renderers — extend here without touching hover lifecycle. */
+const SECTIONS = [
+  { id: 'top', render: renderTop },
+  { id: 'identity', render: renderIdentity },
+  { id: 'stats', render: renderStats },
+  { id: 'ratings', render: renderRatings },
+  { id: 'bio', render: renderBio },
+  { id: 'favorites', render: renderFavorites },
+  { id: 'recent', render: renderRecent },
+  { id: 'badges', render: renderBadges },
+  { id: 'status', render: renderStatus },
+  { id: 'cta', render: renderCta },
+];
+
+/**
+ * One card for every state (skeleton / profile / error): the same sections in the same order, so
+ * a soft update only changes what actually differs.
+ */
+function renderCard(ctx) {
+  const tiers = tiersEnabled();
+  // Tiers off (or still loading / failed) → the neutral Rookie skin.
+  const tierId = tiers && ctx.profile ? tierIdFromProfile(ctx.profile) : 'rookie';
+  const parts = [];
+  for (const section of SECTIONS) {
+    const html = section.render(ctx);
+    // Wrapper gives each block a stable identity so soft updates can morph it in place.
+    if (html) parts.push(`<div class="blp-ump__sec" data-sec="${section.id}">${html}</div>`);
+  }
+  return `
+    <div class="blp-ump__card blp-ump__card--${escapeAttr(tierId)}${tiers ? '' : ' blp-ump__card--plain'}">
       <div class="blp-ump__shine" aria-hidden="true"></div>
       <div class="blp-ump__foil" aria-hidden="true"></div>
-      <div class="blp-ump__top">
-        <span class="blp-ump__tier-pill">${escapeHtml(tierLabel(tierId))}</span>
-        ${avg}
-      </div>
-      <a class="blp-ump__avatar-link" href="${escapeAttr(profile.profileUrl)}" data-turbo-frame="_top">
-        <div class="blp-ump__avatar">
-          ${
-            profile.avatarUrl
-              ? `<img src="${escapeAttr(profile.avatarUrl)}" alt="" loading="lazy" decoding="async">`
-              : ''
-          }
-        </div>
-      </a>
-      <a class="blp-ump__name" href="${escapeAttr(profile.profileUrl)}" data-turbo-frame="_top">${escapeHtml(profile.username)}</a>
-      <div class="blp-ump__tier-sub">${escapeHtml(
-        String(t.miniProfileTierSub || '').replace('{count}', formatCount(profile.gamesPlayed))
-      )}</div>
-      <div class="blp-ump__stats">
-        <div class="blp-ump__stat">
-          <strong>${escapeHtml(formatCount(profile.gamesPlayed))}</strong>
-          <span>${escapeHtml(t.miniProfilePlayed)}</span>
-        </div>
-        <div class="blp-ump__stat">
-          <strong>${escapeHtml(formatCount(profile.playedYear))}</strong>
-          <span>${escapeHtml(t.miniProfileThisYear)}</span>
-        </div>
-        <div class="blp-ump__stat">
-          <strong>${escapeHtml(formatCount(profile.backlog))}</strong>
-          <span>${escapeHtml(t.miniProfileBacklog)}</span>
-        </div>
-      </div>
-      ${ratingBarsHtml(profile.ratings)}
-      ${bio}
-      ${coversHtml(profile.favorites, t.miniProfileFavorites, 5)}
-      ${coversHtml(profile.recent, t.miniProfileRecent, 4)}
-      ${badgesHtml(profile.badges)}
-      <a class="blp-ump__cta" href="${escapeAttr(profile.profileUrl)}" data-turbo-frame="_top">${escapeHtml(t.miniProfileViewProfile)}</a>
+      ${parts.join('')}
     </div>
   `;
 }
@@ -551,44 +621,60 @@ function decorateProfileAnchors(root = document) {
 
 const decorateProfileAnchorsSoon = debounce(() => decorateProfileAnchors(), 120);
 
-async function showForAnchor(anchor, username) {
+/** Follow the card's height changes (animated blocks) so it stays beside the anchor / on screen. */
+function trackPosition(anchor, ms = 520) {
+  const seq = ++trackSeq;
+  const end = performance.now() + ms;
+  const step = () => {
+    if (seq !== trackSeq || activeAnchor !== anchor || !popoverEl?.classList.contains('is-open')) {
+      return;
+    }
+    positionPopover(anchor);
+    if (performance.now() < end) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function paintCard(anchor, ctx, { soft = false } = {}) {
   const el = ensurePopover();
+  const html = renderCard(ctx);
+  if (ctx.loading) {
+    el.setAttribute('aria-busy', 'true');
+    el.setAttribute('aria-label', t.miniProfileLoading);
+  } else {
+    el.removeAttribute('aria-busy');
+    el.removeAttribute('aria-label');
+  }
+  // Soft = patch the already-open card in place (skeleton → data); no entrance replay.
+  el.classList.toggle('is-updating', soft);
+  if (soft) morphCard(el, html, '.blp-ump__card');
+  else el.innerHTML = html;
+  openPopover(el);
+  positionPopover(anchor);
+  trackPosition(anchor);
+}
+
+async function showForAnchor(anchor, username) {
+  ensurePopover();
+  // Re-rendering the card replaces its covers, so a game card opened from them would be orphaned.
+  closeNestedGameMiniProfile({ immediate: true });
+  if (activeAnchor && activeAnchor !== anchor) activeAnchor.removeAttribute(HOVER_ATTR);
+  anchor.setAttribute(HOVER_ATTR, '1');
   activeAnchor = anchor;
   activeUsername = username;
   const seq = ++fetchSeq;
 
   const cached = peekCachedUserProfile(username);
-  if (cached) {
-    applyTierToUsername(username, tierIdFromProfile(cached));
-    el.classList.remove('is-loading');
-    el.innerHTML = renderProfile(cached);
-    openPopover(el);
-    positionPopover(anchor);
-    requestAnimationFrame(() => positionPopover(anchor));
-    return;
-  }
-
-  el.classList.add('is-loading');
-  el.innerHTML = renderLoading(username);
-  openPopover(el);
-  positionPopover(anchor);
+  if (cached) applyTierToUsername(username, tierIdFromProfile(cached));
+  paintCard(anchor, { username, profile: cached, loading: !cached });
+  if (cached) return;
 
   const profile = await ensureProfileFetch(username);
-  if (seq !== fetchSeq || activeUsername !== username) return;
-
-  el.classList.remove('is-loading');
-  el.classList.remove('is-ready');
-  if (!profile) {
-    el.innerHTML = renderError(username);
-  } else {
-    el.innerHTML = renderProfile(profile);
+  // Superseded, or the card was closed while loading (it may still be fading out).
+  if (seq !== fetchSeq || activeUsername !== username || !popoverEl?.classList.contains('is-open')) {
+    return;
   }
-  // Soft re-enter for content swap.
-  void el.offsetWidth;
-  requestAnimationFrame(() => {
-    el.classList.add('is-ready');
-    positionPopover(anchor);
-  });
+  paintCard(anchor, { username, profile, loading: false }, { soft: true });
 }
 
 function scheduleOpen(anchor, username) {
@@ -624,7 +710,12 @@ function resolveProfileAnchor(target) {
 }
 
 function onPointerOver(e) {
-  if (settings.showUserMiniProfile === false) return;
+  if (settings.showUserMiniProfile === false || triggerMode() !== 'hover') return;
+  // Pointer reached the nested game card: keep this card open.
+  if (isInsideGameMiniProfile(e.target)) {
+    window.clearTimeout(closeTimer);
+    return;
+  }
   const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   markProfileAnchor(hit.anchor);
@@ -642,12 +733,58 @@ function onPointerOver(e) {
 }
 
 function onPointerOut(e) {
+  if (triggerMode() !== 'hover') return;
+  // Leaving the nested game card for somewhere other than this card closes this card too.
+  if (isInsideGameMiniProfile(e.target)) {
+    const to = e.relatedTarget;
+    if (!to || (!popoverEl?.contains(to) && !isInsideGameMiniProfile(to))) scheduleClose();
+    return;
+  }
   const hit = resolveProfileAnchor(e.target);
   if (!hit) return;
   const related = e.relatedTarget;
   if (related && (hit.anchor.contains(related) || popoverEl?.contains(related))) return;
   hit.anchor.removeAttribute(HOVER_ATTR);
   scheduleClose();
+}
+
+/** Right-click / Shift+click modes: open the card instead of the native menu / navigation. */
+function onClickTrigger(e) {
+  if (settings.showUserMiniProfile === false) return;
+  const mode = triggerMode();
+  if (mode === 'hover') return;
+  if (mode === 'contextmenu') {
+    if (e.type !== 'contextmenu' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+  } else if (
+    e.type !== 'click' ||
+    e.button !== 0 ||
+    !e.shiftKey ||
+    e.ctrlKey ||
+    e.altKey ||
+    e.metaKey
+  ) {
+    return;
+  }
+  const hit = resolveProfileAnchor(e.target);
+  if (!hit) return;
+  markProfileAnchor(hit.anchor);
+  e.preventDefault();
+  e.stopPropagation();
+  window.clearTimeout(openTimer);
+  window.clearTimeout(closeTimer);
+  showForAnchor(hit.anchor, hit.username);
+}
+
+function onOutsidePointerDown(e) {
+  if (triggerMode() === 'hover' || !popoverEl?.classList.contains('is-open')) return;
+  if (popoverEl.contains(e.target) || isInsideGameMiniProfile(e.target)) return;
+  hidePopover();
+}
+
+function onEscape(e) {
+  if (e.key !== 'Escape' || triggerMode() === 'hover') return;
+  if (!popoverEl?.classList.contains('is-open')) return;
+  hidePopover();
 }
 
 function onScrollOrResize() {
@@ -670,6 +807,10 @@ export function bindUserMiniProfiles() {
   bound = true;
   document.addEventListener('pointerover', onPointerOver, true);
   document.addEventListener('pointerout', onPointerOut, true);
+  document.addEventListener('contextmenu', onClickTrigger, true);
+  document.addEventListener('click', onClickTrigger, true);
+  document.addEventListener('pointerdown', onOutsidePointerDown, true);
+  document.addEventListener('keydown', onEscape, true);
   window.addEventListener('scroll', onScrollOrResize, true);
   window.addEventListener('resize', onScrollOrResize);
 }

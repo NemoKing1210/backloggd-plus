@@ -1,5 +1,14 @@
 /* Game mini-profile hover card on cover grids */
 
+/* Registered so the card colors can transition when the tier lands after the data loads. */
+@property --gmp-accent { syntax: '<color>'; inherits: true; initial-value: #3db89a; }
+@property --gmp-bg0 { syntax: '<color>'; inherits: true; initial-value: #12161c; }
+@property --gmp-bg1 { syntax: '<color>'; inherits: true; initial-value: #1c2430; }
+@property --gmp-edge { syntax: '<color>'; inherits: true; initial-value: rgba(61, 184, 154, 0.28); }
+@property --gmp-glow { syntax: '<color>'; inherits: true; initial-value: rgba(61, 184, 154, 0.22); }
+@property --gmp-ink { syntax: '<color>'; inherits: true; initial-value: #eef3f6; }
+@property --gmp-foil { syntax: '<number>'; inherits: true; initial-value: 0; }
+
 .game-cover[data-blp-gmp-hover='1'] .overflow-wrapper,
 .blp-similar__cover[data-blp-gmp-hover='1'] {
   filter: brightness(1.06);
@@ -19,6 +28,11 @@
     transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
     filter 0.34s ease;
   will-change: transform, opacity, filter;
+}
+
+/* Opened from a cover inside the user mini-profile card — always stack above it. */
+.blp-gmp.is-nested {
+  z-index: 1000006;
 }
 
 .blp-gmp.is-open {
@@ -65,6 +79,30 @@
 .blp-gmp.is-open.is-ready .blp-gmp__card > *:nth-child(7) { transition-delay: 0.14s; }
 .blp-gmp.is-open.is-ready .blp-gmp__card > *:nth-child(8) { transition-delay: 0.16s; }
 
+/* In-place content swap (skeleton → data): keep the card steady, no second entrance. */
+.blp-gmp.is-updating {
+  transition:
+    opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.34s ease,
+    top 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blp-gmp.is-updating .blp-gmp__card {
+  animation: none;
+}
+
+.blp-gmp.is-updating.is-open .blp-gmp__card > *:not(.blp-gmp__shine) {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.blp-gmp.is-updating.is-open .blp-gmp__shine {
+  display: none;
+}
+
 .blp-gmp.is-leaving .blp-gmp__card {
   animation: blp-gmp-card-out 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
@@ -101,20 +139,50 @@
   --gmp-muted: rgba(238, 243, 246, 0.7);
   --gmp-bg0: #12161c;
   --gmp-bg1: #1c2430;
-  --gmp-accent: #3db89a;
-  --gmp-edge: rgba(61, 184, 154, 0.28);
+  --gmp-accent: var(--blp-accent, #3db89a);
+  --gmp-edge: rgba(var(--blp-accent-rgb, 61, 184, 154), 0.28);
+  --gmp-glow: color-mix(in srgb, var(--gmp-accent) 22%, transparent);
+  --gmp-foil: 0;
   position: relative;
   overflow: hidden;
   border-radius: 14px;
   padding: 14px 14px 12px;
   color: var(--gmp-ink);
   background:
-    radial-gradient(120% 80% at 12% 0%, color-mix(in srgb, var(--gmp-accent) 22%, transparent), transparent 55%),
+    radial-gradient(120% 80% at 12% 0%, var(--gmp-glow), transparent 55%),
     linear-gradient(165deg, var(--gmp-bg1), var(--gmp-bg0) 62%);
   border: 1px solid var(--gmp-edge);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 0 0 1px rgba(0, 0, 0, 0.25);
+  transition:
+    --gmp-accent 0.7s ease,
+    --gmp-bg0 0.7s ease,
+    --gmp-bg1 0.7s ease,
+    --gmp-edge 0.7s ease,
+    --gmp-glow 0.7s ease,
+    --gmp-ink 0.7s ease,
+    --gmp-foil 0.7s ease;
+}
+
+/* Blocks are wrapped so soft updates can morph them in place. Wrapper owns the vertical gap
+   (flow-root keeps child margins inside, so animating its height never makes margins jump). */
+.blp-gmp .blp-gmp__sec {
+  display: flow-root;
+  margin-top: 10px;
+}
+
+.blp-gmp .blp-gmp__sec[data-sec='hero'] {
+  margin-top: 0;
+}
+
+.blp-gmp .blp-gmp__sec[data-sec='links'] {
+  margin-top: 12px;
+}
+
+.blp-gmp .blp-gmp__sec > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .blp-gmp__shine {
@@ -446,7 +514,7 @@
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
-  color: #0b1512;
+  color: var(--blp-accent-ink, #0b1512);
   background: linear-gradient(180deg, color-mix(in srgb, var(--gmp-accent) 92%, #fff), var(--gmp-accent));
   border-radius: 9px;
   padding: 8px 12px;
@@ -464,6 +532,164 @@
   text-align: center;
 }
 
+/* —— Rating tiers (same palette as user cards; driven by Backloggd average rating) —— */
+.blp-gmp__tier-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #120e0a;
+  background: linear-gradient(180deg, #fff6e8, var(--gmp-accent));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+}
+
+.blp-gmp__card--tier::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--gmp-edge);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.blp-gmp__card--tier::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--gmp-foil, 0);
+  mix-blend-mode: soft-light;
+  background:
+    repeating-linear-gradient(-18deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 7px),
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.2), transparent 45%);
+}
+
+.blp-gmp__card--tier .blp-gmp__cover {
+  box-shadow:
+    0 0 0 2px var(--gmp-accent),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.blp-gmp__card--tier .blp-gmp__title:hover {
+  color: #fff;
+}
+
+.blp-gmp__card--rookie {
+  --gmp-accent: #8b9098;
+  --gmp-bg0: #15171a;
+  --gmp-bg1: #23262b;
+  --gmp-edge: rgba(180, 190, 200, 0.22);
+  --gmp-glow: rgba(140, 150, 160, 0.16);
+}
+
+.blp-gmp__card--bronze {
+  --gmp-accent: #c8843d;
+  --gmp-bg0: #1a120c;
+  --gmp-bg1: #3a2414;
+  --gmp-edge: rgba(210, 140, 70, 0.4);
+  --gmp-glow: rgba(200, 120, 50, 0.28);
+}
+
+.blp-gmp__card--silver {
+  --gmp-accent: #c5ced8;
+  --gmp-bg0: #12151a;
+  --gmp-bg1: #2a313a;
+  --gmp-edge: rgba(210, 220, 230, 0.38);
+  --gmp-glow: rgba(190, 205, 220, 0.24);
+  --gmp-ink: #f2f5f8;
+}
+
+.blp-gmp__card--gold {
+  --gmp-accent: #e6b735;
+  --gmp-bg0: #1a1406;
+  --gmp-bg1: #3d2e0a;
+  --gmp-edge: rgba(240, 190, 60, 0.48);
+  --gmp-glow: rgba(230, 180, 40, 0.32);
+  --gmp-foil: 0.35;
+}
+
+.blp-gmp__card--platinum {
+  --gmp-accent: #9ad7e8;
+  --gmp-bg0: #0c1418;
+  --gmp-bg1: #1b2c34;
+  --gmp-edge: rgba(160, 220, 235, 0.45);
+  --gmp-glow: rgba(120, 200, 220, 0.28);
+  --gmp-ink: #eef8fb;
+  --gmp-foil: 0.42;
+}
+
+.blp-gmp__card--diamond {
+  --gmp-accent: #6de0ff;
+  --gmp-bg0: #071018;
+  --gmp-bg1: #123044;
+  --gmp-edge: rgba(110, 220, 255, 0.5);
+  --gmp-glow: rgba(80, 200, 255, 0.34);
+  --gmp-ink: #eaf9ff;
+  --gmp-foil: 0.5;
+}
+
+.blp-gmp__card--diamond::after {
+  background:
+    conic-gradient(from 120deg, rgba(255, 255, 255, 0.15), transparent 30%, rgba(120, 220, 255, 0.2), transparent 70%),
+    repeating-linear-gradient(-18deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 7px);
+}
+
+.blp-gmp__card--master {
+  --gmp-accent: #3ecf8e;
+  --gmp-bg0: #07140f;
+  --gmp-bg1: #123528;
+  --gmp-edge: rgba(70, 220, 150, 0.48);
+  --gmp-glow: rgba(50, 200, 130, 0.32);
+  --gmp-ink: #eafff4;
+  --gmp-foil: 0.45;
+}
+
+.blp-gmp__card--legend {
+  --gmp-accent: #ffc14d;
+  --gmp-bg0: #100a05;
+  --gmp-bg1: #2a1808;
+  --gmp-edge: rgba(255, 190, 70, 0.55);
+  --gmp-glow: rgba(255, 160, 40, 0.36);
+  --gmp-foil: 0.55;
+}
+
+.blp-gmp__card--legend::after {
+  animation: blp-gmp-foil 6s linear infinite;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 80, 80, 0.18),
+    rgba(255, 200, 60, 0.22),
+    rgba(80, 220, 160, 0.18),
+    rgba(80, 160, 255, 0.2),
+    rgba(255, 80, 80, 0.18)
+  );
+  background-size: 220% 220%;
+}
+
+.blp-gmp__card--legend .blp-gmp__tier-pill {
+  background: linear-gradient(90deg, #ffb347, #ffd76a, #ffe9a8, #ffb347);
+  background-size: 200% 100%;
+  animation: blp-gmp-legend-pill 2.8s linear infinite;
+}
+
+@keyframes blp-gmp-foil {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes blp-gmp-legend-pill {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
 /* Skeleton bones */
 .blp-gmp__bone {
   display: inline-block;
@@ -476,6 +702,13 @@
   );
   background-size: 200% 100%;
   animation: blp-gmp-shimmer 1.1s ease-in-out infinite;
+}
+
+.blp-gmp__bone--pill {
+  align-self: flex-start;
+  width: 64px;
+  height: 20px;
+  border-radius: 999px;
 }
 
 .blp-gmp__bone--rating {
@@ -525,6 +758,9 @@
   .blp-gmp.is-leaving,
   .blp-gmp.is-open .blp-gmp__card,
   .blp-gmp.is-open .blp-gmp__card > *:not(.blp-gmp__shine),
+  .blp-gmp__card,
+  .blp-gmp__card--legend::after,
+  .blp-gmp__card--legend .blp-gmp__tier-pill,
   .blp-gmp__bone {
     animation: none !important;
     transition: none !important;

@@ -1,5 +1,13 @@
 /* User mini-profile hover card (tiers by games played) */
 
+/* Registered so the card colors can transition when the tier lands after the profile loads. */
+@property --ump-accent { syntax: '<color>'; inherits: true; initial-value: #9a8b78; }
+@property --ump-bg0 { syntax: '<color>'; inherits: true; initial-value: #1a1714; }
+@property --ump-bg1 { syntax: '<color>'; inherits: true; initial-value: #2a241c; }
+@property --ump-edge { syntax: '<color>'; inherits: true; initial-value: rgba(255, 220, 170, 0.28); }
+@property --ump-glow { syntax: '<color>'; inherits: true; initial-value: rgba(180, 140, 90, 0.2); }
+@property --ump-ink { syntax: '<color>'; inherits: true; initial-value: #f4efe6; }
+
 /* Eligible avatar ring — default until tier is known from cache */
 a[data-blp-ump] > img,
 a[data-blp-ump] img {
@@ -160,6 +168,26 @@ a[data-blp-ump-loading] img {
 .blp-ump.is-open.is-ready .blp-ump__card > *:nth-child(11) { transition-delay: 0.21s; }
 .blp-ump.is-open.is-ready .blp-ump__card > *:nth-child(12) { transition-delay: 0.23s; }
 
+/* In-place content swap (skeleton → data): keep the card steady, no second entrance. */
+.blp-ump.is-updating {
+  transition:
+    opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.34s ease,
+    top 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blp-ump.is-updating .blp-ump__card {
+  animation: none;
+}
+
+.blp-ump.is-updating.is-open .blp-ump__card > *:not(.blp-ump__shine):not(.blp-ump__foil) {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 .blp-ump.is-leaving .blp-ump__card {
   animation: blp-ump-card-out 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
@@ -212,6 +240,22 @@ a[data-blp-ump-loading] img {
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35);
   font-family: Montserrat, Roboto, system-ui, sans-serif;
+  transition:
+    --ump-accent 0.7s ease,
+    --ump-bg0 0.7s ease,
+    --ump-bg1 0.7s ease,
+    --ump-edge 0.7s ease,
+    --ump-glow 0.7s ease,
+    --ump-ink 0.7s ease;
+}
+
+/* Blocks are wrapped so soft updates can morph them in place. Wrapper owns the stacking above the
+   shine / foil layers; flow-root keeps child margins inside, so animating its height never makes
+   them jump. */
+.blp-ump .blp-ump__sec {
+  display: flow-root;
+  position: relative;
+  z-index: 1;
 }
 
 .blp-ump__card::before {
@@ -244,6 +288,7 @@ a[data-blp-ump-loading] img {
 
 .blp-ump__foil {
   opacity: 0;
+  transition: opacity 0.7s ease;
   mix-blend-mode: soft-light;
   background:
     repeating-linear-gradient(
@@ -262,6 +307,10 @@ a[data-blp-ump-loading] img {
   margin-bottom: 10px;
   position: relative;
   z-index: 1;
+}
+
+.blp-ump__card--plain .blp-ump__top {
+  justify-content: flex-end;
 }
 
 .blp-ump__tier-pill {
@@ -361,44 +410,17 @@ a[data-blp-ump-loading] img {
 }
 
 .blp-ump__bone--sub {
-  width: 48%;
+  display: inline-block;
+  width: 96px;
   height: 10px;
-  margin: 6px auto 12px;
+  vertical-align: middle;
   animation-delay: 0.12s;
-  position: relative;
-  z-index: 1;
 }
 
 .blp-ump__bone--stat-n {
   width: 42%;
   height: 15px;
-  margin: 0 auto 6px;
-}
-
-.blp-ump__bone--stat-l {
-  width: 58%;
-  height: 8px;
-  margin: 0 auto;
-  animation-delay: 0.1s;
-}
-
-.blp-ump__bone--label {
-  width: 64px;
-  height: 9px;
-  margin-bottom: 8px;
-  animation-delay: 0.16s;
-}
-
-.blp-ump__stat--skel {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 44px;
-}
-
-.blp-ump__name--skel {
-  opacity: 0.85;
-  letter-spacing: 0.02em;
+  margin: 1px auto 0;
 }
 
 .blp-ump__bar--skel {
@@ -426,17 +448,6 @@ a[data-blp-ump-loading] img {
   pointer-events: none;
 }
 
-.blp-ump__card.is-skeleton .blp-ump__status {
-  display: block;
-  width: 100%;
-  margin-top: 4px;
-  padding: 8px 0 2px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
 .blp-ump__spinner {
   flex: 0 0 auto;
   width: 12px;
@@ -445,10 +456,6 @@ a[data-blp-ump-loading] img {
   border: 2px solid color-mix(in srgb, var(--blp-accent, #3db89a) 35%, transparent);
   border-top-color: var(--blp-accent, #3db89a);
   animation: blp-translate-spin 0.65s linear infinite;
-}
-
-.blp-ump__card.is-skeleton .blp-ump__shine {
-  animation-duration: 2.4s;
 }
 
 .blp-ump__name {
@@ -506,12 +513,13 @@ a[data-blp-ump-loading] img {
 
 .blp-ump__stat strong {
   display: block;
+  min-height: 1.1em;
   font-size: 16px;
   font-weight: 800;
   line-height: 1.1;
 }
 
-.blp-ump__stat span {
+.blp-ump__stat > span {
   display: block;
   margin-top: 3px;
   font-size: 9px;
@@ -587,7 +595,8 @@ a[data-blp-ump-loading] img {
   transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
-.blp-ump__cover:hover {
+.blp-ump__cover:hover,
+.blp-ump__cover[data-blp-gmp-hover='1'] {
   transform: translateY(-2px);
   border-color: var(--ump-accent);
 }
@@ -760,10 +769,6 @@ a[data-blp-ump-loading] img {
   animation: blp-ump-legend-pill 2.8s linear infinite;
 }
 
-.blp-ump__card.is-skeleton .blp-ump__name {
-  opacity: 0.85;
-}
-
 @keyframes blp-ump-skel-bar {
   0%,
   100% {
@@ -830,6 +835,7 @@ a[data-blp-ump-loading] img {
   .blp-ump.is-open.is-ready .blp-ump__card > *:not(.blp-ump__shine):not(.blp-ump__foil),
   .blp-ump.is-leaving .blp-ump__card,
   .blp-ump.is-leaving .blp-ump__card > *:not(.blp-ump__shine):not(.blp-ump__foil),
+  .blp-ump__card,
   .blp-ump__shine,
   .blp-ump__foil,
   .blp-ump__card--legend .blp-ump__tier-pill,

@@ -5,6 +5,152 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.99] - 2026-10-17
+
+### Added
+
+- **Settings → Game → Quick links → Custom links look**: show your own links in the Links row as plain text links (default) or as small accent-coloured buttons (all 10 languages; included in settings backups)
+
+## [0.7.98] - 2026-10-17
+
+### Added
+
+- **Settings → Game → Quick links → Show custom links in a separate row**: puts your own links in their own "My links" row under the Links row instead of mixing them with the built-in sites (their order among themselves still follows the list; off by default; all 10 languages)
+
+## [0.7.97] - 2026-10-17
+
+### Added
+
+- **Custom quick links** (Settings → Game → Quick links → **Add custom link**): your own entries in the game page's Links row. Each has a name, a URL template, an optional icon image URL — full or relative to the link's site, e.g. `/favicon.ico` (the site's favicon is used when blank), and a title format. Templates accept `{title}`, `{slug}` (Backloggd slug), `{appid}` (Steam App ID), `{year}` and `{id}` (Backloggd game ID). `{title}` can be written as percent-encoded, plus-separated, slug, underscores or without spaces, per link or per placeholder (`{title:plus}`). A link is hidden for games with no value for a placeholder it uses (e.g. `{appid}` off Steam). A live preview, placeholder chips and validation (http/https only) are in the editor; up to 30 custom links; each can be toggled, edited or removed
+- **Reorder quick links**: drag the grip next to any link (built-in or custom) to change the order of the Links row, or focus the grip and press ↑ / ↓. Works with mouse and touch; the list scrolls while dragging near the panel edge
+
+### Changed
+
+- Settings backups now include custom links and the link order (no secrets involved); imports are validated and capped
+- UI strings for the editor are available in all 10 languages
+
+## [0.7.96] - 2026-10-17
+
+### Added
+
+- Settings search: a box in the panel header filters every tab at once (toggles, fields, group titles and hints). Words are matched in any order, ignoring case and accents; matches are highlighted and results are shown grouped under their tab with a hit count (click a heading to open that tab). Enter / ↓ jumps to the first result, `/` or `Ctrl+K` focuses the box, `Esc` clears it (a second `Esc` closes the panel). Works in all 10 UI languages
+
+## [0.7.95] - 2026-10-17
+
+### Fixed
+
+- Text on solid accent buttons (Plus, Export) now picks white whenever white is readable (contrast ≥ 3:1) instead of the strictly higher ratio, so saturated accents like pink get white text; light and pastel accents (teal default, yellow, lime, sky blue) keep dark text
+
+## [0.7.94] - 2026-10-17
+
+### Fixed
+
+- OpenCritic was missing for every game: its public API now answers "API key is required", and the fallback lookups crashed on an undefined title-match threshold (`TITLE_MATCH_MIN_SCORE`, also used by HowLongToBeat title matching). The threshold is now shared from `utils/title.js`
+- OpenCritic game pages are read from the page state the site now ships (`&q;`-escaped), taking the tier and score of the page's own game instead of the first tier word found anywhere on the page
+
+### Changed
+
+- OpenCritic lookup no longer needs a key: the game is found through PCGamingWiki (its articles list the OpenCritic ID), with DuckDuckGo search as a fallback, and the OpenCritic page is read for tier and score
+- New **Settings → Game → OpenCritic source**: "Automatic (no key)" or "My RapidAPI key" with a key field (kept only on this device and left out of settings backups; an import keeps the key already saved). With a key, the OpenCritic API is tried first and the keyless routes remain as fallback
+- The OpenCritic key field has a "Get a key on RapidAPI" link
+- Plus rating block hides the OpenCritic cell (and its name in the title) when "Show OpenCritic score" is off; the grid goes to three columns
+- Steam, Metacritic and OpenCritic cells in the Plus rating block are links (Steam reviews, Metacritic page, OpenCritic page); Backloggd's stays plain
+- Plus rating bar colour follows the rating (red at 1★ through amber to green at 5★) instead of one fixed blue-to-lime gradient
+- `@connect`: added `www.pcgamingwiki.com` and `opencritic-api.p.rapidapi.com`, dropped `api.opencritic.com`
+
+## [0.7.93] - 2026-10-17
+
+### Changed
+
+- User mini-profile card now works like the game card: the skeleton and the loaded profile are the same set of blocks, and when the profile arrives the card is updated in place instead of being replaced — unchanged parts (labels, the profile button, the name) stay put, new blocks fade in and expand, empty ones collapse, and the card's tier colors blend smoothly into the tier skin instead of snapping. A failed load collapses into the error card the same way
+- The open card now follows its own height changes while blocks animate, so it stays beside the avatar / on screen
+- A card that finishes loading after it was closed (while it is still fading out) no longer pops back open
+- The soft-update engine is shared between the game and user cards (`utils/card-morph.js`) instead of living in the game card only
+
+## [0.7.92] - 2026-10-17
+
+### Fixed
+
+- Steam data is now reused on the first hover: a game's Steam lookup made before its Backloggd year was known (list card badges or the first mini-profile open) was stored under a key without the year, and the next open looked up the year-keyed entry and fetched Steam all over again. Title lookups now fall back to the yearless entry (still rejected when it belongs to a same-named remake), on game pages too
+- Game mini-profile card showed a GameStatus chip (and queried GameStatus.info) even with every GameStatus toggle off; it now follows "Show GameStatus" / the card-badge GameStatus toggle
+- Several open tabs no longer overwrite each other's cache: every save is merged onto the freshest stored value instead of writing the tab's own snapshot, and tabs pick up each other's entries live (value-change listener), so data cached in one tab is a hit in the rest
+
+### Changed
+
+- Cache saves are cheaper: writes are coalesced (one save per ~1.5 s instead of one per 0.4 s of quiet), reading an entry no longer triggers a save (its "last used" time is flushed lazily), tab switches only save when something actually changed, and entry sizes are measured once instead of re-serializing the whole cache on every save
+- GameStatus: a game it does not cover is remembered for the page session (10 min, never persisted), so list pages stop re-querying it for every cover
+
+## [0.7.91] - 2026-10-17
+
+### Added
+
+- Game mini-profile cards now open from the covers inside a user mini-profile card (favorites and recent games): the game card appears beside the user card, stays above it, and both cards stay open while the pointer moves between them (hover, right-click and Shift + click modes all work; follows the game card "Open card by" and "Mini-profile" settings)
+- Settings → Profile → "Played-games tiers" toggle (on by default; included in settings export/import): turn it off to get a neutral user mini-profile card without the tier skin and tier pill, like the game cards' "Rating tiers" option
+
+### Changed
+
+- Settings → Profile → "User mini-profile cards" description now lists what the card shows (stats, rating chart, favorites / recent games, badges) instead of the tier thresholds, and no longer implies hover is the only way to open it
+
+## [0.7.90] - 2026-10-17
+
+### Added
+
+- Fix match: saving an empty Steam App ID now marks the game as not on Steam — the automatic search is skipped and no Steam data, badges or Steam-based extras are shown for that page (the Steam row keeps a "Not on Steam · manual" control; "Use automatic match" reverts it) ([#6](https://github.com/NemoKing1210/backloggd-plus/issues/6))
+
+### Fixed
+
+- Steam/OpenCritic/HLTB title matching no longer drops non-Latin characters: a Steam app like "マイ・プラネット─MOON CHILD─" was reduced to "moon child" and wrongly matched Backloggd's "Moon Child" (1997). Titles now keep kana/CJK/Cyrillic letters, fold fullwidth forms and strip Latin accents (so "Pokémon" ≈ "Pokemon"); all-non-Latin titles no longer collapse to an empty cache key ([#6](https://github.com/NemoKing1210/backloggd-plus/issues/6))
+- Same-named remakes no longer hijack the original: Steam matching now uses the Backloggd release year. A "(YYYY)" tag on the Steam name ("Resident Evil 2 (1998)") is matched to the game's year, Steam results are cached per title+year, and an automatic exact-title match released 10+ years after the Backloggd entry (Resident Evil 2 1998 → 2019 remake) is skipped; manual App IDs are never filtered. Lists/cards use the year once the game's mini-profile is cached
+- Similar games: cards for same-named remakes now link to the right Backloggd entry (Steam's Resident Evil 4 from 2023 used to open the 2005 original). The Steam release year is compared with the Backloggd year and, on a mismatch, the game's remake/remaster list is searched for the entry with a matching year (links and hover cards update in place; resolved slugs are cached)
+
+## [0.7.89] - 2026-10-17
+
+### Added
+
+- Game mini-profile cards now have rating tiers like user cards: Rookie, Bronze, Silver, Gold, Platinum, Diamond, Master, Legend (from 0 up to 4.5★+ Backloggd rating) with matching skins, tier pill and cover frame; games without a rating keep the default look
+- Settings → Game card → "Rating tiers" toggle (on by default; included in settings export/import)
+
+### Changed
+
+- Game mini-profile card now updates in place when data arrives: blocks fade in and expand/collapse smoothly instead of popping, unchanged elements (cover, title, buttons) stay untouched, and the card recolors smoothly to its rating tier; a pill placeholder holds the tier slot while loading
+
+## [0.7.88] - 2026-10-17
+
+### Added
+
+- Settings → Profile / Game card: separate "Open card by" option for user and game mini-profile cards — hover (default), right-click, or Shift + click; click-opened cards stay until a click outside or Esc (included in settings export/import)
+
+### Fixed
+
+- Cover badges (price / reviews / owned / wishlist) are no longer drawn on the small homepage covers (Coming soon, Recently anticipated, Sleeper hits); mini-profile still works there
+
+## [0.7.87] - 2026-10-17
+
+### Changed
+
+- Settings → General: "Hide Fuse ad slots" renamed to "Hide ad blocks" (all locales)
+
+### Fixed
+
+- Hide ad blocks also hides Backloggd's new Prosper ad frames (`.prosper-adframe`) and rows that contain only such a frame
+- Game mini-profile card no longer "re-appears" or jerks while loading: skeleton → data now swaps in place without replaying the entrance animation (position eases to the new height)
+- Game mini-profile (and cover badges) now work on covers in activity feeds such as "Latest from friends", whose cover link points to a log (`/u/{user}/logs/{slug}/`) instead of `/games/{slug}/`
+- Game mini-profile now opens on covers in Backloggd's native Related Games block (DLC / Remakes / Editions / Series / In Bundles) on game pages; the main game cover stays excluded
+
+## [0.7.86] - 2026-10-17
+
+### Added
+
+- Optional Backloggd site translation (Settings → General → Site language): built-in dictionaries in `src/i18n/site/*.json` (Russian included), off by default; contributed by [Nikitamce](https://github.com/Nikitamce) / [MaksVolkov7863](https://github.com/MaksVolkov7863)
+- Settings → General → Accent color: preset swatches, custom color picker, live preview, reset; applied to Plus buttons, badges, mini-profiles, and the unified rating block (included in settings export/import)
+- Settings → General → Data transfer: link to the companion [Backloggd Data Transfer](https://github.com/NemoKing1210/backloggd-data-transfer) userscript
+- MaksVolkov7863 listed under Settings → About contributors
+
+### Changed
+
+- Profile page styling (Settings → Profile) is off by default for new installs and after a settings reset; existing saved choices are kept
+- One Translate button per review; the review expand control keeps working when its label is translated
+
 ## [0.7.85] - 2026-07-28
 
 ### Changed

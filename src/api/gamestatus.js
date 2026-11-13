@@ -15,6 +15,10 @@ import { gmRequest } from '../gm.js';
 import { inflight, locale, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 
+/** Session-only memory of games GameStatus does not cover (never persisted). */
+const gsMissMemory = new Map();
+const GS_MISS_MEMORY_MS = 10 * 60 * 1000;
+
 export function getApiLanguage() {
   if (locale === 'zh') return 'zh-CN';
   if (locale === 'pt') return 'pt-BR';
@@ -134,6 +138,18 @@ export async function fetchGameStatus({ appId, storeUrl, name, title, pageSlug }
   const cached = getCached(cacheKey);
   if (cached) return asCacheHit(cached);
 
+  // Misses are never persisted, but list pages re-ask for the same uncovered game on every card.
+  const missAt = gsMissMemory.get(cacheKey);
+  if (missAt && Date.now() - missAt < GS_MISS_MEMORY_MS) {
+    return asCacheMiss({
+      missing: true,
+      data: null,
+      slug: null,
+      _debug: { reason: 'GameStatus miss (session memory)', appId, cacheKey },
+    });
+  }
+  gsMissMemory.delete(cacheKey);
+
   if (inflight.has(cacheKey)) return inflight.get(cacheKey);
 
   const task = (async () => {
@@ -184,6 +200,10 @@ export async function fetchGameStatus({ appId, storeUrl, name, title, pageSlug }
       ? 'No GameStatus match for tried slugs'
       : 'No valid GameStatus slug candidates';
     const miss = { missing: true, data: null, slug: tried[0] || null, _debug: debug };
+    // Only remember a clean miss — a network error on every attempt should be retried.
+    const cleanMiss =
+      tried.length > 0 && debug.attempts.some((a) => a.outcome === '404' || a.outcome === 'steam_prod_id_mismatch');
+    if (cleanMiss) gsMissMemory.set(cacheKey, Date.now());
     return asCacheMiss(miss);
   })();
 
