@@ -1,5 +1,7 @@
 # Backloggd Plus
 
+[English](README.md) · [Русский](README.ru.md) · [中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Polski](README.pl.md)
+
 [![CI](https://github.com/NemoKing1210/backloggd-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/NemoKing1210/backloggd-plus/actions/workflows/ci.yml)
 [![Install userscript](https://img.shields.io/badge/Install-userscript-7c5cff?style=for-the-badge)](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plus.user.js)
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
@@ -15,27 +17,20 @@ Also listed on [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backloggd-
 
 > **Note:** Catalog pages on Greasy Fork / ScriptCat may lag behind this repository — I don’t always manage to push every release there right away. Sorry about that. For the newest build, prefer the [GitHub raw install URL](#quick-install) (or clone and `npm run build`). The script’s `@updateURL` / `@downloadURL` also point at GitHub `main`.
 
-> **Status:** early (`0.7.55`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
+> **Status:** early (`0.7.99`). Backloggd enrichment + list badges + Steam / SteamDB → Backloggd buttons.
 
 ## Screenshots
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
-  <br />
-  <em>Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links</em>
-</p>
+The real userscript running on a live Backloggd game page.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png" alt="Game page — Plus rating, screenshots gallery, and similar games" width="900" />
-  <br />
-  <em>Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges</em>
-</p>
+![Backloggd Plus settings panel with General, Profile, Game page, Game card, Translation, Cache, Debug and About tabs](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-panel.png)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
-  <br />
-  <em>Settings — Game page toggles</em>
-</p>
+| | |
+|---|---|
+| ![Steam rows on a Backloggd game page](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png)<br>**Game page rows** — Steam owned · price · reviews · tags and categories, SteamDB details, Metacritic, Deck/Proton, players, GameStatus | ![Plus rating, screenshots gallery and similar games](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png)<br>**Scores & extras** — Plus rating average, Steam screenshots gallery, similar games with cover badges |
+| ![Settings search filtering every tab](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-search.png)<br>**Settings search** — filters every tab at once; matches highlighted, results grouped by tab | ![Quick links row with built-in and custom links](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/quick-links.png)<br>**Quick links** — built-in sites plus your own URL templates, shown as links or buttons |
+
+Also on game pages: skeletons while data loads, translate buttons, Fix match, game ID, SteamDB icon and cover, export (Notion CSV / Markdown / JSON), and hover mini-profiles on covers.
 
 ## Quick install
 

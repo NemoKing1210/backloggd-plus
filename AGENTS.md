@@ -17,12 +17,12 @@ Built with [Vite](https://vitejs.dev/) + [vite-plugin-monkey](https://github.com
 - **Source:** `src/main.js`
 - **Canonical install artifacts (committed):** `backloggd-plus.user.js`, `backloggd-plus.meta.js` (also `@downloadURL` / `@updateURL`)
 - **Version source of truth:** `package.json` `version` (userscript header + `SCRIPT_VERSION`)
-- **Docs:** `README.md`, `DEVELOPMENT.md`, `CONTRIBUTING.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`, `docs/platforms/` (Greasy Fork / ScriptCat listing copy)
+- **Docs:** `README.md` (English, canonical) and localized `README.<locale>.md` (`ru`, `zh`, `es`, `pt`, `de`, `fr`, `ja`, `ko`, `pl`), `DEVELOPMENT.md`, `CONTRIBUTING.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `docs/screenshots/`, `docs/platforms/` (Greasy Fork / ScriptCat listing copy)
 - **License:** MIT
 
 Edit source under `src/`, then run `npm run build` to refresh the root install files. Do not hand-edit the built `.user.js` / `.meta.js`.
 
-When user-facing README content changes (features, screenshots, status, supported pages, install/update notes, contributors, affiliation), keep `docs/platforms/greasyfork.md` and `docs/platforms/scriptcat.md` in sync — those files are the paste-ready Additional info for the catalog listings. Prefer absolute GitHub/`raw.githubusercontent.com` URLs in README and platform docs so images and links work outside the repo.
+When user-facing README content changes (features, screenshots, status, supported pages, install/update notes, contributors, affiliation), keep `docs/platforms/greasyfork.md` and `docs/platforms/scriptcat.md` in sync — those files are the paste-ready Additional info for the catalog listings — and update the localized `README.<locale>.md` files too. Prefer absolute GitHub/`raw.githubusercontent.com` URLs in README and platform docs so images and links work outside the repo.
 
 ## Repository layout
 
@@ -55,7 +55,8 @@ backloggd-plus/
 ├── backloggd-plus.meta.js   # Built metadata-only mirror for update checks
 ├── package.json
 ├── vite.config.js
-├── README.md                # User-facing install + features
+├── README.md                # User-facing install + features (English)
+├── README.<locale>.md       # Localized READMEs: ru, zh, es, pt, de, fr, ja, ko, pl
 ├── DEVELOPMENT.md           # Local setup, layout, releases
 ├── CONTRIBUTING.md          # PR guidelines + contributors
 ├── SECURITY.md              # Vulnerability reporting + security model

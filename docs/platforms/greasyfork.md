@@ -16,9 +16,15 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 ## Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links" width="900" />
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-panel.png" alt="Settings panel — General, Profile, Game page, Game card, Translation, Cache, Debug and About tabs" width="900" />
   <br />
-  <em>Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links</em>
+  <em>Settings — every feature has a toggle or field, with search across all tabs</em>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png" alt="Game page — Steam enrichment, SteamDB, Metacritic, Deck/Proton, players, GameStatus" width="900" />
+  <br />
+  <em>Game page — Steam (owned · price · reviews · tags), SteamDB, Metacritic, Deck/Proton, players, GameStatus</em>
 </p>
 
 <p align="center">
@@ -28,9 +34,15 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png" alt="Settings panel — Game page toggles" width="700" />
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-search.png" alt="Settings search filtering every tab and highlighting matches" width="800" />
   <br />
-  <em>Settings — Game page toggles</em>
+  <em>Settings search — filter every tab at once; matches highlighted, results grouped by tab</em>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/quick-links.png" alt="Quick links row with built-in and custom links" width="900" />
+  <br />
+  <em>Quick links — built-in sites plus your own URL templates, shown as links or buttons</em>
 </p>
 
 ## Features

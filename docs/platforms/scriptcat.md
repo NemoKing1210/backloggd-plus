@@ -14,17 +14,25 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 
 ## Screenshots
 
-![Game page — Steam enrichment, Deck/Proton, GameStatus, and quick links](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png)
+![Settings panel — General, Profile, Game page, Game card, Translation, Cache, Debug and About tabs](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-panel.png)
 
-*Game page — Steam (owned · price · reviews · tags), Metacritic, Deck/Proton, players, GameStatus, links*
+*Settings — every feature has a toggle or field, with search across all tabs*
+
+![Game page — Steam enrichment, SteamDB, Metacritic, Deck/Proton, players, GameStatus](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-steam.png)
+
+*Game page — Steam (owned · price · reviews · tags), SteamDB, Metacritic, Deck/Proton, players, GameStatus*
 
 ![Game page — Plus rating, screenshots gallery, and similar games](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/game-page-stats.png)
 
 *Game page — Plus rating average, Steam screenshots gallery, similar games with cover badges*
 
-![Settings panel — Game page toggles](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings.png)
+![Settings search filtering every tab and highlighting matches](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/settings-search.png)
 
-*Settings — Game page toggles*
+*Settings search — filter every tab at once; matches highlighted, results grouped by tab*
+
+![Quick links row with built-in and custom links](https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/docs/screenshots/quick-links.png)
+
+*Quick links — built-in sites plus your own URL templates, shown as links or buttons*
 
 ## Features
 
