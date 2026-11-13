@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.101] - 2026-11-13
+
+### Security
+
+- Site language translates only presentational attributes now: form `value` attributes (privacy choices, filters, log settings) and arbitrary `data-*` attributes are left untouched, and named submit buttons keep their submitted value
+- Links read from Backloggd page data (IGDB, developer and cover links) are accepted only as `http(s)` URLs, so an injected `javascript:` href cannot run when clicked
+- CSV export neutralizes values that spreadsheets would evaluate as formulas; Markdown export escapes raw HTML
+- The translation text extractor parses page-supplied HTML in an inert document, so images and handlers in reviewed markup are not re-loaded or re-executed
+- CI pins GitHub Actions to immutable commit SHAs
+
 ## [0.7.100] - 2026-11-13
 
 ### Changed

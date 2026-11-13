@@ -20,7 +20,17 @@ export function getGameTitle() {
 
 export function getIgdbUrl(slug) {
   const link = document.querySelector('a[href*="igdb.com/games/"]');
-  if (link?.href) return link.href.split('?')[0];
+  if (link?.href) {
+    try {
+      const parsed = new URL(link.href);
+      const http = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      if (http && /(^|\.)igdb\.com$/i.test(parsed.hostname)) {
+        return parsed.href.split('?')[0];
+      }
+    } catch {
+      /* fall through to the constructed URL */
+    }
+  }
   if (slug) return `https://www.igdb.com/games/${encodeURIComponent(slug)}`;
   return '';
 }

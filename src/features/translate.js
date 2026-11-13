@@ -29,10 +29,11 @@ function displayMode() {
 }
 
 function htmlToPlain(html) {
-  const div = document.createElement('div');
-  div.innerHTML = String(html || '');
-  div.querySelectorAll('br').forEach((br) => br.replaceWith('\n'));
-  return (div.textContent || '').replace(/\u00a0/g, ' ').trim();
+  // Parse in an inert document: unlike a detached div, images and other
+  // resources inside page-supplied markup are not loaded or re-executed.
+  const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+  doc.querySelectorAll('br').forEach((br) => br.replaceWith('\n'));
+  return (doc.body?.textContent || '').replace(/\u00a0/g, ' ').trim();
 }
 
 function plainToHtml(text) {

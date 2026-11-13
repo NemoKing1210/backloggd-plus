@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.100-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 [Backloggd](https://www.backloggd.com)를 확장하는 사용자 스크립트입니다. 추가 게임 정보, 더 풍부한 UI, 편의성 개선을 사이트를 떠나지 않고 제공합니다.
 
@@ -17,7 +17,7 @@
 
 > **참고:** Greasy Fork / ScriptCat의 카탈로그 페이지는 이 저장소보다 늦을 수 있습니다. 모든 릴리스를 바로 반영하지는 못합니다. 죄송합니다. 최신 빌드는 [GitHub raw 설치 URL](#빠른-설치)을 사용하세요(또는 저장소를 클론한 뒤 `npm run build` 실행). 스크립트의 `@updateURL` / `@downloadURL`도 GitHub `main`을 가리킵니다.
 
-> **상태:** 초기 (`0.7.100`). Backloggd 정보 보강 + 목록 배지 + Steam / SteamDB → Backloggd 버튼.
+> **상태:** 초기 (`0.7.101`). Backloggd 정보 보강 + 목록 배지 + Steam / SteamDB → Backloggd 버튼.
 
 ## 스크린샷
 

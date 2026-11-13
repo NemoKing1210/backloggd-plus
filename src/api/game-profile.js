@@ -126,7 +126,10 @@ function absUrl(url, base = 'https://www.backloggd.com/') {
   const raw = String(url || '').trim();
   if (!raw || raw.startsWith('data:')) return '';
   try {
-    return new URL(raw, base).href;
+    const parsed = new URL(raw, base);
+    // Keep only web URLs: escaped hrefs are still executable as javascript:.
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+    return parsed.href;
   } catch {
     return '';
   }

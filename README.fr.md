@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.100-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Un userscript qui enrichit [Backloggd](https://www.backloggd.com) avec des informations de jeu supplémentaires, une interface plus riche et des améliorations de confort — sans quitter le site.
 
@@ -17,7 +17,7 @@ Compatible avec [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](h
 
 > **Remarque :** les pages des catalogues Greasy Fork / ScriptCat peuvent être en retard sur ce dépôt — je n'arrive pas toujours à y publier chaque version tout de suite. Désolé. Pour la version la plus récente, préférez l'[URL d'installation raw GitHub](#installation-rapide) (ou clonez le dépôt et lancez `npm run build`). Les `@updateURL` / `@downloadURL` du script pointent aussi vers `main` sur GitHub.
 
-> **Statut :** début (`0.7.100`). Enrichissement Backloggd + badges de listes + boutons Steam / SteamDB → Backloggd.
+> **Statut :** début (`0.7.101`). Enrichissement Backloggd + badges de listes + boutons Steam / SteamDB → Backloggd.
 
 ## Captures d'écran
 
