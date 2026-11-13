@@ -22,7 +22,7 @@ import {
   formatReviewPercentCompact,
   mcScoreTier,
   reviewScoreClass,
-} from './enrichment.js';
+} from '../utils/card-format.js';
 import { getPageContext } from './page.js';
 
 export function cardBadgeToken() {
