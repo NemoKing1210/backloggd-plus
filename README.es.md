@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Un userscript que amplía [Backloggd](https://www.backloggd.com) con información extra de juegos, una interfaz más rica y mejoras de calidad de vida, sin salir del sitio.
 
@@ -17,7 +17,7 @@ También está publicado en [Greasy Fork](https://greasyfork.org/ru/scripts/5872
 
 > **Nota:** las páginas de catálogo de Greasy Fork / ScriptCat pueden ir por detrás de este repositorio: no siempre consigo publicar cada versión allí al momento. Disculpa las molestias. Para la compilación más reciente usa la [URL de instalación raw de GitHub](#instalación-rápida) (o clona el repo y ejecuta `npm run build`). Las etiquetas `@updateURL` / `@downloadURL` del script también apuntan a `main` en GitHub.
 
-> **Estado:** temprano (`0.7.101`). Enriquecimiento de Backloggd + insignias en listas + botones Steam / SteamDB → Backloggd.
+> **Estado:** temprano (`0.7.102`). Enriquecimiento de Backloggd + insignias en listas + botones Steam / SteamDB → Backloggd.
 
 ## Capturas
 
@@ -73,6 +73,10 @@ Pasos de publicación para mantenedores: consulta [DEVELOPMENT.md § Releases](h
 
 ## Funciones
 
+**Página de inicio (`/`):**
+
+- Visibilidad por bloque (Ajustes → Página de inicio): oculta Widgets, Popular entre amigos, Novedades de amigos, Tendencias recientes, Últimas noticias, Reseñas de amigos, Reseñas populares, Listas de amigos, Listas populares y el trío Próximos lanzamientos / Muy esperados / Joyas ocultas; los bloques de la página para invitados (banner promocional, portada y estadísticas, carrusel de portadas, «¿Qué es Backloggd?», bloques de funciones) también se pueden ocultar
+
 **Páginas de juego (`/games/{slug}/`):**
 
 - Filas nativas de detalles bajo Platforms — **Steam** (en propiedad · lista de deseos · precio · fin de oferta / mínimo reciente · reseñas · etiquetas), **SteamDB** (franquicia · sistemas compatibles · tecnologías · última actualización del registro), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Jugadores**, **GameStatus**, **Enlaces**
@@ -108,9 +112,10 @@ Pasos de publicación para mantenedores: consulta [DEVELOPMENT.md § Releases](h
 
 **Ajustes** (botón **Plus** en la barra de navegación de Backloggd / menú del gestor de userscripts):
 
-- Panel con pestañas: General · Perfil · Página del juego · Tarjeta de juego · Traducción · Caché · Depuración · Acerca de
+- Panel con pestañas: General · Página de inicio · Perfil · Página del juego · Tarjeta de juego · Traducción · Caché · Depuración · Acerca de
 - Búsqueda de ajustes: escribe en el campo (o pulsa `/` / `Ctrl+K`) para filtrar todas las pestañas a la vez; las coincidencias en etiquetas y ayudas se resaltan, los resultados se agrupan por pestaña y `Esc` limpia la búsqueda
 - Idioma de la interfaz (automático o una configuración regional fija)
+- Página de inicio: visibilidad de bloques del inicio con sesión y de la página para invitados (widgets, bloques de amigos, reseñas, listas, tendencias, noticias, trío Próximos lanzamientos, banner promocional, portada, carrusel de portadas, bloques de funciones)
 - Perfil: tarjetas de mini-perfil en avatares y nombres de usuario (al pasar el ratón por defecto; o clic derecho / Shift + clic; precarga opcional en el viewport); las portadas dentro de la tarjeta (favoritos / recientes) abren el mini-perfil del juego; el aspecto de nivel por juegos jugados se puede desactivar; decoración de la página de perfil con interruptores por bloque (cabecera, chip de nivel, estadísticas, navegación, favoritos)
 - Región de la tienda de Steam (moneda de los precios)
 - Interruptores para Steam / en propiedad / lista de deseos / etiquetas / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / jugadores / icono y logo de SteamDB / galería de capturas / juegos similares / bloque nativo de estadísticas / ID del juego / traducción (descripción y reseñas) / insignias en portadas (por tipo) / mini-perfiles de juegos / enlaces / botones de Backloggd en Steam y SteamDB

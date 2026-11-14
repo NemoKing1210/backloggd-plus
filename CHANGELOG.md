@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.102] - 2026-11-14
+
+### Added
+
+- **Settings → Home page**: choose which home page blocks stay visible. Signed-in blocks: Widgets, Popular with friends, Latest from friends, Recently trending, Latest news, Friend reviews, Popular reviews, Friend lists, Popular lists, and the Coming soon / Recently anticipated / Sleeper hits trio. Guest landing blocks: promo banner, hero & site stats, cover marquee, "What is Backloggd?" and the feature showcases. Hiding is CSS-only and scoped to `/`, so it follows Turbo navigation and never touches other pages. On by default; all 10 UI languages; included in settings backups
+
 ## [0.7.101] - 2026-11-13
 
 ### Security

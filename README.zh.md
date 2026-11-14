@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 一个扩展 [Backloggd](https://www.backloggd.com) 的用户脚本：添加额外的游戏信息、更丰富的界面和体验改进——无需离开网站。
 
@@ -17,7 +17,7 @@
 
 > **注意：** Greasy Fork / ScriptCat 上的目录页面可能落后于本仓库——并非每次发布都能立刻同步过去，抱歉。要获取最新版本，请优先使用 [GitHub raw 安装地址](#快速安装)（或克隆仓库后运行 `npm run build`）。脚本的 `@updateURL` / `@downloadURL` 也指向 GitHub 的 `main` 分支。
 
-> **状态：** 早期（`0.7.101`）。Backloggd 信息增强 + 列表徽章 + Steam / SteamDB → Backloggd 按钮。
+> **状态：** 早期（`0.7.102`）。Backloggd 信息增强 + 列表徽章 + Steam / SteamDB → Backloggd 按钮。
 
 ## 截图
 
@@ -73,6 +73,10 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 
 ## 功能
 
+**主页（`/`）：**
+
+- 按区块显示（设置 → 主页）：可关闭小组件、好友中流行、好友最新动态、近期热门、最新新闻、好友评测、热门评测、好友列表、热门列表，以及「即将推出 / 近期期待 / 冷门佳作」三栏；访客落地页区块（促销横幅、首屏与站点统计、封面轮播、「Backloggd 是什么？」、功能介绍区块）也可隐藏
+
 **游戏页面（`/games/{slug}/`）：**
 
 - Platforms 下的原生详情行 — **Steam**（已拥有 · 愿望单 · 价格 · 促销结束 / 近期最低价 · 评测 · 标签）、**SteamDB**（系列 · 支持的系统 · 技术 · 最后记录更新）、**Metacritic**、**OpenCritic**、**HLTB**、**Deck / Proton**、**玩家**、**GameStatus**、**链接**
@@ -108,9 +112,10 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 
 **设置**（Backloggd 导航栏的 **Plus** 按钮 / 用户脚本管理器菜单）：
 
-- 选项卡面板：通用 · 资料 · 游戏页 · 游戏卡片 · 翻译 · 缓存 · 调试 · 关于
+- 选项卡面板：通用 · 主页 · 资料 · 游戏页 · 游戏卡片 · 翻译 · 缓存 · 调试 · 关于
 - 设置搜索：在框中输入（或按 `/` / `Ctrl+K`）一次筛选所有选项卡——标签和提示中的匹配项会高亮，结果按选项卡分组，`Esc` 清除
 - 界面语言（自动或固定区域）
+- 主页：登录后的信息流与访客落地页的区块显示（小组件、好友区块、评测、列表、热门、新闻、「即将推出」三栏、促销横幅、首屏、封面轮播、功能介绍）
 - 资料：头像和用户名上的迷你资料卡（默认悬停；或右键 / Shift + 单击；可选视口预加载）；卡片内的游戏封面（收藏 / 最近）会打开游戏迷你资料；可关闭按已玩游戏数显示等级外观；个人资料页可按区块开关等级装饰（页头、等级标记、统计、导航、收藏）
 - Steam 商店区域（价格货币）
 - 各项开关：Steam / 已拥有 / 愿望单 / 标签 / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / 玩家 / SteamDB 图标和 Logo / 截图画廊 / 相似游戏 / 原生统计块 / 游戏 ID / 翻译（描述和评测）/ 列表封面徽章（按类型）/ 游戏迷你资料卡 / 链接 / Steam 和 SteamDB 上的 Backloggd 按钮

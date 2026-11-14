@@ -36,6 +36,10 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 
 ## Features
 
+**Home page (`/`):**
+
+- Per-block visibility (Settings → Home page): turn off Widgets, Popular with friends, Latest from friends, Recently trending, Latest news, Friend reviews, Popular reviews, Friend lists, Popular lists, and Coming soon / Recently anticipated / Sleeper hits; guest landing blocks (promo banner, hero & site stats, cover marquee, "What is Backloggd?", feature showcases) can be hidden too
+
 **Game pages (`/games/{slug}/`):**
 
 - Native detail rows under Platforms — **Steam** (owned · wishlist · price · sale end / recent low · reviews · tags), **SteamDB** (franchise · systems · technologies · last record update), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Players**, **GameStatus**, **Links**
@@ -71,9 +75,10 @@ Userscript that extends [Backloggd](https://www.backloggd.com) with extra game i
 
 **Settings** (navbar **Plus** on Backloggd / userscript manager menu):
 
-- Tabbed panel: General · User profile · Game page · Game card · Translation · Cache · Debug · About
+- Tabbed panel: General · Home page · User profile · Game page · Game card · Translation · Cache · Debug · About
 - Settings search: type in the box (or press `/` / `Ctrl+K`) to filter every tab at once — matches in labels and hints are highlighted, results are grouped by tab, `Esc` clears
 - Interface language (Auto or fixed locale)
+- Home page: per-block visibility for the signed-in feed and the guest landing (widgets, friend blocks, reviews, lists, trending, news, the Coming soon trio, promo banner, hero, cover marquee, showcases)
 - User profile: mini-profile cards on avatars and usernames (hover by default; or right-click / Shift + click; optional viewport preload); game covers inside the card (favorites / recent) open the game mini-profile; tier skin by games played can be turned off; profile-page tier chrome with per-block toggles (header, tier chip, stats, nav, favorites)
 - Steam store region (price currency)
 - Toggles for Steam / owned / wishlist / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / players / SteamDB icon & logo / screenshots gallery / similar games / native game stats block / game ID / translation (description & reviews) / list cover badges (per type) / game mini-profile hover cards / links / Steam & SteamDB Backloggd buttons

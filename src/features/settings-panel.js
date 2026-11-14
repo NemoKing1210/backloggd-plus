@@ -74,6 +74,7 @@ import { queueToast, showToast } from './toast.js';
 
 const SETTINGS_TABS = [
   { id: 'general', labelKey: 'sectionGeneral' },
+  { id: 'home', labelKey: 'sectionHome' },
   { id: 'profile', labelKey: 'sectionProfile' },
   { id: 'game', labelKey: 'sectionGame' },
   { id: 'lists', labelKey: 'sectionLists' },
@@ -895,6 +896,40 @@ export function openSettings() {
             hint: t.transferLinkHint,
           })}
         </div>`
+      )}
+      </div>
+      <div ${panelAttrs('home', activeTab)}>
+      ${groupHtml(
+        'homeGroupPersonal',
+        'homeGroupPersonalHint',
+        listHtml(
+          toggleHtml('showHomeWidgets', draft.showHomeWidgets !== false),
+          toggleHtml('showHomePopularFriends', draft.showHomePopularFriends !== false),
+          toggleHtml('showHomeFriendsActivity', draft.showHomeFriendsActivity !== false),
+          toggleHtml('showHomeTrending', draft.showHomeTrending !== false),
+          toggleHtml('showHomeNews', draft.showHomeNews !== false),
+          toggleHtml('showHomeFriendReviews', draft.showHomeFriendReviews !== false),
+          toggleHtml('showHomePopularReviews', draft.showHomePopularReviews !== false),
+          toggleHtml('showHomeFriendLists', draft.showHomeFriendLists !== false),
+          toggleHtml('showHomePopularLists', draft.showHomePopularLists !== false),
+          toggleHtml('showHomeComingSoon', draft.showHomeComingSoon !== false),
+          toggleHtml(
+            'showHomeRecentlyAnticipated',
+            draft.showHomeRecentlyAnticipated !== false
+          ),
+          toggleHtml('showHomeSleeperHits', draft.showHomeSleeperHits !== false)
+        )
+      )}
+      ${groupHtml(
+        'homeGroupLanding',
+        'homeGroupLandingHint',
+        listHtml(
+          toggleHtml('showHomePromoBanner', draft.showHomePromoBanner !== false),
+          toggleHtml('showHomeHero', draft.showHomeHero !== false),
+          toggleHtml('showHomeCoverMarquee', draft.showHomeCoverMarquee !== false),
+          toggleHtml('showHomeAbout', draft.showHomeAbout !== false),
+          toggleHtml('showHomeShowcase', draft.showHomeShowcase !== false)
+        )
       )}
       </div>
       <div ${panelAttrs('profile', activeTab)}>

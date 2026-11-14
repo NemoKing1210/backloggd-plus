@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Un userscript qui enrichit [Backloggd](https://www.backloggd.com) avec des informations de jeu supplémentaires, une interface plus riche et des améliorations de confort — sans quitter le site.
 
@@ -17,7 +17,7 @@ Compatible avec [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](h
 
 > **Remarque :** les pages des catalogues Greasy Fork / ScriptCat peuvent être en retard sur ce dépôt — je n'arrive pas toujours à y publier chaque version tout de suite. Désolé. Pour la version la plus récente, préférez l'[URL d'installation raw GitHub](#installation-rapide) (ou clonez le dépôt et lancez `npm run build`). Les `@updateURL` / `@downloadURL` du script pointent aussi vers `main` sur GitHub.
 
-> **Statut :** début (`0.7.101`). Enrichissement Backloggd + badges de listes + boutons Steam / SteamDB → Backloggd.
+> **Statut :** début (`0.7.102`). Enrichissement Backloggd + badges de listes + boutons Steam / SteamDB → Backloggd.
 
 ## Captures d'écran
 
@@ -73,6 +73,10 @@ Le script contient les métadonnées `@updateURL` et `@downloadURL` pointant ver
 
 ## Fonctionnalités
 
+**Page d’accueil (`/`) :**
+
+- Visibilité par bloc (Réglages → Page d’accueil) : masquez Widgets, Populaire chez les amis, Nouveautés des amis, Tendances récentes, Dernières nouvelles, Critiques des amis, Critiques populaires, Listes des amis, Listes populaires et le trio Bientôt disponible / Récemment attendus / Pépites méconnues ; les blocs de l’accueil visiteur (bannière promo, en-tête et statistiques, carrousel de jaquettes, « Qu’est-ce que Backloggd ? », blocs de présentation) peuvent aussi être masqués
+
 **Pages de jeu (`/games/{slug}/`) :**
 
 - Lignes de détails natives sous Platforms — **Steam** (possédé · liste de souhaits · prix · fin de promo / minimum récent · évaluations · tags), **SteamDB** (franchise · systèmes pris en charge · technologies · dernière mise à jour de l'enregistrement), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Joueurs**, **GameStatus**, **Liens**
@@ -108,9 +112,10 @@ Le script contient les métadonnées `@updateURL` et `@downloadURL` pointant ver
 
 **Réglages** (bouton **Plus** dans la navbar Backloggd / menu du gestionnaire d'userscripts) :
 
-- Panneau à onglets : Général · Profil · Page jeu · Fiche jeu · Traduction · Cache · Débogage · À propos
+- Panneau à onglets : Général · Page d’accueil · Profil · Page jeu · Fiche jeu · Traduction · Cache · Débogage · À propos
 - Recherche dans les réglages : tapez dans le champ (ou appuyez sur `/` / `Ctrl+K`) pour filtrer tous les onglets d'un coup — les correspondances dans les libellés et aides sont surlignées, les résultats sont regroupés par onglet, `Esc` efface
 - Langue de l'interface (auto ou locale fixe)
+- Page d’accueil : visibilité des blocs de l’accueil connecté et de l’accueil visiteur (widgets, blocs d’amis, critiques, listes, tendances, actualités, trio Bientôt disponible, bannière promo, en-tête, carrousel de jaquettes, blocs de présentation)
 - Profil : cartes mini-profil sur les avatars et pseudos (survol par défaut ; ou clic droit / Shift + clic ; préchargement optionnel dans le viewport) ; les jaquettes dans la carte (favoris / récents) ouvrent le mini-profil du jeu ; l'habillage de palier selon les jeux joués peut être désactivé ; habillage de la page de profil avec interrupteurs par bloc (en-tête, badge de palier, statistiques, navigation, favoris)
 - Région du magasin Steam (devise des prix)
 - Interrupteurs pour Steam / possédé / liste de souhaits / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / joueurs / icône et logo SteamDB / galerie de captures / jeux similaires / bloc natif de statistiques / ID du jeu / traduction (description et avis) / badges de jaquette (par type) / mini-profils de jeux / liens / boutons Backloggd sur Steam et SteamDB

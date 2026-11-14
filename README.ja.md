@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 [Backloggd](https://www.backloggd.com) を拡張するユーザースクリプトです。追加のゲーム情報、よりリッチな UI、QoL の改善を、サイトを離れずに提供します。
 
@@ -17,7 +17,7 @@
 
 > **注意:** Greasy Fork / ScriptCat のカタログページはこのリポジトリより遅れることがあります。すべてのリリースをすぐに反映できるわけではありません。申し訳ありません。最新版は [GitHub の raw インストール URL](#クイックインストール) を優先してください（またはリポジトリをクローンして `npm run build` を実行）。スクリプトの `@updateURL` / `@downloadURL` も GitHub の `main` を指しています。
 
-> **ステータス:** 早期（`0.7.101`）。Backloggd の情報拡充 + リストのバッジ + Steam / SteamDB → Backloggd ボタン。
+> **ステータス:** 早期（`0.7.102`）。Backloggd の情報拡充 + リストのバッジ + Steam / SteamDB → Backloggd ボタン。
 
 ## スクリーンショット
 
@@ -73,6 +73,10 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 
 ## 機能
 
+**ホームページ（`/`）：**
+
+- ブロックごとの表示（設定 → ホームページ）：ウィジェット、フレンドで人気、フレンドの最新情報、最近のトレンド、最新ニュース、フレンドのレビュー、人気のレビュー、フレンドのリスト、人気のリスト、発売予定 / 最近の期待作 / 隠れた名作 の3列を非表示にできます。ゲスト向けページのブロック（プロモバナー、ヒーローとサイト統計、カバーカルーセル、「Backloggd とは？」、機能紹介ブロック）も非表示にできます
+
 **ゲームページ（`/games/{slug}/`）:**
 
 - Platforms の下にネイティブな詳細行 — **Steam**（所持 · ウィッシュリスト · 価格 · セール終了 / 最近の最安値 · レビュー · タグ）、**SteamDB**（フランチャイズ · 対応システム · 技術 · 最終レコード更新）、**Metacritic**、**OpenCritic**、**HLTB**、**Deck / Proton**、**プレイヤー**、**GameStatus**、**リンク**
@@ -108,9 +112,10 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 
 **設定**（Backloggd のナビバーの **Plus** ボタン / ユーザースクリプトマネージャーのメニュー）:
 
-- タブ付きパネル: 一般 · プロフィール · ゲームページ · ゲームカード · 翻訳 · キャッシュ · デバッグ · このスクリプトについて
+- タブ付きパネル: 一般 · ホームページ · プロフィール · ゲームページ · ゲームカード · 翻訳 · キャッシュ · デバッグ · このスクリプトについて
 - 設定検索: ボックスに入力（または `/` / `Ctrl+K`）するとすべてのタブを一度に絞り込み。ラベルとヒントの一致箇所がハイライトされ、結果はタブごとにグループ化。`Esc` でクリア
 - UI 言語（自動または固定ロケール）
+- ホームページ: ログイン後のフィードとゲスト向けページのブロック表示（ウィジェット、フレンド系ブロック、レビュー、リスト、トレンド、ニュース、発売予定の3列、プロモバナー、ヒーロー、カバーカルーセル、機能紹介）
 - プロフィール: アバターとユーザー名のミニプロフィールカード（既定はホバー。右クリック / Shift + クリックも可。任意でビューポート先読み）。カード内のゲームカバー（お気に入り / 最近）はゲームのミニプロフィールを開く。プレイ本数によるティアスキンはオフにできる。プロフィールページのティア装飾はブロックごとに切り替え可能（ヘッダー、ティアチップ、統計、ナビ、お気に入り）
 - Steam ストアの地域（価格の通貨）
 - 各種トグル: Steam / 所持 / ウィッシュリスト / タグ / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / プレイヤー / SteamDB アイコンとロゴ / スクリーンショットギャラリー / 類似ゲーム / ネイティブ統計ブロック / ゲーム ID / 翻訳（説明とレビュー）/ リストのカバーバッジ（種類別）/ ゲームのミニプロフィール / リンク / Steam と SteamDB の Backloggd ボタン

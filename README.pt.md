@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Um userscript que amplia o [Backloggd](https://www.backloggd.com) com informações extras de jogos, uma interface mais rica e melhorias de qualidade de vida — sem sair do site.
 
@@ -17,7 +17,7 @@ Também listado no [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backlo
 
 > **Nota:** as páginas de catálogo no Greasy Fork / ScriptCat podem ficar atrás deste repositório — nem sempre consigo publicar cada versão lá na hora. Desculpe. Para a compilação mais recente, prefira a [URL de instalação raw do GitHub](#instalação-rápida) (ou clone o repositório e rode `npm run build`). O `@updateURL` / `@downloadURL` do script também apontam para a `main` no GitHub.
 
-> **Status:** inicial (`0.7.101`). Enriquecimento do Backloggd + badges nas listas + botões Steam / SteamDB → Backloggd.
+> **Status:** inicial (`0.7.102`). Enriquecimento do Backloggd + badges nas listas + botões Steam / SteamDB → Backloggd.
 
 ## Capturas de tela
 
@@ -73,6 +73,10 @@ Passos de release para mantenedores: veja [DEVELOPMENT.md § Releases](https://g
 
 ## Recursos
 
+**Página inicial (`/`):**
+
+- Visibilidade por bloco (Configurações → Página inicial): oculte Widgets, Popular entre amigos, Novidades dos amigos, Em alta recentemente, Últimas notícias, Análises de amigos, Análises populares, Listas de amigos, Listas populares e o trio Em breve / Recentemente aguardados / Joias escondidas; os blocos da página para visitantes (banner promocional, destaque e estatísticas, carrossel de capas, «O que é o Backloggd?», blocos de recursos) também podem ser ocultados
+
 **Páginas de jogo (`/games/{slug}/`):**
 
 - Linhas nativas de detalhes em Platforms — **Steam** (possui · lista de desejos · preço · fim da promoção / mínimo recente · análises · tags), **SteamDB** (franquia · sistemas suportados · tecnologias · última atualização do registro), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Jogadores**, **GameStatus**, **Links**
@@ -108,9 +112,10 @@ Passos de release para mantenedores: veja [DEVELOPMENT.md § Releases](https://g
 
 **Configurações** (botão **Plus** na navbar do Backloggd / menu do gerenciador de userscripts):
 
-- Painel com abas: Geral · Perfil · Página do jogo · Cartão do jogo · Tradução · Cache · Depuração · Sobre
+- Painel com abas: Geral · Página inicial · Perfil · Página do jogo · Cartão do jogo · Tradução · Cache · Depuração · Sobre
 - Busca de configurações: digite no campo (ou pressione `/` / `Ctrl+K`) para filtrar todas as abas de uma vez — correspondências em rótulos e dicas são destacadas, resultados agrupados por aba, `Esc` limpa
 - Idioma da interface (automático ou locale fixo)
+- Página inicial: visibilidade dos blocos do início com sessão e da página para visitantes (widgets, blocos de amigos, análises, listas, tendências, notícias, trio Em breve, banner promocional, destaque, carrossel de capas, blocos de recursos)
 - Perfil: cartões de mini-perfil em avatares e nomes de usuário (hover por padrão; ou clique direito / Shift + clique; pré-carregamento opcional no viewport); capas dentro do cartão (favoritos / recentes) abrem o mini-perfil do jogo; o visual de nível por jogos jogados pode ser desligado; decoração da página de perfil com alternadores por bloco (cabeçalho, chip de nível, estatísticas, navegação, favoritos)
 - Região da loja Steam (moeda dos preços)
 - Alternadores para Steam / possui / lista de desejos / tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / jogadores / ícone e logo do SteamDB / galeria de capturas / jogos semelhantes / bloco nativo de estatísticas / ID do jogo / tradução (descrição e análises) / badges nas capas (por tipo) / mini-perfis de jogos / links / botões do Backloggd no Steam e no SteamDB

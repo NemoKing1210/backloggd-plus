@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Skrypt użytkownika, który rozszerza [Backloggd](https://www.backloggd.com) o dodatkowe informacje o grach, bogatszy interfejs i usprawnienia — bez opuszczania strony.
 
@@ -17,7 +17,7 @@ Dostępny także na [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backl
 
 > **Uwaga:** strony katalogów Greasy Fork / ScriptCat mogą być opóźnione względem tego repozytorium — nie zawsze udaje się tam od razu opublikować każde wydanie. Przepraszam. Aby mieć najnowszą wersję, użyj [adresu instalacji raw z GitHub](#szybka-instalacja) (albo sklonuj repozytorium i uruchom `npm run build`). `@updateURL` / `@downloadURL` skryptu również wskazują na `main` w GitHub.
 
-> **Status:** wczesny (`0.7.101`). Wzbogacanie Backloggd + odznaki na listach + przyciski Steam / SteamDB → Backloggd.
+> **Status:** wczesny (`0.7.102`). Wzbogacanie Backloggd + odznaki na listach + przyciski Steam / SteamDB → Backloggd.
 
 ## Zrzuty ekranu
 
@@ -73,6 +73,10 @@ Kroki wydania dla opiekunów: patrz [DEVELOPMENT.md § Releases](https://github.
 
 ## Funkcje
 
+**Strona główna (`/`):**
+
+- Widoczność bloków (Ustawienia → Strona główna): możesz ukryć Widgety, Popularne wśród znajomych, Nowości od znajomych, Ostatnio popularne, Najnowsze wieści, Recenzje znajomych, Popularne recenzje, Listy znajomych, Popularne listy oraz trio Wkrótce / Ostatnio wyczekiwane / Ukryte perełki; bloki strony dla gości (baner promocyjny, nagłówek i statystyki, karuzela okładek, „Czym jest Backloggd?”, bloki funkcji) też można ukryć
+
 **Strony gier (`/games/{slug}/`):**
 
 - Natywne wiersze szczegółów pod Platforms — **Steam** (posiadane · lista życzeń · cena · koniec promocji / ostatnie minimum · recenzje · tagi), **SteamDB** (franczyza · obsługiwane systemy · technologie · ostatnia aktualizacja rekordu), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Gracze**, **GameStatus**, **Linki**
@@ -108,9 +112,10 @@ Kroki wydania dla opiekunów: patrz [DEVELOPMENT.md § Releases](https://github.
 
 **Ustawienia** (przycisk **Plus** w nawigacji Backloggd / menu menedżera skryptów):
 
-- Panel z zakładkami: Ogólne · Profil · Strona gry · Karta gry · Tłumaczenie · Cache · Debug · O skrypcie
+- Panel z zakładkami: Ogólne · Strona główna · Profil · Strona gry · Karta gry · Tłumaczenie · Cache · Debug · O skrypcie
 - Wyszukiwanie ustawień: wpisz w polu (lub naciśnij `/` / `Ctrl+K`), aby filtrować wszystkie zakładki naraz — dopasowania w etykietach i podpowiedziach są podświetlane, wyniki grupowane według zakładek, `Esc` czyści
 - Język interfejsu (automatyczny lub stały locale)
+- Strona główna: widoczność bloków w feedzie po zalogowaniu i na stronie dla gości (widgety, bloki znajomych, recenzje, listy, trendy, wieści, trio Wkrótce, baner promocyjny, nagłówek, karuzela okładek, bloki funkcji)
 - Profil: karty mini-profilu na awatarach i nazwach użytkownika (domyślnie po najechaniu; lub prawy przycisk / Shift + klik; opcjonalne wstępne ładowanie w viewporcie); okładki gier w karcie (ulubione / ostatnie) otwierają mini-profil gry; skórkę poziomu według rozegranych gier można wyłączyć; ozdoby strony profilu z przełącznikami per blok (nagłówek, chip poziomu, statystyki, nawigacja, ulubione)
 - Region sklepu Steam (waluta cen)
 - Przełączniki dla Steam / posiadane / lista życzeń / tagi / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / gracze / ikona i logo SteamDB / galeria zrzutów / podobne gry / natywny blok statystyk / ID gry / tłumaczenie (opis i recenzje) / odznaki na okładkach (per typ) / mini-profile gier / linki / przyciski Backloggd na Steam i SteamDB

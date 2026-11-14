@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 Ein Userscript, das [Backloggd](https://www.backloggd.com) um zusätzliche Spielinformationen, eine reichere Oberfläche und Komfortverbesserungen erweitert – ohne die Seite zu verlassen.
 
@@ -17,7 +17,7 @@ Auch gelistet auf [Greasy Fork](https://greasyfork.org/ru/scripts/587296-backlog
 
 > **Hinweis:** Die Katalogseiten auf Greasy Fork / ScriptCat können hinter diesem Repository zurückliegen – nicht jedes Release schaffe ich sofort dorthin. Entschuldigung. Für den neuesten Build nutze die [GitHub-Raw-Installations-URL](#schnellinstallation) (oder klone das Repo und führe `npm run build` aus). `@updateURL` / `@downloadURL` des Skripts zeigen ebenfalls auf `main` bei GitHub.
 
-> **Status:** früh (`0.7.101`). Backloggd-Anreicherung + Listen-Badges + Steam-/SteamDB-→-Backloggd-Buttons.
+> **Status:** früh (`0.7.102`). Backloggd-Anreicherung + Listen-Badges + Steam-/SteamDB-→-Backloggd-Buttons.
 
 ## Screenshots
 
@@ -73,6 +73,10 @@ Release-Schritte für Maintainer: siehe [DEVELOPMENT.md § Releases](https://git
 
 ## Funktionen
 
+**Startseite (`/`):**
+
+- Sichtbarkeit pro Block (Einstellungen → Startseite): Widgets, Bei Freunden beliebt, Neuigkeiten von Freunden, Aktuell im Trend, Neueste Nachrichten, Freundes-Rezensionen, Beliebte Rezensionen, Freundeslisten, Beliebte Listen und das Trio Demnächst / Zuletzt erwartet / Geheimtipps ausblenden; auch die Gast-Blöcke (Promo-Banner, Kopfbereich & Statistiken, Cover-Karussell, „Was ist Backloggd?“, Funktionsblöcke) lassen sich ausblenden
+
 **Spielseiten (`/games/{slug}/`):**
 
 - Native Detailzeilen unter Platforms — **Steam** (im Besitz · Wunschliste · Preis · Sale-Ende / letzter Tiefstpreis · Bewertungen · Tags), **SteamDB** (Franchise · unterstützte Systeme · Technologien · letzte Datensatz-Aktualisierung), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **Spieler**, **GameStatus**, **Links**
@@ -108,9 +112,10 @@ Release-Schritte für Maintainer: siehe [DEVELOPMENT.md § Releases](https://git
 
 **Einstellungen** (Navbar **Plus** auf Backloggd / Menü des Userscript-Managers):
 
-- Tab-Panel: Allgemein · Profil · Spieleseite · Spielkarte · Übersetzung · Cache · Debug · Über
+- Tab-Panel: Allgemein · Startseite · Profil · Spieleseite · Spielkarte · Übersetzung · Cache · Debug · Über
 - Einstellungssuche: in das Feld tippen (oder `/` / `Ctrl+K` drücken), um alle Tabs gleichzeitig zu filtern — Treffer in Labels und Hinweisen werden hervorgehoben, Ergebnisse nach Tab gruppiert, `Esc` leert
 - Oberflächensprache (Auto oder feste Locale)
+- Startseite: Sichtbarkeit der Blöcke im angemeldeten Feed und auf der Gast-Seite (Widgets, Freundesblöcke, Rezensionen, Listen, Trends, Nachrichten, Demnächst-Trio, Promo-Banner, Kopfbereich, Cover-Karussell, Funktionsblöcke)
 - Profil: Mini-Profil-Karten auf Avataren und Benutzernamen (standardmäßig beim Hovern; oder Rechtsklick / Shift + Klick; optionales Vorladen im Viewport); Spielcover in der Karte (Favoriten / zuletzt) öffnen das Spiel-Mini-Profil; Tier-Skin nach gespielten Spielen abschaltbar; Profilseiten-Tier-Chrome mit Schaltern pro Block (Header, Tier-Chip, Statistiken, Navigation, Favoriten)
 - Steam-Store-Region (Preiswährung)
 - Schalter für Steam / Owned / Wishlist / Tags / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / Spieler / SteamDB-Icon & -Logo / Screenshot-Galerie / ähnliche Spiele / nativer Statistikblock / Spiel-ID / Übersetzung (Beschreibung & Reviews) / Cover-Badges (pro Typ) / Spiel-Mini-Profile / Links / Backloggd-Buttons auf Steam & SteamDB

@@ -7,7 +7,7 @@
 [![Greasy Fork](https://img.shields.io/badge/Greasy_Fork-587296-1a1d24?style=for-the-badge&labelColor=670000)](https://greasyfork.org/ru/scripts/587296-backloggd-plus)
 [![ScriptCat](https://img.shields.io/badge/ScriptCat-7077-1a1d24?style=for-the-badge&labelColor=f59e0b)](https://scriptcat.org/ru/script-show-page/7077)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.101-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.102-green?style=for-the-badge)](https://github.com/NemoKing1210/backloggd-plus/blob/main/CHANGELOG.md)
 
 [Backloggd](https://www.backloggd.com)를 확장하는 사용자 스크립트입니다. 추가 게임 정보, 더 풍부한 UI, 편의성 개선을 사이트를 떠나지 않고 제공합니다.
 
@@ -17,7 +17,7 @@
 
 > **참고:** Greasy Fork / ScriptCat의 카탈로그 페이지는 이 저장소보다 늦을 수 있습니다. 모든 릴리스를 바로 반영하지는 못합니다. 죄송합니다. 최신 빌드는 [GitHub raw 설치 URL](#빠른-설치)을 사용하세요(또는 저장소를 클론한 뒤 `npm run build` 실행). 스크립트의 `@updateURL` / `@downloadURL`도 GitHub `main`을 가리킵니다.
 
-> **상태:** 초기 (`0.7.101`). Backloggd 정보 보강 + 목록 배지 + Steam / SteamDB → Backloggd 버튼.
+> **상태:** 초기 (`0.7.102`). Backloggd 정보 보강 + 목록 배지 + Steam / SteamDB → Backloggd 버튼.
 
 ## 스크린샷
 
@@ -73,6 +73,10 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 
 ## 기능
 
+**홈 페이지(`/`):**
+
+- 블록별 표시(설정 → 홈 페이지): 위젯, 친구들 사이 인기, 친구 최신 소식, 최근 인기, 최신 뉴스, 친구 리뷰, 인기 리뷰, 친구 목록, 인기 목록, 출시 예정 / 최근 기대작 / 숨은 명작 3열을 숨길 수 있습니다. 게스트 페이지 블록(프로모 배너, 히어로 및 사이트 통계, 커버 캐러셀, "Backloggd란?", 기능 소개 블록)도 숨길 수 있습니다
+
 **게임 페이지 (`/games/{slug}/`):**
 
 - Platforms 아래의 기본 세부 정보 행 — **Steam**(보유 · 위시리스트 · 가격 · 할인 종료 / 최근 최저가 · 리뷰 · 태그), **SteamDB**(프랜차이즈 · 지원 시스템 · 기술 · 마지막 레코드 업데이트), **Metacritic**, **OpenCritic**, **HLTB**, **Deck / Proton**, **플레이어**, **GameStatus**, **링크**
@@ -108,9 +112,10 @@ https://raw.githubusercontent.com/NemoKing1210/backloggd-plus/main/backloggd-plu
 
 **설정** (Backloggd 내비바의 **Plus** 버튼 / 사용자 스크립트 관리자 메뉴):
 
-- 탭 패널: 일반 · 프로필 · 게임 페이지 · 게임 카드 · 번역 · 캐시 · 디버그 · 정보
+- 탭 패널: 일반 · 홈 페이지 · 프로필 · 게임 페이지 · 게임 카드 · 번역 · 캐시 · 디버그 · 정보
 - 설정 검색: 상자에 입력(또는 `/` / `Ctrl+K`)하면 모든 탭을 한 번에 필터링합니다. 레이블과 힌트의 일치 항목이 강조되고 결과는 탭별로 그룹화되며 `Esc`로 지웁니다
 - UI 언어(자동 또는 고정 로케일)
+- 홈 페이지: 로그인 후 피드와 게스트 페이지 블록 표시(위젯, 친구 블록, 리뷰, 목록, 인기, 뉴스, 출시 예정 3열, 프로모 배너, 히어로, 커버 캐러셀, 기능 소개)
 - 프로필: 아바타와 사용자 이름의 미니 프로필 카드(기본은 호버, 또는 우클릭 / Shift + 클릭, 선택적 뷰포트 사전 로딩); 카드 안의 게임 커버(즐겨찾기 / 최근)는 게임 미니 프로필을 엽니다; 플레이한 게임 수에 따른 티어 스킨은 끌 수 있습니다; 프로필 페이지 티어 장식은 블록별로 토글 가능(헤더, 티어 칩, 통계, 내비게이션, 즐겨찾기)
 - Steam 스토어 지역(가격 통화)
 - 토글: Steam / 보유 / 위시리스트 / 태그 / Metacritic / OpenCritic / HLTB / Deck·Proton / GameStatus / 플레이어 / SteamDB 아이콘과 로고 / 스크린샷 갤러리 / 비슷한 게임 / 기본 통계 블록 / 게임 ID / 번역(설명과 리뷰) / 목록 커버 배지(유형별) / 게임 미니 프로필 / 링크 / Steam 및 SteamDB의 Backloggd 버튼
