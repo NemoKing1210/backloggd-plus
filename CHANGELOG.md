@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.103] - 2026-11-15
+
+### Fixed
+
+- Game and user mini-profile cards no longer stick on screen after going back a page (or returning from another page with the browser cache): Turbo's page snapshot and the back/forward cache could restore an open card that the script no longer tracked, leaving a frozen preview at its old position. Open cards are now removed before the page is cached and reset on every navigation, and a late profile fetch can no longer paint the previous page's card onto a new page
+
 ## [0.7.102] - 2026-11-14
 
 ### Added

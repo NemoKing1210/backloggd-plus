@@ -19,6 +19,7 @@ import { settings, t } from '../state.js';
 import { escapeAttr, escapeHtml } from '../utils/html.js';
 import { morphCard } from '../utils/card-morph.js';
 import { debounce } from '../utils/debounce.js';
+import { bindPopoverReset, dropPopoverCopies } from '../utils/popover-reset.js';
 import { closeNestedGameMiniProfile, isInsideGameMiniProfile } from './game-mini-profile.js';
 
 const HOVER_ATTR = 'data-blp-profile-hover';
@@ -99,6 +100,8 @@ function ensurePopover() {
   popoverEl.className = 'blp-ump';
   popoverEl.setAttribute('role', 'dialog');
   popoverEl.setAttribute('aria-hidden', 'true');
+  // Keep Turbo from saving an open card into the page snapshot (Back would restore it stuck).
+  popoverEl.setAttribute('data-turbo-temporary', '');
   popoverEl.addEventListener('pointerenter', () => {
     window.clearTimeout(closeTimer);
   });
@@ -635,6 +638,25 @@ function trackPosition(anchor, ms = 520) {
   requestAnimationFrame(step);
 }
 
+/** Drop the card and invalidate pending work — navigations and bfcache restores can leave
+ *  an untracked copy of the card in the DOM that nothing would ever close. */
+function resetUserMiniProfile() {
+  fetchSeq += 1;
+  trackSeq += 1;
+  window.clearTimeout(openTimer);
+  window.clearTimeout(closeTimer);
+  window.clearTimeout(leaveTimer);
+  if (popoverEl && leaveHandler) {
+    popoverEl.removeEventListener('transitionend', leaveHandler);
+  }
+  leaveHandler = null;
+  activeAnchor?.removeAttribute?.(HOVER_ATTR);
+  activeAnchor = null;
+  activeUsername = '';
+  popoverEl = null;
+  dropPopoverCopies(`#${POPOVER_ID}`);
+}
+
 function paintCard(anchor, ctx, { soft = false } = {}) {
   const el = ensurePopover();
   const html = renderCard(ctx);
@@ -805,6 +827,7 @@ export function bindUserMiniProfiles() {
   }
   if (bound) return;
   bound = true;
+  bindPopoverReset(resetUserMiniProfile);
   document.addEventListener('pointerover', onPointerOver, true);
   document.addEventListener('pointerout', onPointerOut, true);
   document.addEventListener('contextmenu', onClickTrigger, true);
